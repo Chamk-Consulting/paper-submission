@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { Footer, TopBar } from "@/components/auth/chrome";
 

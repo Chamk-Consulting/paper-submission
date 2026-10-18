@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getT } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import QRCode from "qrcode";
@@ -8,7 +9,10 @@ import { CopyIdButton, PasskeyOffer } from "@/components/auth/welcome-client";
 import { getMe } from "@/lib/auth/me";
 import { safeNext } from "@/lib/config/site";
 
-export const metadata: Metadata = { title: "Welcome" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Welcome") };
+}
 type Search = { next?: string };
 
 function initials(name: string) {
@@ -28,29 +32,30 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
   const qrSvg = id ? await QRCode.toString(id, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#0E1B3D", light: "#FFFFFF" } }) : null;
   const dest = next ? safeNext(next) : "/workspace";
   const hasNext = Boolean(next);
+  const t = await getT();
 
   return (
     <SplitLayout
       width={440}
       aside={
-        <NavyAside label="What's next" kicker="What’s next" title="Pick up where you started." titleSize={40}>
+        <NavyAside label={t("What's next")} kicker={t("What’s next")} title={t("Pick up where you started.")} titleSize={40}>
           <div className="mt-7 max-w-[560px] rounded-[10px] border border-[#2B3D70] bg-[#17285A] px-[22px] py-5">
-            <span className="rounded-[2px] bg-[#E6EDFC] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em] text-[#1F47A8]">{hasNext ? "YOUR SUBMISSION" : "OPEN CALLS"}</span>
+            <span className="rounded-[2px] bg-[#E6EDFC] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em] text-[#1F47A8]">{hasNext ? t("YOUR SUBMISSION") : t("OPEN CALLS")}</span>
             {/* TODO(data): show the venue, deadline and countdown once submissions exist. */}
-            <div className="mt-2.5 font-serif text-[24px] leading-[1.2]">{hasNext ? "Continue where you left off" : "Find a venue to submit to"}</div>
-            <div className="mt-1 text-[14px] text-[#B9C3DA]">{hasNext ? "We’ll take you straight back." : "Conferences, workshops and journals with open calls."}</div>
-            <Link href={hasNext ? dest : "/"} className={`mt-4 h-[46px] ${ui.primary}`}>{hasNext ? "Start your submission" : "Browse open calls"}</Link>
+            <div className="mt-2.5 font-serif text-[24px] leading-[1.2]">{hasNext ? t("Continue where you left off") : t("Find a venue to submit to")}</div>
+            <div className="mt-1 text-[14px] text-[#B9C3DA]">{hasNext ? t("We’ll take you straight back.") : t("Conferences, workshops and journals with open calls.")}</div>
+            <Link href={hasNext ? dest : "/"} className={`mt-4 h-[46px] ${ui.primary}`}>{hasNext ? t("Start your submission") : t("Browse open calls")}</Link>
           </div>
-          <p className="mb-2.5 mt-7 font-mono text-[11px] uppercase tracking-[0.06em] text-[#B9C3DA]">When you have a minute</p>
+          <p className="mb-2.5 mt-7 font-mono text-[11px] uppercase tracking-[0.06em] text-[#B9C3DA]">{t("When you have a minute")}</p>
           <ul className="m-0 flex max-w-[560px] list-none flex-col gap-2 p-0">
             {[
-              { href: "/import", t: "Bring your PaperCept history", s: "Past papers and reviews, from your society’s export or ORCID." },
-              { href: "/workspace", t: "Add your research keywords", s: "So editors invite you to review papers you know." }, // TODO(ui): keywords settings page
-              { href: "/workspace", t: "Look around My workspace", s: "Submissions, reviews and messages, all in one list." },
+              { href: "/import", label: "Bring your PaperCept history", s: "Past papers and reviews, from your society’s export or ORCID." },
+              { href: "/workspace", label: "Add your research keywords", s: "So editors invite you to review papers you know." }, // TODO(ui): keywords settings page
+              { href: "/workspace", label: "Look around My workspace", s: "Submissions, reviews and messages, all in one list." },
             ].map((x) => (
-              <li key={x.t}>
+              <li key={x.label}>
                 <Link href={x.href} className="flex justify-between gap-3 rounded-[8px] border border-[#24335C] px-4 py-3 text-[#F5F6F3] no-underline hover:bg-[#13224B]">
-                  <span><span className="block font-semibold">{x.t}</span><span className="block text-[13px] text-[#B9C3DA]">{x.s}</span></span>
+                  <span><span className="block font-semibold">{t(x.label)}</span><span className="block text-[13px] text-[#B9C3DA]">{t(x.s)}</span></span>
                   <span aria-hidden className="text-[#D6DCEA]">→</span>
                 </Link>
               </li>
@@ -60,10 +65,10 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
       }
     >
       <div className="inline-flex items-center gap-2 rounded-full border border-[#B9E0CB] bg-[#E1F3EA] px-2.5 py-1 font-mono text-[11px] font-medium tracking-[0.06em] text-[#14603F]">
-        <span aria-hidden>✓</span>ACCOUNT READY · 3 OF 3
+        <span aria-hidden>✓</span>{t("ACCOUNT READY · 3 OF 3")}
       </div>
-      <h1 className={`mt-3.5 ${ui.h1}`}>Welcome to Plenary</h1>
-      <p className={`mt-2 ${ui.muted}`}>This is your Plenary ID. Share it with co-authors and chairs so they can find you.</p>
+      <h1 className={`mt-3.5 ${ui.h1}`}>{t("Welcome to Plenary")}</h1>
+      <p className={`mt-2 ${ui.muted}`}>{t("This is your Plenary ID. Share it with co-authors and chairs so they can find you.")}</p>
 
       <div className="mt-[18px] overflow-hidden rounded-[12px] border border-[#DADDE3] bg-white shadow-[0_1px_2px_rgba(18,24,38,.06),0_8px_24px_rgba(18,24,38,.06)]">
         <div className="h-1.5 bg-[#0E1B3D]" />
@@ -73,10 +78,10 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
               <span aria-hidden className="flex size-10 flex-none items-center justify-center rounded-full bg-[#E6EDFC] text-[14px] font-semibold text-[#1F47A8]">{initials(name)}</span>
               <div className="min-w-0">
                 <div className="truncate text-[16px] font-semibold">{name}</div>
-                <div className={`truncate text-[13px] ${ui.muted}`}>{me.affiliation?.institution ?? "Affiliation not set yet"}</div>
+                <div className={`truncate text-[13px] ${ui.muted}`}>{me.affiliation?.institution ?? t("Affiliation not set yet")}</div>
               </div>
             </div>
-            <div className={`mt-3.5 font-mono text-[11px] tracking-[0.06em] ${ui.muted}`}>PLENARY ID</div>
+            <div className={`mt-3.5 font-mono text-[11px] tracking-[0.06em] ${ui.muted}`}>{t("PLENARY ID")}</div>
             <div className="flex flex-wrap items-center gap-2">
               {id ? (
                 <>
@@ -84,25 +89,25 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
                   <CopyIdButton id={id} />
                 </>
               ) : (
-                <span className="text-[14px] text-[#7A4508]">Your ID is being issued — refresh in a moment.</span>
+                <span className="text-[14px] text-[#7A4508]">{t("Your ID is being issued — refresh in a moment.")}</span>
               )}
             </div>
             {p?.orcid ? <div className={`font-mono text-[12px] ${ui.muted}`}>ORCID {p.orcid}</div> : null}
           </div>
           {qrSvg ? (
-            <figure role="img" aria-label={`QR code for Plenary ID ${id}`} className="m-0 flex-none rounded-[6px] border border-[#DADDE3] bg-white p-1.5 text-center">
+            <figure role="img" aria-label={t("QR code for Plenary ID {id}", { id: id ?? "" })} className="m-0 flex-none rounded-[6px] border border-[#DADDE3] bg-white p-1.5 text-center">
               <div className="size-[105px] [&>svg]:size-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
-              <figcaption className={`mt-1 text-[12px] ${ui.muted}`}>ID only</figcaption>
+              <figcaption className={`mt-1 text-[12px] ${ui.muted}`}>{t("ID only")}</figcaption>
             </figure>
           ) : null}
         </div>
         <div className={`flex flex-wrap justify-between gap-3 border-t border-[#EEF0EC] bg-[#F5F6F3] px-5 py-2.5 text-[12px] ${ui.muted}`}>
-          <span>Finds you for co-authors and chairs — never signs you in.</span>
+          <span>{t("Finds you for co-authors and chairs — never signs you in.")}</span>
           {/* TODO(ui): downloadable badge (PNG/PDF). */}
         </div>
       </div>
 
-      <PasskeyOffer nextHref={dest} nextLabel={hasNext ? "Ready to open your submission." : "Ready to open your workspace."} />
+      <PasskeyOffer nextHref={dest} nextLabel={hasNext ? t("Ready to open your submission.") : t("Ready to open your workspace.")} />
     </SplitLayout>
   );
 }

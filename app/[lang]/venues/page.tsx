@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Directory } from "@/components/venues/directory";
 import { getDirectory } from "@/lib/venues/data";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata: Metadata = {
-  title: "Venue directory",
-  description: "Find conferences, journals and awards with open calls for papers — deadlines in your time zone.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: t("Venue directory"),
+    description: t("Find conferences, journals and awards with open calls for papers — deadlines in your time zone."),
+  };
+}
 
 async function Inner() {
   const { venues, generatedAt, ready } = await getDirectory();

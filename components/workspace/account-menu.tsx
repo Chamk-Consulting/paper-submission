@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth/actions";
+import { useT } from "@/lib/i18n/client";
 
 export function AccountMenu({ name, initials, plenaryId }: { name: string; initials: string; plenaryId: string | null }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -22,7 +24,7 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
   const soon = "block px-3.5 py-[9px] text-[14px] text-[#9AA3B5]";
   return (
     <div ref={ref} className="relative">
-      <button type="button" aria-label="Account menu" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}
+      <button type="button" aria-label={t("Account menu")} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}
         className="flex h-10 items-center gap-2 rounded-full border border-[#2A3C6E] bg-transparent py-0 pl-1 pr-2.5 text-[14px] text-[#F5F6F3]">
         <span className="flex size-[30px] items-center justify-center rounded-full bg-[#E6EDFC] text-[13px] font-semibold text-[#1F47A8]">{initials}</span>
         <span className="hidden max-w-[180px] truncate sm:inline">{name}</span>
@@ -34,13 +36,13 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
             <div className="truncate font-semibold">{name}</div>
             {plenaryId ? <div className="font-mono text-[12px] text-[#4A5263]">{plenaryId}</div> : null}
           </div>
-          <Link role="menuitem" href="/create-account/profile" className={item}>Profile &amp; expertise</Link>
+          <Link role="menuitem" href="/create-account/profile" className={item}>{t("Profile & expertise")}</Link>
           {/* TODO(settings): ST02–ST04 */}
-          <span role="menuitem" aria-disabled className={soon}>Sign-in &amp; security · soon</span>
-          <span role="menuitem" aria-disabled className={soon}>Notifications · soon</span>
-          <span role="menuitem" aria-disabled className={soon}>Privacy &amp; data · soon</span>
+          <span role="menuitem" aria-disabled className={soon}>{t("Sign-in & security")} · {t("soon")}</span>
+          <span role="menuitem" aria-disabled className={soon}>{t("Notifications")} · {t("soon")}</span>
+          <span role="menuitem" aria-disabled className={soon}>{t("Privacy & data")} · {t("soon")}</span>
           <form action={signOut} className="border-t border-[#EEF0EC]">
-            <button role="menuitem" type="submit" className="block w-full border-0 bg-transparent px-3.5 py-[9px] text-left text-[14px] text-[#B3261E] hover:bg-[#FDECEA]">Sign out</button>
+            <button role="menuitem" type="submit" className="block w-full border-0 bg-transparent px-3.5 py-[9px] text-left text-[14px] text-[#B3261E] hover:bg-[#FDECEA]">{t("Sign out")}</button>
           </form>
         </div>
       ) : null}
