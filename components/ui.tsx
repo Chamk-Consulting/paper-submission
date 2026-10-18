@@ -48,14 +48,14 @@ export function Field({
   );
 }
 
-export function SubmitButton({ children, pending }: { children: ReactNode; pending?: boolean }) {
+export function SubmitButton({ children, pending, pendingLabel = "Please wait…" }: { children: ReactNode; pending?: boolean; pendingLabel?: string }) {
   return (
     <button
       type="submit"
       disabled={pending}
       className="w-full rounded-lg bg-navy px-4 py-2.5 font-medium text-white transition hover:bg-navy-2 disabled:opacity-60"
     >
-      {pending ? "Please wait…" : children}
+      {pending ? pendingLabel : children}
     </button>
   );
 }

@@ -47,3 +47,50 @@ body {
     outline-offset: 2px;
   }
 }
+
+/* ------------------------------------------------------------------ motion
+   Route changes use React <ViewTransition> (see app/[lang]/template.tsx).
+   Exits are quick, entrances gentler; everything is skipped for reduced-motion users. */
+:root {
+  --duration-exit: 140ms;
+  --duration-enter: 220ms;
+  --duration-move: 380ms;
+}
+@keyframes vt-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vt-rise { from { transform: translateY(8px); } to { transform: translateY(0); } }
+@keyframes vt-slide { from { transform: translateX(var(--slide-offset)); } to { transform: translateX(0); } }
+
+/* default page change: old content fades out fast, new content rises in */
+::view-transition-old(.page) { animation: var(--duration-exit) ease-in both vt-fade reverse; }
+::view-transition-new(.page) {
+  animation: var(--duration-enter) ease-out var(--duration-exit) both vt-fade, var(--duration-move) ease-out both vt-rise;
+}
+/* directional navigation: links tagged nav-forward / nav-back */
+::view-transition-old(.nav-forward) { --slide-offset: -48px; animation: var(--duration-exit) ease-in both vt-fade reverse, var(--duration-move) ease-in-out both vt-slide reverse; }
+::view-transition-new(.nav-forward) { --slide-offset: 48px; animation: var(--duration-enter) ease-out var(--duration-exit) both vt-fade, var(--duration-move) ease-in-out both vt-slide; }
+::view-transition-old(.nav-back) { --slide-offset: 48px; animation: var(--duration-exit) ease-in both vt-fade reverse, var(--duration-move) ease-in-out both vt-slide reverse; }
+::view-transition-new(.nav-back) { --slide-offset: -48px; animation: var(--duration-enter) ease-out var(--duration-exit) both vt-fade, var(--duration-move) ease-in-out both vt-slide; }
+/* skeleton → content handoff */
+::view-transition-old(.skeleton-out) { animation: var(--duration-exit) ease-out both vt-fade reverse; }
+/* keep the persistent chrome still while pages move */
+::view-transition-group(root) { animation-duration: 0s; }
+
+/* skeleton shimmer */
+@keyframes sk-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.sk {
+  background: linear-gradient(90deg, #e9ebe6 25%, #f3f4f1 37%, #e9ebe6 63%);
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+.sk-dark {
+  background: linear-gradient(90deg, #1b2c5e 25%, #24376b 37%, #1b2c5e 63%);
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  .sk, .sk-dark { animation: none; }
+}

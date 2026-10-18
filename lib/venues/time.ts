@@ -1,4 +1,7 @@
 import type { DirectoryVenue, VenueDate } from "@/lib/venues/types";
+import type { T } from "@/lib/i18n/translate";
+
+const identity: T = (k, vars) => { let s = k; if (vars) for (const [a, b] of Object.entries(vars)) s = s.split(`{${a}}`).join(String(b)); return s; };
 
 export const DAY = 864e5;
 const DEADLINE_KINDS = new Set(["submission", "proposal", "final", "registration"]);
@@ -26,16 +29,16 @@ export type Status = { label: string; closes: string; aoe: string; local: string
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function fmtLocal(iso: string, tz: string, withWeekday = true) {
+export function fmtLocal(iso: string, tz: string, withWeekday = true, intl = "en-GB") {
   const d = new Date(iso);
-  const day = d.toLocaleDateString("en-GB", { timeZone: tz, weekday: withWeekday ? "short" : undefined, day: "numeric", month: "short" });
-  const time = d.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false });
+  const day = d.toLocaleDateString(intl, { timeZone: tz, weekday: withWeekday ? "short" : undefined, day: "numeric", month: "short" });
+  const time = d.toLocaleTimeString(intl, { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false });
   return `${day}, ${time}`;
 }
 /** Anywhere on Earth = UTC−12. */
-export function fmtAoE(iso: string) {
+export function fmtAoE(iso: string, intl = "en-GB") {
   const d = new Date(Date.parse(iso) - 12 * 3600e3);
-  return `${d.getUTCDate()} ${d.toLocaleString("en-GB", { month: "short", timeZone: "UTC" })}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} AoE`;
+  return `${d.getUTCDate()} ${d.toLocaleString(intl, { month: "short", timeZone: "UTC" })}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} AoE`;
 }
 export const cityOf = (tz: string) => homeFor(tz)?.[2] ?? tz.split("/").pop()?.replace(/_/g, " ") ?? tz;
 
@@ -44,27 +47,27 @@ export function countdown(ms: number) {
   return d >= 30 ? `${d}d` : `${d}d ${pad(h)}h`;
 }
 
-export function statusOf(v: DirectoryVenue, now: number, tz: string): Status {
+export function statusOf(v: DirectoryVenue, now: number, tz: string, t: T = identity, intl = "en-GB"): Status {
   const nd = nextDeadline(v, now);
   if (nd) {
     const ms = Date.parse(nd.startsAt) - now;
     const days = Math.floor(ms / DAY);
-    return { label: nd.label, closes: countdown(ms), aoe: fmtAoE(nd.startsAt), local: `${fmtLocal(nd.startsAt, tz)} ${cityOf(tz)}`, days, extended: nd.isExtended, state: days <= 7 ? "soon" : days > 60 ? "later" : "open" };
+    return { label: nd.label, closes: countdown(ms), aoe: fmtAoE(nd.startsAt, intl), local: `${fmtLocal(nd.startsAt, tz, true, intl)} ${cityOf(tz)}`, days, extended: nd.isExtended, state: days <= 7 ? "soon" : days > 60 ? "later" : "open" };
   }
   const conf = v.dates.find((d) => d.kind === "conference" && Date.parse(d.startsAt) <= now && Date.parse(d.endsAt ?? d.startsAt) >= now);
-  if (conf) return { label: "Happening", closes: "Now", aoe: v.startsOn ? fmtRange(v.startsOn, v.endsOn) : "", local: "Program online", days: 999, extended: false, state: "now" };
-  if (v.kind === "journal") return { label: "Status", closes: "Open", aoe: "No deadline", local: "Submit any time", days: 999, extended: false, state: "rolling" };
-  if (v.endsOn && Date.parse(`${v.endsOn}T23:59:59Z`) < now) return { label: "Status", closes: "Done", aoe: `Held ${fmtMonth(v.startsOn)}`, local: "", days: 999, extended: false, state: "done" };
-  return { label: "Status", closes: "—", aoe: "Dates to be announced", local: "", days: 999, extended: false, state: "later" };
+  if (conf) return { label: t("Happening"), closes: t("Now"), aoe: v.startsOn ? fmtRange(v.startsOn, v.endsOn, intl, t) : "", local: t("Program online"), days: 999, extended: false, state: "now" };
+  if (v.kind === "journal") return { label: t("Status"), closes: t("Open"), aoe: t("No deadline"), local: t("Submit any time"), days: 999, extended: false, state: "rolling" };
+  if (v.endsOn && Date.parse(`${v.endsOn}T23:59:59Z`) < now) return { label: t("Status"), closes: t("Done"), aoe: t("Held {when}", { when: fmtMonth(v.startsOn, intl) }), local: "", days: 999, extended: false, state: "done" };
+  return { label: t("Status"), closes: "—", aoe: t("Dates to be announced"), local: "", days: 999, extended: false, state: "later" };
 }
 
-export function fmtMonth(d: string | null) {
-  return d ? new Date(`${d}T00:00:00Z`).toLocaleString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }) : "";
+export function fmtMonth(d: string | null, intl = "en-GB") {
+  return d ? new Date(`${d}T00:00:00Z`).toLocaleString(intl, { month: "short", year: "numeric", timeZone: "UTC" }) : "";
 }
-export function fmtRange(a: string | null, b: string | null) {
-  if (!a) return "Rolling";
+export function fmtRange(a: string | null, b: string | null, intl = "en-GB", t: T = identity) {
+  if (!a) return t("Rolling");
   const s = new Date(`${a}T00:00:00Z`), e = new Date(`${b ?? a}T00:00:00Z`);
-  const mon = (x: Date) => x.toLocaleString("en-GB", { month: "short", timeZone: "UTC" });
+  const mon = (x: Date) => x.toLocaleString(intl, { month: "short", timeZone: "UTC" });
   if (s.getUTCFullYear() !== e.getUTCFullYear()) return `${s.getUTCDate()} ${mon(s)} ${s.getUTCFullYear()} – ${e.getUTCDate()} ${mon(e)} ${e.getUTCFullYear()}`;
   if (s.getUTCMonth() !== e.getUTCMonth()) return `${s.getUTCDate()} ${mon(s)}–${e.getUTCDate()} ${mon(e)} ${s.getUTCFullYear()}`;
   if (s.getUTCDate() === e.getUTCDate()) return `${s.getUTCDate()} ${mon(s)} ${s.getUTCFullYear()}`;

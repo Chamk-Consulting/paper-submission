@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { SavedAgo, StepRail, TitleBand, WizardHeader, WizardLayout } from "@/components/submission/shell";
 import { getMe } from "@/lib/auth/me";
+import { getT } from "@/lib/i18n/server";
 import { STEPS, loadSubmission, type Ctx, type StepKey } from "@/lib/submission/data";
 
 export const initialsOf = (name: string, email: string) => {
@@ -19,7 +20,8 @@ export async function requireCtx(id: string, step: StepKey | "status" | "submitt
   return ctx;
 }
 
-export function SubmissionFrame({ ctx, step, children, aside }: { ctx: Ctx; step: StepKey; children: ReactNode; aside?: ReactNode }) {
+export async function SubmissionFrame({ ctx, step, children, aside }: { ctx: Ctx; step: StepKey; children: ReactNode; aside?: ReactNode }) {
+  const t = await getT();
   const generatedAt = new Date(ctx.sub.updatedAt).toISOString();
   const lastDone = STEPS.reduce((m, s) => (ctx.done[s.key] ? Math.max(m, s.n) : m), 0);
   const reachable = Math.max(ctx.sub.draftStep, lastDone + 1, STEPS.find((s) => s.key === step)!.n);
@@ -28,8 +30,8 @@ export function SubmissionFrame({ ctx, step, children, aside }: { ctx: Ctx; step
   const name = ctx.me.person ? `${ctx.me.person.given_name} ${ctx.me.person.family_name}` : ctx.me.email;
   return (
     <WizardLayout
-      header={<WizardHeader initials={initialsOf(name, ctx.me.email)} right={<SavedAgo at={ctx.sub.updatedAt} generatedAt={generatedAt} label={submitted ? `Submitted · #${String(ctx.sub.number).padStart(4, "0")} · saved` : "Draft saved"} />} />}
-      band={<TitleBand crumb={submitted ? `Submission #${String(ctx.sub.number).padStart(4, "0")}` : "New submission"} title={submitted ? "Edit submission" : "New submission"} venue={ctx.venue} generatedAt={generatedAt} />}
+      header={<WizardHeader initials={initialsOf(name, ctx.me.email)} right={<SavedAgo at={ctx.sub.updatedAt} generatedAt={generatedAt} label={submitted ? t("Submitted · {no} · saved", { no: `#${String(ctx.sub.number).padStart(4, "0")}` }) : t("Draft saved")} />} />}
+      band={<TitleBand crumb={submitted ? t("Submission {no}", { no: `#${String(ctx.sub.number).padStart(4, "0")}` }) : t("New submission")} title={submitted ? t("Edit submission") : t("New submission")} venue={ctx.venue} generatedAt={generatedAt} />}
       rail={
         <StepRail
           rail={{ done: ctx.done, current: step, reachable, base: `/submissions/${ctx.sub.id}` }}
