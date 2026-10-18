@@ -23,7 +23,6 @@ alter table public.venues
   add column best_paper       text check (char_length(best_paper) <= 300),
   add column imported_from    text check (char_length(imported_from) <= 40);
 
-create index venues_published_idx on public.venues (is_published, starts_on);
 
 create table public.venue_dates (
   id             uuid primary key default gen_random_uuid(),
