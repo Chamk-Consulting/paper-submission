@@ -1,9 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Sign-up lives in the "Create account" tab of the sign-in screen (canvas PR02).
+// Sign-up is the 3-step flow starting at /create-account (canvas PR06).
 export function GET(request: NextRequest) {
   const url = request.nextUrl.clone();
-  url.pathname = "/sign-in";
-  url.searchParams.set("tab", "create");
+  url.pathname = "/create-account";
   return NextResponse.redirect(url);
 }

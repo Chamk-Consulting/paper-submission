@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
-      const dest = type === "recovery" ? "/reset-password" : type === "signup" ? `/email-verified?next=${encodeURIComponent(next)}` : next;
+      const dest = type === "recovery" ? "/reset-password" : type === "signup" ? "/create-account/profile" : next;
       return NextResponse.redirect(new URL(dest, origin));
     }
   } else if (code) {

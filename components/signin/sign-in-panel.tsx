@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { detectIdentifier, type Detected } from "@/lib/auth/identifier";
+import { startSignup, type StartState } from "@/lib/auth/onboarding-actions";
 import {
-  createAccount,
   sendSignInCode,
   signInWithPassword,
   verifyCode,
@@ -75,12 +75,11 @@ export function SignInPanel({ next, initialTab = "signin" }: { next?: string; in
 
   const [pwState, pwAction, pwPending] = useActionState(signInWithPassword, {} as SignInState);
   const [codeState, codeAction, codePending] = useActionState(sendSignInCode, {} as SignInState);
-  const [createState, createAction, createPending] = useActionState(createAccount, {} as SignInState);
+  const [createState, createAction, createPending] = useActionState(startSignup, {} as StartState);
 
   // The code step shows when the current tab's action just sent a code (until "Use a different email").
   const [dismissed, setDismissed] = useState<SignInState | null>(null);
-  const tabState = tab === "signin" ? codeState : createState;
-  const sent = tabState.step === "sent" && tabState !== dismissed ? tabState : null;
+  const sent = tab === "signin" && codeState.step === "sent" && codeState !== dismissed ? codeState : null;
 
   const d = detectIdentifier(identifier);
   const t = toneStyle[d.tone];
@@ -181,9 +180,10 @@ export function SignInPanel({ next, initialTab = "signin" }: { next?: string; in
 }
 
 function CreateStep({ state, action, pending, next, onOrcid, soon }: {
-  state: SignInState; action: (fd: FormData) => void; pending: boolean; next?: string; onOrcid: () => void; soon: string | null;
+  state: StartState; action: (fd: FormData) => void; pending: boolean; next?: string; onOrcid: () => void; soon: string | null;
 }) {
   const e = state.fieldErrors;
+  const nameErr = e?.firstName?.[0] ?? e?.lastName?.[0];
   const inv = (k: string) => (e?.[k]?.length ? { "aria-invalid": true as const, style: { borderColor: "#B3261E" } } : {});
   return (
     <>
@@ -195,9 +195,10 @@ function CreateStep({ state, action, pending, next, onOrcid, soon }: {
       <form action={action} noValidate>
         <input type="hidden" name="next" value={next ?? ""} />
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-first" className={LABEL}>First name</label><input id="pr-first" name="firstName" autoComplete="given-name" className={INPUT} {...inv("firstName")} /><FieldError id="e-first" errors={e?.firstName} /></div>
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-last" className={LABEL}>Last name</label><input id="pr-last" name="lastName" autoComplete="family-name" className={INPUT} {...inv("lastName")} /><FieldError id="e-last" errors={e?.lastName} /></div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pr-first" className={LABEL}>First name</label><input id="pr-first" name="firstName" autoComplete="given-name" className={INPUT} {...inv("firstName")} /></div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pr-last" className={LABEL}>Last name</label><input id="pr-last" name="lastName" autoComplete="family-name" className={INPUT} {...inv("lastName")} /></div>
         </div>
+        {nameErr ? <p className="mt-1.5 text-[13px] text-[#B3261E]">{nameErr}</p> : null}
         <div className="mt-3 flex flex-col gap-3">
           <div className="flex flex-col gap-1.5"><label htmlFor="pr-cemail" className={LABEL}>Email</label><input id="pr-cemail" name="email" type="email" autoComplete="email" placeholder="Institutional email preferred" className={INPUT} {...inv("email")} /><FieldError id="e-email" errors={e?.email} /></div>
           <div className="flex flex-col gap-1.5"><label htmlFor="pr-aff" className={LABEL}>Affiliation</label><input id="pr-aff" name="affiliation" autoComplete="organization" placeholder="University or company" className={INPUT} /></div>
@@ -224,12 +225,11 @@ function CodeStep({ state, next, onBack }: { state: SignInState; next?: string; 
   const lead = byEmail ? "We sent a link and a 6-digit code to" : "We sent a link and a 6-digit code to your account email";
   return (
     <>
-      <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">{state.mode === "create" ? "Code sent" : "Link sent"}</p>
+      <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">Link sent</p>
       <h1 className={`mt-2.5 ${H1}`}>Check your inbox</h1>
       <p className={`mt-2.5 ${MUTED}`}>{lead} <strong className={INK}>{state.sentTo}</strong>. It expires in 15 minutes. On another device? Enter the code from the same email.</p>
       <form action={vAction} noValidate>
         <input type="hidden" name="email" value={state.email ?? ""} />
-        <input type="hidden" name="mode" value={state.mode ?? "signin"} />
         <input type="hidden" name="next" value={next ?? ""} />
         <div className="mt-[22px] flex flex-col gap-1.5">
           <label htmlFor="pr-code" className={LABEL}>Verification code</label>
@@ -238,7 +238,7 @@ function CodeStep({ state, next, onBack }: { state: SignInState; next?: string; 
             style={vState.fieldErrors?.code?.length ? { borderColor: "#B3261E" } : undefined} />
           <FieldError id="pr-code-err" errors={vState.fieldErrors?.code} />
         </div>
-        <button type="submit" disabled={vPending} className={`mt-4 ${PRIMARY}`}>{vPending ? "Checking…" : state.mode === "create" ? "Confirm email" : "Verify and sign in"}</button>
+        <button type="submit" disabled={vPending} className={`mt-4 ${PRIMARY}`}>{vPending ? "Checking…" : "Verify and sign in"}</button>
       </form>
       <div className="mt-4 flex flex-wrap items-center gap-4 text-[14px]">
         {/* TODO(auth): real resend (supabase.auth.resend / signInWithOtp again) when the timer reaches 0. */}

@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 // Keep this thin: refresh the session cookie and redirect signed-out users
 // away from the workspace. Real permission checks live in server actions and RLS.
 const PROTECTED_PREFIXES = ["/workspace"];
-const AUTH_PAGES = ["/sign-in", "/sign-up"];
+const AUTH_PAGES = ["/sign-in", "/sign-up", "/create-account"];
 
 export default async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
