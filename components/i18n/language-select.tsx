@@ -1,14 +1,15 @@
 "use client";
 
-import { LOCALES, LOCALE_COOKIE, LOCALE_NAMES, type Locale } from "@/lib/i18n/config";
+import { LOCALES, LOCALE_NAMES, type Locale } from "@/lib/i18n/config";
+import { setLanguageCookie } from "@/lib/consent-client";
 import { useLocale, useT } from "@/lib/i18n/client";
 
-/** Language picker used in every header. Saves the choice for a year and reloads the page in that language. */
+/** Language picker used in every header. Saves the choice (for a year with "preferences" consent, else for the session) and reloads the page in that language. */
 export function LanguageSelect({ id = "lang-select", className = "" }: { id?: string; className?: string }) {
   const locale = useLocale();
   const t = useT();
   function change(next: Locale) {
-    document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+    setLanguageCookie(next);
     // Strip an explicit /fr, /it… prefix so the cookie decides; keep the rest of the URL.
     const { pathname, search, hash } = window.location;
     const clean = pathname.replace(/^\/(en|fr|it|de)(?=\/|$)/, "") || "/";

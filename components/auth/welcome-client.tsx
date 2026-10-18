@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useT } from "@/lib/i18n/client";
+import { prefStorage } from "@/lib/consent-client";
 
 export function CopyIdButton({ id }: { id: string }) {
   const [copied, setCopied] = useState(false);
@@ -37,7 +38,7 @@ export function PasskeyOffer({ nextHref, nextLabel }: { nextHref: string; nextLa
           <button type="button" onClick={() => setStep("plain")} className="h-11 rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826]">{t("Not now")}</button>
         </div>
         <label className="mt-2.5 flex min-h-6 items-center gap-2 text-[13px] text-[#4A5263]">
-          <input type="checkbox" className="size-4 accent-[#0E1B3D]" onChange={(e) => { try { localStorage.setItem("plenary.passkeyOffer", e.target.checked ? "never" : ""); } catch { /* storage blocked */ } }} />
+          <input type="checkbox" className="size-4 accent-[#0E1B3D]" onChange={(e) => { prefStorage()?.setItem("plenary.passkeyOffer", e.target.checked ? "never" : ""); }} />
           {t("Don't ask again on this device")}
         </label>
       </section>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth/actions";
 import { useT } from "@/lib/i18n/client";
+import { InstallMenuItem } from "@/components/pwa/install-prompt";
 
 export function AccountMenu({ name, initials, plenaryId }: { name: string; initials: string; plenaryId: string | null }) {
   const t = useT();
@@ -37,6 +38,7 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
             {plenaryId ? <div className="font-mono text-[12px] text-[#4A5263]">{plenaryId}</div> : null}
           </div>
           <Link role="menuitem" href="/create-account/profile" className={item}>{t("Profile & expertise")}</Link>
+          <InstallMenuItem className={`${item} w-full border-0 bg-transparent text-left`} />
           {/* TODO(settings): ST02–ST04 */}
           <span role="menuitem" aria-disabled className={soon}>{t("Sign-in & security")} · {t("soon")}</span>
           <span role="menuitem" aria-disabled className={soon}>{t("Notifications")} · {t("soon")}</span>

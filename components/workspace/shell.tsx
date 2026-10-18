@@ -6,6 +6,8 @@ import { LanguageSelect } from "@/components/i18n/language-select";
 import { getT } from "@/lib/i18n/server";
 import type { T } from "@/lib/i18n/translate";
 import { Pin } from "@/components/motion/pin";
+import { CookieSettingsLink } from "@/components/consent/cookie-consent";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 /* Shared shell of canvas WS01/WS02: navy top bar + white left nav. */
 
@@ -112,10 +114,12 @@ export async function WorkspaceShell({ ctx, active, children }: { ctx: Workspace
           <div className="mt-auto flex flex-col gap-0.5 border-t border-[#DADDE3] pt-4">
             <Link href="/create-account/profile" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Settings")}</Link>
             <Link href="/account-help" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Help & guides")}</Link>
+            <CookieSettingsLink className="flex h-9 items-center rounded-[6px] px-3 text-left text-[14px] text-[#4A5263] hover:bg-[#F5F6F3] hover:no-underline" />
           </div>
         </nav>
         </Pin>
         <main className="box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10">{children}</main>
+        {ctx ? <InstallPrompt /> : null}
       </div>
     </div>
   );

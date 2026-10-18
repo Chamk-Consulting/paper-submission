@@ -5,6 +5,7 @@ import { site } from "@/lib/config/site";
 import { getT } from "@/lib/i18n/server";
 import { LanguageSelect } from "@/components/i18n/language-select";
 import { Reveal } from "@/components/motion/reveal";
+import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -292,6 +293,8 @@ export default async function Landing() {
             <Link href="/legal/privacy" className="text-[#121826] no-underline">{t("Privacy & GDPR")}</Link>
             <Link href="/legal/terms" className="text-[#121826] no-underline">{t("Terms")}</Link>
             <Link href="/legal/security" className="text-[#121826] no-underline">{t("Security")}</Link>
+            <Link href="/legal/cookies" className="text-[#121826] no-underline">{t("Cookies")}</Link>
+            <CookieSettingsLink className="self-start text-left text-[#121826]" />
           </div>
         </div>
         <div className={`${wrap} pb-8 font-mono text-[12px] text-[#4A5263]`}>© 2026 {site.legalName}</div>

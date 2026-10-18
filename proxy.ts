@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, negotiate } from "@/lib/i18n/config";
+import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 
 // Thin edge layer: pick the language, refresh the Supabase session, keep signed-out users out of
 // private areas. Real permission checks live in server actions and RLS.
@@ -55,12 +56,16 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (explicit && cookieLocale !== explicit) response.cookies.set(LOCALE_COOKIE, explicit, { path: "/", maxAge: 31536000, sameSite: "lax" });
-  if (!explicit && !isLocale(cookieLocale) && locale !== DEFAULT_LOCALE) response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  // Language memory is a "preferences" cookie: persistent only with consent. An explicit /fr link is a
+  // request for that language, so it is kept for the browser session even without consent.
+  const prefs = parseConsent(request.cookies.get(CONSENT_COOKIE)?.value)?.preferences === true;
+  const langCookie = { path: "/", sameSite: "lax" as const, secure: request.nextUrl.protocol === "https:", ...(prefs ? { maxAge: 31536000 } : {}) };
+  if (explicit && cookieLocale !== explicit) response.cookies.set(LOCALE_COOKIE, explicit, langCookie);
+  if (prefs && !explicit && !isLocale(cookieLocale) && locale !== DEFAULT_LOCALE) response.cookies.set(LOCALE_COOKIE, locale, langCookie);
   response.headers.set("Vary", "Cookie, Accept-Language");
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)"],
 };

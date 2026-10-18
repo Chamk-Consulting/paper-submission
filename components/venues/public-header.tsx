@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useT } from "@/lib/i18n/client";
 import { LanguageSelect } from "@/components/i18n/language-select";
 import { Pin } from "@/components/motion/pin";
+import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 
 /** White public header of canvas PV01/PV02. */
 export function PublicHeader({ signedIn, active = "venues" }: { signedIn: boolean; active?: "venues" | "" }) {
@@ -55,6 +56,8 @@ export function PublicFooter() {
           <Link href="/legal/terms" className="text-[#4A5263]">{t("Terms")}</Link>
           <Link href="/legal/accessibility" className="text-[#4A5263]">{t("Accessibility")}</Link>
           <Link href="/legal/security" className="text-[#4A5263]">{t("Security")}</Link>
+          <Link href="/legal/cookies" className="text-[#4A5263]">{t("Cookies")}</Link>
+          <CookieSettingsLink className="text-[#4A5263]" />
         </span>
       </div>
     </footer>

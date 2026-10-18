@@ -148,3 +148,21 @@ html.lang-leaving body { opacity: 0.55; transition: opacity var(--dur-base) var(
   .nav-progress[data-state] { transition: opacity var(--dur-fast) !important; }
   button:not(:disabled):active, a[class*="rounded"]:active { transform: none; }
 }
+
+/* ------------------------------------------------------------------ consent, install & app toasts */
+@keyframes sheet-in { from { opacity: 0; transform: translateY(16px); } }
+@keyframes toast-pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+.consent-in { animation: sheet-in var(--dur-slow) var(--ease-emphasized) both; }
+/* floating cards keep their own layer during page transitions (unique names) */
+.vt-consent { view-transition-name: consent; }
+.vt-install { view-transition-name: install-card; }
+.vt-toasts { view-transition-name: app-toasts; }
+.toast-in { animation: toast-pop var(--dur-base) var(--ease-emphasized) both; }
+.consent-dialog[open] { animation: toast-pop var(--dur-base) var(--ease-emphasized) both; }
+.consent-dialog::backdrop { animation: vt-in var(--dur-base) var(--ease-standard) both; }
+::view-transition-group(consent), ::view-transition-group(install-card), ::view-transition-group(app-toasts) { z-index: 4; animation: none; }
+::view-transition-old(consent), ::view-transition-old(install-card), ::view-transition-old(app-toasts) { display: none; }
+::view-transition-new(consent), ::view-transition-new(install-card), ::view-transition-new(app-toasts) { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .consent-in, .toast-in, .consent-dialog[open] { animation: vt-in var(--dur-fast) linear both; }
+}
