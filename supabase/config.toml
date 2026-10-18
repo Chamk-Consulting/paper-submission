@@ -1,0 +1,58 @@
+# Local dev settings (supabase start). Mirror these on staging/production in the dashboard.
+project_id = "paper-submission"
+
+[api]
+schemas = ["public"]           # 'private' is never exposed through the API
+
+[auth]
+site_url = "http://localhost:3000"   # TODO(domain): https://<domain> in production
+additional_redirect_urls = [
+  "http://localhost:3000/**",
+  "https://*.vercel.app/**",   # TODO(vercel): narrow to the project's preview URL pattern after linking
+]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+minimum_password_length = 10
+password_requirements = "lower_upper_letters_digits"
+
+[auth.rate_limit]
+email_sent = 4                 # per hour; raise once custom SMTP is on
+sign_in_sign_ups = 30          # per 5 min per IP
+token_verifications = 30
+token_refresh = 150
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true  # secure email change: old AND new address confirm
+enable_confirmations = true    # no sign-in before the email is confirmed
+secure_password_change = true
+otp_expiry = 3600              # links valid 1 hour
+max_frequency = "60s"
+
+[auth.email.template.confirmation]
+subject = "Confirm your Plenary account"
+content_path = "./supabase/templates/confirm.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Plenary password"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new email address"
+content_path = "./supabase/templates/email_change.html"
+
+# TODO(email): custom SMTP (Resend) — dashboard: Auth -> SMTP. Host smtp.resend.com, port 465,
+# user "resend", password = Resend API key (paste it yourself, never commit it).
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+# TODO(auth): providers once client IDs exist (secrets go in the dashboard, not here)
+# [auth.external.google] / [auth.external.azure] / ORCID as custom OIDC — test early.
+# TODO(auth): [auth.captcha] provider = "turnstile" once the site key exists.
+
+[storage]
+file_size_limit = "50MiB"

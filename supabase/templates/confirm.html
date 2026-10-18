@@ -1,0 +1,8 @@
+<!-- TODO(email): replace with React Email via the Send Email hook. Links MUST go through /auth/confirm. -->
+<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#0E1B3D">
+  <p style="font-family:Georgia,serif;font-size:22px">&#9679; Plenary</p>
+  <h1 style="font-family:Georgia,serif;font-weight:400">Confirm your account</h1>
+  <p>Thanks for joining Plenary. Confirm your email to finish creating your account.</p>
+  <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup" style="display:inline-block;background:#0E1B3D;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none">Confirm email</a></p>
+  <p style="color:#5B6478;font-size:13px">This link works once and expires in 1 hour.</p>
+</div>

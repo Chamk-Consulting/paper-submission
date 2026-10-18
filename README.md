@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Plenary — paper submission & review
 
-## Getting Started
+Next.js 16 (App Router, Cache Components) · Supabase (Postgres, Auth, Storage, RLS) · Vercel · Resend.
 
-First, run the development server:
+## Run locally
 
 ```bash
+cp .env.example .env.local   # fill in Supabase URL + publishable key
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Database changes live in `supabase/migrations` and are applied to staging/production only through migrations.
+RLS smoke test: `supabase/tests/rls_smoke.sql` (runs in a transaction and rolls back).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Layout
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Path | What |
+|---|---|
+| `proxy.ts` | Refreshes the session, redirects signed-out users from `/workspace`. Nothing else. |
+| `lib/config/site.ts` | Everything that depends on the domain (`TODO(domain)`). |
+| `lib/supabase/{server,browser,public,admin}.ts` | Clients. `admin` bypasses RLS — server-only, system jobs only. |
+| `lib/auth/actions.ts` | Sign up / in / out, forgot + reset password (server actions, Zod-validated). |
+| `app/auth/confirm` · `app/auth/callback` | Email links (token hash) and OAuth return. |
+| `app/(auth)/*` | Sign-in, sign-up, check email, email verified, forgot/reset password, link error, account help. |
+| `supabase/migrations` | Identity model: persons ≠ logins, multi-email, affiliations, venues, roles, audit log, RLS. |
 
-## Learn More
+## Environments
 
-To learn more about Next.js, take a look at the following resources:
+| | Supabase | App |
+|---|---|---|
+| Staging | `paper-submission-staging` (eu-central-1) | Vercel preview / staging |
+| Production | TODO: create when staging is signed off | Vercel production |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Open TODOs (search the code for `TODO(`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Domain (`TODO(domain)`)** — nothing blocks development; all of these read `NEXT_PUBLIC_SITE_URL` / env:
+1. Set `NEXT_PUBLIC_SITE_URL` in Vercel (production + staging).
+2. Supabase Auth → URL configuration: Site URL + redirect URLs.
+3. Resend: add + verify `mail.<domain>` (SPF, DKIM, DMARC); switch `EMAIL_FROM_*`.
+4. Attach domain + `staging.` subdomain in Vercel.
+5. Legal entity/contact in legal pages and email footers; support address in Account help.
 
-## Deploy on Vercel
+**Auth (`TODO(auth)`)**
+- Custom SMTP (Resend) in Supabase dashboard — Supabase's built-in email is rate-limited (testing only).
+- Email templates (dashboard) must link to `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…` — copies in `supabase/templates`.
+- Turnstile CAPTCHA on sign-up / sign-in / reset.
+- Google, Microsoft, ORCID (custom OIDC) providers.
+- "Resend confirmation" button; "password changed" email; handle email change → `person_emails`.
+- Account help flows: lost email (AH02), merge (AH03), claim paper (AH06). Require MFA for chairs.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Database (pending)**
+- `20261018000300_venues_single_select_policy.sql` — written, not yet applied to staging (needs approval).
+- Run `supabase/tests/rls_smoke.sql` on staging (needs approval).

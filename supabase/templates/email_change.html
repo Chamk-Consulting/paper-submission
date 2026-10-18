@@ -1,0 +1,8 @@
+<!-- TODO(email): replace with React Email via the Send Email hook. Links MUST go through /auth/confirm. -->
+<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#0E1B3D">
+  <p style="font-family:Georgia,serif;font-size:22px">&#9679; Plenary</p>
+  <h1 style="font-family:Georgia,serif;font-weight:400">Confirm your new email</h1>
+  <p>Confirm that you want to use this address for your Plenary account.</p>
+  <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change" style="display:inline-block;background:#0E1B3D;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none">Confirm new email</a></p>
+  <p style="color:#5B6478;font-size:13px">This link works once and expires in 1 hour.</p>
+</div>
