@@ -12,7 +12,7 @@ const items = [
   { href: "/forgot-password", title: "I forgot my password", body: "Get a reset link by email." },
   { href: "/sign-in", title: "I'm not sure which email I used", body: "Try your institutional and personal addresses; each email belongs to one person." },
   // TODO(auth): AH02 lost email access, AH03 merge accounts, AH06 claim a paper — flows to build.
-  { href: "mailto:support@example.invalid", title: "I lost access to my email", body: "Contact support to verify your identity (ORCID, co-author or organizer check)." },
+  { href: "/contact", title: "I lost access to my email", body: "Contact support to verify your identity (ORCID, co-author or organizer check)." },
 ];
 
 export default async function Page() {

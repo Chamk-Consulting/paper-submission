@@ -12,10 +12,10 @@ const ACCEPT_RATE = 0.37;
 type Plan = { id: string; name: string; sub: string; price: string; unit: string; note: string; features: string[]; cta: string; href: string; featured?: boolean; estimate: (papers: number) => number | null };
 const PLANS: Plan[] = [
   { id: "workshop", name: "Workshop", sub: "Single track, one review round", price: "[$0]", unit: "up to 50 papers", note: "Free for small events",
-    features: ["Submissions & double-blind review", "Email invitations without sign-in", "Program & session pages", "Plenary support by email"], cta: "Start free", href: "/#start",
+    features: ["Submissions & double-blind review", "Email invitations without sign-in", "Program & session pages", "Plenary support by email"], cta: "Start free", href: "/manage/new",
     estimate: (n) => (n <= 50 ? 0 : null) },
   { id: "conference", name: "Conference", sub: "Full IEEE-style workflow", price: "[$4]", unit: "per accepted paper", note: "plus [$500] per event", featured: true,
-    features: ["Everything in Workshop", "Associate editors & bidding", "Copyright (IEEE eCF) & Xplore export", "Program builder with clash checks", "Audit log & conflict firewall"], cta: "Start a trial event", href: "/#start",
+    features: ["Everything in Workshop", "Associate editors & bidding", "Copyright (IEEE eCF) & Xplore export", "Program builder with clash checks", "Audit log & conflict firewall"], cta: "Start a trial event", href: "/manage/new",
     estimate: (n) => 500 + 4 * Math.round(n * ACCEPT_RATE) },
   { id: "society", name: "Society", sub: "Many events, one contract", price: "Custom", unit: "yearly", note: "For societies running 5+ events",
     features: ["Everything in Conference", "Shared reviewer pool & history", "SSO for your members", "Data residency options", "Named success manager"], cta: "Talk to us", href: "/contact?tab=sales",

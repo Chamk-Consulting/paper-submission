@@ -11,6 +11,7 @@ export type WorkspaceCtx = {
   organizerOf: VenueLink | null; // first venue I own/chair (organizer nav)
   submissionCount: number;
   aeRoles: number;
+  unread: number;            // inbox threads with unread messages
 };
 
 const COLORS = ["#2F5FD0", "#A8600F", "#18744F", "#6B4FBF", "#B3261E"];
@@ -23,13 +24,15 @@ export async function getWorkspaceCtx(): Promise<WorkspaceCtx | null> {
   const supabase = await createClient();
   const pid = me.person?.id;
 
-  const [{ data: members }, subs] = await Promise.all([
+  const [{ data: members }, subs, inbox] = await Promise.all([
     pid
       ? supabase.from("venue_members").select("role, venues(id, slug, name, short_name)").eq("person_id", pid)
       : Promise.resolve({ data: [] as unknown[] }),
     pid
       ? supabase.from("submission_authors").select("submission_id", { count: "exact", head: true }).eq("person_id", pid)
       : Promise.resolve({ count: 0 }),
+    // tolerate a database without the inbox tables yet
+    pid ? Promise.resolve(supabase.rpc("my_inbox")).then((r) => r, () => ({ data: null })) : Promise.resolve({ data: null }),
   ]);
 
   const byVenue = new Map<string, VenueLink>();
@@ -53,6 +56,7 @@ export async function getWorkspaceCtx(): Promise<WorkspaceCtx | null> {
     organizerOf: venues.find((v) => v.roles.some((r) => ["owner", "chair", "program_chair", "deputy_chair", "ceb_chair", "publication_chair", "registration_chair", "staff"].includes(r))) ?? null,
     submissionCount: ("count" in subs ? subs.count : 0) ?? 0,
     aeRoles: venues.filter((v) => v.roles.includes("associate_editor")).length,
+    unread: Array.isArray(inbox.data) ? (inbox.data as { unread?: boolean; archived?: boolean }[]).filter((r) => r.unread && !r.archived).length : 0,
   };
 }
 

@@ -32,6 +32,7 @@ export function Footer() {
       {/* TODO(ops): link to a real status page. */}
       <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#18744F]" />{t("All systems normal")}</span>
       <span className="flex flex-wrap gap-4">
+        <Link href="/contact" className="text-[#4A5263]">{t("Contact")}</Link>
         <Link href="/legal/privacy" className="text-[#4A5263]">{t("Privacy")}</Link>
         <Link href="/legal/terms" className="text-[#4A5263]">{t("Terms")}</Link>
         <Link href="/legal/accessibility" className="text-[#4A5263]">{t("Accessibility")}</Link>

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { absoluteUrl, safeNext } from "@/lib/config/site";
 import { detectIdentifier } from "@/lib/auth/identifier";
 
@@ -55,6 +56,7 @@ export async function signInWithPassword(_: SignInState, formData: FormData): Pr
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
   if (error) return { message: GENERIC };
+  await recordSignIn(supabase, "password");
   // TODO(auth): "Keep me signed in" unchecked -> session-only cookies (no persistent maxAge).
   redirect(safeNext(parsed.data.next));
 }
@@ -97,6 +99,7 @@ export async function verifyCode(prev: SignInState, formData: FormData): Promise
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp({ email: parsed.data.email, token: parsed.data.code, type: "email" });
   if (error) return { ...prev, step: "sent", fieldErrors: { code: ["That code is wrong or has expired. Check the latest email or ask for a new one."] } };
+  await recordSignIn(supabase, "email_code");
 
   redirect(safeNext(parsed.data.next));
 }

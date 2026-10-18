@@ -22,7 +22,6 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
   }, [open]);
 
   const item = "block px-3.5 py-[9px] text-[14px] text-[#121826] no-underline hover:bg-[#F5F6F3]";
-  const soon = "block px-3.5 py-[9px] text-[14px] text-[#9AA3B5]";
   return (
     <div ref={ref} className="relative">
       <button type="button" aria-label={t("Account menu")} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}
@@ -37,12 +36,12 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
             <div className="truncate font-semibold">{name}</div>
             {plenaryId ? <div className="font-mono text-[12px] text-[#4A5263]">{plenaryId}</div> : null}
           </div>
-          <Link role="menuitem" href="/create-account/profile" className={item}>{t("Profile & expertise")}</Link>
+          <Link role="menuitem" href="/settings/profile" className={item}>{t("Profile & expertise")}</Link>
+          <Link role="menuitem" href="/settings/security" className={item}>{t("Sign-in & security")}</Link>
+          <Link role="menuitem" href="/settings/notifications" className={item}>{t("Notifications")}</Link>
+          <Link role="menuitem" href="/settings/calendar" className={item}>{t("Calendar feed")}</Link>
+          <Link role="menuitem" href="/settings/privacy" className={item}>{t("Privacy & data")}</Link>
           <InstallMenuItem className={`${item} w-full border-0 bg-transparent text-left`} />
-          {/* TODO(settings): ST02–ST04 */}
-          <span role="menuitem" aria-disabled className={soon}>{t("Sign-in & security")} · {t("soon")}</span>
-          <span role="menuitem" aria-disabled className={soon}>{t("Notifications")} · {t("soon")}</span>
-          <span role="menuitem" aria-disabled className={soon}>{t("Privacy & data")} · {t("soon")}</span>
           <form action={signOut} className="border-t border-[#EEF0EC]">
             <button role="menuitem" type="submit" className="block w-full border-0 bg-transparent px-3.5 py-[9px] text-left text-[14px] text-[#B3261E] hover:bg-[#FDECEA]">{t("Sign out")}</button>
           </form>

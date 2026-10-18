@@ -60,8 +60,7 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
             <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#F5F6F3" strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
             <span className="font-serif text-[22px]">Plenary</span>
           </Link>
-          {/* TODO(search): SR01 global search; for now it searches your own papers. */}
-          <form role="search" action="/workspace/submissions" className="flex h-[38px] max-w-[560px] flex-[1_1_320px] items-center gap-2 rounded-[6px] border border-[#2A3C6E] bg-[#17285A] pl-3 pr-1.5">
+          <form role="search" action="/search" className="flex h-[38px] max-w-[560px] flex-[1_1_320px] items-center gap-2 rounded-[6px] border border-[#2A3C6E] bg-[#17285A] pl-3 pr-1.5">
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden fill="none" stroke="#B9C3DA" strokeWidth="1.5"><circle cx="7" cy="7" r="5" /><path d="M11 11l3.5 3.5" /></svg>
             <label htmlFor="w-search" className="sr-only">{t("Search")}</label>
             <input id="w-search" name="q" type="search" placeholder={t("Search papers, venues, people")} className="h-9 min-w-0 flex-auto border-0 bg-transparent text-[14px] text-[#F5F6F3] outline-none placeholder:text-[#8F9BBA]" />
@@ -73,10 +72,10 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
             <Link href="/venues" className="flex h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">
               <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden fill="none" stroke="#0E1B3D" strokeWidth="1.8"><path d="M7 2v10M2 7h10" /></svg>{t("New submission")}
             </Link>
-            {/* TODO(inbox): IN01 + unread count */}
-            <span aria-label={t("Inbox (coming soon)")} title={t("Inbox — coming soon")} className="relative box-border flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E]">
+            <Link href="/inbox" aria-label={ctx?.unread ? `${t("Inbox")} · ${ctx.unread} ${t("unread")}` : t("Inbox")} title={t("Inbox")} className="relative box-border flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E] no-underline hover:bg-[#17285A]">
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#F5F6F3" strokeWidth="1.5"><rect x="2" y="4" width="14" height="10" rx="1.5" /><path d="M2.5 5l6.5 5 6.5-5" /></svg>
-            </span>
+              {ctx?.unread ? <span aria-hidden className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#F2A93B] px-1 text-[11px] font-bold text-[#0E1B3D]">{ctx.unread > 9 ? "9+" : ctx.unread}</span> : null}
+            </Link>
             {ctx ? <AccountMenu name={ctx.name} initials={ctx.initials} plenaryId={ctx.me.person?.plenary_id ?? null} /> : <span aria-hidden className="sk-dark block size-10 rounded-full!" />}
           </div>
         </div>
@@ -91,7 +90,7 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
           <NavItem t={t} href="/reviews" icon={Icon.pen} label="Reviews" active={active === "reviews"} />
           <NavItem t={t} href="/chair" icon={Icon.cal} label="Sessions I chair" active={active === "sessions"} />
           <NavItem t={t} href="/venues" icon={Icon.globe} label="Browse venues" />
-          <NavItem t={t} href="/inbox" icon={Icon.mail} label="Inbox" active={active === "inbox"} />
+          <NavItem t={t} href="/inbox" icon={Icon.mail} label="Inbox" active={active === "inbox"} badge={ctx?.unread ? count(ctx.unread) : null} />
 
           {ctx?.venues.length ? (
             <>
@@ -127,8 +126,8 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
           })() : null}
 
           <div className="mt-auto flex flex-col gap-0.5 border-t border-[#DADDE3] pt-4">
-            <Link href="/create-account/profile" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Settings")}</Link>
-            <Link href="/account-help" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Help & guides")}</Link>
+            <Link href="/settings/profile" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Settings")}</Link>
+            <Link href="/help" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Help & guides")}</Link>
             <CookieSettingsLink className="flex h-9 items-center rounded-[6px] px-3 text-left text-[14px] text-[#4A5263] hover:bg-[#F5F6F3] hover:no-underline" />
           </div>
         </nav>

@@ -77,14 +77,15 @@ export default async function Landing() {
             <nav aria-label={t("Primary")} className="hidden flex-wrap gap-x-5 gap-y-1 text-[14px] font-medium lg:flex">
               <Link href="/venues" className="text-[#D6DCEA] no-underline hover:text-white">{t("Venues")}</Link>
               <a href="#roles" className="text-[#D6DCEA] no-underline hover:text-white">{t("Authors & reviewers")}</a>
-              <a href="#chairs" className="text-[#D6DCEA] no-underline hover:text-white">{t("For organizers")}</a>
+              <Link href="/organizers" className="text-[#D6DCEA] no-underline hover:text-white">{t("For organizers")}</Link>
               <a href="#compare" className="text-[#D6DCEA] no-underline hover:text-white">{t("Why switch")}</a>
-              <a href="#pricing" className="text-[#D6DCEA] no-underline hover:text-white">{t("Pricing")}</a>
+              <Link href="/pricing" className="text-[#D6DCEA] no-underline hover:text-white">{t("Pricing")}</Link>
+              <Link href="/contact" className="text-[#D6DCEA] no-underline hover:text-white">{t("Contact")}</Link>
             </nav>
             <div className="flex items-center gap-2">
               <LanguageSelect id="landing-lang" className="hidden border-[#2A3C6E]! bg-[#17285A]! text-[#F5F6F3]! sm:block" />
               <Link href="/sign-in" className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline">{t("Sign in")}</Link>
-              <a href="#start" className={`px-4 py-2.5 text-[14px] ${saffronBtn}`}>{t("Host a conference")}</a>
+              <Link href="/manage/new" className={`px-4 py-2.5 text-[14px] ${saffronBtn}`}>{t("Host a conference")}</Link>
             </div>
           </div>
         </header>
@@ -279,14 +280,14 @@ export default async function Landing() {
             <div className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Product")}</div>
             <Link href="/venues" className="text-[#121826] no-underline">{t("Venues")}</Link>
             <a href="#roles" className="text-[#121826] no-underline">{t("For authors & reviewers")}</a>
-            <a href="#chairs" className="text-[#121826] no-underline">{t("For organizers")}</a>
+            <Link href="/organizers" className="text-[#121826] no-underline">{t("For organizers")}</Link>
+            <Link href="/pricing" className="text-[#121826] no-underline">{t("Pricing")}</Link>
           </div>
           <div className="flex flex-col gap-2">
             <div className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Resources")}</div>
-            <Link href="/account-help" className="text-[#121826] no-underline">{t("Help centre")}</Link>
-            {/* TODO(content): templates page + status page */}
-            <span className="text-[#9AA3B5]">{t("LaTeX & Word templates")}</span>
-            <span className="text-[#9AA3B5]">{t("System status")}</span>
+            <Link href="/help" className="text-[#121826] no-underline">{t("Help centre")}</Link>
+            <Link href="/contact" className="text-[#121826] no-underline">{t("Contact")}</Link>
+            <Link href="/maintenance" className="text-[#121826] no-underline">{t("System status")}</Link>
           </div>
           <div className="flex flex-col gap-2">
             <div className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Legal")}</div>

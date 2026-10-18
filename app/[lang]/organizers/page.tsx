@@ -10,10 +10,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const FEATURES: [string, string, string, string][] = [
-  ["SETUP", "A checklist, not a manual", "Twelve sections with live checks: dates in order, deputy chair named, email placeholders filled. Open submissions when it all passes.", "/#start"],
-  ["ASSIGNMENT", "Match by topic, block conflicts", "AE load bars, topic match, automatic conflict detection with overrides that need a reason and a second approver.", "/#start"],
+  ["SETUP", "A checklist, not a manual", "Twelve sections with live checks: dates in order, deputy chair named, email placeholders filled. Open submissions when it all passes.", "/manage/new"],
+  ["ASSIGNMENT", "Match by topic, block conflicts", "AE load bars, topic match, automatic conflict detection with overrides that need a reason and a second approver.", "/manage/new"],
   ["REVIEW", "Reviewers who say yes", "One-click invitations without sign-in, a blind viewer with margin notes, discussion when reviewers disagree.", "/help#accept"],
-  ["DECISIONS", "See the whole picture", "Scores, spread and AE recommendations in one table, with a live acceptance-rate meter. Release when ready.", "/#start"],
+  ["DECISIONS", "See the whole picture", "Scores, spread and AE recommendations in one table, with a live acceptance-rate meter. Release when ready.", "/manage/new"],
   ["PROGRAM", "Clash-free in minutes", "Place papers in rooms and slots; presenter and chair clashes are flagged before you publish.", "/venues"],
   ["TRUST", "A firewall for chairs’ own papers", "Chairs who submit are handled by a deputy. Every sensitive action is in an audit log nobody can edit.", "/help#conflicts"],
 ];
@@ -39,7 +39,7 @@ export default async function Organizers() {
             <h1 className="mt-3 font-serif text-[40px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[54px]">{t("Run submissions, reviews and the program in one place.")}</h1>
             <p className="mt-4 max-w-[52ch] text-[17px] text-[#D6DCEA]">{t("Built for IEEE-style conferences: double-blind review, associate editors, copyright and Xplore export — without the PIN emails.")}</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/#start" className="inline-flex h-12 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[16px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Start a free trial event")}</Link>
+              <Link href="/manage/new" className="inline-flex h-12 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[16px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Start a free trial event")}</Link>
               <Link href="/contact?tab=sales" className="inline-flex h-12 items-center rounded-[4px] border border-[#3A4C7E] px-5 text-[16px] font-medium text-[#F5F6F3] no-underline hover:bg-[#17285A]">{t("Book a demo")}</Link>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default async function Organizers() {
             <p className="mb-0 mt-1.5">{t("Free until you open submissions. No credit card.")}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/#start" className="inline-flex h-12 items-center rounded-[4px] bg-[#0E1B3D] px-5 text-[16px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("Create an event")}</Link>
+            <Link href="/manage/new" className="inline-flex h-12 items-center rounded-[4px] bg-[#0E1B3D] px-5 text-[16px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("Create an event")}</Link>
             <Link href="/pricing" className="inline-flex h-12 items-center rounded-[4px] border border-[#0E1B3D] px-5 text-[16px] font-medium text-[#0E1B3D] no-underline">{t("See pricing")}</Link>
           </div>
         </section>
