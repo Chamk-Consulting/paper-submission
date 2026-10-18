@@ -10,7 +10,10 @@ function required(name: string, value: string | undefined): string {
 export const site = {
   name: "Plenary",
   // TODO(domain): e.g. https://plenaryapp.com — for now the Vercel URL or localhost.
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
+  url: (
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000")
+  ).replace(/\/$/, ""),
   email: {
     // TODO(domain): no-reply@<domain> and events@<domain> once the domain is verified in Resend.
     authFrom: process.env.EMAIL_FROM_AUTH ?? "Plenary <onboarding@resend.dev>",
