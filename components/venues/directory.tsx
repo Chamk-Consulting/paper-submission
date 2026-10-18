@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PublicFooter, PublicHeader } from "@/components/venues/public-header";
 import { CalendarView } from "@/components/venues/calendar-view";
 import { MapView } from "@/components/venues/map-view";
@@ -36,10 +35,18 @@ function toggleIn<T>(arr: T[], v: T) { return arr.includes(v) ? arr.filter((x) =
 
 /** Canvas PV01: venue directory with list, deadline calendar, map and past venues. */
 export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVenue[]; generatedAt: string; ready: boolean }) {
-  const params = useSearchParams();
-  const initialView = (VIEWS.find(([k]) => k === params.get("view"))?.[0] ?? "list") as View;
-  const [view, setViewState] = useState<View>(initialView);
-  const [q, setQ] = useState(params.get("q") ?? "");
+  const [view, setViewState] = useState<View>("list");
+  const [q, setQ] = useState("");
+  // Read ?view= and ?q= after hydration so the list itself is server-rendered (and indexable).
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const p = new URLSearchParams(window.location.search);
+      const v = VIEWS.find(([k]) => k === p.get("view"))?.[0];
+      if (v) setViewState(v);
+      if (p.get("q")) setQ(p.get("q") ?? "");
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
   const [field, setField] = useState<"all" | Field>("all");
   const [win, setWin] = useState<Win>("any");
   const [kinds, setKinds] = useState<string[]>([]);
