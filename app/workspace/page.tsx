@@ -28,7 +28,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string
           <div className="mt-1 font-semibold">My submissions</div>
           <div className="text-[13px] text-[#4A5263]">{ctx.submissionCount} {ctx.submissionCount === 1 ? "paper" : "papers"}</div>
         </Link>
-        <Link href="/#open-calls" className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4 text-[#121826] no-underline hover:border-[#B7BDC9]">
+        <Link href="/venues" className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4 text-[#121826] no-underline hover:border-[#B7BDC9]">
           <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">Venues</div>
           <div className="mt-1 font-semibold">Find a call for papers</div>
           <div className="text-[13px] text-[#4A5263]">Open calls, in your time zone</div>

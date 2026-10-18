@@ -68,7 +68,7 @@ export default function Landing() {
           <div className={`${wrap} flex min-h-16 flex-wrap items-center justify-between gap-4 py-2`}>
             <Logo light />
             <nav aria-label="Primary" className="flex flex-wrap gap-6 text-[14px] font-medium">
-              <a href="#open-calls" className="text-[#D6DCEA] no-underline hover:text-white">Venues</a>
+              <Link href="/venues" className="text-[#D6DCEA] no-underline hover:text-white">Venues</Link>
               <a href="#roles" className="text-[#D6DCEA] no-underline hover:text-white">Authors &amp; reviewers</a>
               <a href="#chairs" className="text-[#D6DCEA] no-underline hover:text-white">For organizers</a>
               <a href="#compare" className="text-[#D6DCEA] no-underline hover:text-white">Why switch</a>
@@ -87,7 +87,7 @@ export default function Landing() {
           <p className="mt-7 max-w-[56ch] text-[20px] leading-[1.55] text-[#B9C3DA]">Plenary runs the whole life of a technical conference — call for papers, double-blind review, invited sessions, the program and the proceedings — in one workspace that authors, reviewers and chairs can find their way around.</p>
           <div className="mt-9 flex flex-wrap items-center gap-6">
             <a href="#start" className={`px-5 py-3 text-[15px] ${saffronBtn}`}>Host your next conference</a>
-            <a href="#open-calls" className="text-[15px] font-medium text-[#F5F6F3] underline">Find a call for papers →</a>
+            <Link href="/venues" className="text-[15px] font-medium text-[#F5F6F3] underline">Find a call for papers →</Link>
           </div>
 
           <figure className="m-0 mt-16 rounded-[8px] bg-[#17285A] p-7">
@@ -259,7 +259,7 @@ export default function Landing() {
           <div><div className="font-serif text-[22px]">Plenary</div><p className="mt-2 text-[#4A5263]">Conference submission and review for the research community.</p></div>
           <div className="flex flex-col gap-2">
             <div className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">Product</div>
-            <a href="#open-calls" className="text-[#121826] no-underline">Venues</a>
+            <Link href="/venues" className="text-[#121826] no-underline">Venues</Link>
             <a href="#roles" className="text-[#121826] no-underline">For authors &amp; reviewers</a>
             <a href="#chairs" className="text-[#121826] no-underline">For organizers</a>
           </div>

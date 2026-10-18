@@ -107,7 +107,7 @@ export function PapersList({ papers, initialQuery = "" }: { papers: MyPaper[]; i
       {groups.length === 0 ? (
         <div className="mt-3.5 rounded-[8px] border border-dashed border-[#DADDE3] bg-white p-7 text-center text-[#4A5263]">
           {papers.length && (q || f !== "all") ? "No papers match." : "Nothing here."}{" "}
-          <Link href="/#open-calls" className="text-[#2F5FD0] underline">Find a venue</Link> to submit to.
+          <Link href="/venues" className="text-[#2F5FD0] underline">Find a venue</Link> to submit to.
         </div>
       ) : null}
       <p className="mt-2.5 text-[12px] text-[#4A5263]">Ticks: <strong>PDF</strong> file check · <strong>©</strong> copyright · <strong>REG</strong> registration. Green = done, amber = needed, grey = not yet.</p>

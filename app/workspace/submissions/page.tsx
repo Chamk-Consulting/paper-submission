@@ -24,7 +24,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
           <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">My submissions</h1>
           <p className="mt-1.5 text-[#4A5263]">Every paper you are an author on, grouped by venue. One venue can hold several of your papers, each at its own stage.</p>
         </div>
-        <Link href="/#open-calls" className="inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">+ New submission</Link>
+        <Link href="/venues" className="inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">+ New submission</Link>
       </div>
 
       {!ready ? (

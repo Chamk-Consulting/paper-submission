@@ -52,7 +52,7 @@ export function WorkspaceShell({ ctx, active, children }: { ctx: WorkspaceCtx; a
           </form>
           <div className="ml-auto flex items-center gap-3">
             {/* TODO(submit): SB01 venue-type step; until then pick a venue from the open calls. */}
-            <Link href="/#open-calls" className="flex h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">
+            <Link href="/venues" className="flex h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">
               <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden fill="none" stroke="#0E1B3D" strokeWidth="1.8"><path d="M7 2v10M2 7h10" /></svg>New submission
             </Link>
             {/* TODO(inbox): IN01 + unread count */}
@@ -70,7 +70,7 @@ export function WorkspaceShell({ ctx, active, children }: { ctx: WorkspaceCtx; a
           <NavItem href="/workspace/submissions" icon={Icon.paper} label="My submissions" active={active === "submissions"} badge={count(ctx.submissionCount)} />
           <NavItem icon={Icon.pen} label="Reviews" soon />
           <NavItem icon={Icon.cal} label="Sessions I chair" soon />
-          <NavItem href="/#open-calls" icon={Icon.globe} label="Browse venues" />
+          <NavItem href="/venues" icon={Icon.globe} label="Browse venues" />
           <NavItem icon={Icon.mail} label="Inbox" soon />
 
           {ctx.venues.length ? (

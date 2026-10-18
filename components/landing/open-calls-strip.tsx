@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 
@@ -28,7 +29,7 @@ export async function OpenCallsStrip() {
         calls.map((v, i) => (
           <div key={v.slug} className={`grid grid-cols-12 gap-3 px-5 py-3 ${i < calls.length - 1 ? "border-b border-[#EEF0EC]" : ""}`}>
             <div className="col-span-12 sm:col-span-6">
-              <div className="font-semibold">{v.name}</div>
+              <Link href={`/venues/${v.slug}`} className="font-semibold text-[#121826] no-underline hover:underline">{v.name}</Link>
               <div className="text-[13px] text-[#4A5263]">
                 <span className="mr-1.5 rounded-[2px] bg-[#E6EDFC] px-1.5 py-px font-mono text-[11px] uppercase text-[#1F47A8]">{v.short_name ?? v.kind}</span>
                 <span className="capitalize">{v.kind}</span>
@@ -44,8 +45,7 @@ export async function OpenCallsStrip() {
       )}
       <div className="flex justify-between border-t border-[#DADDE3] bg-[#F5F6F3] px-5 py-2.5 text-[13px]">
         <span className="font-mono text-[#4A5263]">{calls.length ? "Live listings" : "Listings"}</span>
-        {/* TODO(venues): PV01 venue directory. */}
-        <span className="font-semibold text-[#9AA3B5]" title="Coming soon">Browse all venues →</span>
+        <Link href="/venues" className="font-semibold text-[#2F5FD0]">Browse all venues →</Link>
       </div>
     </div>
   );
