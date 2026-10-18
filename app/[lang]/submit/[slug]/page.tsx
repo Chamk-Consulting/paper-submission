@@ -9,8 +9,12 @@ import { getMe } from "@/lib/auth/me";
 import { loadVenueBySlug } from "@/lib/submission/data";
 import { tracksOf, typeOptions } from "@/lib/submission/options";
 import { fmtMonth } from "@/lib/venues/time";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata: Metadata = { title: "New submission" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("New submission") };
+}
 type P = { params: Promise<{ slug: string }>; searchParams: Promise<{ type?: string }> };
 
 async function Inner({ params, searchParams }: P) {
@@ -20,21 +24,22 @@ async function Inner({ params, searchParams }: P) {
   if (!me.person) redirect("/create-account/profile");
   const venue = await loadVenueBySlug(slug);
   if (!venue) notFound();
+  const t = await getT();
   const options = typeOptions(venue);
   const generatedAt = new Date().toISOString();
   const name = `${me.person.given_name} ${me.person.family_name}`;
   return (
     <WizardLayout
       header={<WizardHeader initials={initialsOf(name, me.email)} />}
-      band={<TitleBand crumb="New submission" title="New submission" venue={venue} generatedAt={generatedAt} />}
+      band={<TitleBand crumb={t("New submission")} title={t("New submission")} venue={venue} generatedAt={generatedAt} />}
       rail={<StepRail rail={{ done: { type: false, details: false, authors: false, keywords: false, files: false, conflicts: false, review: false }, current: "type", reachable: 1, base: "" }} />}
       aside={<TypeAside venue={venue} type={type} />}
     >
       {!venue.deadline && venue.kind !== "journal" ? (
-        <p role="alert" className="mb-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2.5 text-[14px] text-[#5C1A15]">Submissions for {venue.acr} are closed.</p>
+        <p role="alert" className="mb-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2.5 text-[14px] text-[#5C1A15]">{t("Submissions for {venue} are closed.", { venue: venue.acr })}</p>
       ) : null}
       <TypeForm
-        venue={{ id: venue.id, acr: venue.acr, name: venue.name, slug: venue.slug, badge: venue.acr.replace(/[[\]\s]/g, "").slice(0, 5).toUpperCase(), meta: [venue.location, fmtMonth(venue.startsOn), venue.society ? `by ${venue.society}` : null].filter(Boolean).join(" · ") }}
+        venue={{ id: venue.id, acr: venue.acr, name: venue.name, slug: venue.slug, badge: venue.acr.replace(/[[\]\s]/g, "").slice(0, 5).toUpperCase(), meta: [venue.location, fmtMonth(venue.startsOn, t.intl), venue.society ? t("by {society}", { society: venue.society }) : null].filter(Boolean).join(" · ") }}
         types={options}
         tracks={tracksOf(venue)}
         initialType={options.find((o) => o.name === type)?.name}
