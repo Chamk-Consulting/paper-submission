@@ -1,68 +1,46 @@
-import { Suspense } from "react";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Brand, Notice } from "@/components/ui";
-import { createClient } from "@/lib/supabase/server";
-import { signOut } from "@/lib/auth/actions";
+import { Suspense } from "react";
+import { WorkspaceShell } from "@/components/workspace/shell";
+import { getWorkspaceCtx } from "@/lib/workspace/data";
 
-export const metadata: Metadata = { title: "Workspace" };
+export const metadata: Metadata = { title: "My workspace" };
 
 async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/sign-in?next=/workspace");
-
-  // RLS: these only return the signed-in person's own rows.
-  const [{ data: person }, { data: emails }, { data: roles }] = await Promise.all([
-    supabase.from("persons").select("id, display_name, orcid, country").eq("user_id", auth.user.id).maybeSingle(),
-    supabase.from("person_emails").select("email, is_primary, verified_at").order("is_primary", { ascending: false }),
-    supabase.from("venue_members").select("role, venues(name, slug)"),
-  ]);
+  const ctx = await getWorkspaceCtx();
+  if (!ctx) redirect("/sign-in?next=/workspace");
   const { notice } = await searchParams;
+  const first = ctx.me.person?.given_name?.trim();
 
   return (
-    <div className="min-h-dvh">
-      <header className="flex items-center justify-between bg-navy px-4 py-3 sm:px-6">
-        <Brand light />
-        <form action={signOut}>
-          <button className="rounded-md px-3 py-1.5 text-sm text-white/80 hover:bg-white/10 hover:text-white">Sign out</button>
-        </form>
-      </header>
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        {notice === "password-changed" ? <Notice tone="ok">Password changed. Other devices were signed out.</Notice> : null}
-        <h1 className="font-serif text-4xl text-navy">Welcome{person?.display_name ? `, ${person.display_name}` : ""}</h1>
-        <p className="mt-1 text-muted">Your home for submissions, reviews and events.</p>
-
-        <section className="mt-6 rounded-xl border border-line bg-card p-5">
-          <h2 className="font-medium text-navy">Your emails</h2>
-          <ul className="mt-2 text-sm">
-            {(emails ?? []).map((e) => (
-              <li key={e.email} className="flex items-center gap-2 py-1">
-                <span className="font-mono">{e.email}</span>
-                {e.is_primary ? <span className="rounded bg-saffron/20 px-1.5 text-xs text-saffron-ink">primary</span> : null}
-                {e.verified_at ? <span className="text-xs text-ok">verified</span> : <span className="text-xs text-muted">unverified</span>}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="mt-4 rounded-xl border border-line bg-card p-5">
-          <h2 className="font-medium text-navy">Your roles</h2>
-          {roles && roles.length ? (
-            <ul className="mt-2 text-sm">{roles.map((r, i) => <li key={i}>{r.role}</li>)}</ul>
-          ) : (
-            <p className="mt-2 text-sm text-muted">No events yet. Find an open call to submit, or accept a reviewer invitation.</p>
-          )}
-        </section>
-        {/* TODO: replace with the full Workspace (WS01) once the submission module lands. */}
-      </main>
-    </div>
+    <WorkspaceShell ctx={ctx} active="home">
+      {notice === "password-changed" ? (
+        <p role="status" className="mb-5 rounded-[6px] border border-[#B9E0CB] bg-[#E1F3EA] px-3.5 py-2.5 text-[14px] text-[#14603F]">✓ Password changed. Other devices were signed out.</p>
+      ) : null}
+      <p className="m-0 font-mono text-[12px] text-[#4A5263]">My workspace</p>
+      <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">Welcome{first ? `, ${first}` : ""}</h1>
+      <p className="mt-1.5 text-[#4A5263]">Everything you owe, across every venue.</p>
+      {/* TODO(WS01): due-next list, role tabs and to-do cards from canvas WS01-Workspace. */}
+      <div className="mt-6 grid max-w-[720px] gap-3.5 sm:grid-cols-2">
+        <Link href="/workspace/submissions" className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4 text-[#121826] no-underline hover:border-[#B7BDC9]">
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">Author</div>
+          <div className="mt-1 font-semibold">My submissions</div>
+          <div className="text-[13px] text-[#4A5263]">{ctx.submissionCount} {ctx.submissionCount === 1 ? "paper" : "papers"}</div>
+        </Link>
+        <Link href="/#open-calls" className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4 text-[#121826] no-underline hover:border-[#B7BDC9]">
+          <div className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">Venues</div>
+          <div className="mt-1 font-semibold">Find a call for papers</div>
+          <div className="text-[13px] text-[#4A5263]">Open calls, in your time zone</div>
+        </Link>
+      </div>
+    </WorkspaceShell>
   );
 }
 
 export default function Page(props: { searchParams: Promise<{ notice?: string }> }) {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-paper" aria-busy="true" />}>
+    <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}>
       <Inner {...props} />
     </Suspense>
   );
