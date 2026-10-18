@@ -12,6 +12,8 @@ export function LanguageSelect({ id = "lang-select", className = "" }: { id?: st
     // Strip an explicit /fr, /it… prefix so the cookie decides; keep the rest of the URL.
     const { pathname, search, hash } = window.location;
     const clean = pathname.replace(/^\/(en|fr|it|de)(?=\/|$)/, "") || "/";
+    // Full reload on purpose: the whole tree (incl. <html lang>) and the router cache must switch language.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign(`${clean}${search}${hash}`);
   }
   return (

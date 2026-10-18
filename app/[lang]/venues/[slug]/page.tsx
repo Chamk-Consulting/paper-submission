@@ -42,8 +42,8 @@ async function Venue({ params }: { params: Promise<Params> }) {
       <section className="bg-white">
         <div className="mx-auto max-w-[1280px] px-5 pb-7 pt-6 sm:px-8">
           <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#4A5263]">
-            <Link href="/venues" className="text-[#121826] underline">{t("Venues")}</Link>
-            {v.field ? <> / <Link href="/venues" className="text-[#121826] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
+            <Link href="/venues" transitionTypes={["nav-back"]} className="text-[#121826] underline">{t("Venues")}</Link>
+            {v.field ? <> / <Link href="/venues" transitionTypes={["nav-back"]} className="text-[#121826] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
           </nav>
           <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex min-w-0 gap-5">

@@ -89,7 +89,7 @@ export function StepRail({ rail, draft, footer = true }: { rail: RailState; draf
             </span>
           );
           const cls = `flex-none rounded-[8px] px-2.5 py-2 no-underline ${isCur ? "border border-[#DADDE3] bg-white text-[#121826]" : "text-[#121826]"}`;
-          return <li key={s.key}>{can && !isCur ? <Link href={`${rail.base}/${s.key}`} className={`${cls} block hover:bg-white`}>{body}</Link> : <span aria-current={isCur ? "step" : undefined} className={`${cls} block ${!can && !isCur ? "opacity-70" : ""}`}>{body}</span>}</li>;
+          return <li key={s.key}>{can && !isCur ? <Link href={`${rail.base}/${s.key}`} transitionTypes={[s.n < (cur?.n ?? 8) ? "nav-back" : "nav-forward"]} className={`${cls} block hover:bg-white`}>{body}</Link> : <span aria-current={isCur ? "step" : undefined} className={`${cls} block ${!can && !isCur ? "opacity-70" : ""}`}>{body}</span>}</li>;
         })}
       </ol>
       {footer ? <p className="mt-4 hidden text-[13px] text-[#4A5263] lg:block">{t("Your work is saved each time you continue. You can leave and come back until the deadline.")}</p> : null}

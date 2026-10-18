@@ -23,9 +23,7 @@ for (const f of files) {
   for (const m of src.matchAll(litCall)) if (m[1] !== "`" || !m[2].includes("${")) keys.add(unq(m[2]));
   const indirect = INDIRECT.some((r) => r.test(f.replace(/\\/g, "/")));
   if (indirect || LABEL_ARRAYS.test(src)) {
-    const scope = indirect ? src : src.split("\n").filter((l, i, arr) => { // only lines inside UPPER_CASE constant blocks
-      return true;
-    }).join("\n");
+    const scope = src;
     if (!indirect) {
       // collect strings inside top-level UPPER_CASE constants only
       const blocks = src.match(/const\s+[A-Z][A-Z_]+\s*(?::[^=]+)?=\s*[[{][\s\S]*?\n[\]}];/g) ?? [];

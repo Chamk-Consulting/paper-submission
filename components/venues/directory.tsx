@@ -280,7 +280,7 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
       <span aria-hidden className="flex size-14 flex-none items-center justify-center rounded-[8px] px-1 text-center font-mono text-[11px] font-semibold leading-[1.1]" style={{ background: fbg, color: fink }}>{v.society ?? v.acr.slice(0, 6)}</span>
       <div className="min-w-0 flex-auto">
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1.5">
-          <h2 className="m-0 text-[22px] font-semibold leading-[1.2]"><Link href={href} className="text-[#121826] no-underline hover:underline">{v.acr}</Link></h2>
+          <h2 className="m-0 text-[22px] font-semibold leading-[1.2]"><Link href={href} transitionTypes={["nav-forward"]} className="text-[#121826] no-underline hover:underline">{v.acr}</Link></h2>
           <span className="text-[14px] text-[#4A5263]">{v.name}</span>
         </div>
         <div className="mt-1 text-[14px] text-[#4A5263]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t), where, v.society ? t("by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</div>
@@ -303,7 +303,7 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
             style={{ color: following ? "#7A4508" : "#121826", background: following ? "#FFF6E6" : "#FFFFFF", border: `1px solid ${following ? "#F1D29A" : "#B7BDC9"}` }}>
             {following ? t("★ Following") : t("☆ Follow")}
           </button>
-          <Link href={href} className="inline-flex h-[34px] items-center rounded-[4px] bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("View call")}</Link>
+          <Link href={href} transitionTypes={["nav-forward"]} className="inline-flex h-[34px] items-center rounded-[4px] bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("View call")}</Link>
         </div>
       </div>
     </article>
