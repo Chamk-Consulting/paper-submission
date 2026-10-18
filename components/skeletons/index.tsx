@@ -262,3 +262,21 @@ export function AuthSkeleton() {
     </SplitLayout>
   );
 }
+
+/* ------------------------------------------------------------------ organizer screens */
+export async function ManageSkeleton({ rows = 3 }: { rows?: number }) {
+  return (
+    <WorkspaceShell ctx={null} active="m:setup">
+      <Skeleton className="max-w-[1180px]">
+        <Line size={12} w={180} />
+        <Line size={40} lh={1.1} w="min(420px, 80%)" className="mt-1.5" />
+        <Line size={15} w="min(520px, 90%)" className="mt-1.5" />
+        <div className="mt-[22px] flex flex-col gap-4">
+          {Array.from({ length: rows }, (_, i) => (
+            <Card key={i} className="p-[22px]!"><Line size={22} w={200} /><Bar w="100%" h={44} className="mt-4" /><Bar w="70%" h={44} className="mt-3" /></Card>
+          ))}
+        </div>
+      </Skeleton>
+    </WorkspaceShell>
+  );
+}

@@ -44,7 +44,9 @@ for (const f of files) {
 const list = [...keys].filter((k) => k.trim() && /[A-Za-z]/.test(k) && !k.includes("${") && !/\w\(\w+(, \w+)+\)/.test(k) && !/^use (cache|server|client)$/.test(k)).sort();
 if (process.argv.includes("--missing")) {
   for (const l of ["fr", "it", "de"]) {
-    const src = fs.readFileSync(path.join(ROOT, `lib/i18n/dict/${l}.ts`), "utf8");
+    const modDir = path.join(ROOT, "lib/i18n/dict/modules");
+    const src = [path.join(ROOT, `lib/i18n/dict/${l}.ts`), ...fs.readdirSync(modDir).filter((f) => f.endsWith(`.${l}.ts`)).map((f) => path.join(modDir, f))]
+      .map((f) => fs.readFileSync(f, "utf8")).join("\n");
     const have = new Set([...src.matchAll(/^\s*("(?:[^"\\]|\\.)*")\s*:/gm)].map((m) => JSON.parse(m[1])));
     const miss = list.filter((k) => !have.has(k));
     console.log(`${l}: ${list.length - miss.length}/${list.length} translated, ${miss.length} missing`);

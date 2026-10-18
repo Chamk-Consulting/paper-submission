@@ -5,10 +5,10 @@ import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 
 // Thin edge layer: pick the language, refresh the Supabase session, keep signed-out users out of
 // private areas. Real permission checks live in server actions and RLS.
-const PROTECTED_PREFIXES = ["/workspace", "/submissions", "/submit"];
+const PROTECTED_PREFIXES = ["/workspace", "/submissions", "/submit", "/manage", "/reviews", "/settings", "/inbox", "/chair", "/search"];
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/create-account"];
 // Route handlers live outside app/[lang] and are never rewritten.
-const NO_LOCALE = [/^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
+const NO_LOCALE = [/^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
 
 export default async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

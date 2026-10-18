@@ -19,7 +19,16 @@ const Icon = {
   globe: <><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></>,
   mail: <><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" /><path d="M2 4.5l6 4.5 6-4.5" /></>,
 };
-type Key = "home" | "submissions" | "reviews" | "sessions" | "venues" | "inbox";
+type Key = "home" | "submissions" | "reviews" | "sessions" | "venues" | "inbox" | `m:${string}`;
+
+/** Organizer links of the event sidebar (canvas EM20–EM44). key → path under /manage/[slug]. */
+export const ORGANIZER_NAV: [string, string, string][] = [
+  ["dashboard", "Event dashboard", ""], ["papers", "Papers", "/papers"], ["assignment", "Assignment", "/assignment"],
+  ["reviews", "Review progress", "/reviews"], ["decisions", "Decisions", "/decisions"], ["finals", "Final versions", "/finals"],
+  ["program", "Program builder", "/program"], ["live", "Event day", "/live"], ["proceedings", "Proceedings & reports", "/proceedings"],
+  ["people", "People", "/people"], ["email", "Email centre", "/email"], ["setup", "Setup", "/setup"],
+  ["committee", "Committee", "/setup/committee"], ["roles", "My roles & conflicts", "@/manage/roles"], ["audit", "Audit log", "/audit"],
+];
 
 function NavItem({ t, href, icon, label, active, badge, soon }: { t: T; href?: string; icon: ReactNode; label: string; active?: boolean; badge?: ReactNode; soon?: boolean }) {
   const cls = `flex h-10 items-center justify-between rounded-[6px] px-3 text-[14px] no-underline ${active ? "bg-[#E6EDFC] font-semibold text-[#0E1B3D]" : soon ? "text-[#9AA3B5]" : "text-[#121826] hover:bg-[#F5F6F3]"}`;
@@ -38,10 +47,9 @@ function NavItem({ t, href, icon, label, active, badge, soon }: { t: T; href?: s
 
 const count = (n: number) => (n ? <span className="font-mono text-[12px] text-[#4A5263]">{n}</span> : null);
 
-const ORGANIZER_LINKS = ["Event dashboard", "Papers", "Assignment", "Review progress", "Decisions", "Final versions", "Program builder", "Event day", "Proceedings & reports", "People", "Email centre", "Setup", "Committee", "My roles & conflicts", "Audit log"];
 
 /** ctx = null renders the same chrome with placeholders (used by the loading skeleton). */
-export async function WorkspaceShell({ ctx, active, children }: { ctx: WorkspaceCtx | null; active: Key; children: ReactNode }) {
+export async function WorkspaceShell({ ctx, active, children, event }: { ctx: WorkspaceCtx | null; active: Key; children: ReactNode; event?: { slug: string; name: string; roleLabel: string } }) {
   const t = await getT();
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
@@ -80,36 +88,43 @@ export async function WorkspaceShell({ ctx, active, children }: { ctx: Workspace
         <nav aria-label={t("Workspace")} className="box-border hidden w-[232px] flex-none flex-col gap-0.5 border-r border-[#DADDE3] bg-white px-3 py-5 md:flex">
           <NavItem t={t} href="/workspace" icon={Icon.home} label="Home" active={active === "home"} />
           <NavItem t={t} href="/workspace/submissions" icon={Icon.paper} label="My submissions" active={active === "submissions"} badge={ctx ? count(ctx.submissionCount) : null} />
-          <NavItem t={t} icon={Icon.pen} label="Reviews" soon />
-          <NavItem t={t} icon={Icon.cal} label="Sessions I chair" soon />
+          <NavItem t={t} href="/reviews" icon={Icon.pen} label="Reviews" active={active === "reviews"} />
+          <NavItem t={t} href="/chair" icon={Icon.cal} label="Sessions I chair" active={active === "sessions"} />
           <NavItem t={t} href="/venues" icon={Icon.globe} label="Browse venues" />
-          <NavItem t={t} icon={Icon.mail} label="Inbox" soon />
+          <NavItem t={t} href="/inbox" icon={Icon.mail} label="Inbox" active={active === "inbox"} />
 
           {ctx?.venues.length ? (
             <>
               <div className="mx-3 mb-2 mt-4 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Your venues")}</div>
               {ctx.venues.map((v, i) => (
-                <span key={v.id} className="flex h-9 items-center gap-2.5 rounded-[6px] px-3 text-[14px] text-[#121826]">
+                <Link key={v.id} href={`/venues/${v.slug}/me`} className="flex h-9 items-center gap-2.5 rounded-[6px] px-3 text-[14px] text-[#121826] no-underline hover:bg-[#F5F6F3]">
                   <span className="size-2 flex-none rounded-[2px]" style={{ background: venueColor(i) }} />
                   <span className="truncate">{v.name}</span>
-                </span>
+                </Link>
               ))}
             </>
           ) : null}
 
-          {ctx?.organizerOf ? (
-            <>
-              <div className="mx-3 mb-2 mt-4 flex items-center justify-between">
-                <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Organizer")}</span>
-                <span className="rounded-[3px] bg-[#0E1B3D] px-1.5 py-px font-mono text-[10px] uppercase text-[#F2A93B]">{ctx.organizerOf.roles.includes("owner") ? t("Owner") : t("Chair")}</span>
-              </div>
-              <div className="truncate px-3 pb-1 text-[12px] text-[#4A5263]">{ctx.organizerOf.name}</div>
-              {/* TODO(organizer): EM20–EM44 screens */}
-              {ORGANIZER_LINKS.map((l) => (
-                <span key={l} title={t("Coming soon")} className="flex h-[34px] items-center rounded-[6px] px-3 text-[14px] text-[#9AA3B5]">{t(l)}</span>
-              ))}
-            </>
-          ) : null}
+          {event ?? (ctx?.organizerOf ? { slug: ctx.organizerOf.slug, name: ctx.organizerOf.shortName ?? ctx.organizerOf.name, roleLabel: ctx.organizerOf.roles.includes("owner") ? "Owner" : "Chair" } : null) ? (() => {
+            const ev = (event ?? { slug: ctx!.organizerOf!.slug, name: ctx!.organizerOf!.shortName ?? ctx!.organizerOf!.name, roleLabel: ctx!.organizerOf!.roles.includes("owner") ? "Owner" : "Chair" })!;
+            return (
+              <>
+                <div className="mx-3 mb-2 mt-4 flex items-center justify-between">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Organizer")}</span>
+                  <span className="rounded-[3px] bg-[#0E1B3D] px-1.5 py-px font-mono text-[10px] uppercase text-[#F2A93B]">{t(ev.roleLabel)}</span>
+                </div>
+                <div className="truncate px-3 pb-1 text-[12px] text-[#4A5263]">{ev.name}</div>
+                {ORGANIZER_NAV.map(([k, l, path]) => {
+                  const href = path.startsWith("@") ? path.slice(1) : `/manage/${ev.slug}${path}`;
+                  const on = active === `m:${k}`;
+                  return (
+                    <Link key={k} href={href} aria-current={on ? "page" : undefined}
+                      className={`flex h-[34px] items-center rounded-[6px] px-3 text-[14px] no-underline ${on ? "bg-[#E6EDFC] font-semibold text-[#0E1B3D]" : "text-[#121826] hover:bg-[#F5F6F3]"}`}>{t(l)}</Link>
+                  );
+                })}
+              </>
+            );
+          })() : null}
 
           <div className="mt-auto flex flex-col gap-0.5 border-t border-[#DADDE3] pt-4">
             <Link href="/create-account/profile" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Settings")}</Link>

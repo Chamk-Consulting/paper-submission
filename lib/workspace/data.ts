@@ -50,7 +50,7 @@ export async function getWorkspaceCtx(): Promise<WorkspaceCtx | null> {
     name,
     initials,
     venues,
-    organizerOf: venues.find((v) => v.roles.some((r) => r === "owner" || r === "chair")) ?? null,
+    organizerOf: venues.find((v) => v.roles.some((r) => ["owner", "chair", "program_chair", "deputy_chair", "ceb_chair", "publication_chair", "registration_chair", "staff"].includes(r))) ?? null,
     submissionCount: ("count" in subs ? subs.count : 0) ?? 0,
     aeRoles: venues.filter((v) => v.roles.includes("associate_editor")).length,
   };

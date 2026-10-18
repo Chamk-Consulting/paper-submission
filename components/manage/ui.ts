@@ -1,0 +1,20 @@
+/* Shared Tailwind class strings for organizer screens (usable from server and client components). */
+export const ui = {
+  card: "rounded-[8px] border border-[#DADDE3] bg-white p-[22px]",
+  h2: "m-0 font-serif text-[22px] font-normal",
+  kicker: "m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]",
+  label: "flex flex-col gap-1.5 text-[14px] font-medium",
+  input: "h-11 box-border rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[15px] font-normal text-[#121826]",
+  textarea: "box-border rounded-[4px] border border-[#B7BDC9] bg-white px-3 py-2.5 text-[15px] font-normal leading-[1.5] text-[#121826]",
+  hint: "text-[13px] font-normal text-[#4A5263]",
+  primary: "inline-flex h-11 items-center justify-center rounded-[4px] border-0 bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] disabled:opacity-60",
+  navy: "inline-flex h-11 items-center justify-center rounded-[4px] border-0 bg-[#0E1B3D] px-[18px] text-[15px] font-semibold text-white no-underline hover:bg-[#17285A] disabled:opacity-60",
+  ghost: "inline-flex h-11 items-center justify-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6] disabled:opacity-60",
+  table: "w-full border-collapse text-left text-[14px]",
+  th: "border-b border-[#DADDE3] bg-[#F7F8F6] px-3.5 py-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]",
+  td: "border-b border-[#EEF0EC] px-3.5 py-3 align-top",
+  tag: "inline-flex items-center rounded-[3px] px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-[0.04em]",
+  ok: "rounded-[6px] border border-[#B9E0CB] bg-[#E1F3EA] px-3.5 py-2.5 text-[14px] text-[#14603F]",
+  warn: "rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]",
+  bad: "rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3.5 py-2.5 text-[14px] text-[#8C1D18]",
+};
