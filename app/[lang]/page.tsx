@@ -73,15 +73,15 @@ export default async function Landing() {
         <header className="border-b border-[#24335C]">
           <div className={`${wrap} flex min-h-16 flex-wrap items-center justify-between gap-4 py-2`}>
             <Logo light />
-            <nav aria-label={t("Primary")} className="flex flex-wrap gap-6 text-[14px] font-medium">
+            <nav aria-label={t("Primary")} className="hidden flex-wrap gap-x-5 gap-y-1 text-[14px] font-medium lg:flex">
               <Link href="/venues" className="text-[#D6DCEA] no-underline hover:text-white">{t("Venues")}</Link>
               <a href="#roles" className="text-[#D6DCEA] no-underline hover:text-white">{t("Authors & reviewers")}</a>
               <a href="#chairs" className="text-[#D6DCEA] no-underline hover:text-white">{t("For organizers")}</a>
               <a href="#compare" className="text-[#D6DCEA] no-underline hover:text-white">{t("Why switch")}</a>
               <a href="#pricing" className="text-[#D6DCEA] no-underline hover:text-white">{t("Pricing")}</a>
             </nav>
-            <div className="flex items-center gap-3">
-              <LanguageSelect id="landing-lang" className="hidden border-[#2A3C6E] bg-[#17285A] text-[#F5F6F3] sm:block" />
+            <div className="flex items-center gap-2">
+              <LanguageSelect id="landing-lang" className="hidden border-[#2A3C6E]! bg-[#17285A]! text-[#F5F6F3]! sm:block" />
               <Link href="/sign-in" className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline">{t("Sign in")}</Link>
               <a href="#start" className={`px-4 py-2.5 text-[14px] ${saffronBtn}`}>{t("Host a conference")}</a>
             </div>

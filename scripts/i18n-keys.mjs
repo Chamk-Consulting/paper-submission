@@ -21,13 +21,21 @@ const LABEL_ARRAYS = /const\s+[A-Z][A-Z_]+\s*(?::[^=]+)?=\s*[[{]/;
 for (const f of files) {
   const src = fs.readFileSync(f, "utf8");
   for (const m of src.matchAll(litCall)) if (m[1] !== "`" || !m[2].includes("${")) keys.add(unq(m[2]));
+  // t(cond ? "a" : "b"), t(x ?? "fallback"): take the quoted strings inside the call
+  for (const m of src.matchAll(/(?:^|[^\w.])t\(([^"'`)][^\n]*)/g)) {
+    let depth = 1, i = 0, body = m[1];
+    for (; i < body.length && depth; i++) { if (body[i] === "(") depth++; else if (body[i] === ")") depth--; }
+    body = body.slice(0, i);
+    const firstArg = body.split(/,\s*\{/)[0];
+    for (const q of firstArg.matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)) if (/[A-Za-z]{2}/.test(q[1])) keys.add(unq(q[1]));
+  }
   const indirect = INDIRECT.some((r) => r.test(f.replace(/\\/g, "/")));
   if (indirect || LABEL_ARRAYS.test(src)) {
     const scope = src;
     if (!indirect) {
       // collect strings inside top-level UPPER_CASE constants only
-      const blocks = src.match(/const\s+[A-Z][A-Z_]+\s*(?::[^=]+)?=\s*[[{][\s\S]*?\n[\]}];/g) ?? [];
-      for (const b of blocks) for (const m of b.matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)) if (/[a-z]{2}/.test(m[1]) && /\s|^[A-Z][a-z]+$/.test(m[1]) && !/^[#/.]|^https?:|^\[|className|^[a-z-]+$|^#[0-9A-F]/i.test(m[1]) && !/^[a-z]+(_[a-z]+)*$/.test(m[1])) keys.add(unq(m[1]));
+      const blocks = [...(src.match(/const\s+[A-Z][A-Z_]+\s*(?::[^=]+)?=\s*[[{][\s\S]*?\n[\]}];/g) ?? []), ...(src.match(/const\s+[A-Z][A-Z_]+\s*(?::[^=\n]+)?=\s*[[{][^\n]*[\]}];/g) ?? [])];
+      for (const b of blocks) for (const m of b.matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)) if (/[a-z]{2}/.test(m[1]) && /\s|^[A-Z][a-z]+$/.test(m[1]) && !/^[#/.]|^https?:|^\[|className|^#[0-9A-F]/i.test(m[1]) && !/^[a-z-]+$/.test(m[1]) && !/^[a-z]+(_[a-z]+)*$/.test(m[1])) keys.add(unq(m[1]));
     } else {
       for (const m of scope.matchAll(/"([^"\\]*(?:\\.[^"\\]*)*)"/g)) if (/[a-z]{3}/.test(m[1]) && /\s/.test(m[1]) && !/^[a-z0-9_.-]+$|^https?:|select\(|^[a-z_]+,|\*,|\bfrom\b.*\bwhere\b/i.test(m[1]) && !m[1].includes("_") ) keys.add(unq(m[1]));
     }
