@@ -14,7 +14,7 @@ export type WizardVenue = {
 };
 
 export type Author = { personId: string; position: number; corresponding: boolean; name: string; email: string | null; institution: string | null; plenaryId: string | null; isYou: boolean; hasAccount: boolean };
-export type SubFile = { id: string; role: "paper" | "appendix" | "source" | "data" | "video"; path: string; name: string; size: number; mime: string; pages: number | null; check: { status?: string; items?: { key: string; label: string; value: string; detail: string; level: "ok" | "warn" | "fail" }[] }; version: number; current: boolean; createdAt: string };
+export type SubFile = { id: string; role: "paper" | "appendix" | "source" | "data" | "video" | "revision" | "highlighted" | "final" | "slides" | "supplementary"; path: string; name: string; size: number; mime: string; pages: number | null; check: { status?: string; items?: { key: string; label: string; value: string; detail: string; level: "ok" | "warn" | "fail" }[] }; version: number; current: boolean; createdAt: string };
 export type Conflict = { id: string; personId: string | null; institution: string | null; reason: string };
 
 export type Submission = {
