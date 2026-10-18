@@ -8,10 +8,11 @@ import { continueFromFiles, fileUrl, finishUpload, removeFile, type ActionState 
 import { card, ghostBtn, h2, primaryBtn } from "@/components/submission/shell";
 import type { SubFile } from "@/lib/submission/data";
 import { useT } from "@/lib/i18n/client";
+import { OpenViewer } from "@/components/submission/followup/open-viewer";
 
 type I18n = { key: string; vars?: Record<string, string | number> };
 
-type Role = SubFile["role"];
+type Role = "paper" | "appendix" | "source" | "data" | "video";
 const EXTRA: { role: Role; label: string; accept: string; mime: string }[] = [
   { role: "appendix", label: "Appendix PDF", accept: "application/pdf,.pdf", mime: "application/pdf" },
   { role: "source", label: "LaTeX source (ZIP)", accept: ".zip,application/zip", mime: "application/zip" },
@@ -96,7 +97,8 @@ export function FilesStep({ id, files, typeLine, canContinue }: { id: string; fi
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" onClick={() => paperInput.current?.click()} className="h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[14px]">{t("Replace file")}</button>
-                  <button type="button" onClick={() => open(paper.path)} className="h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[14px]">{t("Open")}</button>
+                  <OpenViewer id={id} files={[paper, ...current.filter((f) => f.id !== paper.id)]} label={t("Open in viewer")} className="h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[14px]" />
+                  <button type="button" onClick={() => open(paper.path)} className="h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[14px]">{t("Download")}</button>
                 </div>
               </div>
             </div>

@@ -5,6 +5,8 @@ import { StepMark } from "@/components/motion/step-transition";
 import { initialsOf, requireCtx } from "@/components/submission/frame";
 import { WizardHeader } from "@/components/submission/shell";
 import { OpenFile, WithdrawBox } from "@/components/submission/status-bits";
+import { OpenViewer } from "@/components/submission/followup/open-viewer";
+import { loadDecision, loadInfo, loadRevision } from "@/lib/submission/followup-data";
 import { createClient } from "@/lib/supabase/server";
 import { fmtMonth } from "@/lib/venues/time";
 import { Reveal } from "@/components/motion/reveal";
@@ -14,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return { title: t("Paper status") };
 }
+const isFuture = (iso: string) => Date.parse(iso) > Date.now();
 type P = { params: Promise<{ id: string }> };
 
 const STAGE: Record<string, [string, string, string, string]> = {
@@ -42,7 +45,24 @@ async function Inner({ params }: P) {
   const { sub, venue, authors, files, editable } = ctx;
   const short = (iso: string) => shortAt(iso, t.intl);
   const supabase = await createClient();
-  const { data: hist } = await supabase.rpc("submission_history", { p_submission: id });
+  const [{ data: hist }, decision, info, revision] = await Promise.all([
+    supabase.rpc("submission_history", { p_submission: id }),
+    loadDecision(id),
+    sub.stage === "draft" ? Promise.resolve(null) : loadInfo(id),
+    sub.stage === "revise" ? loadRevision(id) : Promise.resolve(null),
+  ]);
+  const myConfirmation = info?.authors.find((a) => a.isMe)?.confirmation;
+  const rebuttalClose = info?.rebuttal ? info.dates.rebuttal_close ?? null : null;
+  const rebuttalOpen = !!rebuttalClose && isFuture(rebuttalClose) && ["review", "decision", "submitted"].includes(sub.stage);
+  const viewerFiles = files.filter((f) => f.current && f.mime === "application/pdf");
+  const base = `/submissions/${id}`;
+  const nextStep: { title: string; text: string; cta: string; href: string } | null =
+    sub.stage === "final" ? { title: t("Final version"), text: t("Upload the camera-ready PDF, lock the title and authors, sign the copyright form and register one author."), cta: t("Start final version"), href: `${base}/final` }
+    : sub.stage === "revise" ? (revision && revision.status !== "draft"
+        ? { title: t("Revision submitted"), text: t("The associate editor is checking your revision."), cta: t("View revision"), href: `${base}/revision/done` }
+        : { title: t("Revision"), text: t("Answer the reviewers' comments and upload the revised paper."), cta: t("Start revision"), href: `${base}/revision` })
+    : rebuttalOpen ? { title: t("Rebuttal"), text: t("The reviews are in. You can correct misunderstandings before the decision."), cta: t("Respond to the reviews"), href: `${base}/rebuttal` }
+    : null;
   const [label, bg, ink, line] = STAGE[sub.stage] ?? STAGE.submitted;
   const paper = files.find((f) => f.role === "paper" && f.current);
   const me = authors.find((a) => a.isYou);
@@ -85,15 +105,28 @@ async function Inner({ params }: P) {
             <p className="mt-1 text-[15px] text-[#4A5263]">{no} · {venue.acr} · {t(sub.paperType)}{me?.corresponding ? ` · ${t("you are the corresponding author")}` : ""}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {/* TODO(review): decision & reviews page (SB13). */}
-            <span title={t("Available after the decision")} className="inline-flex h-11 items-center rounded-[4px] border border-[#DADDE3] bg-white px-4 text-[15px] text-[#9AA3B5]">{t("Decision & reviews")}</span>
-            {paper ? <OpenFile path={paper.path} className="h-11 rounded-[4px] bg-[#0E1B3D] px-4 text-[15px] font-semibold text-white">{t("Open paper")}</OpenFile> : null}
+            {decision
+              ? <Link href={`${base}/decision`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Decision & reviews")}</Link>
+              : <span title={t("Available after the decision")} className="inline-flex h-11 items-center rounded-[4px] border border-[#DADDE3] bg-white px-4 text-[15px] text-[#9AA3B5]">{t("Decision & reviews")}</span>}
+            {viewerFiles.length ? <OpenViewer id={id} files={viewerFiles} label={t("Open paper")} className="h-11 rounded-[4px] bg-[#0E1B3D] px-4 text-[15px] font-semibold text-white" /> : null}
           </div>
         </div>
       </div>
 
       <div className="flex w-full max-w-[1340px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row lg:items-start">
         <main className="flex min-w-0 flex-auto flex-col gap-4">
+          {myConfirmation === "pending" && sub.stage !== "draft" ? (
+            <section role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-[8px] border border-[#BCCDF5] bg-[#E6EDFC] px-[22px] py-4 text-[#1F2E5C]">
+              <span><strong>{t("Confirm you are a co-author")}</strong> · {t("Every author confirms before review starts.")}</span>
+              <Link href={`${base}/confirm`} className="inline-flex h-10 items-center rounded-[4px] bg-[#0E1B3D] px-4 text-[15px] font-semibold text-white no-underline">{t("Confirm authorship")}</Link>
+            </section>
+          ) : null}
+          {nextStep ? (
+            <section className="flex flex-wrap items-center justify-between gap-3 rounded-[8px] bg-[#0E1B3D] px-[22px] py-4 text-[#F5F6F3]">
+              <span className="min-w-0"><span className="block font-mono text-[11px] uppercase tracking-[0.06em] text-[#F2A93B]">{t("Next step")} · {nextStep.title}</span><span className="mt-1 block text-[15px]">{nextStep.text}</span></span>
+              <Link href={nextStep.href} className="inline-flex h-11 flex-none items-center rounded-[4px] bg-[#F2A93B] px-4 font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{nextStep.cta} →</Link>
+            </section>
+          ) : null}
           <section className="rounded-[8px] border border-[#DADDE3] bg-white px-[22px] py-5">
             <div className="flex flex-wrap items-center gap-3"><span className="rounded-[2px] px-2.5 py-1 font-mono text-[12px] font-medium tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(label)}</span>{sub.stageDetail ? <span className="text-[15px] text-[#4A5263]">{/^Step (\d+) of 7$/.test(sub.stageDetail) ? t("Step {n} of 7", { n: sub.stageDetail.split(" ")[1] }) : t(sub.stageDetail)}</span> : null}</div>
             <p className="mt-3 text-[16px]">{t(line)}{notif && sub.stage !== "withdrawn" ? ` ${t("Decisions are expected on {date}.", { date: short(notif.startsAt) })}` : ""}</p>
@@ -111,7 +144,9 @@ async function Inner({ params }: P) {
             ) : null}
           </section>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {tile("Reviews", "Not yet", "after the deadline", "#DADDE3")}
+            {info && info.reviews.submitted > 0
+              ? tile("Reviews", decision ? "Released" : "In progress", decision ? "" : "shown after the decision", decision ? "#18744F" : "#2F5FD0")
+              : tile("Reviews", "Not yet", "after the deadline", "#DADDE3")}
             {tile("PDF check", paper ? (paper.check.status === "failed" ? "Problems" : "Passed") : "No PDF", paper?.pages != null ? t("{n} pages", { n: paper.pages }) : "", paper ? (paper.check.status === "failed" ? "#B3261E" : "#18744F") : "#DADDE3")}
             {tile("Copyright", sub.copyrightCheck === "ok" ? "Signed" : "Not yet", "after acceptance", sub.copyrightCheck === "ok" ? "#18744F" : "#DADDE3")}
             {tile("Registration", sub.registrationCheck === "ok" ? "Done" : "Not yet", "after acceptance", sub.registrationCheck === "ok" ? "#18744F" : "#DADDE3")}
@@ -163,11 +198,17 @@ async function Inner({ params }: P) {
           <section className={box}>
             <p className={kicker}>{t("Actions")}</p>
             <div className="flex flex-col gap-2">
-              {editable ? <Link href={`/submissions/${id}/details`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{sub.stage === "draft" ? t("Continue editing") : t("Edit submission (until the deadline)")}</Link> : null}
+              {editable ? <Link href={sub.stage === "draft" ? `${base}/details` : `${base}/edit`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{sub.stage === "draft" ? t("Continue editing") : t("Edit submission (until the deadline)")}</Link> : null}
+              {decision ? <Link href={`${base}/decision`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Decision & reviews")}</Link> : null}
+              {rebuttalOpen ? <Link href={`${base}/rebuttal`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Respond to the reviews")}</Link> : null}
+              {sub.stage === "final" || sub.stage === "done" ? <Link href={`${base}/final`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Final version")}</Link> : null}
               {/* TODO(inbox): message the program chair (IN01). */}
               <span title={t("Coming soon")} className="flex h-11 items-center rounded-[4px] border border-[#DADDE3] px-3.5 text-[15px] text-[#9AA3B5]">{t("Message the program chair")}</span>
               {sub.number ? <a href={`/submissions/${id}/receipt.pdf`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Download receipt")}</a> : null}
-              {!["withdrawn", "done", "rejected"].includes(sub.stage) ? <WithdrawBox id={id} /> : null}
+              {!["withdrawn", "done", "rejected", "draft"].includes(sub.stage) ? <Link href={`${base}/withdraw`} className="flex h-11 items-center rounded-[4px] border border-[#F3C3BE] bg-white px-3.5 text-[15px] text-[#B3261E] no-underline hover:bg-[#FDECEA]">{t("Withdraw paper")}</Link> : null}
+              {/* Drafts have no paper number to type, so they keep the inline confirm. */}
+              {sub.stage === "draft" ? <WithdrawBox id={id} /> : null}
+              {sub.stage === "withdrawn" ? <Link href={`${base}/withdraw/done`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Withdrawal details")}</Link> : null}
             </div>
           </section>
         </aside>
