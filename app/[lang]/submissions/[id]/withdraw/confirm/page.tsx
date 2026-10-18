@@ -42,7 +42,7 @@ async function Inner({ params, searchParams }: P) {
           <ul className="mb-0 mt-2.5 flex list-none flex-col gap-2 p-0 text-[15px]">
             {ctx.editable ? <li><Link href={`${base}/edit`} className="text-[#2F5FD0]">{t("Fix the paper before the deadline")}</Link></li> : null}
             {/* TODO(inbox): link to the chair thread once IN01 lands. */}
-            <li><span title={t("Coming soon")} className="text-[#9AA3B5]">{t("Message the program chair")} · {t("soon")}</span></li>
+            <li><Link href={`/submissions/${id}/message?about=withdraw`} className="text-[#2F5FD0]">{t("Message the program chair")}</Link></li>
           </ul>
         </section>
       }

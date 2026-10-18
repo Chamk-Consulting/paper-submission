@@ -12,8 +12,10 @@ const LANGS = { fr: "French", ar: "Arabic", es: "Spanish", pt: "Portuguese", de:
 
 const body = z.object({
   submissionId: z.string().uuid(),
-  fileId: z.string().uuid(),
-  kind: z.enum(["summary", "translate", "ask"]),
+  fileId: z.string().uuid().optional(),
+  // review_* come from the reviewer's viewer (RV03): no file id, plain-text answer
+  kind: z.enum(["summary", "translate", "ask", "review_summary", "review_ask"]),
+  assignmentId: z.string().uuid().optional(),
   mode: z.enum(["brief", "detailed", "reviewers"]).optional(),
   lang: z.enum(["fr", "ar", "es", "pt", "de", "zh"]).optional(),
   scope: z.enum(["abstract", "page", "summary"]).optional(),
@@ -55,12 +57,16 @@ export async function POST(req: Request) {
   if (!user) return json({ error: "sign_in" }, 401);
   const parsed = body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return json({ error: "bad_request" }, 400);
-  const b = parsed.data;
+  const raw = parsed.data;
+  const review = raw.kind === "review_summary" || raw.kind === "review_ask";
+  const b = { ...raw, kind: raw.kind === "review_summary" ? "summary" : raw.kind === "review_ask" ? "ask" : raw.kind, mode: raw.kind === "review_summary" ? "reviewers" : raw.mode } as z.infer<typeof body> & { kind: "summary" | "translate" | "ask" };
   if (b.kind === "ask" && !b.question) return json({ error: "bad_request" }, 400);
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return json({ error: "ai_off" }, 503);
 
-  const { data: file } = await supabase.from("submission_files").select("storage_path, mime_type, submission_id").eq("id", b.fileId).eq("submission_id", b.submissionId).maybeSingle();
+  let fileQuery = supabase.from("submission_files").select("storage_path, mime_type, submission_id").eq("submission_id", b.submissionId);
+  fileQuery = b.fileId ? fileQuery.eq("id", b.fileId) : fileQuery.eq("mime_type", "application/pdf").eq("is_current", true).order("role").order("created_at", { ascending: false }).limit(1);
+  const { data: file } = await fileQuery.maybeSingle();
   if (!file || file.mime_type !== "application/pdf") return json({ error: "not_found" }, 404);
 
   const { data: left, error: limitErr } = await supabase.rpc("use_ai", { p_submission: b.submissionId, p_kind: b.kind });
@@ -89,6 +95,12 @@ export async function POST(req: Request) {
   const data = parse(text);
   if (!data) return b.kind === "translate" ? json({ text, left }) : json({ error: "upstream" }, 502);
   const clampPage = (p: unknown) => { const n = Number(p); return Number.isInteger(n) && n >= 1 && n <= pages.length ? n : null; };
+  if (review) {
+    const text = b.kind === "summary"
+      ? (Array.isArray(data.items) ? data.items : []).map((i: Record<string, unknown>) => `${String(i.key ?? "")}${clampPage(i.page) ? ` (p. ${clampPage(i.page)})` : ""}: ${String(i.text ?? "")}`).join("\n\n")
+      : String(data.answer ?? "");
+    return json({ text: text.slice(0, 6000), left });
+  }
   if (b.kind === "summary") {
     const items = (Array.isArray(data.items) ? data.items : []).slice(0, 12).map((i: Record<string, unknown>) => ({ key: String(i.key ?? "").slice(0, 60), text: String(i.text ?? "").slice(0, 1200), page: clampPage(i.page) }));
     return json({ items, pages: pages.length, left });

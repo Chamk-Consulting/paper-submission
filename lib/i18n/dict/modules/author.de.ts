@@ -449,4 +449,13 @@ export const author_de: Record<string, string> = {
   "{venue} statistics: {n} submissions · {p}% accepted": "{venue}-Statistik: {n} Einreichungen · {p} % angenommen",
   "{who} · comment {n}": "{who} · Kommentar {n}",
   "{who} · read the review": "{who} · Gutachten lesen",
+  "Question about my paper": "Frage zu meinem Beitrag",
+  "Question about the decision": "Frage zur Entscheidung",
+  "Question about withdrawing": "Frage zum Zurückziehen",
+  "Replies": "Antworten",
+  "Replies arrive in your Plenary inbox. Your message stays linked to this paper.": "Antworten kommen in Ihren Plenary-Posteingang. Ihre Nachricht bleibt mit diesem Beitrag verknüpft.",
+  "The venue's general and program chairs. Reviewers never see it, and your co-authors aren't copied.": "Die General und Program Chairs der Veranstaltung. Gutachter sehen sie nie, und Ihre Mitautoren sind nicht in Kopie.",
+  "Who reads this": "Wer das liest",
+  "Write your question. The chairs reply in your Plenary inbox.": "Schreiben Sie Ihre Frage. Die Chairs antworten in Ihrem Plenary-Posteingang.",
+  "unread": "ungelesen",
 };

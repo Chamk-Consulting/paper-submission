@@ -58,7 +58,7 @@ async function Inner({ params }: P) {
               {paper ? <li><OpenViewer id={id} files={[paper]} tab="translate" label={t("Translate the paper")} className="p-0 text-left text-[#2F5FD0] underline-offset-2 hover:underline" /></li> : null}
               <li><PrintButton label={t("Print or save letter and reviews (PDF)")} className="p-0 text-left text-[#2F5FD0] hover:underline" /></li>
               {/* TODO(inbox): link to the chair thread once IN01 lands. */}
-              <li><span title={t("Coming soon")} className="text-[#9AA3B5]">{t("Question about the decision? Message the chair")} · {t("soon")}</span></li>
+              <li><Link href={`/submissions/${id}/message?about=decision`} className="text-[#2F5FD0]">{t("Question about the decision? Message the chair")}</Link></li>
             </ul>
           </section>
         </>
