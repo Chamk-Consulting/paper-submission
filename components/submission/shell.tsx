@@ -1,0 +1,114 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { DeadlinePill, SavedAgo } from "@/components/submission/live";
+import { STEPS, type StepKey } from "@/lib/submission/steps";
+import type { WizardVenue } from "@/lib/submission/data";
+
+/* Shared frame of canvas SB01–SB08. */
+
+export function WizardHeader({ initials, right }: { initials: string; right?: ReactNode }) {
+  return (
+    <header className="border-b border-[#DADDE3] bg-white">
+      <div className="flex min-h-[60px] items-center justify-between gap-4 px-5 sm:px-8">
+        <div className="flex items-center gap-7">
+          <Link href="/workspace" className="flex items-center gap-2.5 text-[#121826] no-underline">
+            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
+            <span className="font-serif text-[22px]">Plenary</span>
+          </Link>
+          <nav aria-label="Primary" className="hidden gap-5 text-[14px] font-medium sm:flex">
+            <Link href="/workspace" className="border-b-2 border-[#0E1B3D] py-[18px] text-[#121826] no-underline">My workspace</Link>
+            <Link href="/venues" className="border-b-2 border-transparent py-[18px] text-[#4A5263] no-underline hover:text-[#121826]">Venues</Link>
+            <Link href="/account-help" className="border-b-2 border-transparent py-[18px] text-[#4A5263] no-underline hover:text-[#121826]">Help</Link>
+          </nav>
+        </div>
+        <div className="flex items-center gap-4">
+          {right}
+          <span aria-label="Your account" className="flex size-8 items-center justify-center rounded-full bg-[#E6EDFC] text-[13px] font-semibold text-[#1F47A8]">{initials}</span>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export function TitleBand({ crumb, title, venue, generatedAt }: { crumb: string; title: string; venue: WizardVenue; generatedAt: string }) {
+  return (
+    <div className="border-b border-[#DADDE3] bg-white">
+      <div className="flex flex-col gap-3 px-5 pb-5 pt-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">My workspace</Link> / {crumb}</p>
+          <h1 className="mt-2 font-serif text-[28px] font-normal leading-[1.15] sm:text-[34px]">{title} <span className="text-[#4A5263]">· {venue.acr}</span></h1>
+        </div>
+        <DeadlinePill deadline={venue.deadline} generatedAt={generatedAt} />
+      </div>
+    </div>
+  );
+}
+
+export type RailState = { done: Record<StepKey, boolean>; current: StepKey | null; reachable: number; base: string };
+
+export function StepRail({ rail, draft, footer = true }: { rail: RailState; draft?: { title: string; venue: string; index: number; total: number; switchHref?: string }; footer?: boolean }) {
+  const cur = STEPS.find((s) => s.key === rail.current);
+  return (
+    <aside className="w-full lg:w-[220px] lg:flex-none">
+      {draft ? (
+        <div className="rounded-[8px] border border-[#DADDE3] bg-white px-3 py-2.5">
+          <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">
+            <span>Draft {draft.index} of {draft.total}</span>
+            {draft.switchHref && draft.total > 1 ? <Link href={draft.switchHref} className="font-sans text-[12px] font-semibold normal-case tracking-normal text-[#2F5FD0] no-underline">Switch ▾</Link> : null}
+          </div>
+          <div className="mt-1 line-clamp-2 text-[14px] font-semibold">{draft.title}</div>
+          <div className="text-[12px] text-[#4A5263]">{draft.venue}</div>
+        </div>
+      ) : null}
+      <p className="mb-2 mt-5 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{cur ? `Step ${cur.n} of 7` : "Submitted · all steps done"}</p>
+      <ol className="m-0 flex list-none flex-row gap-1 overflow-x-auto p-0 lg:flex-col">
+        {STEPS.map((s) => {
+          const isCur = s.key === rail.current, done = rail.done[s.key] && !isCur, can = s.n <= rail.reachable && rail.base;
+          const badge = done ? (
+            <span className="flex size-6 flex-none items-center justify-center rounded-full bg-[#18744F] text-[11px] text-white" aria-label="Done">✓</span>
+          ) : isCur ? (
+            <span className="flex size-6 flex-none items-center justify-center rounded-full bg-[#F2A93B] text-[12px] font-semibold text-[#0E1B3D]">{s.n}</span>
+          ) : (
+            <span className="box-border flex size-6 flex-none items-center justify-center rounded-full border-[1.5px] border-[#B7BDC9] text-[12px] text-[#4A5263]">{s.n}</span>
+          );
+          const body = (
+            <span className="flex items-center gap-3">
+              {badge}
+              <span className="whitespace-nowrap">
+                <span className={`block text-[15px] ${isCur ? "font-semibold" : ""}`}>{s.label}</span>
+                {done ? <span className="block text-[12px] text-[#14603F]">Done</span> : isCur ? <span className="block text-[12px] text-[#7A4508]">In progress</span> : null}
+              </span>
+            </span>
+          );
+          const cls = `flex-none rounded-[8px] px-2.5 py-2 no-underline ${isCur ? "border border-[#DADDE3] bg-white text-[#121826]" : "text-[#121826]"}`;
+          return <li key={s.key}>{can && !isCur ? <Link href={`${rail.base}/${s.key}`} className={`${cls} block hover:bg-white`}>{body}</Link> : <span aria-current={isCur ? "step" : undefined} className={`${cls} block ${!can && !isCur ? "opacity-70" : ""}`}>{body}</span>}</li>;
+        })}
+      </ol>
+      {footer ? <p className="mt-4 hidden text-[13px] text-[#4A5263] lg:block">Your work is saved each time you continue. You can leave and come back until the deadline.</p> : null}
+    </aside>
+  );
+}
+
+export function WizardLayout({ header, band, rail, children, aside }: { header: ReactNode; band: ReactNode; rail: ReactNode; children: ReactNode; aside?: ReactNode }) {
+  return (
+    <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
+      {header}
+      {band}
+      <div className="flex w-full max-w-[1340px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row lg:items-start lg:gap-8">
+        {rail}
+        <main className="w-full min-w-0 lg:max-w-[680px] lg:flex-auto">{children}</main>
+        {aside ? <aside className="flex w-full flex-col gap-4 lg:w-[300px] lg:flex-none">{aside}</aside> : null}
+      </div>
+    </div>
+  );
+}
+
+export const card = "rounded-[8px] border border-[#DADDE3] bg-white p-[22px]";
+export const h2 = "m-0 font-serif text-[22px] font-normal";
+export const kicker = "m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]";
+export const asideCard = "rounded-[8px] border border-[#DADDE3] bg-white px-[18px] py-4";
+export const noteBlue = "rounded-[8px] bg-[#E6EDFC] px-4 py-3.5 text-[14px] text-[#1F2E5C]";
+export const primaryBtn = "inline-flex h-12 items-center justify-center rounded-[4px] border-0 bg-[#F2A93B] px-5 text-[16px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] disabled:opacity-60";
+export const ghostBtn = "inline-flex h-12 items-center justify-center rounded-[4px] border border-[#B7BDC9] bg-white px-5 text-[15px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]";
+
+export { SavedAgo };

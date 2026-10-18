@@ -60,6 +60,7 @@ export type Stage = "draft" | "submitted" | "review" | "decision" | "revise" | "
 export type Check = "ok" | "need" | "no";
 export type MyPaper = {
   id: string;
+  href: string;
   number: number | null;
   title: string;
   paperType: string;
@@ -98,9 +99,11 @@ export async function getMyPapers(personId: string | undefined): Promise<{ ready
       const s = r.submissions!;
       const v = s.venues!;
       const role = r.is_corresponding ? "Corresponding author" : r.position === 1 ? "Author" : "Co-author";
-      const detail = s.stage_detail ?? (s.stage === "draft" && s.draft_step ? `Step ${s.draft_step} of 7` : "");
+      const detail = s.stage === "draft" ? `Step ${Math.min(s.draft_step ?? 1, 7)} of 7` : s.stage_detail ?? "";
+      const STEP = ["type", "type", "details", "authors", "keywords", "files", "conflicts", "review"];
+      const href = s.stage === "draft" ? `/submissions/${s.id}/${STEP[Math.min(s.draft_step ?? 1, 7)]}` : `/submissions/${s.id}`;
       return {
-        id: s.id, number: s.number, title: s.title, paperType: s.paper_type, role, stage: s.stage, detail,
+        id: s.id, href, number: s.number, title: s.title, paperType: s.paper_type, role, stage: s.stage, detail,
         checks: { pdf: s.pdf_check, copyright: s.copyright_check, registration: s.registration_check },
         venue: { id: v.id, slug: v.slug, name: v.name, shortName: v.short_name, kind: v.kind, location: v.location, startsOn: v.starts_on },
         _updated: s.updated_at,

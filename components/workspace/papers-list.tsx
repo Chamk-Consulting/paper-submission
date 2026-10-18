@@ -81,8 +81,7 @@ export function PapersList({ papers, initialQuery = "" }: { papers: MyPaper[]; i
             {g.items.map((p) => {
               const [label, bg, ink] = ST[p.stage];
               return (
-                // TODO(submit): link to SB09 status / SB04 draft step once those screens exist.
-                <div key={p.id} className="grid grid-cols-[70px_minmax(0,1fr)] items-center gap-3.5 border-b border-[#EEF0EC] px-4 py-3 last:border-b-0 lg:grid-cols-[70px_minmax(0,1fr)_190px_150px]">
+                <Link key={p.id} href={p.href} className="grid grid-cols-[70px_minmax(0,1fr)] text-[#121826] no-underline hover:bg-[#FBFBF9] items-center gap-3.5 border-b border-[#EEF0EC] px-4 py-3 last:border-b-0 lg:grid-cols-[70px_minmax(0,1fr)_190px_150px]">
                   <span className="font-mono text-[12px] text-[#4A5263]">{p.number ? `#${String(p.number).padStart(4, "0")}` : "—"}</span>
                   <span className="min-w-0">
                     <span className="block truncate font-semibold">{p.title}</span>
@@ -97,7 +96,7 @@ export function PapersList({ papers, initialQuery = "" }: { papers: MyPaper[]; i
                     <Tick t="©" title="Copyright" s={p.checks.copyright} />
                     <Tick t="REG" title="Registration" s={p.checks.registration} />
                   </span>
-                </div>
+                </Link>
               );
             })}
           </div>

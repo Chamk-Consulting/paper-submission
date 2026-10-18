@@ -55,8 +55,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
                 <p className="mt-1.5 text-[19px]">{v.name}</p>
                 <p className="mt-1.5 text-[15px] text-[#4A5263]">{[fmtRange(v.startsOn, v.endsOn), where, v.society ? `Sponsored by ${v.society}` : null].filter(Boolean).join(" · ")}</p>
                 <div className="mt-5 flex flex-wrap gap-2.5">
-                  {/* TODO(submit): SB01 for this venue once the submission wizard exists. */}
-                  <a href="#types" className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">Submit a paper</a>
+                  <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">Submit a paper</Link>
                   <FollowButton venueId={v.id} slug={v.slug} />
                   <a href={`/venues/${v.slug}/calendar.ics`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">Add deadlines to calendar</a>
                 </div>
@@ -99,8 +98,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
                         <td className="px-4 py-3"><strong>{t.name}</strong>{t.note ? <div className="text-[13px] text-[#4A5263]">{t.note}</div> : null}</td>
                         <td className="px-4 py-3">{t.length ?? "—"}</td>
                         <td className="px-4 py-3">{t.review ?? "—"}</td>
-                        {/* TODO(submit): start a draft of this type (SB01). */}
-                        <td className="px-4 py-3 text-right"><span className="font-semibold text-[#9AA3B5]" title="Submissions open on Plenary soon">Submit →</span></td>
+                        <td className="px-4 py-3 text-right"><Link href={`/submit/${v.slug}?type=${encodeURIComponent(t.name)}`} className="font-semibold text-[#2F5FD0]">{/workshop|proposal/i.test(t.name) ? "Propose →" : "Submit →"}</Link></td>
                       </tr>
                     ))}
                   </tbody>
