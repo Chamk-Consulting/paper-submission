@@ -24,7 +24,7 @@ export function SubmitForm({ id, ready, resubmit }: { id: string; ready: boolean
       {state.error ? <p role="alert" className="mt-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2 text-[14px] text-[#5C1A15]">{t(state.error)}</p> : null}
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-[#DADDE3] pt-6">
         <div className="flex gap-2">
-          <Link href={`/submissions/${id}/conflicts`} transitionTypes={["nav-back"]} className={ghostBtn}>{t("← Back")}</Link>
+          <Link href={`/submissions/${id}/conflicts`} className={ghostBtn}>{t("← Back")}</Link>
           <Link href="/workspace/submissions" className={`${ghostBtn} hidden sm:inline-flex`}>{t("Save draft and exit")}</Link>
         </div>
         <button type="submit" disabled={pending || !ready} className={primaryBtn}>{pending ? t("Submitting…") : resubmit ? t("Save changes") : t("Submit paper")}</button>

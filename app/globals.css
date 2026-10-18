@@ -49,48 +49,102 @@ body {
 }
 
 /* ------------------------------------------------------------------ motion
-   Route changes use React <ViewTransition> (see app/[lang]/template.tsx).
-   Exits are quick, entrances gentler; everything is skipped for reduced-motion users. */
+   One short transition per navigation, never two in a row:
+   - page-out / page-in: the content crossfades (no waiting for the old page to leave first);
+   - step-out / step-in: wizard steps slide in the direction of travel (html[data-nav-dir]);
+   - skeleton-out / content-in: the skeleton dissolves into the real content;
+   - chrome: headers, step rail and side nav carry a view-transition-name, so they stay still.
+   Tokens mirror lib/motion.ts. Everything except opacity is dropped for reduced-motion users. */
 :root {
-  --duration-exit: 140ms;
-  --duration-enter: 220ms;
-  --duration-move: 380ms;
+  --dur-out: 90ms;
+  --dur-gap: 60ms;
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 280ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --step-x: 0px;
 }
-@keyframes vt-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes vt-rise { from { transform: translateY(8px); } to { transform: translateY(0); } }
-@keyframes vt-slide { from { transform: translateX(var(--slide-offset)); } to { transform: translateX(0); } }
+html[data-nav-dir="forward"] { --step-x: 28px; }
+html[data-nav-dir="back"] { --step-x: -28px; }
 
-/* default page change: old content fades out fast, new content rises in */
-::view-transition-old(.page) { animation: var(--duration-exit) ease-in both vt-fade reverse; }
-::view-transition-new(.page) {
-  animation: var(--duration-enter) ease-out var(--duration-exit) both vt-fade, var(--duration-move) ease-out both vt-rise;
-}
-/* directional navigation: links tagged nav-forward / nav-back */
-::view-transition-old(.nav-forward) { --slide-offset: -48px; animation: var(--duration-exit) ease-in both vt-fade reverse, var(--duration-move) ease-in-out both vt-slide reverse; }
-::view-transition-new(.nav-forward) { --slide-offset: 48px; animation: var(--duration-enter) ease-out var(--duration-exit) both vt-fade, var(--duration-move) ease-in-out both vt-slide; }
-::view-transition-old(.nav-back) { --slide-offset: 48px; animation: var(--duration-exit) ease-in both vt-fade reverse, var(--duration-move) ease-in-out both vt-slide reverse; }
-::view-transition-new(.nav-back) { --slide-offset: -48px; animation: var(--duration-enter) ease-out var(--duration-exit) both vt-fade, var(--duration-move) ease-in-out both vt-slide; }
-/* skeleton → content handoff */
-::view-transition-old(.skeleton-out) { animation: var(--duration-exit) ease-out both vt-fade reverse; }
-/* keep the persistent chrome still while pages move */
-::view-transition-group(root) { animation-duration: 0s; }
+@keyframes vt-in { from { opacity: 0; } }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-rise { from { transform: translateY(6px); } }
+@keyframes vt-sink { to { transform: translateY(-4px); } }
+@keyframes vt-from-side { from { transform: translateX(var(--step-x)); } }
+@keyframes vt-to-side { to { transform: translateX(calc(var(--step-x) * -0.6)); } }
 
-/* skeleton shimmer */
-@keyframes sk-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-.sk {
-  background: linear-gradient(90deg, #e9ebe6 25%, #f3f4f1 37%, #e9ebe6 63%);
-  background-size: 400% 100%;
-  animation: sk-shimmer 1.4s ease-in-out infinite;
-  border-radius: 4px;
+/* unnamed parts swap instantly; only the classes below animate */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+
+/* fade-through: the old content is mostly gone before the new one shows, so text never double-exposes */
+::view-transition-old(.page-out) { animation: var(--dur-out) var(--ease-exit) both vt-out, var(--dur-out) var(--ease-exit) both vt-sink; }
+::view-transition-new(.page-in) { animation: var(--dur-base) var(--ease-standard) var(--dur-gap) both vt-in, var(--dur-slow) var(--ease-emphasized) var(--dur-gap) both vt-rise; }
+
+::view-transition-old(.step-out) { animation: var(--dur-out) var(--ease-exit) both vt-out, var(--dur-out) var(--ease-exit) both vt-to-side; }
+::view-transition-new(.step-in) { animation: var(--dur-base) var(--ease-standard) var(--dur-gap) both vt-in, var(--dur-slow) var(--ease-emphasized) var(--dur-gap) both vt-from-side; }
+
+::view-transition-old(.skeleton-out) { animation: var(--dur-fast) var(--ease-exit) both vt-out; }
+::view-transition-new(.content-in) { animation: var(--dur-base) var(--ease-standard) both vt-in; }
+
+/* persistent chrome: same place before and after, so the morph is a quiet crossfade */
+/* stacked above the page layers: a page snapshot carries its own background, which would cover the chrome */
+::view-transition-group(.chrome) { z-index: 2; animation-duration: var(--dur-base); animation-timing-function: var(--ease-standard); }
+::view-transition-old(.chrome), ::view-transition-new(.chrome) { animation-duration: var(--dur-base); }
+/* pinned panels whose content changes (auth navy aside): stay in place, fade through their content */
+::view-transition-group(.chrome-swap) { z-index: 1; animation-duration: var(--dur-base); animation-timing-function: var(--ease-standard); }
+::view-transition-old(.chrome-swap) { animation: var(--dur-out) var(--ease-exit) both vt-out; }
+::view-transition-new(.chrome-swap) { animation: var(--dur-base) var(--ease-standard) var(--dur-gap) both vt-in; }
+/* the auth aside is always navy: keep the panel colour while its content fades through */
+::view-transition-group(auth-aside) { background: #0E1B3D; }
+
+/* list items (venue directory): move to their new place, fade in/out */
+::view-transition-group(.card-move) { animation-duration: var(--dur-slow); animation-timing-function: var(--ease-emphasized); }
+::view-transition-new(.card-in) { animation: var(--dur-base) var(--ease-standard) both vt-in, var(--dur-slow) var(--ease-emphasized) both vt-rise; }
+::view-transition-old(.card-out) { animation: var(--dur-fast) var(--ease-exit) both vt-out; }
+
+/* tab panels (list / calendar / map / past) */
+::view-transition-old(.panel-out) { animation: var(--dur-out) var(--ease-exit) both vt-out; }
+::view-transition-new(.panel-in) { animation: var(--dur-base) var(--ease-standard) var(--dur-gap) both vt-in, var(--dur-slow) var(--ease-emphasized) var(--dur-gap) both vt-rise; }
+
+/* instant feedback: thin progress bar on navigation (components/motion/nav-progress.tsx) */
+.nav-progress {
+  position: fixed; inset: 0 0 auto 0; z-index: 100; height: 2px; pointer-events: none;
+  background: #F2A93B; transform-origin: 0 50%; transform: scaleX(0); opacity: 0;
+  view-transition-name: nav-progress;
 }
-.sk-dark {
-  background: linear-gradient(90deg, #1b2c5e 25%, #24376b 37%, #1b2c5e 63%);
-  background-size: 400% 100%;
-  animation: sk-shimmer 1.4s ease-in-out infinite;
+.nav-progress[data-state="loading"] { opacity: 1; transform: scaleX(0.82); transition: transform 7s cubic-bezier(0.08, 0.7, 0.2, 1), opacity var(--dur-fast); }
+.nav-progress[data-state="done"] { opacity: 0; transform: scaleX(1); transition: transform var(--dur-base) var(--ease-standard), opacity var(--dur-slow) var(--dur-fast); }
+::view-transition-old(nav-progress) { display: none; }
+::view-transition-new(nav-progress) { animation: none; }
+::view-transition-group(nav-progress) { animation: none; z-index: 3; }
+
+/* press feedback */
+button, a { -webkit-tap-highlight-color: transparent; }
+button:not(:disabled), a[class*="rounded"], [role="tab"], [role="radio"] { transition: transform var(--dur-fast) var(--ease-standard), background-color var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast); }
+button:not(:disabled):active, a[class*="rounded"]:active { transform: scale(0.98); }
+
+/* language switch: dim while the page reloads in the new language */
+html.lang-leaving body { opacity: 0.55; transition: opacity var(--dur-base) var(--ease-exit); }
+
+/* skeleton shimmer: one shared light sweep (background fixed to the viewport, so every bar moves together) */
+@keyframes sk-shimmer { from { background-position: -100vw 0; } to { background-position: 100vw 0; } }
+.sk, .sk-dark {
   border-radius: 4px;
+  background-size: 100vw 100%;
+  background-attachment: fixed;
+  animation: sk-shimmer 1.6s var(--ease-standard) infinite;
 }
+.sk { background-color: #E9EBE6; background-image: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.65) 50%, transparent 100%); background-repeat: no-repeat; }
+.sk-dark { background-color: #1B2C5E; background-image: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.08) 50%, transparent 100%); background-repeat: no-repeat; }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
-  .sk, .sk-dark { animation: none; }
+  ::view-transition-old(*), ::view-transition-new(*) { animation-name: vt-out !important; animation-duration: var(--dur-fast) !important; }
+  ::view-transition-new(*) { animation-name: vt-in !important; }
+  ::view-transition-group(*) { animation: none !important; }
+  .sk, .sk-dark { animation: none; background-image: none; }
+  .nav-progress[data-state] { transition: opacity var(--dur-fast) !important; }
+  button:not(:disabled):active, a[class*="rounded"]:active { transform: none; }
 }

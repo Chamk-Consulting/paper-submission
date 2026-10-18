@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Footer, TopBar } from "@/components/auth/chrome";
+import { Pin } from "@/components/motion/pin";
 
 /* Shared shell of canvas PR02–PR09: paper form column + navy aside. */
 
@@ -16,7 +17,7 @@ export function SplitLayout({ banner, children, aside, width = 420 }: { banner?:
         </div>
         <Footer />
       </main>
-      {aside}
+      <Pin name="auth-aside" swap>{aside}</Pin>
     </div>
   );
 }

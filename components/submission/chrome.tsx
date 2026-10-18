@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { DeadlinePill } from "@/components/submission/live";
 import { LanguageSelect } from "@/components/i18n/language-select";
 import { useT } from "@/lib/i18n/client";
+import { Pin } from "@/components/motion/pin";
 import { STEPS, type StepKey } from "@/lib/submission/steps";
 import type { WizardVenue } from "@/lib/submission/data";
 
@@ -13,6 +14,7 @@ import type { WizardVenue } from "@/lib/submission/data";
 export function WizardHeader({ initials, right }: { initials: string; right?: ReactNode }) {
   const t = useT();
   return (
+    <Pin name="wz-header">
     <header className="border-b border-[#DADDE3] bg-white">
       <div className="flex min-h-[60px] items-center justify-between gap-4 px-5 sm:px-8">
         <div className="flex items-center gap-7">
@@ -29,16 +31,22 @@ export function WizardHeader({ initials, right }: { initials: string; right?: Re
         <div className="flex items-center gap-4">
           <LanguageSelect id="wz-lang" className="hidden sm:block" />
           {right}
-          <span aria-label={t("Your account")} className="flex size-8 items-center justify-center rounded-full bg-[#E6EDFC] text-[13px] font-semibold text-[#1F47A8]">{initials}</span>
+          {initials ? (
+            <span aria-label={t("Your account")} className="flex size-8 items-center justify-center rounded-full bg-[#E6EDFC] text-[13px] font-semibold text-[#1F47A8]">{initials}</span>
+          ) : (
+            <span aria-hidden className="sk block size-8 rounded-full!" />
+          )}
         </div>
       </div>
     </header>
+    </Pin>
   );
 }
 
 export function TitleBand({ crumb, title, venue, generatedAt }: { crumb: string; title: string; venue: WizardVenue; generatedAt: string }) {
   const t = useT();
   return (
+    <Pin name="wz-band">
     <div className="border-b border-[#DADDE3] bg-white">
       <div className="flex flex-col gap-3 px-5 pb-5 pt-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
@@ -48,17 +56,25 @@ export function TitleBand({ crumb, title, venue, generatedAt }: { crumb: string;
         <DeadlinePill deadline={venue.deadline} generatedAt={generatedAt} />
       </div>
     </div>
+    </Pin>
   );
 }
 
-export type RailState = { done: Record<StepKey, boolean>; current: StepKey | null; reachable: number; base: string };
+export type RailState = { done: Record<StepKey, boolean>; current: StepKey | null; reachable: number; base: string; loading?: boolean };
 
-export function StepRail({ rail, draft, footer = true }: { rail: RailState; draft?: { title: string; venue: string; index: number; total: number; switchHref?: string }; footer?: boolean }) {
+export function StepRail({ rail, draft, footer = true }: { rail: RailState; draft?: { title: string; venue: string; index: number; total: number; switchHref?: string } | "loading"; footer?: boolean }) {
   const t = useT();
   const cur = STEPS.find((s) => s.key === rail.current);
   return (
+    <Pin name="wz-rail">
     <aside className="w-full lg:w-[220px] lg:flex-none">
-      {draft ? (
+      {draft === "loading" ? (
+        <div aria-hidden className="rounded-[8px] border border-[#DADDE3] bg-white px-3 py-2.5">
+          <span className="flex h-[17px] items-center"><span className="sk block h-2.5 w-[90px]" /></span>
+          <span className="mt-1 flex h-[21px] items-center"><span className="sk block h-3 w-[85%]" /></span>
+          <span className="flex h-[18px] items-center"><span className="sk block h-2.5 w-[60px]" /></span>
+        </div>
+      ) : draft ? (
         <div className="rounded-[8px] border border-[#DADDE3] bg-white px-3 py-2.5">
           <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">
             <span>{t("Draft {n} of {total}", { n: draft.index, total: draft.total })}</span>
@@ -89,11 +105,12 @@ export function StepRail({ rail, draft, footer = true }: { rail: RailState; draf
             </span>
           );
           const cls = `flex-none rounded-[8px] px-2.5 py-2 no-underline ${isCur ? "border border-[#DADDE3] bg-white text-[#121826]" : "text-[#121826]"}`;
-          return <li key={s.key}>{can && !isCur ? <Link href={`${rail.base}/${s.key}`} transitionTypes={[s.n < (cur?.n ?? 8) ? "nav-back" : "nav-forward"]} className={`${cls} block hover:bg-white`}>{body}</Link> : <span aria-current={isCur ? "step" : undefined} className={`${cls} block ${!can && !isCur ? "opacity-70" : ""}`}>{body}</span>}</li>;
+          return <li key={s.key}>{can && !isCur ? <Link href={`${rail.base}/${s.key}`} className={`${cls} block hover:bg-white`}>{body}</Link> : <span aria-current={isCur ? "step" : undefined} className={`${cls} block ${!can && !isCur && !rail.loading ? "opacity-70" : ""}`}>{body}</span>}</li>;
         })}
       </ol>
       {footer ? <p className="mt-4 hidden text-[13px] text-[#4A5263] lg:block">{t("Your work is saved each time you continue. You can leave and come back until the deadline.")}</p> : null}
     </aside>
+    </Pin>
   );
 }
 

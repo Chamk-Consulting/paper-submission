@@ -10,6 +10,8 @@ import { site } from "@/lib/config/site";
 import { LOCALES, isLocale } from "@/lib/i18n/config";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale, getT } from "@/lib/i18n/server";
+import { Suspense } from "react";
+import { NavProgress } from "@/components/motion/nav-progress";
 
 export function generateStaticParams() {
   return LOCALES.map((lang) => ({ lang }));
@@ -31,7 +33,8 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const locale = await getLocale();
   return (
     <html lang={locale}>
-      <body className="min-h-dvh antialiased">
+      <body className="min-h-dvh bg-[#F5F6F3] antialiased">
+        <Suspense fallback={null}><NavProgress /></Suspense>
         <I18nProvider locale={locale}>{children}</I18nProvider>
       </body>
     </html>

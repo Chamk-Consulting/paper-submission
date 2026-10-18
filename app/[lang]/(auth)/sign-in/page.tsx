@@ -6,6 +6,8 @@ import { OpenCallsPanel } from "@/components/signin/open-calls";
 import { createPublicClient } from "@/lib/supabase/public";
 import { Footer, TopBar } from "@/components/auth/chrome";
 import { getT } from "@/lib/i18n/server";
+import { AuthFormSkeleton } from "@/components/skeletons";
+import { Pin } from "@/components/motion/pin";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -52,14 +54,14 @@ export default function Page({ searchParams }: { searchParams: Promise<Search> }
         </Suspense>
 
         <div className="flex flex-auto items-center justify-center py-8">
-          <Suspense fallback={<div className="h-[640px] w-full max-w-[420px]" aria-busy="true" />}>
+          <Suspense fallback={<div className="w-full max-w-[420px]"><AuthFormSkeleton tabs /></div>}>
             <Panel searchParams={searchParams} />
           </Suspense>
         </div>
 
         <Footer />
       </main>
-      <OpenCallsPanel />
+      <Pin name="auth-aside" swap><OpenCallsPanel /></Pin>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 import { NavyAside, SetupSteps, ShieldNote, SplitLayout, ui } from "@/components/auth/split-layout";
 import { ProfileForm } from "@/components/auth/profile-form";
 import { getMe } from "@/lib/auth/me";
 import { suggestFromEmailDomain } from "@/lib/auth/onboarding-actions";
 import { countryOptions } from "@/lib/countries";
+import { Reveal } from "@/components/motion/reveal";
+import { AuthSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -68,8 +69,8 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}>
+    <Reveal fallback={<AuthSkeleton />}>
       <Content searchParams={searchParams} />
-    </Suspense>
+    </Reveal>
   );
 }

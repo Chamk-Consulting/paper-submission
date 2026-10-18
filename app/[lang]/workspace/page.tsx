@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 import { WorkspaceShell } from "@/components/workspace/shell";
 import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { getT } from "@/lib/i18n/server";
+import { Reveal } from "@/components/motion/reveal";
+import { WorkspaceSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -45,8 +46,8 @@ async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string
 
 export default function Page(props: { searchParams: Promise<{ notice?: string }> }) {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}>
+    <Reveal fallback={<WorkspaceSkeleton active="home" />}>
       <Inner {...props} />
-    </Suspense>
+    </Reveal>
   );
 }

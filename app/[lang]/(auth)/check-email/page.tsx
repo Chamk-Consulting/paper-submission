@@ -1,8 +1,9 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
-import { AuthCard, AuthSkeleton } from "@/components/ui";
+import { AuthCard } from "@/components/ui";
+import { AuthSkeleton } from "@/components/skeletons";
+import { Reveal } from "@/components/motion/reveal";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -30,8 +31,8 @@ async function Inner({ searchParams }: { searchParams: Promise<{ email?: string 
 
 export default function Page(props: { searchParams: Promise<{ email?: string }> }) {
   return (
-    <Suspense fallback={<AuthSkeleton />}>
+    <Reveal fallback={<AuthSkeleton />}>
       <Inner {...props} />
-    </Suspense>
+    </Reveal>
   );
 }

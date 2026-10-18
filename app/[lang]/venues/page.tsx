@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { Directory } from "@/components/venues/directory";
 import { getDirectory } from "@/lib/venues/data";
 import { getT } from "@/lib/i18n/server";
+import { Reveal } from "@/components/motion/reveal";
+import { DirectorySkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -20,8 +21,8 @@ async function Inner() {
 /** Canvas PV01-Directory (+ PV01c calendar, PV01m map, PV01p past). */
 export default function Page() {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}>
+    <Reveal fallback={<DirectorySkeleton />}>
       <Inner />
-    </Suspense>
+    </Reveal>
   );
 }

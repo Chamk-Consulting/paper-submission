@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
-import { Suspense } from "react";
 import { NavyAside, SplitLayout, ui } from "@/components/auth/split-layout";
 import { NewPasswordFlow } from "@/components/reset/new-password-flow";
 import { getUser } from "@/lib/supabase/server";
 import { hasRecovery } from "@/lib/auth/recovery-cookie";
+import { Reveal } from "@/components/motion/reveal";
+import { AuthSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -36,8 +37,8 @@ async function Inner() {
 /** Canvas PR11-NewPassword. */
 export default function Page() {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}>
+    <Reveal fallback={<AuthSkeleton />}>
       <Inner />
-    </Suspense>
+    </Reveal>
   );
 }

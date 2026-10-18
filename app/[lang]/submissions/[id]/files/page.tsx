@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { getT } from "@/lib/i18n/server";
 import { SubmissionFrame, requireCtx } from "@/components/submission/frame";
 import { FilesStep } from "@/components/submission/files-step";
 import { asideCard, kicker } from "@/components/submission/shell";
 import { parsePageLimit } from "@/lib/submission/pdf-check";
+import { Reveal } from "@/components/motion/reveal";
+import { WizardSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -54,5 +55,5 @@ async function Inner({ params }: P) {
 
 /** Canvas SB05-Upload. */
 export default function Page(props: P) {
-  return <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}><Inner {...props} /></Suspense>;
+  return <Reveal fallback={<WizardSkeleton step="files" />}><Inner {...props} /></Reveal>;
 }

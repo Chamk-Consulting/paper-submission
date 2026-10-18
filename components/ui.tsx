@@ -64,14 +64,3 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "ok" | "ba
   const cls = tone === "ok" ? "border-ok/30 bg-ok/5 text-ok" : tone === "bad" ? "border-bad/30 bg-bad/5 text-bad" : "border-saffron/50 bg-saffron/10 text-saffron-ink";
   return <div role={tone === "bad" ? "alert" : "status"} className={`mb-4 rounded-lg border px-3 py-2 text-sm ${cls}`}>{children}</div>;
 }
-
-export function AuthSkeleton() {
-  return (
-    <main className="grid min-h-dvh place-items-center px-4 py-10" aria-busy="true">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center"><Brand /></div>
-        <div className="h-72 animate-pulse rounded-xl border border-line bg-card" />
-      </div>
-    </main>
-  );
-}

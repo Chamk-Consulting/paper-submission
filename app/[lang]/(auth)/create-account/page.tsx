@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { NavyAside, SetupSteps, SplitLayout, VenueBannerBox } from "@/components/auth/split-layout";
 import { CreateAccountForm } from "@/components/auth/create-account-form";
 import { getPublishedVenue } from "@/lib/auth/venue";
+import { AuthFormSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -47,7 +48,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
         </NavyAside>
       }
     >
-      <Suspense fallback={<div className="h-[700px]" aria-busy="true" />}>
+      <Suspense fallback={<AuthFormSkeleton />}>
         <Form searchParams={searchParams} />
       </Suspense>
     </SplitLayout>

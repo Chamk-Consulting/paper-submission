@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { getT } from "@/lib/i18n/server";
+import { StepMark } from "@/components/motion/step-transition";
 import { initialsOf, requireCtx } from "@/components/submission/frame";
 import { WizardHeader } from "@/components/submission/shell";
 import { OpenFile, WithdrawBox } from "@/components/submission/status-bits";
 import { createClient } from "@/lib/supabase/server";
 import { fmtMonth } from "@/lib/venues/time";
+import { Reveal } from "@/components/motion/reveal";
+import { StatusSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -74,6 +76,7 @@ async function Inner({ params }: P) {
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <WizardHeader initials={initialsOf(name, ctx.me.email)} />
+      <StepMark n={0} />
       <div className="border-b border-[#DADDE3] bg-white">
         <div className="flex flex-col gap-4 px-5 pb-5 pt-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
@@ -175,5 +178,5 @@ async function Inner({ params }: P) {
 
 /** Canvas SB09-Status. */
 export default function Page(props: P) {
-  return <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}><Inner {...props} /></Suspense>;
+  return <Reveal fallback={<StatusSkeleton />}><Inner {...props} /></Reveal>;
 }

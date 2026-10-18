@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { OpenCallsStrip } from "@/components/landing/open-calls-strip";
 import { site } from "@/lib/config/site";
 import { getT } from "@/lib/i18n/server";
 import { LanguageSelect } from "@/components/i18n/language-select";
+import { Reveal } from "@/components/motion/reveal";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -122,9 +122,19 @@ export default async function Landing() {
             <p className="m-0 mb-2 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("Open calls now")}</p>
             <h2 className="m-0 font-serif text-[32px] font-normal leading-[1.15]">{t("Deadlines in your time zone, not the organizer's.")}</h2>
           </div>
-          <Suspense fallback={<div className="h-[180px] flex-[2_1_560px] rounded-[8px] border border-[#DADDE3]" aria-busy="true" />}>
+          <Reveal fallback={
+            <div aria-busy="true" className="min-w-0 flex-[2_1_560px] overflow-hidden rounded-[8px] border border-[#DADDE3]">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="grid grid-cols-12 items-center gap-3 border-b border-[#EEF0EC] px-5 py-3 last:border-0">
+                  <span className="col-span-12 flex h-6 items-center sm:col-span-6"><span className="sk block h-3 w-[70%]" /></span>
+                  <span className="col-span-6 flex h-6 items-center sm:col-span-3"><span className="sk block h-3 w-[60%]" /></span>
+                  <span className="col-span-6 flex h-6 items-center justify-end sm:col-span-3"><span className="sk block h-3 w-[50%]" /></span>
+                </div>
+              ))}
+            </div>
+          }>
             <OpenCallsStrip />
-          </Suspense>
+          </Reveal>
         </div>
       </section>
 

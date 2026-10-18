@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { getT } from "@/lib/i18n/server";
 import { SubmissionFrame, requireCtx } from "@/components/submission/frame";
 import { TypeForm } from "@/components/submission/type-form";
 import { TypeAside } from "@/components/submission/type-aside";
 import { tracksOf, typeOptions } from "@/lib/submission/options";
 import { fmtMonth } from "@/lib/venues/time";
+import { Reveal } from "@/components/motion/reveal";
+import { WizardSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -31,5 +32,5 @@ async function Inner({ params }: P) {
 
 /** Canvas SB01-VenueType (existing draft). */
 export default function Page(props: P) {
-  return <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}><Inner {...props} /></Suspense>;
+  return <Reveal fallback={<WizardSkeleton step="type" />}><Inner {...props} /></Reveal>;
 }

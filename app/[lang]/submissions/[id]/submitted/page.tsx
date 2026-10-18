@@ -1,11 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 import { getT } from "@/lib/i18n/server";
+import { StepMark } from "@/components/motion/step-transition";
 import { initialsOf, requireCtx } from "@/components/submission/frame";
 import { StepRail, TitleBand, WizardHeader, WizardLayout, asideCard, card, ghostBtn, h2, primaryBtn } from "@/components/submission/shell";
 import { fmtLocal } from "@/lib/venues/time";
+import { Reveal } from "@/components/motion/reveal";
+import { StatusSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -35,7 +37,7 @@ async function Inner({ params }: P) {
   ];
   return (
     <WizardLayout
-      header={<WizardHeader initials={initialsOf(name, ctx.me.email)} right={<span className="hidden items-center gap-2 text-[14px] text-[#4A5263] sm:flex"><span className="size-2 rounded-full bg-[#18744F]" />{t("Submitted")} · {no}</span>} />}
+      header={<><StepMark n={8} /><WizardHeader initials={initialsOf(name, ctx.me.email)} right={<span className="hidden items-center gap-2 text-[14px] text-[#4A5263] sm:flex"><span className="size-2 rounded-full bg-[#18744F]" />{t("Submitted")} · {no}</span>} /></>}
       band={<TitleBand crumb={t("Submission {no}", { no })} title={t("Paper submitted")} venue={venue} generatedAt={new Date().toISOString()} />}
       rail={<StepRail rail={{ done: { type: true, details: true, authors: true, keywords: true, files: true, conflicts: true, review: true }, current: null, reachable: 7, base: `/submissions/${id}` }} footer={false} />}
       aside={
@@ -92,5 +94,5 @@ async function Inner({ params }: P) {
 
 /** Canvas SB08-Submitted. */
 export default function Page(props: P) {
-  return <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}><Inner {...props} /></Suspense>;
+  return <Reveal fallback={<StatusSkeleton />}><Inner {...props} /></Reveal>;
 }

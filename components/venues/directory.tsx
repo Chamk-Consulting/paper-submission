@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { ViewTransition, startTransition, useCallback, useEffect, useMemo, useState, type SetStateAction } from "react";
+import { VT } from "@/lib/motion";
 import { PublicFooter, PublicHeader } from "@/components/venues/public-header";
 import dynamic from "next/dynamic";
 import { useT } from "@/lib/i18n/client";
@@ -18,7 +19,15 @@ const REGIONS = ["Europe", "Americas", "Asia–Pacific", "Africa & Middle East",
 
 export type Row = DirectoryVenue & { st: Status; past: boolean };
 
-// Lazy: each tab's code downloads only when it is opened.
+// Lazy: each tab's code downloads on its own, preloaded in idle time so switching tabs is instant.
+const preloadTabs = () => { void import("@/components/venues/calendar-view"); void import("@/components/venues/map-view"); void import("@/components/venues/past-view"); };
+
+/** State whose updates run in a transition, so the list animates (cards glide, enter and leave). */
+function useSoftState<T>(init: T) {
+  const [v, set] = useState(init);
+  const soft = useCallback((x: SetStateAction<T>) => startTransition(() => set(x)), []);
+  return [v, soft] as const;
+}
 const TabSkeleton = ({ h }: { h: number }) => <div aria-busy="true" className="mt-3.5 w-full animate-pulse rounded-[8px] border border-[#DADDE3] bg-white" style={{ height: h }} />;
 const CalendarView = dynamic(() => import("@/components/venues/calendar-view").then((m) => m.CalendarView), { loading: () => <TabSkeleton h={760} /> });
 const MapView = dynamic(() => import("@/components/venues/map-view").then((m) => m.MapView), { loading: () => <TabSkeleton h={520} /> });
@@ -53,22 +62,28 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
     }, 0);
     return () => clearTimeout(tm);
   }, []);
-  const [field, setField] = useState<"all" | Field>("all");
-  const [win, setWin] = useState<Win>("any");
-  const [kinds, setKinds] = useState<string[]>([]);
-  const [socs, setSocs] = useState<string[]>([]);
-  const [formats, setFormats] = useState<string[]>([]);
-  const [indexes, setIndexes] = useState<string[]>([]);
-  const [region, setRegion] = useState("");
-  const [sort, setSort] = useState<"close" | "event" | "name">("close");
-  const [followOnly, setFollowOnly] = useState(false);
-  const [shown, setShown] = useState(20);
+  const [field, setField] = useSoftState<"all" | Field>("all");
+  const [win, setWin] = useSoftState<Win>("any");
+  const [kinds, setKinds] = useSoftState<string[]>([]);
+  const [socs, setSocs] = useSoftState<string[]>([]);
+  const [formats, setFormats] = useSoftState<string[]>([]);
+  const [indexes, setIndexes] = useSoftState<string[]>([]);
+  const [region, setRegion] = useSoftState("");
+  const [sort, setSort] = useSoftState<"close" | "event" | "name">("close");
+  const [followOnly, setFollowOnly] = useSoftState(false);
+  const [shown, setShown] = useSoftState(20);
+  useEffect(() => {
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+    if (w.requestIdleCallback) { const id = w.requestIdleCallback(preloadTabs, { timeout: 3000 }); return () => w.cancelIdleCallback?.(id); }
+    const id = window.setTimeout(preloadTabs, 1500);
+    return () => window.clearTimeout(id);
+  }, []);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { now, tz } = useClock(generatedAt);
   const follows = useFollows();
 
   function setView(v: View) {
-    setViewState(v);
+    startTransition(() => setViewState(v));
     const u = new URL(window.location.href);
     if (v === "list") u.searchParams.delete("view"); else u.searchParams.set("view", v);
     window.history.replaceState(null, "", u);
@@ -242,9 +257,14 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
             </div>
           ) : null}
 
+          <ViewTransition key={view} enter={VT.panelIn} exit={VT.panelOut} default="none">
           {view === "list" ? (
             <div className="mt-3.5 flex flex-col gap-3">
-              {list.slice(0, shown).map((v) => <VenueCard key={v.id} v={v} following={follows.followed.includes(v.id)} onFollow={() => follows.toggle(v.id, "/venues")} />)}
+              {list.slice(0, shown).map((v) => (
+                <ViewTransition key={v.id} enter={VT.cardIn} exit={VT.cardOut} update={VT.cardMove} default="none">
+                  <VenueCard v={v} following={follows.followed.includes(v.id)} onFollow={() => follows.toggle(v.id, "/venues")} />
+                </ViewTransition>
+              ))}
               {list.length === 0 ? (
                 <div className="rounded-[8px] border border-dashed border-[#DADDE3] bg-white p-9 text-center text-[#4A5263]">
                   {current.length ? <>{t("No venues match.")} <button type="button" onClick={clearAll} className="border-0 bg-transparent p-0 text-[14px] text-[#2F5FD0] underline">{t("Clear filters")}</button></> : t("No open calls yet — new venues appear here as soon as they publish.")}
@@ -261,6 +281,7 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
           ) : (
             <PastView rows={pastRows} />
           )}
+          </ViewTransition>
         </section>
       </div>
       <PublicFooter />
@@ -280,7 +301,7 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
       <span aria-hidden className="flex size-14 flex-none items-center justify-center rounded-[8px] px-1 text-center font-mono text-[11px] font-semibold leading-[1.1]" style={{ background: fbg, color: fink }}>{v.society ?? v.acr.slice(0, 6)}</span>
       <div className="min-w-0 flex-auto">
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1.5">
-          <h2 className="m-0 text-[22px] font-semibold leading-[1.2]"><Link href={href} transitionTypes={["nav-forward"]} className="text-[#121826] no-underline hover:underline">{v.acr}</Link></h2>
+          <h2 className="m-0 text-[22px] font-semibold leading-[1.2]"><Link href={href} className="text-[#121826] no-underline hover:underline">{v.acr}</Link></h2>
           <span className="text-[14px] text-[#4A5263]">{v.name}</span>
         </div>
         <div className="mt-1 text-[14px] text-[#4A5263]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t), where, v.society ? t("by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</div>
@@ -303,7 +324,7 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
             style={{ color: following ? "#7A4508" : "#121826", background: following ? "#FFF6E6" : "#FFFFFF", border: `1px solid ${following ? "#F1D29A" : "#B7BDC9"}` }}>
             {following ? t("★ Following") : t("☆ Follow")}
           </button>
-          <Link href={href} transitionTypes={["nav-forward"]} className="inline-flex h-[34px] items-center rounded-[4px] bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("View call")}</Link>
+          <Link href={href} className="inline-flex h-[34px] items-center rounded-[4px] bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("View call")}</Link>
         </div>
       </div>
     </article>

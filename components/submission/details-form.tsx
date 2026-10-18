@@ -59,7 +59,7 @@ export function DetailsForm({ id, typeLine, initial }: { id: string; typeLine: s
       {state.error ? <p role="alert" className="mt-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2 text-[14px] text-[#5C1A15]">{t(state.error)}</p> : null}
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-[#DADDE3] pt-6">
         <div className="flex gap-2">
-          <Link href={`/submissions/${id}/type`} transitionTypes={["nav-back"]} className={ghostBtn}>{t("← Back")}</Link>
+          <Link href={`/submissions/${id}/type`} className={ghostBtn}>{t("← Back")}</Link>
           <button type="submit" name="intent" value="exit" className={`${ghostBtn} hidden sm:inline-flex`}>{t("Save and exit")}</button>
         </div>
         <button type="submit" name="intent" value="next" disabled={pending} className={primaryBtn}>{pending ? t("Saving…") : t("Continue to authors →")}</button>

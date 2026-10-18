@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { NavyAside, SetupSteps, SplitLayout, ui } from "@/components/auth/split-layout";
 import { OtpVerify } from "@/components/auth/otp-verify";
 import { ResetShield } from "@/components/reset/reset-shield";
+import { AuthAsideSkeleton, AuthFormSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -53,8 +54,8 @@ async function Aside({ searchParams }: { searchParams: Promise<Search> }) {
 /** Canvas PR10b-ResetCode. */
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
   return (
-    <SplitLayout aside={<Suspense fallback={<aside className="flex-[7_1_520px] bg-[#0E1B3D]" />}><Aside searchParams={searchParams} /></Suspense>}>
-      <Suspense fallback={<div className="h-[640px]" aria-busy="true" />}>
+    <SplitLayout aside={<Suspense fallback={<AuthAsideSkeleton />}><Aside searchParams={searchParams} /></Suspense>}>
+      <Suspense fallback={<AuthFormSkeleton />}>
         <Left searchParams={searchParams} />
       </Suspense>
     </SplitLayout>

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { SavedAgo, StepRail, TitleBand, WizardHeader, WizardLayout } from "@/components/submission/shell";
 import { getMe } from "@/lib/auth/me";
+import { StepMark } from "@/components/motion/step-transition";
 import { getT } from "@/lib/i18n/server";
 import { STEPS, loadSubmission, type Ctx, type StepKey } from "@/lib/submission/data";
 
@@ -40,6 +41,7 @@ export async function SubmissionFrame({ ctx, step, children, aside }: { ctx: Ctx
       }
       aside={aside}
     >
+      <StepMark n={STEPS.find((s) => s.key === step)!.n} />
       {children}
     </WizardLayout>
   );

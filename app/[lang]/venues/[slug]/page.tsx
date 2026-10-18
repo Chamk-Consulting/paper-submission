@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { PublicFooter } from "@/components/venues/public-header";
 import { CountdownCard, DatesList, FollowButton, LiveHeader, StatusCard } from "@/components/venues/venue-live";
 import { getVenue } from "@/lib/venues/data";
 import { FIELD_COLOR, FIELD_LABEL, FORMAT_LABEL } from "@/lib/venues/types";
 import { fmtRange } from "@/lib/venues/time";
 import { getT } from "@/lib/i18n/server";
+import { Reveal } from "@/components/motion/reveal";
+import { VenueSkeleton } from "@/components/skeletons";
 
 type Params = { slug: string };
 
@@ -42,8 +43,8 @@ async function Venue({ params }: { params: Promise<Params> }) {
       <section className="bg-white">
         <div className="mx-auto max-w-[1280px] px-5 pb-7 pt-6 sm:px-8">
           <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#4A5263]">
-            <Link href="/venues" transitionTypes={["nav-back"]} className="text-[#121826] underline">{t("Venues")}</Link>
-            {v.field ? <> / <Link href="/venues" transitionTypes={["nav-back"]} className="text-[#121826] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
+            <Link href="/venues" className="text-[#121826] underline">{t("Venues")}</Link>
+            {v.field ? <> / <Link href="/venues" className="text-[#121826] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
           </nav>
           <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex min-w-0 gap-5">
@@ -192,8 +193,8 @@ async function Venue({ params }: { params: Promise<Params> }) {
 /** Canvas PV02-Venue. */
 export default function Page({ params }: { params: Promise<Params> }) {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}>
+    <Reveal fallback={<VenueSkeleton />}>
       <Venue params={params} />
-    </Suspense>
+    </Reveal>
   );
 }

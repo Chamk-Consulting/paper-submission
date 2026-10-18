@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { getT } from "@/lib/i18n/server";
 import { SubmissionFrame, requireCtx } from "@/components/submission/frame";
 import { ConflictsForm, type Member } from "@/components/submission/conflicts-form";
 import { asideCard, kicker } from "@/components/submission/shell";
 import { createClient } from "@/lib/supabase/server";
+import { Reveal } from "@/components/motion/reveal";
+import { WizardSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -57,5 +58,5 @@ async function Inner({ params }: P) {
 
 /** Canvas SB06-Conflicts. */
 export default function Page(props: P) {
-  return <Suspense fallback={<div className="min-h-dvh bg-[#F5F6F3]" aria-busy="true" />}><Inner {...props} /></Suspense>;
+  return <Reveal fallback={<WizardSkeleton step="conflicts" />}><Inner {...props} /></Reveal>;
 }
