@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { resendSignupCode, verifySignupCode } from "@/lib/auth/onboarding-actions";
+import { resendResetCode, verifyResetCode } from "@/lib/auth/reset-actions";
 import { ui } from "@/components/auth/split-layout";
 
 type Mode = "wait" | "sent" | "wrong" | "ok" | "expired" | "locked";
@@ -15,8 +16,34 @@ const MAX_TRIES = 5;
 const mmss = (n: number) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
 const stamp = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-/** Canvas PR07: six code boxes with paste, resend timer, wrong/expired/locked states. */
-export function OtpVerify({ email, onSuccessHref, changeHref }: { email: string; onSuccessHref: string; changeHref: string }) {
+type Props = {
+  email: string;
+  onSuccessHref: string;
+  changeHref: string;
+  /** signup = PR07 (confirm email), recovery = PR10b (password reset code). */
+  kind?: "signup" | "recovery";
+};
+
+const COPY = {
+  signup: {
+    submit: "Confirm email",
+    linkNote: "Or click the link in the email — it confirms you and continues here." as string | null,
+    change: "Wrong email? Change it",
+    tips: ["Check spam, “Other” or “Promotions” folders.", "Universities sometimes hold automated mail for a few minutes.", "ask-it"],
+  },
+  recovery: {
+    submit: "Continue",
+    linkNote: null as string | null,
+    change: "Wrong account? Change it",
+    tips: ["Check spam, “Other” or “Promotions” folders.", "Try the other emails you publish with.", "recover"],
+  },
+};
+
+/** Canvas PR07 / PR10b: six code boxes with paste, resend timer, wrong/expired/locked states. */
+export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }: Props) {
+  const copy = COPY[kind];
+  const verify = kind === "recovery" ? verifyResetCode : verifySignupCode;
+  const resendCode = kind === "recovery" ? resendResetCode : resendSignupCode;
   const router = useRouter();
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const [mode, setMode] = useState<Mode>("wait");
@@ -49,7 +76,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref }: { email: string;
     const code = d.join("");
     if (code.length < 6 || pending) return;
     startTransition(async () => {
-      const r = await verifySignupCode(email, code);
+      const r = await verify(email, code);
       if (r.ok) {
         setMode("ok");
         router.replace(onSuccessHref);
@@ -73,7 +100,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref }: { email: string;
   function resend(force = false) {
     if (limit || locked || (!force && left > 0)) return;
     startTransition(async () => {
-      const r = await resendSignupCode(email);
+      const r = await resendCode(email);
       if (!r.ok) { setNote(r.message ?? ""); return; }
       const n = resends + 1;
       setResends(n); setLeft(WAITS[Math.min(n, WAITS.length - 1)]); setExp(EXPIRES); setTries(MAX_TRIES);
@@ -166,10 +193,10 @@ export function OtpVerify({ email, onSuccessHref, changeHref }: { email: string;
 
       {!locked && !expired ? (
         <button type="button" onClick={() => submit(digits)} disabled={pending || digits.join("").length < 6} className={`mt-5 h-12 ${ui.primary}`}>
-          {pending ? "Checking…" : "Confirm email"}
+          {pending ? "Checking…" : copy.submit}
         </button>
       ) : null}
-      <p className={`mt-3.5 text-[14px] ${ui.muted}`}>Or click the link in the email — it confirms you and continues here.</p>
+      {copy.linkNote ? <p className={`mt-3.5 text-[14px] ${ui.muted}`}>{copy.linkNote}</p> : null}
 
       <div className="mt-[18px] flex flex-wrap items-center gap-x-4 gap-y-2 text-[14px]">
         {left === 0 && !limit && !locked && !expired ? (
@@ -180,15 +207,21 @@ export function OtpVerify({ email, onSuccessHref, changeHref }: { email: string;
         ) : null}
         {limit && !locked ? <span className={`text-[13px] ${ui.muted}`}>Resend limit reached · <Link href="/account-help" className={ui.link}>Recover your account</Link></span> : null}
         <span aria-hidden className="text-[#B7BDC9]">·</span>
-        <Link href={changeHref} className={ui.link}>Wrong email? Change it</Link>
+        <Link href={changeHref} className={ui.link}>{copy.change}</Link>
       </div>
 
       <details className="mt-6 rounded-[6px] border border-[#DADDE3] bg-white px-3.5 py-3 text-[14px]">
         <summary className="cursor-pointer font-semibold">Email not arriving?</summary>
         <ul className={`mt-2.5 flex flex-col gap-1.5 pl-[18px] ${ui.muted}`}>
-          <li>Check spam, “Other” or “Promotions” folders.</li>
-          <li>Universities sometimes hold automated mail for a few minutes.</li>
-          <li>Ask IT to allow mail from <span className="font-mono">[sender domain]</span>.</li>
+          {copy.tips.map((t) =>
+            t === "ask-it" ? (
+              <li key={t}>Ask IT to allow mail from <span className="font-mono">[sender domain]</span>.</li>
+            ) : t === "recover" ? (
+              <li key={t}>Still stuck? <Link href="/account-help" className={ui.link}>Recover your account</Link> with ORCID or help from support.</li>
+            ) : (
+              <li key={t}>{t}</li>
+            ),
+          )}
         </ul>
       </details>
     </>

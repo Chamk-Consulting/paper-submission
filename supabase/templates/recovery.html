@@ -1,8 +1,11 @@
 <!-- TODO(email): replace with React Email via the Send Email hook. Links MUST go through /auth/confirm. -->
+<!-- Paste into Supabase → Authentication → Emails → "Reset password". Needs {{ .Token }} for the PR10b code boxes. -->
 <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#0E1B3D">
   <p style="font-family:Georgia,serif;font-size:22px">&#9679; Plenary</p>
   <h1 style="font-family:Georgia,serif;font-weight:400">Reset your password</h1>
-  <p>Someone asked to reset the password for this account. If it was you, choose a new password below. If not, ignore this email.</p>
-  <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#0E1B3D;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none">Choose a new password</a></p>
-  <p style="color:#5B6478;font-size:13px">This link works once and expires in 1 hour.</p>
+  <p>Someone asked to reset the password for this account. If it was you, enter this code on the reset page:</p>
+  <p style="font-family:'Courier New',monospace;font-size:32px;letter-spacing:8px;font-weight:700;margin:16px 0">{{ .Token }}</p>
+  <p>Or use this button:</p>
+  <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block;background:#F2A93B;color:#0E1B3D;padding:12px 20px;border-radius:4px;text-decoration:none;font-weight:600">Choose a new password</a></p>
+  <p style="color:#5B6478;font-size:13px">The code and link work once and expire in 15 minutes. Plenary staff will never ask for this code. If you didn't ask for a reset, ignore this email — your password stays the same.</p>
 </div>

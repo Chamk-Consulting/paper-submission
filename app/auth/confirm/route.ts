@@ -2,6 +2,7 @@ import { type EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/config/site";
+import { markRecovery } from "@/lib/auth/recovery-cookie";
 
 // Handles every email link: sign-up confirmation, password recovery, magic link, email change.
 // Supabase email templates must point here:
@@ -16,8 +17,9 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
 
   if (tokenHash && type) {
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
+      if (type === "recovery" && data.user) await markRecovery(data.user.id);
       const dest = type === "recovery" ? "/reset-password" : type === "signup" ? "/create-account/profile" : next;
       return NextResponse.redirect(new URL(dest, origin));
     }
