@@ -33,7 +33,7 @@ for (const f of files) {
     }
   }
 }
-const list = [...keys].filter((k) => k.trim() && /[A-Za-z]/.test(k)).sort();
+const list = [...keys].filter((k) => k.trim() && /[A-Za-z]/.test(k) && !k.includes("${") && !/\w\(\w+(, \w+)+\)/.test(k) && !/^use (cache|server|client)$/.test(k)).sort();
 if (process.argv.includes("--missing")) {
   for (const l of ["fr", "it", "de"]) {
     const src = fs.readFileSync(path.join(ROOT, `lib/i18n/dict/${l}.ts`), "utf8");
