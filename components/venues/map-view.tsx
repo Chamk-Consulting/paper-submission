@@ -6,6 +6,7 @@ import type { Row } from "@/components/venues/directory";
 import { LAND } from "@/lib/venues/land";
 import { FORMAT_LABEL } from "@/lib/venues/types";
 import { fmtRange, homeFor, km } from "@/lib/venues/time";
+import { useT } from "@/lib/i18n/client";
 
 type MapKey = "world" | "europe" | "africa" | "asia" | "americas";
 const VIEWS: Record<MapKey, { label: string; lo: [number, number]; la: [number, number]; k?: number; region?: string }> = {
@@ -65,6 +66,7 @@ function geometry(key: MapKey) {
 
 /** Canvas PV01 "Map" tab: dot-matrix world map with deadline-coloured pins. */
 export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) {
+  const t = useT();
   const [key, setKey] = useState<MapKey>("world");
   const [pin, setPin] = useState("");
   const geo = useMemo(() => geometry(key), [key]);
@@ -75,7 +77,7 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
   const homeVisible = home ? geo.visible(home[0], home[1]) : false;
 
   const color = (v: Row) => (v.st.state === "now" ? "#18744F" : v.st.state === "soon" ? "#F2A93B" : v.st.state === "later" ? "#8A93A6" : "#0E1B3D");
-  const short = (v: Row) => (v.st.state === "now" ? "now" : v.st.days < 999 ? `${v.st.days}d` : "");
+  const short = (v: Row) => (v.st.state === "now" ? t("now") : v.st.days < 999 ? `${v.st.days}d` : "");
 
   let route = "";
   if (sel && home && homeVisible && geo.visible(sel.lng!, sel.lat!)) {
@@ -88,18 +90,18 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
   return (
     <div className="mt-3.5 flex flex-col items-start gap-4 xl:flex-row">
       <div className="w-full min-w-0 flex-auto overflow-hidden rounded-[8px] border border-[#DADDE3] bg-white">
-        <div role="tablist" aria-label="Map region" className="flex flex-wrap gap-1.5 border-b border-[#EEF0EC] px-3 py-2.5">
+        <div role="tablist" aria-label={t("Map region")} className="flex flex-wrap gap-1.5 border-b border-[#EEF0EC] px-3 py-2.5">
           {(Object.keys(VIEWS) as MapKey[]).map((k) => {
             const on = key === k;
             const n = placed.filter((v) => k === "world" || v.region === VIEWS[k].region).length;
             return (
               <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setKey(k)} className="h-7 rounded-full px-2.5 text-[12px] font-semibold"
-                style={{ background: on ? "#0E1B3D" : "#FFFFFF", color: on ? "#F5F6F3" : "#4A5263", border: on ? "1px solid #0E1B3D" : "1px solid #DADDE3" }}>{VIEWS[k].label} · {n}</button>
+                style={{ background: on ? "#0E1B3D" : "#FFFFFF", color: on ? "#F5F6F3" : "#4A5263", border: on ? "1px solid #0E1B3D" : "1px solid #DADDE3" }}>{t(VIEWS[k].label)} · {n}</button>
             );
           })}
         </div>
         <div className="relative bg-[#EEF3FA]">
-          <svg viewBox={`0 0 ${MW} ${geo.MH}`} width="100%" role="img" aria-label="Map of venues" className="block">
+          <svg viewBox={`0 0 ${MW} ${geo.MH}`} width="100%" role="img" aria-label={t("Map of venues")} className="block">
             <path d={geo.grid} fill="none" stroke="#D5DEEC" strokeWidth="1" />
             <path d={geo.tropics} fill="none" stroke="#C3CFE3" strokeWidth="1" strokeDasharray="2 5" />
             <path d={geo.eq} fill="none" stroke="#AFC0DB" strokeWidth="1.2" strokeDasharray="6 4" />
@@ -107,11 +109,11 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
             {route ? <path d={route} fill="none" stroke="#2F5FD0" strokeWidth="2" strokeDasharray="5 5" /> : null}
           </svg>
           {geo.lat.map((g) => <span key={g.t} aria-hidden className="absolute left-1 font-mono text-[9px] text-[#7D8AA3]" style={{ top: `${g.y}%`, transform: "translateY(-110%)" }}>{g.t}</span>)}
-          {geo.oceans.map((o) => <span key={`${o.t}${o.x}`} aria-hidden className="absolute hidden whitespace-nowrap font-serif text-[13px] italic tracking-[0.08em] text-[#8C9BB6] sm:block" style={{ left: `${o.x}%`, top: `${o.y}%`, transform: "translate(-50%,-50%)" }}>{o.t}</span>)}
+          {geo.oceans.map((o) => <span key={`${o.t}${o.x}`} aria-hidden className="absolute hidden whitespace-nowrap font-serif text-[13px] italic tracking-[0.08em] text-[#8C9BB6] sm:block" style={{ left: `${o.x}%`, top: `${o.y}%`, transform: "translate(-50%,-50%)" }}>{t(o.t)}</span>)}
           {home && homeVisible ? (
             <>
               <span aria-hidden className="absolute size-3 rounded-full bg-[#2F5FD0] shadow-[0_0_0_5px_rgba(47,95,208,.22)]" style={{ left: `${((geo.PX(home[0]) / MW) * 100).toFixed(2)}%`, top: `${((geo.PY(home[1]) / geo.MH) * 100).toFixed(2)}%`, transform: "translate(-50%,-50%)" }} />
-              <span className="absolute rounded-[2px] border border-[#BFD0F5] bg-white px-[5px] py-px font-mono text-[10px] font-semibold uppercase text-[#1F47A8]" style={{ left: `${((geo.PX(home[0]) / MW) * 100).toFixed(2)}%`, top: `${((geo.PY(home[1]) / geo.MH) * 100).toFixed(2)}%`, transform: "translate(10px,4px)" }}>You · {home[2]}</span>
+              <span className="absolute rounded-[2px] border border-[#BFD0F5] bg-white px-[5px] py-px font-mono text-[10px] font-semibold uppercase text-[#1F47A8]" style={{ left: `${((geo.PX(home[0]) / MW) * 100).toFixed(2)}%`, top: `${((geo.PY(home[1]) / geo.MH) * 100).toFixed(2)}%`, transform: "translate(10px,4px)" }}>{t("You")} · {home[2]}</span>
             </>
           ) : null}
           {onMap.map((v) => {
@@ -132,50 +134,50 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
         </div>
         <div className="flex flex-wrap justify-between gap-2.5 border-t border-[#EEF0EC] px-3.5 py-2.5 text-[12px] text-[#4A5263]">
           <span className="flex flex-wrap items-center gap-3.5">
-            {[["#F2A93B", "Closes within 7 days"], ["#0E1B3D", "Open"], ["#8A93A6", "Later (60+ days)"], ["#18744F", "Happening now"]].map(([c, t]) => (
-              <span key={t}><span aria-hidden className="inline-block size-2.5 rounded-[2px] align-[-1px]" style={{ background: c }} /> {t}</span>
+            {[["#F2A93B", "Closes within 7 days"], ["#0E1B3D", "Open"], ["#8A93A6", "Later (60+ days)"], ["#18744F", "Happening now"]].map(([c, lbl]) => (
+              <span key={lbl}><span aria-hidden className="inline-block size-2.5 rounded-[2px] align-[-1px]" style={{ background: c }} /> {t(lbl)}</span>
             ))}
           </span>
-          <span>{online ? `${online} online venue${online === 1 ? "" : "s"} not on the map` : "All venues placed"}{hidden ? ` · ${hidden} outside this view` : ""}</span>
+          <span>{online ? (online === 1 ? t("1 online venue not on the map") : t("{n} online venues not on the map", { n: online })) : t("All venues placed")}{hidden ? ` · ${t("{n} outside this view", { n: hidden })}` : ""}</span>
         </div>
       </div>
 
-      <aside aria-label="Selected venue" className="flex w-full flex-col gap-3 xl:w-[300px] xl:flex-none">
+      <aside aria-label={t("Selected venue")} className="flex w-full flex-col gap-3 xl:w-[300px] xl:flex-none">
         {sel ? (
           <section className="rounded-[8px] border border-[#DADDE3] bg-white p-4">
             <div className="flex items-baseline justify-between gap-2">
               <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: sel.st.state === "now" ? "#14603F" : sel.st.state === "soon" ? "#A8600F" : "#4A5263" }}>
-                {sel.st.state === "now" ? "Happening now" : sel.st.state === "soon" ? "Closes soon" : "Open for submissions"}
+                {sel.st.state === "now" ? t("Happening now") : sel.st.state === "soon" ? t("Closes soon") : t("Open for submissions")}
               </span>
-              <span className="font-mono text-[12px] text-[#4A5263]">{sel.region}</span>
+              <span className="font-mono text-[12px] text-[#4A5263]">{sel.region ? t(sel.region) : null}</span>
             </div>
             <div className="mt-1 text-[20px] font-semibold">{sel.acr}</div>
             <div className="text-[13px] text-[#4A5263]">{sel.name}</div>
             <dl className="m-0 mt-2.5 grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-1.5 text-[13px]">
-              <dt className="text-[#4A5263]">When</dt><dd className="m-0">{fmtRange(sel.startsOn, sel.endsOn)}</dd>
-              <dt className="text-[#4A5263]">Where</dt><dd className="m-0">{[sel.city, sel.country].filter(Boolean).join(", ")}{sel.placeHint ? ` (${sel.placeHint})` : ""}</dd>
-              <dt className="text-[#4A5263]">Deadline</dt><dd className="m-0">{sel.st.closes}{sel.st.local ? ` · ${sel.st.local}` : ""}</dd>
-              {dist != null && home ? <><dt className="text-[#4A5263]">From you</dt><dd className="m-0">{dist.toLocaleString("en-US")} km from {home[2]} · about {Math.max(1, Math.round(dist / 750))} h flying</dd></> : null}
-              {sel.format ? <><dt className="text-[#4A5263]">Format</dt><dd className="m-0">{FORMAT_LABEL[sel.format]}</dd></> : null}
+              <dt className="text-[#4A5263]">{t("When")}</dt><dd className="m-0">{fmtRange(sel.startsOn, sel.endsOn, t.intl, t)}</dd>
+              <dt className="text-[#4A5263]">{t("Where")}</dt><dd className="m-0">{[sel.city, sel.country].filter(Boolean).join(", ")}{sel.placeHint ? ` (${sel.placeHint})` : ""}</dd>
+              <dt className="text-[#4A5263]">{t("Deadline")}</dt><dd className="m-0">{sel.st.closes}{sel.st.local ? ` · ${sel.st.local}` : ""}</dd>
+              {dist != null && home ? <><dt className="text-[#4A5263]">{t("From you")}</dt><dd className="m-0">{t("{km} km from {city} · about {h} h flying", { km: dist.toLocaleString(t.intl), city: home[2], h: Math.max(1, Math.round(dist / 750)) })}</dd></> : null}
+              {sel.format ? <><dt className="text-[#4A5263]">{t("Format")}</dt><dd className="m-0">{t(FORMAT_LABEL[sel.format])}</dd></> : null}
             </dl>
             {sel.format !== "online" ? (
-              <p className="mt-2.5 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-2.5 py-2 text-[12px] text-[#3B2A07]">Travelling? Check visa rules early — accepted authors can request an invitation letter from their paper page.</p>
+              <p className="mt-2.5 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-2.5 py-2 text-[12px] text-[#3B2A07]">{t("Travelling? Check visa rules early — accepted authors can request an invitation letter from their paper page.")}</p>
             ) : null}
             <div className="mt-3 flex gap-2">
-              <Link href={`/venues/${sel.slug}`} className="inline-flex h-9 flex-auto items-center justify-center rounded-[4px] bg-[#0E1B3D] text-[13px] font-semibold text-white no-underline">View call</Link>
+              <Link href={`/venues/${sel.slug}`} className="inline-flex h-9 flex-auto items-center justify-center rounded-[4px] bg-[#0E1B3D] text-[13px] font-semibold text-white no-underline">{t("View call")}</Link>
               {sel.region && REGION_KEY[sel.region] ? (
-                <button type="button" onClick={() => setKey(REGION_KEY[sel.region!])} className="h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[13px] font-medium text-[#121826]">Zoom to region</button>
+                <button type="button" onClick={() => setKey(REGION_KEY[sel.region!])} className="h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[13px] font-medium text-[#121826]">{t("Zoom to region")}</button>
               ) : null}
             </div>
           </section>
         ) : (
-          <section className="rounded-[8px] border border-dashed border-[#DADDE3] bg-white p-4 text-[14px] text-[#4A5263]">No venues with a location match your filters.</section>
+          <section className="rounded-[8px] border border-dashed border-[#DADDE3] bg-white p-4 text-[14px] text-[#4A5263]">{t("No venues with a location match your filters.")}</section>
         )}
         <section className="rounded-[8px] border border-[#DADDE3] bg-white px-3.5 py-3">
-          <p className="m-0 mb-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">By region</p>
+          <p className="m-0 mb-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("By region")}</p>
           {["Europe", "Asia–Pacific", "Americas", "Africa & Middle East", "Online"].map((r) => (
             <button key={r} type="button" onClick={() => REGION_KEY[r] && setKey(REGION_KEY[r])} className="flex w-full justify-between border-0 border-b border-solid border-[#EEF0EC] bg-transparent px-0 py-1.5 text-left text-[13px] text-[#121826]">
-              <span>{r}</span><span className="font-mono text-[#4A5263]">{rows.filter((v) => v.region === r).length} →</span>
+              <span>{t(r)}</span><span className="font-mono text-[#4A5263]">{rows.filter((v) => v.region === r).length} →</span>
             </button>
           ))}
         </section>

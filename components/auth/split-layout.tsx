@@ -1,49 +1,9 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Footer, TopBar } from "@/components/auth/chrome";
 
 /* Shared shell of canvas PR02–PR09: paper form column + navy aside. */
 
-export function Logo() {
-  return (
-    <Link href="/" className="flex items-center gap-2.5 text-[#121826] no-underline">
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5">
-        <circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" />
-      </svg>
-      <span className="font-serif text-[24px]">Plenary</span>
-    </Link>
-  );
-}
-
-function TopBar() {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <Logo />
-      <div className="flex items-center gap-4 text-[14px]">
-        <label htmlFor="auth-lang" className="sr-only">Language</label>
-        {/* TODO(i18n): only English is available for now. */}
-        <select id="auth-lang" defaultValue="English" className="h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-2 text-[14px] text-[#121826]">
-          <option>English</option>
-        </select>
-        <Link href="/account-help" className="font-medium text-[#121826] no-underline">Help</Link>
-      </div>
-    </div>
-  );
-}
-
-function Footer() {
-  return (
-    <div className="flex flex-wrap justify-between gap-3 text-[13px] text-[#4A5263]">
-      {/* TODO(ops): link to a real status page. */}
-      <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#18744F]" />All systems normal</span>
-      <span className="flex flex-wrap gap-4">
-        <Link href="/legal/privacy" className="text-[#4A5263]">Privacy</Link>
-        <Link href="/legal/terms" className="text-[#4A5263]">Terms</Link>
-        <Link href="/legal/accessibility" className="text-[#4A5263]">Accessibility</Link>
-        <Link href="/legal/security" className="text-[#4A5263]">Security</Link>
-      </span>
-    </div>
-  );
-}
+export { Logo } from "@/components/auth/logo";
 
 export function SplitLayout({ banner, children, aside, width = 420 }: { banner?: ReactNode; children: ReactNode; aside: ReactNode; width?: 420 | 440 }) {
   return (
@@ -72,14 +32,14 @@ export function NavyAside({ label, kicker, title, children, titleSize = 44 }: { 
 }
 
 export type StepState = "done" | "current" | "next";
-export function SetupSteps({ steps }: { steps: { title: string; text: ReactNode; state: StepState }[] }) {
+export function SetupSteps({ steps, doneLabel = "Done" }: { steps: { title: string; text: ReactNode; state: StepState }[]; doneLabel?: string }) {
   return (
     <ol className="mt-9 flex max-w-[480px] list-none flex-col p-0">
       {steps.map((s, i) => (
         <li key={s.title} className="flex gap-4">
           <div className="flex flex-col items-center">
             {s.state === "done" ? (
-              <span className="flex size-[26px] items-center justify-center rounded-full bg-[#18744F] text-[12px] text-white" aria-label="Done">✓</span>
+              <span className="flex size-[26px] items-center justify-center rounded-full bg-[#18744F] text-[12px] text-white" aria-label={doneLabel}>✓</span>
             ) : s.state === "current" ? (
               <span className="flex size-[26px] items-center justify-center rounded-full bg-[#F2A93B] font-mono text-[12px] font-semibold text-[#0E1B3D]" aria-current="step">{i + 1}</span>
             ) : (

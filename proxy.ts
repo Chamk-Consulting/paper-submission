@@ -1,56 +1,66 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, negotiate } from "@/lib/i18n/config";
 
-// Keep this thin: refresh the session cookie and redirect signed-out users
-// away from the workspace. Real permission checks live in server actions and RLS.
+// Thin edge layer: pick the language, refresh the Supabase session, keep signed-out users out of
+// private areas. Real permission checks live in server actions and RLS.
 const PROTECTED_PREFIXES = ["/workspace", "/submissions", "/submit"];
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/create-account"];
+// Route handlers live outside app/[lang] and are never rewritten.
+const NO_LOCALE = [/^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
 
 export default async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const { pathname, search } = request.nextUrl;
+  const first = pathname.split("/")[1];
+  const explicit = isLocale(first) ? first : null;
+  const bare = explicit ? pathname.slice(first.length + 1) || "/" : pathname;
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  const locale = explicit ?? (isLocale(cookieLocale) ? cookieLocale : negotiate(request.headers.get("accept-language")));
+  const skipLocale = NO_LOCALE.some((r) => r.test(bare));
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-          Object.entries(headers ?? {}).forEach(([k, v]) => response.headers.set(k, v));
-        },
+  // Visible URLs stay unprefixed (/venues); the page renders from /[lang]/venues. /fr/venues also works and is remembered.
+  const target = request.nextUrl.clone();
+  if (!skipLocale && !explicit) target.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
+  const make = () => (skipLocale || explicit ? NextResponse.next({ request }) : NextResponse.rewrite(target, { request }));
+  let response = make();
+
+  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet, headers) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = make();
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        Object.entries(headers ?? {}).forEach(([k, v]) => response.headers.set(k, v));
       },
     },
-  );
-
-  // Revalidates the token with Supabase Auth and refreshes cookies if needed.
+  });
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-
-  if (!user && PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
+  const prefix = explicit ? `/${explicit}` : "";
+  if (!user && PROTECTED_PREFIXES.some((p) => bare === p || bare.startsWith(`${p}/`))) {
     const url = request.nextUrl.clone();
-    url.pathname = "/sign-in";
-    url.search = `?next=${encodeURIComponent(path + request.nextUrl.search)}`;
+    url.pathname = `${prefix}/sign-in`;
+    url.search = `?next=${encodeURIComponent(bare + search)}`;
     return NextResponse.redirect(url);
   }
-
-  if (user && AUTH_PAGES.includes(path)) {
+  if (user && AUTH_PAGES.includes(bare)) {
     const url = request.nextUrl.clone();
-    url.pathname = "/workspace";
+    url.pathname = `${prefix}/workspace`;
     url.search = "";
     return NextResponse.redirect(url);
   }
 
+  if (explicit && cookieLocale !== explicit) response.cookies.set(LOCALE_COOKIE, explicit, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  if (!explicit && !isLocale(cookieLocale) && locale !== DEFAULT_LOCALE) response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  response.headers.set("Vary", "Cookie, Accept-Language");
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)"],
 };

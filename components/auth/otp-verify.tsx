@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { resendSignupCode, verifySignupCode } from "@/lib/auth/onboarding-actions";
 import { resendResetCode, verifyResetCode } from "@/lib/auth/reset-actions";
 import { ui } from "@/components/auth/split-layout";
+import { useT } from "@/lib/i18n/client";
 
 type Mode = "wait" | "sent" | "wrong" | "ok" | "expired" | "locked";
 const EXPIRES = 15 * 60; // TODO(auth): set Supabase Auth "Email OTP expiration" to 900s so this matches.
@@ -14,7 +15,7 @@ const MAX_RESENDS = 5;
 const MAX_TRIES = 5;
 
 const mmss = (n: number) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
-const stamp = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+const stamp = (intl: string) => new Date().toLocaleTimeString(intl, { hour: "2-digit", minute: "2-digit" });
 
 type Props = {
   email: string;
@@ -56,6 +57,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();
   const refs = useRef<(HTMLInputElement | null)[]>([]);
+  const t = useT();
 
   // one clock for resend wait, code expiry and lock-out
   useEffect(() => {
@@ -86,7 +88,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
         setMode("locked"); setLock(15 * 60); setTries(0); setDigits(["", "", "", "", "", ""]);
         return;
       }
-      setTries((t) => t - 1); setMode("wrong"); focus(0);
+      setTries((n) => n - 1); setMode("wrong"); focus(0);
     });
   }
 
@@ -104,22 +106,22 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
       if (!r.ok) { setNote(r.message ?? ""); return; }
       const n = resends + 1;
       setResends(n); setLeft(WAITS[Math.min(n, WAITS.length - 1)]); setExp(EXPIRES); setTries(MAX_TRIES);
-      setDigits(["", "", "", "", "", ""]); setSentAt(stamp()); setMode("sent"); setNote(""); focus(0);
+      setDigits(["", "", "", "", "", ""]); setSentAt(stamp(t.intl)); setMode("sent"); setNote(""); focus(0);
     });
   }
 
-  let msg = `You can paste the whole code. It expires in ${mmss(exp)}.`;
+  let msg = t("You can paste the whole code. It expires in {time}.", { time: mmss(exp) });
   let msgInk = "#4A5263";
-  if (mode === "sent") { msg = `New code sent to ${email} at ${sentAt}. Older codes no longer work · expires in ${mmss(exp)}.`; msgInk = "#14603F"; }
-  if (mode === "wrong") { msg = `That code doesn’t match. ${tries} ${tries === 1 ? "try" : "tries"} left — use the code from the latest email.`; msgInk = "#B3261E"; }
-  if (mode === "ok") { msg = "✓ Code accepted."; msgInk = "#14603F"; }
+  if (mode === "sent") { msg = t("New code sent to {email} at {sentAt}. Older codes no longer work · expires in {time}.", { email, sentAt, time: mmss(exp) }); msgInk = "#14603F"; }
+  if (mode === "wrong") { msg = tries === 1 ? t("That code doesn’t match. 1 try left — use the code from the latest email.") : t("That code doesn’t match. {n} tries left — use the code from the latest email.", { n: tries }); msgInk = "#B3261E"; }
+  if (mode === "ok") { msg = `✓ ${t("Code accepted.")}`; msgInk = "#14603F"; }
   const firstEmpty = digits.indexOf("");
 
   return (
     <>
       {!locked && !expired ? (
         <fieldset className="m-0 mt-4 border-0 p-0">
-          <legend className="mb-2 text-[14px] font-medium">6-digit code</legend>
+          <legend className="mb-2 text-[14px] font-medium">{t("6-digit code")}</legend>
           <div className="grid grid-cols-6 gap-2">
             {digits.map((v, i) => {
               const border = mode === "wrong" ? "2px solid #B3261E" : mode === "ok" ? "2px solid #18744F" : i === firstEmpty ? "2px solid #2F5FD0" : v ? "1px solid #121826" : "1px solid #B7BDC9";
@@ -129,7 +131,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
                   key={i}
                   ref={(el) => { refs.current[i] = el; }}
                   type="text" inputMode="numeric" pattern="[0-9]*" maxLength={i === 0 ? 6 : 2}
-                  autoComplete={i === 0 ? "one-time-code" : "off"} aria-label={`Digit ${i + 1} of 6`} aria-invalid={mode === "wrong" || undefined}
+                  autoComplete={i === 0 ? "one-time-code" : "off"} aria-label={t("Digit {n} of 6", { n: i + 1 })} aria-invalid={mode === "wrong" || undefined}
                   value={v} disabled={pending}
                   onChange={(e) => {
                     let raw = e.target.value.replace(/[^0-9]/g, "");
@@ -150,12 +152,12 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
                     if (e.key === "ArrowRight" && i < 5) focus(i + 1);
                   }}
                   onPaste={(e) => {
-                    const t = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 6);
-                    if (!t) return;
+                    const pasted = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 6);
+                    if (!pasted) return;
                     e.preventDefault();
                     const d = ["", "", "", "", "", ""];
-                    t.split("").forEach((ch, k) => { d[k] = ch; });
-                    update(d, Math.min(t.length, 5));
+                    pasted.split("").forEach((ch, k) => { d[k] = ch; });
+                    update(d, Math.min(pasted.length, 5));
                   }}
                   className="box-border h-14 w-full rounded-[6px] text-center font-mono text-[24px] font-medium text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
                   style={{ border, background: bg }}
@@ -167,7 +169,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
           {resends >= 3 && !limit ? (
             <p className="mt-1.5 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-2.5 py-2 text-[13px] text-[#3B2A07]">
               {/* TODO(domain): real sender domain */}
-              Still nothing after {resends} tries? Check spam, or ask IT to allow mail from <span className="font-mono">[sender domain]</span>. Resend now waits a little longer each time.
+              {t("Still nothing after {n} tries? Check spam, or ask IT to allow mail from", { n: resends })} <span className="font-mono">[sender domain]</span>. {t("Resend now waits a little longer each time.")}
             </p>
           ) : null}
         </fieldset>
@@ -175,51 +177,51 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
 
       {expired ? (
         <div role="alert" className="mt-4 rounded-[6px] border border-l-4 border-[#DADDE3] border-l-[#A8600F] bg-white p-4">
-          <div className="font-semibold">This code expired</div>
-          <p className={`mt-1 text-[14px] ${ui.muted}`}>Codes and links last 15 minutes. We&apos;ll send a fresh one to {email}.</p>
-          <button type="button" onClick={() => resend(true)} disabled={pending} className={`mt-3 h-11 ${ui.primary}`}>Send a new code</button>
+          <div className="font-semibold">{t("This code expired")}</div>
+          <p className={`mt-1 text-[14px] ${ui.muted}`}>{t("Codes and links last 15 minutes. We'll send a fresh one to {email}.", { email })}</p>
+          <button type="button" onClick={() => resend(true)} disabled={pending} className={`mt-3 h-11 ${ui.primary}`}>{t("Send a new code")}</button>
         </div>
       ) : null}
 
       {locked ? (
         <div role="alert" className="mt-4 rounded-[6px] border border-l-4 border-[#F3C3BE] border-l-[#B3261E] bg-[#FDECEA] p-4 text-[#5C1A15]">
-          <div className="font-semibold">Too many tries</div>
-          <p className="mt-1 text-[14px]">To keep your account safe, codes are paused. Try again in <span className="font-mono font-semibold">{mmss(lock)}</span>.</p>
-          <div className="mt-2.5 flex flex-wrap gap-4 text-[14px]"><Link href="/account-help" className={ui.link}>Contact support</Link></div>
+          <div className="font-semibold">{t("Too many tries")}</div>
+          <p className="mt-1 text-[14px]">{t("To keep your account safe, codes are paused. Try again in")} <span className="font-mono font-semibold">{mmss(lock)}</span>.</p>
+          <div className="mt-2.5 flex flex-wrap gap-4 text-[14px]"><Link href="/account-help" className={ui.link}>{t("Contact support")}</Link></div>
         </div>
       ) : null}
 
-      {note ? <p role="status" className="mt-3 text-[13px] text-[#7A4508]">{note}</p> : null}
+      {note ? <p role="status" className="mt-3 text-[13px] text-[#7A4508]">{t(note)}</p> : null}
 
       {!locked && !expired ? (
         <button type="button" onClick={() => submit(digits)} disabled={pending || digits.join("").length < 6} className={`mt-5 h-12 ${ui.primary}`}>
-          {pending ? "Checking…" : copy.submit}
+          {pending ? t("Checking…") : t(copy.submit)}
         </button>
       ) : null}
-      {copy.linkNote ? <p className={`mt-3.5 text-[14px] ${ui.muted}`}>{copy.linkNote}</p> : null}
+      {copy.linkNote ? <p className={`mt-3.5 text-[14px] ${ui.muted}`}>{t(copy.linkNote)}</p> : null}
 
       <div className="mt-[18px] flex flex-wrap items-center gap-x-4 gap-y-2 text-[14px]">
         {left === 0 && !limit && !locked && !expired ? (
-          <button type="button" onClick={() => resend()} disabled={pending} className="min-h-6 border-0 bg-transparent p-0 text-[14px] font-semibold text-[#2F5FD0] underline">Resend code</button>
+          <button type="button" onClick={() => resend()} disabled={pending} className="min-h-6 border-0 bg-transparent p-0 text-[14px] font-semibold text-[#2F5FD0] underline">{t("Resend code")}</button>
         ) : null}
         {left > 0 && !limit && !locked && !expired ? (
-          <span className={`font-mono text-[13px] ${ui.muted}`} aria-label={`You can ask for a new code in ${left} seconds`}>Resend in {mmss(left)}</span>
+          <span className={`font-mono text-[13px] ${ui.muted}`} aria-label={t("You can ask for a new code in {n} seconds", { n: left })}>{t("Resend in {time}", { time: mmss(left) })}</span>
         ) : null}
-        {limit && !locked ? <span className={`text-[13px] ${ui.muted}`}>Resend limit reached · <Link href="/account-help" className={ui.link}>Recover your account</Link></span> : null}
+        {limit && !locked ? <span className={`text-[13px] ${ui.muted}`}>{t("Resend limit reached")} · <Link href="/account-help" className={ui.link}>{t("Recover your account")}</Link></span> : null}
         <span aria-hidden className="text-[#B7BDC9]">·</span>
-        <Link href={changeHref} className={ui.link}>{copy.change}</Link>
+        <Link href={changeHref} className={ui.link}>{t(copy.change)}</Link>
       </div>
 
       <details className="mt-6 rounded-[6px] border border-[#DADDE3] bg-white px-3.5 py-3 text-[14px]">
-        <summary className="cursor-pointer font-semibold">Email not arriving?</summary>
+        <summary className="cursor-pointer font-semibold">{t("Email not arriving?")}</summary>
         <ul className={`mt-2.5 flex flex-col gap-1.5 pl-[18px] ${ui.muted}`}>
-          {copy.tips.map((t) =>
-            t === "ask-it" ? (
-              <li key={t}>Ask IT to allow mail from <span className="font-mono">[sender domain]</span>.</li>
-            ) : t === "recover" ? (
-              <li key={t}>Still stuck? <Link href="/account-help" className={ui.link}>Recover your account</Link> with ORCID or help from support.</li>
+          {copy.tips.map((tip) =>
+            tip === "ask-it" ? (
+              <li key={tip}>{t("Ask IT to allow mail from")} <span className="font-mono">[sender domain]</span>.</li>
+            ) : tip === "recover" ? (
+              <li key={tip}>{t("Still stuck?")} <Link href="/account-help" className={ui.link}>{t("Recover your account")}</Link> {t("with ORCID or help from support.")}</li>
             ) : (
-              <li key={t}>{t}</li>
+              <li key={tip}>{t(tip)}</li>
             ),
           )}
         </ul>

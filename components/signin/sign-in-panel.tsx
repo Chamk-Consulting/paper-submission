@@ -10,6 +10,7 @@ import {
   verifyCode,
   type SignInState,
 } from "@/lib/auth/signin-actions";
+import { useT } from "@/lib/i18n/client";
 
 /* Canvas PR02 tokens */
 const INK = "text-[#121826]";
@@ -32,10 +33,11 @@ const toneStyle: Record<Detected["tone"], { border: string; iconBg: string; icon
 };
 
 function FieldError({ id, errors }: { id: string; errors?: string[] }) {
+  const t = useT();
   if (!errors?.length) return null;
   return (
     <span id={id} className="text-[13px] text-[#B3261E]">
-      {errors[0]}
+      {t(errors[0])}
     </span>
   );
 }
@@ -72,6 +74,7 @@ export function SignInPanel({ next, initialTab = "signin" }: { next?: string; in
   const [identifier, setIdentifier] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [soon, setSoon] = useState<string | null>(null);
+  const t = useT();
 
   const [pwState, pwAction, pwPending] = useActionState(signInWithPassword, {} as SignInState);
   const [codeState, codeAction, codePending] = useActionState(sendSignInCode, {} as SignInState);
@@ -82,37 +85,37 @@ export function SignInPanel({ next, initialTab = "signin" }: { next?: string; in
   const sent = tab === "signin" && codeState.step === "sent" && codeState !== dismissed ? codeState : null;
 
   const d = detectIdentifier(identifier);
-  const t = toneStyle[d.tone];
+  const tone = toneStyle[d.tone];
   const idErrors = pwState.fieldErrors?.identifier ?? codeState.fieldErrors?.identifier;
 
   const tabBtn = (active: boolean) =>
     `h-[38px] flex-1 rounded-[4px] border-0 text-[14px] font-semibold ${active ? "bg-white text-[#121826] shadow-[0_1px_2px_rgba(18,24,38,.12)]" : "bg-transparent text-[#4A5263]"}`;
 
-  const comingSoon = (what: string) => setSoon(`${what} sign-in is coming soon. Use your email for now.`);
+  const comingSoon = (what: string) => setSoon(t("{what} sign-in is coming soon. Use your email for now.", { what: t(what) }));
 
   return (
     <div className="w-full max-w-[420px]">
-      <div role="tablist" aria-label="Account" className="flex gap-1 rounded-[6px] bg-[#E9EBE6] p-1">
-        <button type="button" role="tab" aria-selected={tab === "signin"} className={tabBtn(tab === "signin")} onClick={() => { setTab("signin"); setSoon(null); }}>Sign in</button>
-        <button type="button" role="tab" aria-selected={tab === "create"} className={tabBtn(tab === "create")} onClick={() => { setTab("create"); setSoon(null); }}>Create account</button>
+      <div role="tablist" aria-label={t("Account")} className="flex gap-1 rounded-[6px] bg-[#E9EBE6] p-1">
+        <button type="button" role="tab" aria-selected={tab === "signin"} className={tabBtn(tab === "signin")} onClick={() => { setTab("signin"); setSoon(null); }}>{t("Sign in")}</button>
+        <button type="button" role="tab" aria-selected={tab === "create"} className={tabBtn(tab === "create")} onClick={() => { setTab("create"); setSoon(null); }}>{t("Create account")}</button>
       </div>
 
       {sent ? (
         <CodeStep key={sent.email} state={sent} next={next} onBack={() => setDismissed(sent)} />
       ) : tab === "signin" ? (
         <>
-          <h1 className={`mt-7 ${H1}`}>Welcome back</h1>
-          <p className={`mt-2 ${MUTED}`}>One account for submitting, reviewing and chairing — at every venue.</p>
-          {pwState.message ? <Banner>{pwState.message}</Banner> : null}
-          {codeState.message ? <Banner>{codeState.message}</Banner> : null}
+          <h1 className={`mt-7 ${H1}`}>{t("Welcome back")}</h1>
+          <p className={`mt-2 ${MUTED}`}>{t("One account for submitting, reviewing and chairing — at every venue.")}</p>
+          {pwState.message ? <Banner>{t(pwState.message)}</Banner> : null}
+          {codeState.message ? <Banner>{t(codeState.message)}</Banner> : null}
           {soon ? <Banner tone="info">{soon}</Banner> : null}
 
           <form action={pwAction} noValidate>
             <input type="hidden" name="next" value={next ?? ""} />
             <div className="mt-6 flex flex-col gap-1.5">
-              <label htmlFor="pr-id" className={LABEL}>Email, phone, Plenary ID or alias</label>
-              <div className="box-border flex h-12 items-center gap-2.5 rounded-[4px] border-2 bg-white px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ borderColor: idErrors?.length ? "#B3261E" : t.border }}>
-                <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[4px] font-mono text-[10px] font-semibold" style={{ background: t.iconBg, color: t.iconInk }}>{d.icon}</span>
+              <label htmlFor="pr-id" className={LABEL}>{t("Email, phone, Plenary ID or alias")}</label>
+              <div className="box-border flex h-12 items-center gap-2.5 rounded-[4px] border-2 bg-white px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ borderColor: idErrors?.length ? "#B3261E" : tone.border }}>
+                <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[4px] font-mono text-[10px] font-semibold" style={{ background: tone.iconBg, color: tone.iconInk }}>{d.icon}</span>
                 <input
                   id="pr-id" name="identifier" type="text" autoComplete="username webauthn" autoCapitalize="none" spellCheck={false}
                   placeholder="name@uni.edu · +234… · PL-4821-0937 · a.researcher"
@@ -120,57 +123,57 @@ export function SignInPanel({ next, initialTab = "signin" }: { next?: string; in
                   aria-describedby="pr-id-hint pr-id-err" aria-invalid={idErrors?.length ? true : undefined}
                   className="h-10 min-w-0 flex-auto border-0 bg-transparent text-[16px] text-[#121826] outline-none"
                 />
-                {d.chip ? <span className="whitespace-nowrap rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em]" style={{ background: t.iconBg, color: t.iconInk }}>{d.chip}</span> : null}
+                {d.chip ? <span className="whitespace-nowrap rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em]" style={{ background: tone.iconBg, color: tone.iconInk }}>{t(d.chip)}</span> : null}
               </div>
-              <span id="pr-id-hint" className="text-[13px]" style={{ color: t.hint }}>{d.hint}</span>
+              <span id="pr-id-hint" className="text-[13px]" style={{ color: tone.hint }}>{t(d.hint)}</span>
               <FieldError id="pr-id-err" errors={idErrors} />
               {d.kind === "pin" ? (
                 <Link href="/import" className="mt-1 flex items-center gap-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3 py-2.5 text-[13px] text-[#3B2A07] no-underline">
-                  <span className="flex-auto"><strong>Looks like a PaperCept PIN.</strong> It can’t sign you in here, but it can bring your history across.</span>
-                  <span className="whitespace-nowrap font-semibold text-[#7A4508]">Bring history →</span>
+                  <span className="flex-auto"><strong>{t("Looks like a PaperCept PIN.")}</strong> {t("It can’t sign you in here, but it can bring your history across.")}</span>
+                  <span className="whitespace-nowrap font-semibold text-[#7A4508]">{t("Bring history →")}</span>
                 </Link>
               ) : null}
             </div>
 
             <div className="mt-4 flex flex-col gap-1.5">
               <div className="flex items-baseline justify-between">
-                <label htmlFor="pr-pass1" className={LABEL}>Password</label>
-                <Link href="/forgot-password" className={`text-[13px] ${LINK}`}>Forgot password?</Link>
+                <label htmlFor="pr-pass1" className={LABEL}>{t("Password")}</label>
+                <Link href="/forgot-password" className={`text-[13px] ${LINK}`}>{t("Forgot password?")}</Link>
               </div>
               <div className="flex overflow-hidden rounded-[4px] border bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ borderColor: pwState.fieldErrors?.password?.length ? "#B3261E" : "#B7BDC9" }}>
                 <input id="pr-pass1" name="password" type={showPass ? "text" : "password"} autoComplete="current-password" aria-describedby="pr-pass-err"
                   className="box-border h-11 min-w-0 flex-auto border-0 bg-transparent px-3.5 text-[16px] text-[#121826] outline-none" />
-                <button type="button" onClick={() => setShowPass((s) => !s)} aria-label={showPass ? "Hide password" : "Show password"}
-                  className="w-[68px] border-0 border-l border-[#B7BDC9] bg-[#F2F3F0] text-[13px] font-medium text-[#4A5263]">{showPass ? "Hide" : "Show"}</button>
+                <button type="button" onClick={() => setShowPass((s) => !s)} aria-label={showPass ? t("Hide password") : t("Show password")}
+                  className="w-[68px] border-0 border-l border-[#B7BDC9] bg-[#F2F3F0] text-[13px] font-medium text-[#4A5263]">{showPass ? t("Hide") : t("Show")}</button>
               </div>
               <FieldError id="pr-pass-err" errors={pwState.fieldErrors?.password} />
             </div>
 
             <label className="mt-3 flex min-h-6 items-center gap-2.5 text-[14px]">
-              <input type="checkbox" name="remember" className="size-[18px] accent-[#0E1B3D]" />Keep me signed in on this device
+              <input type="checkbox" name="remember" className="size-[18px] accent-[#0E1B3D]" />{t("Keep me signed in on this device")}
             </label>
-            <button type="submit" disabled={pwPending} className={`mt-4 ${PRIMARY}`}>{pwPending ? "Signing in…" : "Sign in"}</button>
+            <button type="submit" disabled={pwPending} className={`mt-4 ${PRIMARY}`}>{pwPending ? t("Signing in…") : t("Sign in")}</button>
           </form>
 
           <div className="mt-2.5 grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => comingSoon("Passkey")} className={`h-10 text-[13px] ${SECONDARY}`}><KeyIcon />Use a passkey</button>
+            <button type="button" onClick={() => comingSoon("Passkey")} className={`h-10 text-[13px] ${SECONDARY}`}><KeyIcon />{t("Use a passkey")}</button>
             <form action={codeAction}>
               <input type="hidden" name="identifier" value={identifier} />
               <input type="hidden" name="next" value={next ?? ""} />
-              <button type="submit" disabled={codePending} className={`h-10 w-full text-[13px] ${SECONDARY}`}><MailIcon />{codePending ? "Sending…" : "Email me a link"}</button>
+              <button type="submit" disabled={codePending} className={`h-10 w-full text-[13px] ${SECONDARY}`}><MailIcon />{codePending ? t("Sending…") : t("Email me a link")}</button>
             </form>
           </div>
 
           <div className={`my-[22px] flex items-center gap-3 text-[13px] ${MUTED}`}>
-            <span className="h-px flex-auto bg-[#DADDE3]" />or continue with<span className="h-px flex-auto bg-[#DADDE3]" />
+            <span className="h-px flex-auto bg-[#DADDE3]" />{t("or continue with")}<span className="h-px flex-auto bg-[#DADDE3]" />
           </div>
           {/* TODO(auth): wire ORCID (custom OIDC), Institution (SAML) and Google once providers are configured. */}
           <div className="grid grid-cols-3 gap-2">
             <button type="button" onClick={() => comingSoon("ORCID")} className={`h-11 text-[14px] ${SECONDARY}`}><OrcidIcon />ORCID</button>
-            <button type="button" onClick={() => comingSoon("Institution")} className={`h-11 text-[14px] ${SECONDARY}`}><InstitutionIcon />Institution</button>
+            <button type="button" onClick={() => comingSoon("Institution")} className={`h-11 text-[14px] ${SECONDARY}`}><InstitutionIcon />{t("Institution")}</button>
             <button type="button" onClick={() => comingSoon("Google")} className={`h-11 text-[14px] ${SECONDARY}`}><GoogleIcon />Google</button>
           </div>
-          <p className={`mt-5 text-[14px] ${MUTED}`}>Had a PIN on another conference system? <Link href="/import" className={LINK}>Bring your history</Link></p>
+          <p className={`mt-5 text-[14px] ${MUTED}`}>{t("Had a PIN on another conference system?")} <Link href="/import" className={LINK}>{t("Bring your history")}</Link></p>
         </>
       ) : (
         <CreateStep state={createState} action={createAction} pending={createPending} next={next} onOrcid={() => comingSoon("ORCID")} soon={soon} />
@@ -182,38 +185,40 @@ export function SignInPanel({ next, initialTab = "signin" }: { next?: string; in
 function CreateStep({ state, action, pending, next, onOrcid, soon }: {
   state: StartState; action: (fd: FormData) => void; pending: boolean; next?: string; onOrcid: () => void; soon: string | null;
 }) {
+  const t = useT();
   const e = state.fieldErrors;
   const nameErr = e?.firstName?.[0] ?? e?.lastName?.[0];
   const inv = (k: string) => (e?.[k]?.length ? { "aria-invalid": true as const, style: { borderColor: "#B3261E" } } : {});
   return (
     <>
-      <h1 className={`mt-7 ${H1}`}>Create your account</h1>
-      <p className={`mt-2 ${MUTED}`}>Free for authors and reviewers. Takes about a minute.</p>
-      {state.message ? <Banner>{state.message}</Banner> : null}
+      <h1 className={`mt-7 ${H1}`}>{t("Create your account")}</h1>
+      <p className={`mt-2 ${MUTED}`}>{t("Free for authors and reviewers. Takes about a minute.")}</p>
+      {state.message ? <Banner>{t(state.message)}</Banner> : null}
       {soon ? <Banner tone="info">{soon}</Banner> : null}
-      <button type="button" onClick={onOrcid} className={`mt-5 h-[46px] w-full text-[15px] font-semibold ${SECONDARY}`}><OrcidIcon />Fill in from ORCID</button>
+      <button type="button" onClick={onOrcid} className={`mt-5 h-[46px] w-full text-[15px] font-semibold ${SECONDARY}`}><OrcidIcon />{t("Fill in from ORCID")}</button>
       <form action={action} noValidate>
         <input type="hidden" name="next" value={next ?? ""} />
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-first" className={LABEL}>First name</label><input id="pr-first" name="firstName" autoComplete="given-name" className={INPUT} {...inv("firstName")} /></div>
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-last" className={LABEL}>Last name</label><input id="pr-last" name="lastName" autoComplete="family-name" className={INPUT} {...inv("lastName")} /></div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pr-first" className={LABEL}>{t("First name")}</label><input id="pr-first" name="firstName" autoComplete="given-name" className={INPUT} {...inv("firstName")} /></div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pr-last" className={LABEL}>{t("Last name")}</label><input id="pr-last" name="lastName" autoComplete="family-name" className={INPUT} {...inv("lastName")} /></div>
         </div>
-        {nameErr ? <p className="mt-1.5 text-[13px] text-[#B3261E]">{nameErr}</p> : null}
+        {nameErr ? <p className="mt-1.5 text-[13px] text-[#B3261E]">{t(nameErr)}</p> : null}
         <div className="mt-3 flex flex-col gap-3">
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-cemail" className={LABEL}>Email</label><input id="pr-cemail" name="email" type="email" autoComplete="email" placeholder="Institutional email preferred" className={INPUT} {...inv("email")} /><FieldError id="e-email" errors={e?.email} /></div>
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-aff" className={LABEL}>Affiliation</label><input id="pr-aff" name="affiliation" autoComplete="organization" placeholder="University or company" className={INPUT} /></div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pr-cemail" className={LABEL}>{t("Email")}</label><input id="pr-cemail" name="email" type="email" autoComplete="email" placeholder={t("Institutional email preferred")} className={INPUT} {...inv("email")} /><FieldError id="e-email" errors={e?.email} /></div>
+          <div className="flex flex-col gap-1.5"><label htmlFor="pr-aff" className={LABEL}>{t("Affiliation")}</label><input id="pr-aff" name="affiliation" autoComplete="organization" placeholder={t("University or company")} className={INPUT} /></div>
           <label className="flex items-start gap-2.5 text-[14px]"><input type="checkbox" name="consent" className="mt-0.5 size-[18px] flex-none accent-[#0E1B3D]" />
-            <span>I agree to the <Link href="/legal/terms" className={LINK}>Terms</Link> and the <Link href="/legal/privacy" className={LINK}>Privacy notice</Link> (GDPR).</span>
+            <span>{t("I agree to the")} <Link href="/legal/terms" className={LINK}>{t("Terms")}</Link> {t("and the")} <Link href="/legal/privacy" className={LINK}>{t("Privacy notice")}</Link> (GDPR).</span>
           </label>
           <FieldError id="e-consent" errors={e?.consent} />
         </div>
-        <button type="submit" disabled={pending} className={`mt-[18px] ${PRIMARY}`}>{pending ? "Creating…" : "Create account"}</button>
+        <button type="submit" disabled={pending} className={`mt-[18px] ${PRIMARY}`}>{pending ? t("Creating…") : t("Create account")}</button>
       </form>
     </>
   );
 }
 
 function CodeStep({ state, next, onBack }: { state: SignInState; next?: string; onBack: () => void }) {
+  const t = useT();
   const [vState, vAction, vPending] = useActionState(verifyCode, state);
   const [left, setLeft] = useState(30);
   useEffect(() => {
@@ -222,31 +227,31 @@ function CodeStep({ state, next, onBack }: { state: SignInState; next?: string; 
     return () => clearTimeout(id);
   }, [left]);
   const byEmail = state.sentKind === "email";
-  const lead = byEmail ? "We sent a link and a 6-digit code to" : "We sent a link and a 6-digit code to your account email";
+  const lead = byEmail ? t("We sent a link and a 6-digit code to") : t("We sent a link and a 6-digit code to your account email");
   return (
     <>
-      <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">Link sent</p>
-      <h1 className={`mt-2.5 ${H1}`}>Check your inbox</h1>
-      <p className={`mt-2.5 ${MUTED}`}>{lead} <strong className={INK}>{state.sentTo}</strong>. It expires in 15 minutes. On another device? Enter the code from the same email.</p>
+      <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">{t("Link sent")}</p>
+      <h1 className={`mt-2.5 ${H1}`}>{t("Check your inbox")}</h1>
+      <p className={`mt-2.5 ${MUTED}`}>{lead} <strong className={INK}>{state.sentTo}</strong>. {t("It expires in 15 minutes. On another device? Enter the code from the same email.")}</p>
       <form action={vAction} noValidate>
         <input type="hidden" name="email" value={state.email ?? ""} />
         <input type="hidden" name="next" value={next ?? ""} />
         <div className="mt-[22px] flex flex-col gap-1.5">
-          <label htmlFor="pr-code" className={LABEL}>Verification code</label>
+          <label htmlFor="pr-code" className={LABEL}>{t("Verification code")}</label>
           <input id="pr-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" aria-describedby="pr-code-err"
             className="box-border h-[46px] rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 font-mono text-[18px] tracking-[0.3em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
             style={vState.fieldErrors?.code?.length ? { borderColor: "#B3261E" } : undefined} />
           <FieldError id="pr-code-err" errors={vState.fieldErrors?.code} />
         </div>
-        <button type="submit" disabled={vPending} className={`mt-4 ${PRIMARY}`}>{vPending ? "Checking…" : "Verify and sign in"}</button>
+        <button type="submit" disabled={vPending} className={`mt-4 ${PRIMARY}`}>{vPending ? t("Checking…") : t("Verify and sign in")}</button>
       </form>
       <div className="mt-4 flex flex-wrap items-center gap-4 text-[14px]">
         {/* TODO(auth): real resend (supabase.auth.resend / signInWithOtp again) when the timer reaches 0. */}
-        <span className={`font-mono text-[13px] ${MUTED}`}>{left > 0 ? `Resend in 0:${String(left).padStart(2, "0")}` : "You can ask for a new code"}</span>
-        <button type="button" onClick={onBack} className={`min-h-6 border-0 bg-transparent p-0 text-[14px] ${LINK}`}>Use a different email</button>
+        <span className={`font-mono text-[13px] ${MUTED}`}>{left > 0 ? t("Resend in {time}", { time: `0:${String(left).padStart(2, "0")}` }) : t("You can ask for a new code")}</span>
+        <button type="button" onClick={onBack} className={`min-h-6 border-0 bg-transparent p-0 text-[14px] ${LINK}`}>{t("Use a different email")}</button>
       </div>
       {/* TODO(domain): real sender domain. */}
-      <p className={`mt-5 text-[13px] ${MUTED}`}>Not arriving? Check spam, or ask your IT team to allow mail from <span className="font-mono">[sender domain]</span>.</p>
+      <p className={`mt-5 text-[13px] ${MUTED}`}>{t("Not arriving? Check spam, or ask your IT team to allow mail from")} <span className="font-mono">[sender domain]</span>.</p>
     </>
   );
 }
