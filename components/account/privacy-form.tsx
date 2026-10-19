@@ -81,20 +81,15 @@ export function PrivacyForm({ visibility, consents, lastExport, lastDelete }: {
 
 function YourData({ lastExport }: { lastExport: DataRequest | null }) {
   const t = useT();
-  const [pending, start] = useTransition();
-  const [res, setRes] = useState<AccountState | null>(null);
-  const status = res?.value === "requested" ? "requested" : lastExport?.status ?? null;
-  const busy = status === "requested" || status === "preparing";
+  const status = lastExport?.status ?? null;
   return (
     <section className={sx.card}>
       <h2 className={sx.h2}>{t("Your data")}</h2>
       <div className="mt-3.5 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span><strong className="text-[14px]">{t("Download everything")}</strong><span className="block text-[13px] text-[#4A5263]">{t("Papers, reviews you wrote, messages and profile as a ZIP (JSON + PDFs).")}</span></span>
-          {status === "ready" ? <span className="text-[13px] font-semibold text-[#14603F]">{t("Ready — we emailed you a download link")}</span>
-            : <button type="button" disabled={pending || busy} className={small} onClick={() => start(async () => setRes(await requestData("export")))}>{busy ? t("Preparing… we'll email you") : t("Request export")}</button>}
+          <Link href="/settings/privacy/export" className={small}>{status === "ready" ? t("Download ZIP") : status === "preparing" ? t("Preparing…") : t("Request export")}</Link>
         </div>
-        {res?.error ? <p role="alert" className="m-0 text-[13px] text-[#B3261E]">{t(res.error)}</p> : null}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0EC] pt-3">
           <span><strong className="text-[14px]">{t("Import from PaperCept or another system")}</strong><span className="block text-[13px] text-[#4A5263]">{t("Bring past papers and reviews using your society's export or ORCID.")}</span></span>
           <span aria-disabled title={t("Coming soon")} className={`${small} text-[#9AA3B5]!`}>{t("Import")} · {t("soon")}</span>
@@ -122,9 +117,9 @@ function DeleteAccount({ lastDelete, date }: { lastDelete: DataRequest | null; d
       {outcome === "scheduled" ? (
         <p role="status" className="mb-0 mt-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3 py-2.5 text-[13px] text-[#3B2A07]">
           {lastDelete?.scheduled_for
-            ? t("Your account will be deleted on {date}. To keep it, contact support before then.", { date: date(lastDelete.scheduled_for) })
-            : t("Your account will be deleted in 30 days. To keep it, contact support before then.")}{" "}
-          <Link href="/account-help">{t("Contact support")}</Link>
+            ? t("Your account will be deleted on {date}. You can cancel until then.", { date: date(lastDelete.scheduled_for) })
+            : t("Your account will be deleted in 30 days. You can cancel until then.")}{" "}
+          <Link href="/settings/privacy/export">{t("Cancel deletion")}</Link>
         </p>
       ) : confirming ? (
         <div className="mt-3 rounded-[6px] border border-[#F3C3BE] bg-[#FFFBFA] px-3.5 py-3">
