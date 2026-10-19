@@ -2,6 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { DirectoryVenue, VenueDate, VenueDetails } from "@/lib/venues/types";
+import type { ArchiveAward, ArchiveSession, Fee, VenueArchive, VenuePublic, VenuePublicInfo } from "@/lib/venues/polish-types";
 
 const COLS =
   "id, slug, short_name, name, kind, society, field, format, review_mode, page_limit, indexed_in, accepting, city, country, location, region, latitude, longitude, place_hint, starts_on, ends_on, papers_count, acceptance_rate, best_paper, imported_from, venue_dates(id, kind, label, starts_at, ends_at, is_hard, is_extended, extended_from)";
@@ -57,4 +58,48 @@ export async function getVenue(slug: string): Promise<{ venue: DirectoryVenue; d
   if (!data) return null;
   const r = data as Row;
   return { venue: mapVenue(r), details: (r.details as VenueDetails) ?? {}, doubleBlind: !!r.double_blind, website: (r.website as string) ?? null };
+}
+
+/** PV02 Attending / Venue & travel / Gallery content and the fee table (null = not published or migration not applied). */
+export async function getVenuePublic(slug: string): Promise<VenuePublic | null> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("venues", `venue:${slug}`);
+  if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) return null;
+  const { data, error } = await createPublicClient().rpc("venue_public_info", { p_slug: slug });
+  if (error || !data) return null;
+  const d = data as { info?: VenuePublicInfo; fees?: Fee[]; currency?: string; papers_per_registration?: number | null; lat?: number | null; lng?: number | null };
+  return {
+    info: d.info ?? {}, fees: Array.isArray(d.fees) ? d.fees.filter((f) => f && typeof f.name === "string") : [], currency: d.currency ?? "USD",
+    papersPerRegistration: d.papers_per_registration ?? null, lat: d.lat ?? null, lng: d.lng ?? null,
+  };
+}
+
+/** PV01p archive of a past edition: stats, proceedings, program and awards. Null until the event is over. */
+export async function getVenueArchive(slug: string): Promise<{ archive: VenueArchive; sessions: ArchiveSession[]; awards: ArchiveAward[] } | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("venues", `venue:${slug}`);
+  if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) return null;
+  const supabase = createPublicClient();
+  const { data, error } = await supabase.rpc("venue_archive", { p_slug: slug });
+  if (error || !data) return null;
+  const a = data as Record<string, unknown>;
+  const archive: VenueArchive = {
+    venueId: a.venue_id as string, slug: a.slug as string, name: a.name as string, acr: a.acr as string,
+    startsOn: (a.starts_on as string) ?? null, endsOn: (a.ends_on as string) ?? null, where: (a.where as string) || null,
+    importedFrom: (a.imported_from as string) ?? null, bestPaper: (a.best_paper as string) ?? null,
+    submitted: a.submitted == null ? null : Number(a.submitted), accepted: a.accepted == null ? null : Number(a.accepted),
+    acceptanceRate: a.acceptance_rate == null ? null : Number(a.acceptance_rate), countries: a.countries == null ? null : Number(a.countries),
+    papers: Array.isArray(a.papers) ? (a.papers as VenueArchive["papers"]) : [], programPublished: !!a.program_published,
+  };
+  const prog = archive.programPublished ? await supabase.rpc("program", { p_venue: archive.venueId }) : { data: [] as unknown[] };
+  // Awards come from the awards screens (EM34) once that module is installed; until then only the venue's best paper.
+  const aw = await supabase.rpc("public_awards", { p_venue: archive.venueId });
+  const sessions = (Array.isArray(prog.data) ? prog.data : []) as ArchiveSession[];
+  const awards: ArchiveAward[] = !aw.error && Array.isArray(aw.data)
+    ? (aw.data as Record<string, unknown>[]).map((r) => ({ award: String(r.award ?? r.award_name ?? ""), title: String(r.title ?? r.paper_title ?? ""), authors: (r.authors as string) ?? null })).filter((r) => r.award && r.title)
+    : [];
+  if (!awards.length && archive.bestPaper) awards.push({ award: "Best paper", title: archive.bestPaper, authors: null });
+  return { archive, sessions, awards };
 }

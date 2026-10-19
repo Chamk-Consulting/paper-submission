@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { PublicHeader } from "@/components/venues/public-header";
+import { getMyVenueStatus } from "@/lib/venues/polish-actions";
+import type { MyVenueStatus } from "@/lib/venues/polish-types";
 import { useClock, useFollows } from "@/components/venues/use-clock";
 import type { VenueDate } from "@/lib/venues/types";
 import { DAY, cityOf, fmtAoE, fmtLocal } from "@/lib/venues/time";
@@ -97,16 +100,70 @@ export function DatesList({ dates, generatedAt }: { dates: VenueDate[]; generate
   );
 }
 
+const STAGE: Record<string, string> = {
+  draft: "DRAFT", submitted: "SUBMITTED", review: "IN REVIEW", decision: "DECISION", revise: "REVISION", final: "FINAL VERSION", done: "ACCEPTED", rejected: "NOT ACCEPTED", withdrawn: "WITHDRAWN",
+};
+const ROLE: Record<string, string> = {
+  owner: "OWNER", chair: "GENERAL CHAIR", program_chair: "PROGRAM CHAIR", deputy_chair: "DEPUTY CHAIR", ceb_chair: "EDITORIAL BOARD CHAIR", publication_chair: "PUBLICATION CHAIR",
+  registration_chair: "REGISTRATION CHAIR", session_chair: "SESSION CHAIR", associate_editor: "ASSOCIATE EDITOR", reviewer: "REVIEWER", staff: "STAFF",
+};
+
+function MyStatus({ venueId, acr, slug }: { venueId: string; acr: string; slug: string }) {
+  const t = useT();
+  const [s, setS] = useState<MyVenueStatus | null | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    getMyVenueStatus(venueId).then((r) => { if (live) setS(r); }).catch(() => { if (live) setS(null); });
+    return () => { live = false; };
+  }, [venueId]);
+  if (s === undefined) return <div aria-busy="true" className="mt-2 h-14 animate-pulse rounded-[6px] bg-[#F5F6F3]" />;
+  const empty = !s || (!s.roles.length && !s.papers.length && !s.reviews.length);
+  if (empty) return <p className="mt-1.5 text-[14px] text-[#4A5263]">{t("You have no papers or roles at {acr} yet.", { acr })} <Link href="/workspace/submissions" className="text-[#2F5FD0] underline">{t("My submissions")}</Link></p>;
+  const no = (n: number | null) => (n ? `#${String(n).padStart(4, "0")}` : t("Draft"));
+  return (
+    <>
+      <ul className="m-0 mt-2.5 flex list-none flex-col gap-2 p-0">
+        {s.roles.map((r) => (
+          <li key={r} className="rounded-[6px] border border-[#DADDE3] px-3 py-2">
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#1F47A8]">{t(ROLE[r] ?? r.toUpperCase())}</span>
+            {["owner", "chair", "program_chair", "deputy_chair", "ceb_chair", "publication_chair", "registration_chair", "staff"].includes(r)
+              ? <Link href={`/manage/${slug}`} className="block text-[13px] font-semibold text-[#2F5FD0]">{t("Open the event dashboard →")}</Link> : null}
+          </li>
+        ))}
+        {s.papers.slice(0, 4).map((p) => (
+          <li key={p.id} className="rounded-[6px] border border-[#DADDE3] px-3 py-2">
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t(STAGE[p.stage] ?? p.stage)} · {no(p.number)}</span>
+            <span className="block truncate text-[14px] font-semibold">{p.title || t("Untitled draft")}</span>
+            <span className="block text-[13px] text-[#4A5263]">
+              {p.stage === "draft" && p.draft_step ? `${t("Step {n} of 7", { n: p.draft_step })} · ` : ""}
+              <Link href={`/submissions/${p.id}`} className="font-semibold text-[#2F5FD0]">{p.stage === "draft" ? t("Continue →") : t("Open →")}</Link>
+            </span>
+          </li>
+        ))}
+        {s.reviews.slice(0, 4).map((r) => (
+          <li key={r.id} className="rounded-[6px] border border-[#DADDE3] px-3 py-2">
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#7A4508]">{t("REVIEWER")} · {no(r.number)}</span>
+            <span className="block text-[13px] text-[#4A5263]">
+              {r.status === "invited" ? t("Invitation — reply needed") : r.status === "submitted" ? t("Review submitted") : t("Due {date}", { date: new Date(r.due_at).toLocaleDateString(t.intl, { day: "numeric", month: "short" }) })}
+              {" · "}<Link href={r.status === "accepted" ? `/reviews/${r.id}` : "/reviews"} className="font-semibold text-[#2F5FD0]">{t("Open →")}</Link>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <Link href={`/venues/${slug}/me`} className="mt-3 inline-block text-[13px] font-semibold text-[#2F5FD0]">{t("Everything for you at {acr} →", { acr })}</Link>
+    </>
+  );
+}
+
 /** "Your status here" card. */
-export function StatusCard({ acr, slug }: { acr: string; slug: string }) {
+export function StatusCard({ venueId, acr, slug }: { venueId: string; acr: string; slug: string }) {
   const t = useT();
   const f = useFollows();
   return (
     <section aria-labelledby="st-h" className="rounded-[8px] border border-[#DADDE3] bg-white p-[18px]">
       <h2 id="st-h" className="m-0 text-[17px] font-semibold">{t("Your status here")}</h2>
       {f.signedIn ? (
-        // TODO(workspace): your papers, reviews and roles at this venue.
-        <p className="mt-1.5 text-[14px] text-[#4A5263]">{t("You have no papers or roles at {acr} yet.", { acr })} <Link href="/workspace/submissions" className="text-[#2F5FD0] underline">{t("My submissions")}</Link></p>
+        <MyStatus venueId={venueId} acr={acr} slug={slug} />
       ) : (
         <>
           <p className="mt-1.5 text-[14px] text-[#4A5263]">{t("Sign in to see your papers, reviews and roles at {acr}.", { acr })}</p>

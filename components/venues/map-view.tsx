@@ -70,10 +70,32 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
   const [key, setKey] = useState<MapKey>("world");
   const [pin, setPin] = useState("");
   const geo = useMemo(() => geometry(key), [key]);
-  const placed = rows.filter((v) => v.lat != null && v.lng != null);
+  // "Distance from you": a guess from the time zone, or the browser's location after the person asks (never stored or sent).
+  const [geoHome, setGeoHome] = useState<[number, number, string] | null>(null);
+  const [geoState, setGeoState] = useState<"idle" | "asking" | "denied" | "on">("idle");
+  const [unit, setUnit] = useState<"km" | "mi">("km");
+  const [within, setWithin] = useState<0 | 1000 | 3000>(0);
+  const home = geoHome ?? homeFor(tz);
+  const askLocation = () => {
+    if (!navigator.geolocation) { setGeoState("denied"); return; }
+    setGeoState("asking");
+    if (/-(US|GB|LR|MM)$/i.test(navigator.language)) setUnit("mi");
+    navigator.geolocation.getCurrentPosition(
+      (p) => { setGeoHome([Math.round(p.coords.longitude * 100) / 100, Math.round(p.coords.latitude * 100) / 100, t("your location")]); setGeoState("on"); },
+      () => setGeoState("denied"),
+      { maximumAge: 600_000, timeout: 10_000, enableHighAccuracy: false },
+    );
+  };
+  const fmtDist = (k: number) => {
+    const n = unit === "mi" ? Math.round((k * 0.621371) / 10) * 10 : k;
+    return `${n > 0 ? n.toLocaleString(t.intl) : "<10"} ${unit}`;
+  };
+  const distOf = (v: Row) => (home && v.lat != null && v.lng != null ? km([home[0], home[1]], [v.lng, v.lat]) : null);
+  const placedAll = rows.filter((v) => v.lat != null && v.lng != null);
+  const placed = within && home ? placedAll.filter((v) => (distOf(v) ?? Infinity) <= within) : placedAll;
+  const nearest = home ? [...placedAll].sort((a, b) => (distOf(a) ?? 0) - (distOf(b) ?? 0)).slice(0, 5) : [];
   const onMap = placed.filter((v) => geo.visible(v.lng!, v.lat!));
   const sel = placed.find((v) => v.id === pin) ?? onMap[0] ?? placed[0];
-  const home = homeFor(tz);
   const homeVisible = home ? geo.visible(home[0], home[1]) : false;
 
   const color = (v: Row) => (v.st.state === "now" ? "#18744F" : v.st.state === "soon" ? "#F2A93B" : v.st.state === "later" ? "#8A93A6" : "#0E1B3D");
@@ -157,7 +179,7 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
               <dt className="text-[#4A5263]">{t("When")}</dt><dd className="m-0">{fmtRange(sel.startsOn, sel.endsOn, t.intl, t)}</dd>
               <dt className="text-[#4A5263]">{t("Where")}</dt><dd className="m-0">{[sel.city, sel.country].filter(Boolean).join(", ")}{sel.placeHint ? ` (${sel.placeHint})` : ""}</dd>
               <dt className="text-[#4A5263]">{t("Deadline")}</dt><dd className="m-0">{sel.st.closes}{sel.st.local ? ` · ${sel.st.local}` : ""}</dd>
-              {dist != null && home ? <><dt className="text-[#4A5263]">{t("From you")}</dt><dd className="m-0">{t("{km} km from {city} · about {h} h flying", { km: dist.toLocaleString(t.intl), city: home[2], h: Math.max(1, Math.round(dist / 750)) })}</dd></> : null}
+              {dist != null && home ? <><dt className="text-[#4A5263]">{t("From you")}</dt><dd className="m-0">{t("{dist} from {city} · about {h} h flying", { dist: fmtDist(dist), city: home[2], h: Math.max(1, Math.round(dist / 750)) })}</dd></> : null}
               {sel.format ? <><dt className="text-[#4A5263]">{t("Format")}</dt><dd className="m-0">{t(FORMAT_LABEL[sel.format])}</dd></> : null}
             </dl>
             {sel.format !== "online" ? (
@@ -173,6 +195,46 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
         ) : (
           <section className="rounded-[8px] border border-dashed border-[#DADDE3] bg-white p-4 text-[14px] text-[#4A5263]">{t("No venues with a location match your filters.")}</section>
         )}
+        <section aria-labelledby="near-h" className="rounded-[8px] border border-[#DADDE3] bg-white px-3.5 py-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <h3 id="near-h" className="m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("Distance from you")}</h3>
+            <span role="group" aria-label={t("Units")} className="flex gap-1">
+              {(["km", "mi"] as const).map((u) => (
+                <button key={u} type="button" aria-pressed={unit === u} onClick={() => setUnit(u)} className="h-6 rounded-[3px] px-1.5 font-mono text-[11px]"
+                  style={{ background: unit === u ? "#0E1B3D" : "#FFFFFF", color: unit === u ? "#F5F6F3" : "#4A5263", border: "1px solid #DADDE3" }}>{u}</button>
+              ))}
+            </span>
+          </div>
+          <p className="m-0 mt-1 text-[12px] text-[#4A5263]">
+            {geoState === "on" ? t("From your current location. It stays in this browser — we don't save it.") : home ? t("Estimated from your time zone ({city}).", { city: home[2] }) : t("We can't guess where you are from your time zone.")}
+          </p>
+          {geoState !== "on" ? (
+            <button type="button" onClick={askLocation} disabled={geoState === "asking"} className="mt-2 h-8 w-full rounded-[4px] border border-[#B7BDC9] bg-white text-[13px] font-medium text-[#121826] disabled:opacity-60">
+              {geoState === "asking" ? t("Finding you…") : t("Use my precise location")}
+            </button>
+          ) : null}
+          {geoState === "denied" ? <p role="status" className="m-0 mt-1.5 text-[12px] text-[#A8600F]">{t("Location is off for this site. Distances stay estimated from your time zone.")}</p> : null}
+          {home ? (
+            <>
+              <div role="group" aria-label={t("Show venues within")} className="mt-2.5 flex flex-wrap gap-1">
+                {([[0, t("Any distance")], [1000, `≤ ${fmtDist(1000)}`], [3000, `≤ ${fmtDist(3000)}`]] as [0 | 1000 | 3000, string][]).map(([w, lbl]) => (
+                  <button key={w} type="button" aria-pressed={within === w} onClick={() => setWithin(w)} className="h-7 rounded-full px-2.5 text-[12px] font-semibold"
+                    style={{ background: within === w ? "#0E1B3D" : "#FFFFFF", color: within === w ? "#F5F6F3" : "#4A5263", border: within === w ? "1px solid #0E1B3D" : "1px solid #DADDE3" }}>{lbl}</button>
+                ))}
+              </div>
+              <p className="m-0 mt-2.5 text-[12px] font-semibold text-[#121826]">{t("Nearest venues")}</p>
+              <ol className="m-0 mt-1 list-none p-0">
+                {nearest.map((v) => (
+                  <li key={v.id} className="border-b border-[#EEF0EC] last:border-b-0">
+                    <button type="button" onClick={() => setPin(v.id)} className="flex w-full justify-between gap-2 border-0 bg-transparent px-0 py-1.5 text-left text-[13px] text-[#121826]">
+                      <span className="truncate">{v.acr}</span><span className="flex-none font-mono text-[#4A5263]">{fmtDist(distOf(v) ?? 0)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : null}
+        </section>
         <section className="rounded-[8px] border border-[#DADDE3] bg-white px-3.5 py-3">
           <p className="m-0 mb-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("By region")}</p>
           {["Europe", "Asia–Pacific", "Americas", "Africa & Middle East", "Online"].map((r) => (

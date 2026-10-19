@@ -4,6 +4,8 @@ import { requireEvent, groupStatus, lastChange } from "@/lib/manage/data";
 import { ManagePage, SetupLayout } from "@/components/manage/chrome";
 import { PublishingForm, type Fee } from "@/components/manage/setup2/publishing";
 import { RulesCard } from "@/components/manage/setup2/rules";
+import { VenuePageForm } from "@/components/manage/venuepolish/venue-page-form";
+import type { VenuePublicInfo } from "@/lib/venues/polish-types";
 import { Reveal } from "@/components/motion/reveal";
 import { SetupFormSkeleton } from "@/components/skeletons/setup2";
 
@@ -39,6 +41,8 @@ async function Inner({ params }: P) {
                 papers_per_registration: Math.min(4, Math.max(1, Number(s.papers_per_registration ?? 1))), extra_pages_prepaid: s.extra_pages_prepaid === true,
                 fee_types: fees, currency: String(s.currency ?? "USD"),
               }} />
+            <VenuePageForm venueId={ctx.venue.id} slug={slug} canEdit={ctx.isOrganizer}
+              initial={(ctx.venue.public_info && typeof ctx.venue.public_info === "object" ? ctx.venue.public_info : {}) as VenuePublicInfo} />
           </div>
           <RulesCard rules={[
             ["G1", "Copyright is signed per paper by one author."], ["G2", "Final files lock after the copyright is confirmed."],

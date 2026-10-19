@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicFooter } from "@/components/venues/public-header";
 import { CountdownCard, DatesList, FollowButton, LiveHeader, StatusCard } from "@/components/venues/venue-live";
-import { getVenue } from "@/lib/venues/data";
+import { getVenue, getVenuePublic } from "@/lib/venues/data";
+import { AttendingSection, GallerySection, TravelSection } from "@/components/venues/venue-sections";
+import { ContactOrganizers } from "@/components/venues/venue-client";
 import { FIELD_COLOR, FIELD_LABEL, FORMAT_LABEL } from "@/lib/venues/types";
 import { fmtRange } from "@/lib/venues/time";
 import { getT } from "@/lib/i18n/server";
@@ -24,9 +26,10 @@ const section = "scroll-mt-20 border-t border-[#DADDE3] py-8 first:border-t-0 fi
 
 async function Venue({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const [data, t] = await Promise.all([getVenue(slug), getT()]);
+  const [data, t, pub] = await Promise.all([getVenue(slug), getT(), getVenuePublic(slug)]);
   if (!data) notFound();
   const { venue: v, details, website } = data;
+  const online = v.kind === "journal" || v.format === "online";
   const generatedAt = new Date().toISOString();
   const [fbg, fink] = v.field ? FIELD_COLOR[v.field] : ["#E6EDFC", "#1F47A8"];
   const tags = [v.field ? (v.field === "ocean" ? t("Ocean") : v.field) : null, v.format ? t(FORMAT_LABEL[v.format]) : null, v.reviewMode ? t(v.reviewMode) : null, v.indexedIn.length ? v.indexedIn.join(" · ") : null].filter(Boolean) as string[];
@@ -35,7 +38,12 @@ async function Venue({ params }: { params: Promise<Params> }) {
   const types = details.types ?? [];
   const policies = details.policies ?? [];
   const organizers = details.organizers ?? [];
-  const nav: [string, string][] = [["cfp", "Call for papers"], ["dates", "Dates"], ["types", "How to submit"], ["policies", "Policies"], ["publication", "Publication"], ["program", "Program"], ["organizers", "Organizers"]];
+  const nav: [string, string][] = [
+    ["cfp", "Call for papers"], ["dates", "Dates"], ["types", "How to submit"], ["policies", "Policies"], ["publication", "Publication"],
+    ...(pub && !online ? ([["attending", "Attending"], ["travel", "Venue & travel"]] as [string, string][]) : []),
+    ...(pub?.info.gallery?.length ? ([["gallery", "Gallery"]] as [string, string][]) : []),
+    ["program", "Program"], ["organizers", "Organizers"],
+  ];
 
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
@@ -135,12 +143,18 @@ async function Venue({ params }: { params: Promise<Params> }) {
             </dl>
           </section>
 
-          {/* TODO(venue): Attending (fees, visas, grants), Venue & travel map and Gallery sections from canvas PV02. */}
+          {pub && !online ? <AttendingSection pub={pub} acr={v.acr} /> : null}
+          {pub && !online ? <TravelSection pub={pub} name={v.acr} fallbackPlace={v.location ?? ([v.city, v.country].filter(Boolean).join(", ") || null)} /> : null}
+          {pub ? <GallerySection pub={pub} /> : null}
 
           <section id="program" aria-labelledby="program-h" className={section}>
             <h2 id="program-h" className={h2}>{t("Program")}</h2>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4">
-              <div><div className="font-semibold">{t("The program is published after acceptance.")}</div><div className="text-[14px] text-[#4A5263]">{t("Then you can browse sessions and build My agenda.")}</div></div>
+              {(v.endsOn ?? v.startsOn) && (v.endsOn ?? v.startsOn)! < generatedAt.slice(0, 10) ? (
+                <div><div className="font-semibold">{t("This edition is over.")}</div><div className="text-[14px] text-[#4A5263]"><Link href={`/venues/${v.slug}/archive`} className="text-[#2F5FD0] underline">{t("Program, proceedings, awards and figures →")}</Link></div></div>
+              ) : (
+                <div><div className="font-semibold">{t("The program is published after acceptance.")}</div><div className="text-[14px] text-[#4A5263]">{t("Then you can browse sessions and build My agenda.")}</div></div>
+              )}
               <FollowButton venueId={v.id} slug={v.slug} />
             </div>
           </section>
@@ -164,7 +178,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
         </main>
 
         <aside className="flex w-full flex-col gap-4 pt-8 lg:w-[320px] lg:flex-none">
-          <StatusCard acr={v.acr} slug={v.slug} />
+          <StatusCard venueId={v.id} acr={v.acr} slug={v.slug} />
           <section aria-labelledby="ag-h" className="rounded-[8px] border border-[#DADDE3] bg-white p-[18px]">
             <h2 id="ag-h" className="m-0 text-[17px] font-semibold">{t("At a glance")}</h2>
             <dl className="m-0 mt-3 grid grid-cols-[130px_1fr] gap-x-3 gap-y-2 text-[14px]">
@@ -176,12 +190,11 @@ async function Venue({ params }: { params: Promise<Params> }) {
               {website ? <><dt className="text-[#4A5263]">{t("Website")}</dt><dd className="m-0 truncate"><a href={website} rel="noopener noreferrer" target="_blank" className="text-[#2F5FD0] underline">{website.replace(/^https:\/\//, "")}</a></dd></> : null}
             </dl>
           </section>
-          <section aria-labelledby="q-h" className="rounded-[8px] border border-[#DADDE3] bg-white p-[18px]">
+          <section id="contact" aria-labelledby="q-h" className="scroll-mt-20 rounded-[8px] border border-[#DADDE3] bg-white p-[18px]">
             <h2 id="q-h" className="m-0 text-[17px] font-semibold">{t("Questions?")}</h2>
             <p className="mt-1.5 text-[14px] text-[#4A5263]">{t("Message the right chair. Replies arrive in your Plenary inbox and by email.")}</p>
-            {/* TODO(inbox): contact-organizers form (IN01). */}
-            <span title={t("Coming soon")} className="mt-3 flex h-10 items-center justify-center rounded-[4px] border border-[#DADDE3] text-[14px] font-medium text-[#9AA3B5]">{t("Contact organizers")}</span>
-            <p className="mt-2.5 text-[13px]"><Link href="/account-help" className="text-[#2F5FD0] underline">{t("Technical problem? Plenary support")}</Link></p>
+            <ContactOrganizers venueId={v.id} slug={v.slug} acr={v.acr} />
+            <p className="mt-2.5 text-[13px]"><Link href="/contact" className="text-[#2F5FD0] underline">{t("Technical problem? Plenary support")}</Link></p>
           </section>
         </aside>
       </div>
