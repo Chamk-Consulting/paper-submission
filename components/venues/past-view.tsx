@@ -36,7 +36,7 @@ export function PastView({ rows }: { rows: Row[] }) {
             <span className="font-mono text-[13px] text-[#4A5263]">{p.startsOn?.slice(0, 4) ?? "—"}</span>
             <span className="min-w-0">
               <span className="flex flex-wrap items-center gap-2">
-                <Link href={`/venues/${p.slug}`} className="font-semibold text-[#121826] no-underline hover:underline">{p.acr}</Link>
+                <Link href={`/venues/${p.slug}/archive`} className="font-semibold text-[#121826] no-underline hover:underline">{p.acr}</Link>
                 <span className="text-[13px] text-[#4A5263]">{[p.city, p.country].filter(Boolean).join(", ") || p.location}</span>
                 {p.importedFrom ? <span className="rounded-[2px] bg-[#FBEFDD] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-[#7A4508]">{t("Imported from {source}", { source: p.importedFrom })}</span> : null}
               </span>
@@ -47,8 +47,12 @@ export function PastView({ rows }: { rows: Row[] }) {
               <span className="font-mono text-[13px]">{p.acceptanceRate != null ? `${Math.round(p.acceptanceRate)}%` : "—"}</span>
               {p.acceptanceRate != null ? <span aria-hidden className="ml-auto mt-1 block h-1 w-[60px] overflow-hidden rounded-sm bg-[#EEF0EC]"><span className="block h-1 bg-[#0E1B3D]" style={{ width: `${p.acceptanceRate}%` }} /></span> : null}
             </span>
-            {/* TODO(archive): program, proceedings, awards and stats pages for past editions. */}
-            <span className="hidden flex-wrap gap-3 text-[13px] md:flex"><Link href={`/venues/${p.slug}`} className="text-[#2F5FD0]">{t("Venue page")}</Link></span>
+            <span className="hidden flex-wrap gap-x-3 gap-y-1 text-[13px] md:flex">
+              <Link href={`/venues/${p.slug}/archive#program`} className="text-[#2F5FD0]">{t("Program")}</Link>
+              <Link href={`/venues/${p.slug}/archive#proceedings`} className="text-[#2F5FD0]">{t("Proceedings")}</Link>
+              <Link href={`/venues/${p.slug}/archive#awards`} className="text-[#2F5FD0]">{t("Awards")}</Link>
+              <Link href={`/venues/${p.slug}/archive#stats`} className="text-[#2F5FD0]">{t("Stats")}</Link>
+            </span>
           </div>
         ))}
         {list.length === 0 ? <p className="m-0 px-[18px] py-6 text-[#4A5263]">{t("No past editions match.")}</p> : null}
