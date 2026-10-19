@@ -9,6 +9,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { loadProgram, loadRoom } from "@/lib/program/data";
 import { KIND_STYLE, fmtDay, fmtTime, overlaps } from "@/lib/program/time";
 import { getT } from "@/lib/i18n/server";
+import { SessionAwards } from "@/components/manage/orgtools/award-badges";
 
 /* Canvas PG02 — one session: talks, room facts, what else runs at the same time. */
 
@@ -74,6 +75,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
             ) : null}
             <Link href={`/venues/${venue.slug}#program`} className="mt-2 inline-block">{t("Venue map & travel")}</Link>
           </section>
+          <SessionAwards venueId={venue.id} submissionIds={s.talks.map((x) => x.submissionId).filter((x): x is string => !!x)} />
           <section className="rounded-[8px] border border-[#DADDE3] bg-white px-[18px] py-4 text-[14px]">
             <p className="m-0 mb-2 font-mono text-[11px] tracking-[0.06em] text-[#4A5263]">{t("SAME TIME")}</p>
             {same.length ? (
