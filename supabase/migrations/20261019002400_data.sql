@@ -33,10 +33,11 @@ begin
   return v_n;
 end $$;
 
-create or replace function private.mask_email(p_email text)
+-- Same helper as the admin migration (same parameter name, so either order works).
+create or replace function private.mask_email(p text)
 returns text language sql immutable set search_path = '' as $$
-  select case when p_email is null or position('@' in p_email) < 2 then null
-              else left(p_email, 1) || '***' || substr(p_email, position('@' in p_email)) end
+  select case when p is null or position('@' in p) < 2 then null
+              else left(p, 1) || '***' || substr(p, position('@' in p)) end
 $$;
 
 -- What the unsubscribe page shows. Null when the link is unknown or expired.

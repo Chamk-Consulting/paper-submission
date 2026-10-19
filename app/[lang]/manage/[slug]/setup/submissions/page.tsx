@@ -25,7 +25,7 @@ async function Inner({ params }: P) {
   const supabase = await createClient();
   const [{ data: rows }, { data: used }] = await Promise.all([
     supabase.from("submission_types").select("id, name, description, pages, extra_pages, extra_page_fee, revision_pages, deadline_at, blind_override, enabled").eq("venue_id", ctx.venue.id).order("sort").order("name"),
-    supabase.from("submissions").select("paper_type").eq("venue_id", ctx.venue.id).not("paper_type", "is", null),
+    supabase.from("submissions").select("paper_type").eq("venue_id", ctx.venue.id).eq("is_test", false).not("paper_type", "is", null),
   ]);
   const inUse = new Set(((used ?? []) as { paper_type: string }[]).map((u) => u.paper_type));
   const types: SubType[] = ((rows ?? []) as (Omit<SubType, "deadline" | "inUse"> & { deadline_at: string | null })[]).map(({ deadline_at, ...r }) => ({ ...r, deadline: deadline_at ? aoeDate(deadline_at) : null, inUse: inUse.has(r.name) }));

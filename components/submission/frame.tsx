@@ -5,6 +5,7 @@ import { getMe } from "@/lib/auth/me";
 import { StepMark } from "@/components/motion/step-transition";
 import { getT } from "@/lib/i18n/server";
 import { STEPS, loadSubmission, type Ctx, type StepKey } from "@/lib/submission/data";
+import { TestBanner } from "@/components/submission/test-banner";
 
 export const initialsOf = (name: string, email: string) => {
   const p = name.trim().split(/\s+/).filter(Boolean);
@@ -32,7 +33,7 @@ export async function SubmissionFrame({ ctx, step, children, aside }: { ctx: Ctx
   return (
     <WizardLayout
       header={<WizardHeader initials={initialsOf(name, ctx.me.email)} right={<SavedAgo at={ctx.sub.updatedAt} generatedAt={generatedAt} label={submitted ? t("Submitted · {no} · saved", { no: `#${String(ctx.sub.number).padStart(4, "0")}` }) : t("Draft saved")} />} />}
-      band={<TitleBand crumb={submitted ? t("Submission {no}", { no: `#${String(ctx.sub.number).padStart(4, "0")}` }) : t("New submission")} title={submitted ? t("Edit submission") : t("New submission")} venue={ctx.venue} generatedAt={generatedAt} />}
+      band={<TitleBand crumb={ctx.sub.isTest ? t("Test submission") : submitted ? t("Submission {no}", { no: `#${String(ctx.sub.number).padStart(4, "0")}` }) : t("New submission")} title={ctx.sub.isTest ? t("Test submission") : submitted ? t("Edit submission") : t("New submission")} venue={ctx.venue} generatedAt={generatedAt} />}
       rail={
         <StepRail
           rail={{ done: ctx.done, current: step, reachable, base: `/submissions/${ctx.sub.id}` }}
@@ -42,6 +43,7 @@ export async function SubmissionFrame({ ctx, step, children, aside }: { ctx: Ctx
       aside={aside}
     >
       <StepMark n={STEPS.find((s) => s.key === step)!.n} />
+      {ctx.sub.isTest ? <TestBanner venueSlug={ctx.venue.slug} passed={!!ctx.sub.testSubmittedAt} /> : null}
       {children}
     </WizardLayout>
   );

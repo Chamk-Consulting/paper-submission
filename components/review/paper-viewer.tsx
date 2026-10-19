@@ -24,6 +24,7 @@ export function PaperViewer(p: ViewerProps) {
   const [tab, setTab] = useState<Tab>(p.initialTab ?? "notes");
   const [noteState, noteAction, notePending] = useActionState<ActionState, FormData>(addNote, {});
   const [composing, setComposing] = useState(false);
+  const [sheet, setSheet] = useState(false); // below xl the side panel is a bottom sheet (M03)
   const [busy, start] = useTransition();
   const [err, setErr] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -49,7 +50,7 @@ export function PaperViewer(p: ViewerProps) {
           </label>
           <button type="button" onClick={() => go(page + 1)} disabled={page >= max} aria-label={t("Next page")} className="h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-2.5 disabled:opacity-50">›</button>
           {p.canEdit ? (
-            <button type="button" onClick={() => { setComposing(true); setTab("notes"); }} className="ml-auto h-8 rounded-[4px] border-0 bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white">{t("+ Note on this page")}</button>
+            <button type="button" onClick={() => { setComposing(true); setTab("notes"); setSheet(true); }} className="ml-auto h-8 rounded-[4px] border-0 bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white">{t("+ Note on this page")}</button>
           ) : null}
         </div>
         {src ? (
@@ -59,7 +60,16 @@ export function PaperViewer(p: ViewerProps) {
         )}
       </section>
 
-      <aside className="flex w-full flex-col rounded-[8px] border border-[#DADDE3] bg-white xl:w-[380px] xl:flex-none">
+      <button type="button" onClick={() => setSheet(true)} aria-expanded={sheet} aria-controls="viewer-panel"
+        className={`fixed bottom-4 right-4 z-30 h-12 rounded-full border-0 bg-[#F2A93B] px-[18px] text-[15px] font-bold text-[#0E1B3D] shadow-[0_4px_14px_rgba(18,24,38,.25)] xl:hidden ${sheet ? "hidden" : ""}`}>
+        ✎ {t("Notes")} ({p.notes.length}) · ✦ {t("AI")}
+      </button>
+      <aside id="viewer-panel" aria-label={t("Viewer panels")}
+        className={`flex w-full flex-col rounded-[8px] border border-[#DADDE3] bg-white xl:w-[380px] xl:flex-none max-xl:fixed max-xl:inset-x-0 max-xl:bottom-0 max-xl:z-40 max-xl:max-h-[78dvh] max-xl:overflow-y-auto max-xl:rounded-b-none max-xl:rounded-t-[14px] max-xl:shadow-[0_-8px_28px_rgba(18,24,38,0.22)] ${sheet ? "" : "max-xl:hidden"}`}>
+        <div className="flex items-center justify-between px-4 pt-2 xl:hidden">
+          <span aria-hidden className="mx-auto h-1 w-10 rounded-full bg-[#DADDE3]" />
+          <button type="button" onClick={() => setSheet(false)} className="h-9 border-0 bg-transparent px-1 text-[14px] text-[#2F5FD0] underline">{t("Close")}</button>
+        </div>
         <div role="tablist" aria-label={t("Viewer panels")} className="flex border-b border-[#EEF0EC]">
           {tabs.map(([k, l]) => (
             <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
@@ -141,7 +151,7 @@ function AiPanel({ kind, submissionId, assignmentId, policy }: { kind: "summary"
   const [q, setQ] = useState("");
   const [out, setOut] = useState<{ state: "idle" | "busy" | "done" | "off" | "error" | "limit"; text?: string }>({ state: "idle" });
   const intro = kind === "summary"
-    ? t("AI summary — for orientation only. Your review must be your own reading. Nothing you see here leaves Plenary.")
+    ? t("AI summary — for orientation only. Your review must be your own reading. To make it, the paper text is sent to our AI provider, Anthropic.")
     : t("Answers cite the page they come from. Check them yourself before using them in your review.");
   if (policy === "not_allowed") return <p className="m-0 text-[14px] text-[#4A5263]">{t("This venue doesn't allow AI tools on papers under review.")}</p>;
 

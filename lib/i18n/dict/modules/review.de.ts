@@ -6,7 +6,7 @@ export const review_de: Record<string, string> = {
   "3 more days": "3 Tage mehr",
   "7 more days": "7 Tage mehr",
   "AI isn't configured on this server yet.": "KI ist auf diesem Server noch nicht eingerichtet.",
-  "AI summary — for orientation only. Your review must be your own reading. Nothing you see here leaves Plenary.": "KI-Zusammenfassung — nur zur Orientierung. Ihr Gutachten muss auf Ihrer eigenen Lektüre beruhen. Nichts, was Sie hier sehen, verlässt Plenary.",
+  "AI summary — for orientation only. Your review must be your own reading. To make it, the paper text is sent to our AI provider, Anthropic.": "KI-Zusammenfassung — nur zur Orientierung. Ihr Gutachten muss auf Ihrer eigenen Lektüre beruhen. Dafür wird der Text des Beitrags an unseren KI-Anbieter Anthropic gesendet.",
   "AI tools are allowed if you say how you used them in the confidential comments.": "KI-Werkzeuge sind erlaubt, wenn Sie in den vertraulichen Kommentaren angeben, wie Sie sie genutzt haben.",
   "AI tools may help with language only; your judgement must be your own.": "KI-Werkzeuge dürfen nur bei der Sprache helfen; Ihr Urteil muss Ihr eigenes sein.",
   "APPROVED": "GENEHMIGT",

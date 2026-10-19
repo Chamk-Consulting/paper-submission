@@ -22,6 +22,8 @@ export type Submission = {
   stage: string; stageDetail: string | null; draftStep: number; declarations: { original?: boolean; preprint?: boolean; student_award?: boolean };
   keywords: string[]; ownKeywords: string[]; conflictsOkAt: string | null; submittedAt: string | null; updatedAt: string; withdrawnAt: string | null;
   pdfCheck: string; copyrightCheck: string; registrationCheck: string;
+  /** EM13 test paper: organizer only, never numbered or counted. */
+  isTest: boolean; testSubmittedAt: string | null;
 };
 
 export type Ctx = {
@@ -40,7 +42,7 @@ export function stepDone(sub: Submission, authors: Author[], files: SubFile[]): 
     keywords: sub.keywords.length >= 3,
     files: !!paper && paper.check.status !== "failed",
     conflicts: !!sub.conflictsOkAt,
-    review: sub.stage !== "draft",
+    review: sub.stage !== "draft" || !!sub.testSubmittedAt,
   };
 }
 
@@ -102,6 +104,7 @@ export async function loadSubmission(id: string): Promise<Ctx | null> {
     stage: s.stage, stageDetail: s.stage_detail, draftStep: s.draft_step ?? 1, declarations: s.declarations ?? {}, keywords: s.keywords ?? [], ownKeywords: s.own_keywords ?? [],
     conflictsOkAt: s.conflicts_ok_at, submittedAt: s.submitted_at, updatedAt: s.updated_at, withdrawnAt: s.withdrawn_at,
     pdfCheck: s.pdf_check, copyrightCheck: s.copyright_check, registrationCheck: s.registration_check,
+    isTest: !!s.is_test, testSubmittedAt: (s.test_submitted_at as string) ?? null,
   };
   const authors: Author[] = ((authorRows ?? []) as Record<string, unknown>[]).map((a) => ({
     personId: a.person_id as string, position: a.author_position as number, corresponding: !!a.is_corresponding, name: (a.display_name as string) || (a.email as string) || "Unnamed",
@@ -116,7 +119,8 @@ export async function loadSubmission(id: string): Promise<Ctx | null> {
   return {
     me, sub, venue, authors, files, conflicts,
     drafts: ((draftRows ?? []) as { id: string; title: string }[]).map((d) => ({ id: d.id, title: d.title })),
-    editable: open && (sub.stage === "draft" || sub.stage === "submitted"),
+    // a test paper can be filled in before submissions open (the database checks the organizer role)
+    editable: (open || sub.isTest) && (sub.stage === "draft" || sub.stage === "submitted"),
     done: stepDone(sub, authors, files),
   };
 }

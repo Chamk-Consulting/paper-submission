@@ -61,6 +61,7 @@ function Pane({ submissionId, files, initialTab, onClose, idx, setIdx, panel, se
   const [err, setErr] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [zoom, setZoom] = useState(100);
+  const [sheet, setSheet] = useState(false); // phones: AI tools as a bottom sheet (M03)
   const canvas = useRef<HTMLCanvasElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDivElement>(null);
@@ -153,6 +154,7 @@ function Pane({ submissionId, files, initialTab, onClose, idx, setIdx, panel, se
           ) : null}
           <div className="flex items-center gap-1">
             {isPdf ? <button type="button" onClick={() => setPanel((p) => !p)} aria-pressed={panel} className="hidden h-9 rounded-[4px] px-2.5 text-[14px] hover:bg-white/10 md:block">✦ {t("AI tools")}</button> : null}
+            {isPdf ? <button type="button" onClick={() => setSheet((v) => !v)} aria-expanded={sheet} aria-controls="ai-sheet" className="h-9 rounded-[4px] px-2.5 text-[14px] hover:bg-white/10 md:hidden">✦ {t("AI")}</button> : null}
             {url ? <a href={url} download={file.name} className="h-9 rounded-[4px] px-2.5 text-[14px] leading-9 text-[#F5F6F3] no-underline hover:bg-white/10">{t("Download")}</a> : null}
             <button type="button" onClick={onClose} className={barBtn} aria-label={t("Close viewer (Esc)")}>×</button>
           </div>
@@ -182,6 +184,18 @@ function Pane({ submissionId, files, initialTab, onClose, idx, setIdx, panel, se
           {isPdf && panel ? (
             <div className="hidden w-[380px] flex-none border-l border-[#DADDE3] md:flex">
               <AiPanel submissionId={submissionId} file={file} page={page} pages={pages} onGo={go} initialTab={initialTab} />
+            </div>
+          ) : null}
+          {isPdf && sheet ? (
+            <div id="ai-sheet" role="region" aria-label={t("AI tools")} className="fixed inset-x-0 bottom-0 z-[60] flex max-h-[78dvh] flex-col overflow-hidden rounded-t-[14px] border-t border-[#DADDE3] bg-white shadow-[0_-8px_28px_rgba(18,24,38,0.22)] md:hidden">
+              <div className="flex flex-none items-center justify-between gap-2 px-4 pb-1 pt-2">
+                <span aria-hidden className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-[#DADDE3]" />
+                <span className="mt-2 text-[15px] font-semibold">✦ {t("AI tools")} · {t("Page {n} of {total}", { n: page, total: pages })}</span>
+                <button type="button" onClick={() => setSheet(false)} className="mt-2 h-9 rounded-[4px] border-0 bg-transparent px-2 text-[14px] text-[#2F5FD0] underline">{t("Close")}</button>
+              </div>
+              <div className="flex min-h-0 flex-auto overflow-y-auto">
+                <AiPanel submissionId={submissionId} file={file} page={page} pages={pages} onGo={(n) => { go(n); setSheet(false); }} initialTab={initialTab} />
+              </div>
             </div>
           ) : null}
         </div>
