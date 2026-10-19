@@ -14,6 +14,16 @@ async function Inner({ searchParams }: { searchParams: Promise<{ reason?: string
   const { reason } = await searchParams;
   const oauth = reason === "oauth";
   const t = await getT();
+  if (reason === "locked") {
+    return (
+      <AuthCard title={t("You can’t sign in to this account")} lead={t("It is locked, or it was merged into another account. If you merged it, sign in with the email of the account you kept.")}>
+        <div className="grid gap-2">
+          <Link href="/contact" className="rounded-lg border border-line px-4 py-2 text-center text-navy hover:bg-paper">{t("Contact support")}</Link>
+          <Link href="/sign-in" className="rounded-lg bg-navy px-4 py-2 text-center text-white hover:bg-navy-2">{t("Back to sign in")}</Link>
+        </div>
+      </AuthCard>
+    );
+  }
   return (
     <AuthCard
       title={oauth ? t("Sign-in didn't complete") : t("This link has expired or was already used")}
