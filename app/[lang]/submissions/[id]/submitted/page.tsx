@@ -8,6 +8,8 @@ import { StepRail, TitleBand, WizardHeader, WizardLayout, asideCard, card, ghost
 import { fmtLocal } from "@/lib/venues/time";
 import { Reveal } from "@/components/motion/reveal";
 import { StatusSkeleton } from "@/components/skeletons";
+import { getMyVolunteering } from "@/lib/reviewpolish/data";
+import { VolunteerBox } from "@/components/reviewpolish/forms";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -28,6 +30,7 @@ async function Inner({ params }: P) {
   const notif = venue.dates.find((d) => d.kind === "notification");
   const final = venue.dates.find((d) => d.kind === "final");
   const days = daysUntil(venue.deadline);
+  const vol = await getMyVolunteering(venue.id, ctx.me.person?.id);
   const steps = [
     { title: t("Submitted"), d: t("Today. You can still edit until the deadline."), s: "done" },
     { title: t("Deadline and lock"), d: days != null ? t(days === 1 ? "In {n} day. Then the paper goes to an associate editor." : "In {n} days. Then the paper goes to an associate editor.", { n: days }) : t("Rolling — the editor picks it up soon."), s: "next" },
@@ -45,8 +48,7 @@ async function Inner({ params }: P) {
           <section className={asideCard}>
             <h3 className="m-0 text-[17px] font-semibold">{t("Help review for this venue?")}</h3>
             <p className="mt-1.5 text-[15px] text-[#4A5263]">{sub.keywords[0] ? t("{venue} needs reviewers in {keyword}.", { venue: venue.acr, keyword: t(sub.keywords[0]) }) : t("{venue} needs reviewers.", { venue: venue.acr })} {t("You'd get up to 3 papers.")}</p>
-            {/* TODO(review): reviewer volunteering (RV10). */}
-            <span title={t("Coming soon")} className="mt-3 inline-flex h-10 items-center rounded-[4px] border border-[#DADDE3] px-3.5 text-[14px] text-[#9AA3B5]">{t("Yes, I can review · soon")}</span>
+            {vol === undefined ? null : <VolunteerBox venueId={venue.id} venue={venue.acr} path={`/submissions/${id}/submitted`} suggested={sub.keywords.slice(0, 5)} current={vol} />}
           </section>
           <section className={asideCard}>
             <h3 className="m-0 text-[17px] font-semibold">{t("Need to change something?")}</h3>

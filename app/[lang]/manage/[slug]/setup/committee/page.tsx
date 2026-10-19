@@ -8,6 +8,8 @@ import { CommitteeList, InviteForm, PolicyForm, type CommitteeRow } from "@/comp
 import { RulesCard } from "@/components/manage/setup2/rules";
 import { Reveal } from "@/components/motion/reveal";
 import { CommitteeSkeleton } from "@/components/skeletons/setup2";
+import { getVenueVolunteers } from "@/lib/reviewpolish/data";
+import { VolunteersList } from "@/components/reviewpolish/manage";
 
 const nowMs = () => Date.now();
 
@@ -68,6 +70,7 @@ async function Inner({ params }: P) {
             ) : null}
             <CommitteeList slug={slug} rows={[...members, ...inv]} canGrant={canGrant} />
             <InviteForm slug={slug} canGrant={canGrant} />
+            <VolunteersList volunteers={await getVenueVolunteers(ctx.venue.id)} />
             <PolicyForm slug={slug} canEdit={ctx.isChair && !ctx.locked} status={groupStatus(ctx, ["committee", "conflicts"])} last={lastChange(ctx, ["committee", "conflicts"])}
               v={{ coauthor_years: Number(s.coauthor_years ?? 3), institution_years: Number(s.institution_years ?? 2), use_declared: s.use_declared !== false, override_second: s.override_second !== false }} />
           </div>

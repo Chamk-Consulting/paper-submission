@@ -10,6 +10,8 @@ import { loadReview } from "@/lib/review/page";
 import { getT } from "@/lib/i18n/server";
 import { nowMs } from "@/lib/review/format";
 import { ui } from "@/components/manage/ui";
+import { AnnotatedPdf } from "@/components/reviewpolish/forms";
+import { getMyAnnotation } from "@/lib/reviewpolish/data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -27,6 +29,8 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
   const mode = withdrawn || a.locked_at || !["accepted", "submitted"].includes(a.status) ? "readonly" : a.status === "submitted" ? "submitted" : "edit";
   const readonlyReason = withdrawn ? "withdrawn" : a.locked_at ? "locked" : mode === "readonly" ? "closed" : null;
   const r = form.review;
+  const annot = await getMyAnnotation(id);
+  const annotEditable = a.status === "accepted" && !a.locked_at && !withdrawn;
 
   return (
     <WorkspaceShell ctx={ctx} active="reviews">
@@ -43,6 +47,7 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
         mode={mode} readonlyReason={readonlyReason}
         dueAt={a.due_at} serverNow={nowMs()} ae={ae} aiPolicy={form.settings.ai_policy} blind={form.settings.blind_type}
         submittedAt={a.submitted_at} withdrawnAt={form.paper.withdrawn_at} notesInReview={Number(form.notes_in_review ?? 0)}
+        annotation={annotEditable || annot ? <AnnotatedPdf assignmentId={id} submissionId={a.submission_id} editable={annotEditable} current={annot} /> : null}
       />
     </WorkspaceShell>
   );

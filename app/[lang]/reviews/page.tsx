@@ -12,6 +12,7 @@ import { getAvailability, getMyReviews, getOverview } from "@/lib/review/data";
 import { daysUntil, fmtDay, paperNo } from "@/lib/review/shared";
 import { relDay, nowMs } from "@/lib/review/format";
 import { getT } from "@/lib/i18n/server";
+import { certificateVenues } from "@/lib/reviewpolish/data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -23,6 +24,7 @@ async function Inner() {
   if (!ctx) redirect("/sign-in?next=/reviews");
   const [reviews, overview, avail, t] = await Promise.all([getMyReviews(), getOverview(), getAvailability(ctx.me.person?.id), getT()]);
   const now = nowMs();
+  const certs = certificateVenues(reviews);
 
   const rows: Row[] = reviews.map((r) => {
     const base = { id: r.assignment_id, no: paperNo(r.paper_number), title: r.title };
@@ -67,8 +69,11 @@ async function Inner() {
                 <div><div className="font-serif text-[28px] leading-none text-[#A8600F]">{overview.due}</div><div className="text-[12px] text-[#4A5263]">{t("due")}</div></div>
                 <div><div className="font-serif text-[28px] leading-none">{overview.on_time_pct == null ? "—" : `${overview.on_time_pct}%`}</div><div className="text-[12px] text-[#4A5263]">{t("on time")}</div></div>
               </div>
-              {/* TODO(review): reviewer certificate PDF. */}
-              <span aria-disabled title={t("Coming soon")} className="mt-3 block text-[13px] text-[#9AA3B5]">{t("Download reviewer certificate →")}</span>
+              {certs.length ? (
+                <div className="mt-3 flex flex-col gap-0.5">
+                  {certs.map((c) => <a key={c.slug} href={`/api/reviews/certificate/${c.slug}`} className="text-[13px] text-[#2F5FD0]">{certs.length > 1 ? t("Reviewer certificate · {venue} →", { venue: c.short }) : t("Download reviewer certificate →")}</a>)}
+                </div>
+              ) : <p className="mb-0 mt-3 text-[13px] text-[#4A5263]">{t("Your certificate appears after your first submitted review.")}</p>}
             </section>
             <AvailabilityForm initial={{ availability: avail.availability, available_from: avail.available_from }} />
             {overview.bidding.map((b) => (

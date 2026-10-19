@@ -13,6 +13,7 @@ import { fmtDayYear, paperNo } from "@/lib/review/shared";
 import { getT } from "@/lib/i18n/server";
 import { nowMs } from "@/lib/review/format";
 import { ui } from "@/components/manage/ui";
+import { MessageEditorBox } from "@/components/reviewpolish/forms";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -75,8 +76,8 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
             </section>
             <section className={box}>
               <p className={kick}>{t("Questions?")}</p>
-              {/* TODO(inbox): message thread with the associate editor (IN01). */}
-              <span aria-disabled title={t("Coming soon")} className="mt-1.5 block text-[14px] text-[#9AA3B5]">{t("Message the associate editor")}</span>
+              {["invited", "accepted", "submitted"].includes(inv.status) ? <MessageEditorBox assignmentId={inv.assignment_id} editor={inv.inviter ?? null} />
+                : <p className="mb-0 mt-1.5 text-[14px] text-[#4A5263]">{t("Write to the venue from its page.")}</p>}
             </section>
           </>
         }

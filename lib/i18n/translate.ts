@@ -29,6 +29,9 @@ import { ops_de } from "@/lib/i18n/dict/modules/ops.de";
 import { event_fr } from "@/lib/i18n/dict/modules/event.fr";
 import { event_it } from "@/lib/i18n/dict/modules/event.it";
 import { event_de } from "@/lib/i18n/dict/modules/event.de";
+import { reviewpolish_fr } from "@/lib/i18n/dict/modules/reviewpolish.fr";
+import { reviewpolish_it } from "@/lib/i18n/dict/modules/reviewpolish.it";
+import { reviewpolish_de } from "@/lib/i18n/dict/modules/reviewpolish.de";
 
 
 
@@ -39,9 +42,9 @@ import { event_de } from "@/lib/i18n/dict/modules/event.de";
 export type Dict = Record<string, string>;
 export const DICTS: Record<Locale, Dict> = {
   en: {},
-  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr },
-  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it },
-  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de },
+  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr, ...reviewpolish_fr },
+  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it, ...reviewpolish_it },
+  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de, ...reviewpolish_de },
 };
 export type Vars = Record<string, string | number>;
 export type T = (key: string, vars?: Vars) => string;

@@ -7,6 +7,9 @@ import { getMyPapers, getWorkspaceCtx } from "@/lib/workspace/data";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
 import { WorkspaceSkeleton } from "@/components/skeletons";
+import { getMyInbox, getMyReviews } from "@/lib/site/data";
+import { getFollowedDeadlines } from "@/lib/reviewpolish/data";
+import { LocalWhen } from "@/components/reviewpolish/local-when";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -19,7 +22,10 @@ const kicker = "m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em
 async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const ctx = await getWorkspaceCtx();
   if (!ctx) redirect("/sign-in?next=/workspace/submissions");
-  const [{ ready, papers }, { q }] = await Promise.all([getMyPapers(ctx.me.person?.id), searchParams]);
+  const [{ ready, papers }, { q }, reviews, follows, inbox] = await Promise.all([
+    getMyPapers(ctx.me.person?.id), searchParams, getMyReviews(), getFollowedDeadlines(ctx.me.person?.id), getMyInbox(3),
+  ]);
+  const due = reviews.filter((r) => r.status === "accepted" || r.status === "invited").length;
   const t = await getT();
 
   return (
@@ -34,7 +40,6 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
       </div>
 
       {!ready ? (
-        // TODO(db): disappears once 20261018000500_submissions.sql is applied.
         <p role="status" className="mt-5 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">
           {t("Papers will show here once the submissions database update is installed.")}
         </p>
@@ -50,22 +55,43 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
             <p className={kicker}>{t("At a glance")}</p>
             <div className="mt-2.5 grid grid-cols-3 gap-2 text-center">
               <div><div className="font-serif text-[28px] leading-none">{papers.length}</div><div className="text-[12px] text-[#4A5263]">{t("papers")}</div></div>
-              {/* TODO(review): reviews due from review assignments (RV01). */}
-              <div><div className="font-serif text-[28px] leading-none text-[#A8600F]">0</div><div className="text-[12px] text-[#4A5263]">{t("reviews due")}</div></div>
+              <Link href="/reviews" className="text-[#121826] no-underline"><div className={`font-serif text-[28px] leading-none ${due ? "text-[#A8600F]" : ""}`}>{due}</div><div className="text-[12px] text-[#4A5263]">{t("reviews due")}</div></Link>
               <div><div className="font-serif text-[28px] leading-none">{ctx.aeRoles}</div><div className="text-[12px] text-[#4A5263]">{t("AE role")}</div></div>
             </div>
           </section>
           <section className={card}>
-            <div className="flex items-baseline justify-between"><p className={kicker}>{t("Following · next deadlines")}</p><span className="text-[12px] text-[#9AA3B5]" title={t("Coming soon")}>{t("Calendar")}</span></div>
-            {/* TODO(follow): followed venues + deadlines (PV01c). */}
-            <p className="mb-0 mt-2 text-[13px] text-[#4A5263]">{t("Follow a venue to see its deadlines here, in your time zone.")}</p>
+            <div className="flex items-baseline justify-between"><p className={kicker}>{t("Following · next deadlines")}</p><Link href="/venues?view=calendar" className="text-[12px] text-[#2F5FD0]">{t("Calendar")}</Link></div>
+            {follows.length ? (
+              <ul className="m-0 mt-2 list-none p-0">
+                {follows.map((f) => (
+                  <li key={f.venueId} className="flex items-baseline justify-between gap-3 border-b border-[#EEF0EC] py-2 text-[14px] last:border-0">
+                    <span className="min-w-0"><Link href={`/venues/${f.slug}`} className="font-semibold text-[#121826] no-underline">{f.short}</Link><span className="block truncate text-[12px] text-[#4A5263]">{f.label}</span></span>
+                    <LocalWhen at={f.at} className="flex-none font-mono text-[12px] text-[#4A5263]" />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mb-0 mt-2 text-[13px] text-[#4A5263]">{t("Follow a venue to see its deadlines here, in your time zone.")}</p>
+            )}
           </section>
           <section className={card}>
-            <p className={kicker}>{t("Inbox")}</p>
-            {/* TODO(inbox): latest messages (IN01). */}
-            <p className="mb-0 mt-2 text-[13px] text-[#4A5263]">{t("No messages yet. Chairs and co-authors reach you here.")}</p>
+            <div className="flex items-baseline justify-between"><p className={kicker}>{t("Inbox")}</p><Link href="/inbox" className="text-[12px] text-[#2F5FD0]">{t("Open inbox")}</Link></div>
+            {inbox.length ? (
+              <ul className="m-0 mt-2 list-none p-0">
+                {inbox.map((m) => (
+                  <li key={m.thread_id} className="border-b border-[#EEF0EC] py-2 last:border-0">
+                    <Link href={`/inbox/${m.thread_id}`} className="block text-[14px] text-[#121826] no-underline">
+                      <span className="flex items-center gap-1.5">{m.unread ? <span aria-label={t("unread")} className="size-2 flex-none rounded-full bg-[#2F5FD0]" /> : null}<span className={`truncate ${m.unread ? "font-semibold" : ""}`}>{m.subject}</span></span>
+                      <span className="block truncate text-[12px] text-[#4A5263]">{[m.venue, m.last_from].filter(Boolean).join(" · ")}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mb-0 mt-2 text-[13px] text-[#4A5263]">{t("No messages yet. Chairs and co-authors reach you here.")}</p>
+            )}
           </section>
-          <span aria-disabled title={t("Coming soon")} className="box-border inline-flex h-[42px] w-full items-center justify-center rounded-[4px] border border-[#DADDE3] bg-white px-3.5 text-[14px] font-medium text-[#9AA3B5]">{t("Add deadlines to my calendar")}</span>
+          <Link href="/settings/calendar" className="box-border inline-flex h-[42px] w-full items-center justify-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Add deadlines to my calendar")}</Link>
         </aside>
       </div>
     </WorkspaceShell>

@@ -10,6 +10,7 @@ import { getBidding } from "@/lib/review/data";
 import { countdown, fmtDay } from "@/lib/review/shared";
 import { getT } from "@/lib/i18n/server";
 import { nowMs } from "@/lib/review/format";
+import { getBiddingMatches } from "@/lib/reviewpolish/data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -32,6 +33,7 @@ async function Inner({ params }: { params: Promise<{ slug: string }> }) {
     );
   }
   const { venue, papers } = data;
+  const { matches, hasTopics } = await getBiddingMatches(venue.venue_id, ctx.me.person?.id);
   const left = venue.closes_at ? countdown(venue.closes_at, nowMs()) : null;
   return (
     <WorkspaceShell ctx={ctx} active="reviews">
@@ -44,8 +46,7 @@ async function Inner({ params }: { params: Promise<{ slug: string }> }) {
           : <Tag tone="n">{t("BIDDING CLOSED")}</Tag>}
       />
       {!venue.open ? <div className="mt-4"><Banner tone="info">{t("Bidding is closed. Your bids are shown read-only.")}</Banner></div> : null}
-      {/* TODO(review): "Best match" ordering needs topic-match scores; papers are shown by number for now. */}
-      <Bidding papers={papers} open={venue.open} />
+      <Bidding papers={papers} open={venue.open} matches={matches} hasTopics={hasTopics} />
     </WorkspaceShell>
   );
 }

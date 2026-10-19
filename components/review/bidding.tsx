@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n/client";
 import { placeBid } from "@/lib/review/actions";
 import type { BidPaper } from "@/lib/review/data";
 import { paperNo } from "@/lib/review/shared";
+import Link from "next/link";
 import { Tag } from "@/components/review/parts";
 
 type Level = "eager" | "willing" | "not_my_area" | "conflict";
@@ -14,7 +15,9 @@ type Filter = "match" | "none" | "mine" | "all";
 const TARGET = 30;
 
 /** RV10 — bid on papers (click again to clear). */
-export function Bidding({ papers, open }: { papers: BidPaper[]; open: boolean }) {
+export function Bidding({ papers, open, matches = {}, hasTopics = false }: {
+  papers: BidPaper[]; open: boolean; matches?: Record<string, { score: number; matched: string[] }>; hasTopics?: boolean;
+}) {
   const t = useT();
   const [bids, setBids] = useState<Record<string, Level | null>>(() => Object.fromEntries(papers.map((p) => [p.submission_id, (p.my_bid as Level | null) ?? null])));
   const [filter, setFilter] = useState<Filter>("match");
@@ -26,13 +29,15 @@ export function Bidding({ papers, open }: { papers: BidPaper[]; open: boolean })
   const count = (l: Level) => vals.filter((v) => v === l).length;
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return papers.filter((p) => {
+    const out = papers.filter((p) => {
       if (needle && !`${p.title} ${p.abstract ?? ""} ${(p.keywords ?? []).join(" ")}`.toLowerCase().includes(needle)) return false;
       if (filter === "none") return !bids[p.submission_id];
       if (filter === "mine") return !!bids[p.submission_id];
       return true;
     });
-  }, [papers, q, filter, bids]);
+    // "Best match": most topic overlap first, then paper number (RV10)
+    return filter === "match" ? [...out].sort((a, b) => (matches[b.submission_id]?.score ?? 0) - (matches[a.submission_id]?.score ?? 0) || a.number - b.number) : out;
+  }, [papers, q, filter, bids, matches]);
 
   const pick = (id: string, l: Level) => {
     const prev = bids[id] ?? null;
@@ -68,6 +73,9 @@ export function Bidding({ papers, open }: { papers: BidPaper[]; open: boolean })
         <input type="search" value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("Search abstracts")} placeholder={t("Search title or abstract")}
           className="ml-auto h-9 w-full rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[14px] sm:w-[280px]" />
       </div>
+      {filter === "match" && !hasTopics ? (
+        <p className="mb-0 mt-2 text-[14px] text-[#4A5263]">{t("Add your topics to sort papers by how well they match you.")} <Link href="/settings/profile" className="text-[#2F5FD0]">{t("Edit my topics")}</Link></p>
+      ) : null}
       {err ? <p role="alert" className="mb-0 mt-2 text-[14px] text-[#B3261E]">{t(err)}</p> : null}
 
       <div className="mt-4 flex flex-col gap-3">
@@ -77,7 +85,8 @@ export function Bidding({ papers, open }: { papers: BidPaper[]; open: boolean })
           return (
             <article key={p.submission_id} className={`relative overflow-hidden rounded-[8px] border bg-white py-4 pl-6 pr-5 ${v === "conflict" ? "border-[#F3C3BE]" : "border-[#DADDE3]"}`}>
               <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: v ? COL[v] : "transparent" }} />
-              <div className="flex flex-wrap items-center gap-1.5"><Tag tone="n">{paperNo(p.number)}</Tag>{p.topic ? <Tag tone="b">{p.topic}</Tag> : null}</div>
+              <div className="flex flex-wrap items-center gap-1.5"><Tag tone="n">{paperNo(p.number)}</Tag>{p.topic ? <Tag tone="b">{p.topic}</Tag> : null}
+                {matches[p.submission_id] ? <span className="text-[12px] text-[#14603F]">✓ {t("Matches your topics: {list}", { list: matches[p.submission_id].matched.slice(0, 3).join(", ") })}</span> : null}</div>
               <h2 className="mb-0 mt-2 font-serif text-[20px] font-normal leading-[1.3]">{p.title}</h2>
               {p.abstract ? <p className="mb-0 mt-1.5 line-clamp-3 text-[14px] text-[#4A5263]">{p.abstract}</p> : null}
               <div role="radiogroup" aria-label={t("Your bid")} className="mt-3 flex flex-wrap gap-2">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useT } from "@/lib/i18n/client";
 import { saveReview } from "@/lib/review/actions";
 import { CONFS, MIN_WORDS, RECS, countdown, fmtDateTime, type Criterion, type Rec, words } from "@/lib/review/shared";
@@ -25,6 +25,8 @@ export type ReviewFormProps = {
   readonlyReason: "locked" | "withdrawn" | "closed" | null;
   dueAt: string; serverNow: number; ae: string; aiPolicy: string; blind: string; submittedAt: string | null; withdrawnAt: string | null;
   notesInReview: number;
+  /** RV03 annotated PDF block (server-rendered by the page). */
+  annotation?: ReactNode;
 };
 
 type Save = { state: "idle" | "saving" | "saved" | "offline" | "error"; at?: string; error?: string };
@@ -156,7 +158,7 @@ export function ReviewForm(p: ReviewFormProps) {
         <label htmlFor="rv-editor" className="mt-5 block text-[15px] font-medium">{t("Confidential comments to the editor (authors never see these)")}</label>
         <textarea id="rv-editor" value={d.to_editor} readOnly={!editable} onChange={(e) => set({ to_editor: e.target.value })} rows={5} maxLength={10000}
           className={`${ui.textarea} mt-1.5 w-full`} />
-        {/* TODO(review): annotated PDF upload (reviews.annotated_path) — needs a reviewer upload policy on bucket 'papers'. */}
+        {p.annotation}
       </section>
 
       {editable ? (

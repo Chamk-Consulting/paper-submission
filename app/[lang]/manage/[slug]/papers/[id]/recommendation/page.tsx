@@ -9,6 +9,8 @@ import { Reveal } from "@/components/motion/reveal";
 import { OpsSplitSkeleton } from "@/components/skeletons/ops1";
 import { criteriaOf, discussionCount, loadMilestones, loadPaperReviews, loadRecommendation, loadScoreChanges, myAePapers, requirePaper } from "@/lib/manage/ops1-data";
 import { paperId, recTone, REVIEW_REC_LABEL } from "@/lib/manage/ops1-shared";
+import { getAnnotations } from "@/lib/reviewpolish/data";
+import { AnnotationsCard } from "@/components/reviewpolish/manage";
 
 /* EM24 — the AE's recommendation for one paper. */
 
@@ -28,7 +30,7 @@ async function Inner({ params }: P) {
   const t = await getT();
   const min = Number(ctx.settings?.min_reviews ?? 3);
   const me = ctx.ws.me.person!.id;
-  const [reviews, rec, changes, posts, mine, ms] = await Promise.all([loadPaperReviews(id), loadRecommendation(id), loadScoreChanges(id), discussionCount(id), myAePapers(ctx.venue.id, me, min), loadMilestones(ctx.venue.id)]);
+  const [reviews, rec, changes, posts, mine, ms, annots] = await Promise.all([loadPaperReviews(id), loadRecommendation(id), loadScoreChanges(id), discussionCount(id), myAePapers(ctx.venue.id, me, min), loadMilestones(ctx.venue.id), getAnnotations(id)]);
   const crit = criteriaOf(ctx);
   const done = reviews.filter((r) => r.status === "submitted" && r.round === 1);
   const avgs = done.map((r) => { const v = Object.values(r.scores).map(Number); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }).filter((x): x is number => x != null);
@@ -73,6 +75,7 @@ async function Inner({ params }: P) {
           <RecommendForm slug={slug} submission={id} initial={rec} reviewsIn={done.length} min={min} backHref={`/manage/${slug}/papers/${id}/reviewers`} />
         </div>
         <div className="flex flex-col gap-4">
+          {annots.length ? <AnnotationsCard items={annots} /> : null}
           {mine.total ? <SideStat kicker={t("Your AE papers")} value={`${mine.recsSent} / ${mine.total}`} sub={[t("recommendations sent"), due ? t("due {d}", { d: new Date(due).toLocaleDateString(t.intl, { day: "numeric", month: "short", timeZone: "UTC" }) }) : ""].filter(Boolean).join(" · ")} /> : null}
           <Rules title={t("Rules on this page")} items={[
             ["F1", t("Only the program chair decides; AEs recommend.")],

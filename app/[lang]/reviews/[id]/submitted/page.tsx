@@ -68,6 +68,7 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
             <section className={ui.card}>
               <h2 className={ui.h2}>{t("Get credit")}</h2>
               <div className="mt-3"><OrcidToggle id={id} initial={a.orcid_push} /></div>
+              {a.status === "submitted" ? <a href={`/api/reviews/certificate/${form.venue.slug}`} className="mt-3 inline-block text-[14px] text-[#2F5FD0]">{t("Download reviewer certificate (PDF)")}</a> : null}
             </section>
           </>
         }

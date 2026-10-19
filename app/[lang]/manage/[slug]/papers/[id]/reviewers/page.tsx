@@ -10,6 +10,8 @@ import { Reveal } from "@/components/motion/reveal";
 import { OpsSplitSkeleton } from "@/components/skeletons/ops1";
 import { loadAuthorSummary, loadInvitations, loadSuggestions, myAePapers, requirePaper } from "@/lib/manage/ops1-data";
 import { paperId } from "@/lib/manage/ops1-shared";
+import { getAnnotations, getVenueVolunteers } from "@/lib/reviewpolish/data";
+import { AnnotationsCard, VolunteerCandidates } from "@/components/reviewpolish/manage";
 
 /* EM23 — find reviewers for one paper (handling AE or a chair without a conflict). */
 
@@ -27,7 +29,9 @@ async function Inner({ params }: P) {
   const t = await getT();
   const min = Number(ctx.settings?.min_reviews ?? 3), max = Number(ctx.settings?.max_reviewers ?? 4), days = Number(ctx.settings?.invite_days ?? 3);
   const me = ctx.ws.me.person!.id;
-  const [inv, sug, authors, mine] = await Promise.all([loadInvitations(id), loadSuggestions(id), loadAuthorSummary(id), myAePapers(ctx.venue.id, me, min)]);
+  const [inv, sug, authors, mine, vols, annots] = await Promise.all([loadInvitations(id), loadSuggestions(id), loadAuthorSummary(id), myAePapers(ctx.venue.id, me, min), getVenueVolunteers(ctx.venue.id), getAnnotations(id)]);
+  const invited = new Set(inv.map((i) => i.reviewerId).filter(Boolean));
+  const terms = [paper.topic, ...paper.keywords].filter(Boolean).map((x) => String(x).toLowerCase());
   const isAE = paper.handlingAe === me;
   const enough = inv.filter((i) => i.round === 1 && ["accepted", "submitted"].includes(i.status)).length >= min;
   return (
@@ -48,8 +52,10 @@ async function Inner({ params }: P) {
             ) : null}
           </section>
           <ReviewerFinder slug={slug} submission={id} invitations={inv} suggestions={sug} min={min} max={max} inviteDays={days} />
+          {vols.length ? <VolunteerCandidates slug={slug} submission={id} volunteers={vols.filter((v) => !invited.has(v.personId)).map((v) => ({ ...v, matches: v.topics.filter((x) => terms.includes(x.toLowerCase())) }))} /> : null}
         </div>
         <div className="flex flex-col gap-4">
+          {annots.length ? <AnnotationsCard items={annots} /> : null}
           {mine.total ? <SideStat kicker={t("Your papers as AE")} value={String(mine.total)} sub={t("{a} need reviewers · {b} fully covered", { a: mine.needReviewers, b: mine.covered })} /> : null}
           <Rules title={t("Rules on this page")} items={[
             ["E3", t("{a} reviews needed, max {b}.", { a: min, b: max })],
