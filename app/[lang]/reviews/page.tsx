@@ -82,10 +82,12 @@ async function Inner() {
             ))}
             <section className={box}>
               <p className={kick}>{t("Guides")}</p>
-              {/* TODO(help): reviewer guides (HP pages). */}
-              <span aria-disabled title={t("Coming soon")} className={`${asideLink} text-[#9AA3B5]!`}>{t("Writing a useful review")}</span>
-              <span aria-disabled title={t("Coming soon")} className={`${asideLink} text-[#9AA3B5]!`}>{t("Conflicts of interest")}</span>
-              <span aria-disabled title={t("Coming soon")} className={`${asideLink} text-[#9AA3B5]!`}>{t("Using AI tools in reviews")}</span>
+              <Link href="/help/reviewers/workflow" className={asideLink}>{t("From invitation to decision")}</Link>
+              <Link href="/help/reviewers/blind-review" className={asideLink}>{t("Blind review: what stays hidden")}</Link>
+              <Link href="/help/reviewers/conflicts" className={asideLink}>{t("Conflicts of interest")}</Link>
+              <Link href="/help/reviewers/ai-tools" className={asideLink}>{t("Using AI tools in reviews")}</Link>
+              <Link href="/help/reviewers/extensions" className={asideLink}>{t("More time, or handing a review back")}</Link>
+              <Link href="/help/reviewers" className={`${asideLink} font-semibold`}>{t("All reviewer guides →")}</Link>
             </section>
           </>
         }

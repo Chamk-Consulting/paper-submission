@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { NavyAside, SetupSteps, SplitLayout, ui } from "@/components/auth/split-layout";
 import { OtpVerify } from "@/components/auth/otp-verify";
+import { senderDomain } from "@/lib/config/site";
 import { ResetShield } from "@/components/reset/reset-shield";
 import { AuthAsideSkeleton, AuthFormSkeleton } from "@/components/skeletons";
 
@@ -28,7 +29,7 @@ async function Left({ searchParams }: { searchParams: Promise<Search> }) {
       <p className={`mt-2.5 ${ui.muted}`}>
         {t("If there's a Plenary account for")} <strong className="text-[#121826]">{email}</strong>, {t("we've sent a reset link and code to it.")}
       </p>
-      <OtpVerify kind="recovery" email={email} onSuccessHref="/reset-password" changeHref="/forgot-password" />
+      <OtpVerify kind="recovery" email={email} onSuccessHref="/reset-password" changeHref="/forgot-password" senderDomain={senderDomain()} />
     </>
   );
 }

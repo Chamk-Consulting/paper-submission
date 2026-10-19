@@ -1,6 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { rememberDevice } from "@/lib/auth/remember-device";
 
 /**
  * Adds a row to the person's sign-in activity (ST03). Best effort: a database
@@ -16,4 +17,5 @@ export async function recordSignIn(supabase: SupabaseClient, method: "password" 
   } catch {
     /* activity log is optional */
   }
+  await rememberDevice(supabase);
 }

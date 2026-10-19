@@ -17,8 +17,10 @@ const GROUPS: { title: string; icon: string; guides: Guide[] }[] = [
   ] },
   { title: "Reviewers", icon: "R", guides: [
     { id: "accept", title: "Accept or decline", body: "Invitations open with one click, without signing in. Declining early helps chairs find someone else — you can suggest a colleague.", href: "/reviews", cta: "My reviews" },
-    { id: "review", title: "Write a helpful review", body: "Summarise the contribution, then strengths, weaknesses and concrete suggestions. Scores should match your text. Margin notes in the viewer are shared with the authors only if you choose.", href: "/reviews", cta: "My reviews" },
-    { id: "conflicts", title: "Conflicts of interest", body: "Declare co-authors from the last years, your institution and close collaborators. Plenary detects most conflicts automatically; tell the chairs about any others.", href: "/settings", cta: "Account settings" },
+    { id: "review", title: "Write a helpful review", body: "Summarise the contribution, then strengths, weaknesses and concrete suggestions. Scores should match your text. Margin notes in the viewer are shared with the authors only if you choose.", href: "/help/reviewers/workflow", cta: "Read the reviewer guide" },
+    { id: "conflicts", title: "Conflicts of interest", body: "Declare co-authors from the last years, your institution and close collaborators. Plenary detects most conflicts automatically; tell the chairs about any others.", href: "/help/reviewers/conflicts", cta: "Read the guide" },
+    { id: "ai-tools", title: "Using AI tools in reviews", body: "Each venue sets an AI policy: language help only, allowed with a declaration, or not allowed. The paper viewer shows the rule and switches the AI panel off where it isn't allowed.", href: "/help/reviewers/ai-tools", cta: "Read the guide" },
+    { id: "more-time", title: "More time, or handing a review back", body: "Three extra days are approved at once; a week or two needs the editor. If you can't review at all, hand it back early and suggest someone.", href: "/help/reviewers/extensions", cta: "Read the guide" },
     { id: "orcid", title: "Get credit on ORCID", body: "Connect ORCID in your account and Plenary can add your completed reviews to your record, without naming the paper.", href: "/settings", cta: "Account settings" },
   ] },
   { title: "Session chairs", icon: "S", guides: [

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { detectIdentifier, type Detected } from "@/lib/auth/identifier";
 import { startSignup, type StartState } from "@/lib/auth/onboarding-actions";
 import {
@@ -11,6 +11,10 @@ import {
   type SignInState,
 } from "@/lib/auth/signin-actions";
 import { useT } from "@/lib/i18n/client";
+import { resendSignInCode } from "@/lib/auth/resend-actions";
+import { ResendButton } from "@/components/auth/resend-button";
+import { AccountChooser, useDeviceAccounts } from "@/components/signin/account-chooser";
+import type { DeviceAccount } from "@/lib/auth/device-accounts";
 
 /* Canvas PR02 tokens */
 const INK = "text-[#121826]";
@@ -69,12 +73,19 @@ const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><path d="M15 9a6 6 0 1 1-1.8-4.3M15 3.5V7h-3.5" /></svg>
 );
 
-export function SignInPanel({ next, initialTab = "signin" }: { next?: string; initialTab?: "signin" | "create" }) {
+export function SignInPanel({ next, initialTab = "signin", senderDomain = "[sender domain]" }: { next?: string; initialTab?: "signin" | "create"; senderDomain?: string }) {
   const [tab, setTab] = useState<"signin" | "create">(initialTab);
   const [identifier, setIdentifier] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [soon, setSoon] = useState<string | null>(null);
   const t = useT();
+  // PR03: accounts used on this device. The chooser shows until one is picked or "Use another account".
+  const [accounts, removeAccount] = useDeviceAccounts();
+  const [chooserDone, setChooserDone] = useState(false);
+  const [picked, setPicked] = useState<DeviceAccount | null>(null);
+  const showChooser = !chooserDone && accounts.length > 0;
+  const pick = (a: DeviceAccount) => { setPicked(a); setIdentifier(a.id ?? ""); setChooserDone(true); };
+  const other = () => { setPicked(null); setIdentifier(""); setChooserDone(true); };
 
   const [pwState, pwAction, pwPending] = useActionState(signInWithPassword, {} as SignInState);
   const [codeState, codeAction, codePending] = useActionState(sendSignInCode, {} as SignInState);
@@ -101,11 +112,16 @@ export function SignInPanel({ next, initialTab = "signin" }: { next?: string; in
       </div>
 
       {sent ? (
-        <CodeStep key={sent.email} state={sent} next={next} onBack={() => setDismissed(sent)} />
+        <CodeStep key={sent.email} state={sent} next={next} onBack={() => setDismissed(sent)} senderDomain={senderDomain} />
+      ) : tab === "signin" && showChooser ? (
+        <AccountChooser accounts={accounts} onPick={pick} onOther={other} onRemove={removeAccount} />
       ) : tab === "signin" ? (
         <>
-          <h1 className={`mt-7 ${H1}`}>{t("Welcome back")}</h1>
-          <p className={`mt-2 ${MUTED}`}>{t("One account for submitting, reviewing and chairing — at every venue.")}</p>
+          <h1 className={`mt-7 ${H1}`}>{picked ? t("Hello again, {name}", { name: picked.name.split(" ")[0] }) : t("Welcome back")}</h1>
+          <p className={`mt-2 ${MUTED}`}>{picked && !picked.id ? t("Enter the full email for {email}.", { email: picked.email }) : t("One account for submitting, reviewing and chairing — at every venue.")}</p>
+          {accounts.length > 0 ? (
+            <button type="button" onClick={() => { setChooserDone(false); setPicked(null); setIdentifier(""); }} className={`mt-1 min-h-6 border-0 bg-transparent p-0 text-[14px] ${LINK}`}>{picked ? t("Not you? Choose another account") : t("Choose an account on this device")}</button>
+          ) : null}
           {pwState.message ? <Banner>{t(pwState.message)}</Banner> : null}
           {codeState.message ? <Banner>{t(codeState.message)}</Banner> : null}
           {soon ? <Banner tone="info">{soon}</Banner> : null}
@@ -217,15 +233,9 @@ function CreateStep({ state, action, pending, next, onOrcid, soon }: {
   );
 }
 
-function CodeStep({ state, next, onBack }: { state: SignInState; next?: string; onBack: () => void }) {
+function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; next?: string; onBack: () => void; senderDomain: string }) {
   const t = useT();
   const [vState, vAction, vPending] = useActionState(verifyCode, state);
-  const [left, setLeft] = useState(30);
-  useEffect(() => {
-    if (left <= 0) return;
-    const id = setTimeout(() => setLeft((s) => s - 1), 1000);
-    return () => clearTimeout(id);
-  }, [left]);
   const byEmail = state.sentKind === "email";
   const lead = byEmail ? t("We sent a link and a 6-digit code to") : t("We sent a link and a 6-digit code to your account email");
   return (
@@ -245,13 +255,11 @@ function CodeStep({ state, next, onBack }: { state: SignInState; next?: string; 
         </div>
         <button type="submit" disabled={vPending} className={`mt-4 ${PRIMARY}`}>{vPending ? t("Checking…") : t("Verify and sign in")}</button>
       </form>
-      <div className="mt-4 flex flex-wrap items-center gap-4 text-[14px]">
-        {/* TODO(auth): real resend (supabase.auth.resend / signInWithOtp again) when the timer reaches 0. */}
-        <span className={`font-mono text-[13px] ${MUTED}`}>{left > 0 ? t("Resend in {time}", { time: `0:${String(left).padStart(2, "0")}` }) : t("You can ask for a new code")}</span>
+      <div className="mt-4 flex flex-wrap items-start gap-4 text-[14px]">
+        <ResendButton send={() => resendSignInCode(state.email ?? "", next)} label={t("Resend code")} />
         <button type="button" onClick={onBack} className={`min-h-6 border-0 bg-transparent p-0 text-[14px] ${LINK}`}>{t("Use a different email")}</button>
       </div>
-      {/* TODO(domain): real sender domain. */}
-      <p className={`mt-5 text-[13px] ${MUTED}`}>{t("Not arriving? Check spam, or ask your IT team to allow mail from")} <span className="font-mono">[sender domain]</span>.</p>
+      <p className={`mt-5 text-[13px] ${MUTED}`}>{t("Not arriving? Check spam, or ask your IT team to allow mail from")} <span className="font-mono">{senderDomain}</span>.</p>
     </>
   );
 }

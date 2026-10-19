@@ -265,8 +265,7 @@ export default async function Landing() {
         <div className={`${wrap} flex flex-wrap items-center justify-between gap-8 py-[88px]`}>
           <h2 className={`${h2} max-w-[22ch]`}>{t("Running a call for papers next year? Start it here.")}</h2>
           <div className="flex flex-wrap items-center gap-4">
-            {/* TODO(domain): sales contact address; EM01 create-event flow for self-serve. */}
-            <Link href="/create-account" className={`px-5 py-3 text-[15px] ${saffronBtn}`}>{t("Talk to us about migration")}</Link>
+            <Link href="/contact?tab=sales" className={`px-5 py-3 text-[15px] ${saffronBtn}`}>{t("Talk to us about migration")}</Link>
             <Link href="/sign-in" className="text-[15px] font-medium text-[#F5F6F3] underline">{t("Sign in →")}</Link>
           </div>
         </div>

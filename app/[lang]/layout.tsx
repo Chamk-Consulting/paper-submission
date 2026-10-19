@@ -14,6 +14,7 @@ import { Suspense } from "react";
 import { NavProgress } from "@/components/motion/nav-progress";
 import { PwaLayer } from "@/components/pwa/pwa-layer";
 import { CookieConsent } from "@/components/consent/cookie-consent";
+import { RememberAccount } from "@/components/auth/remember-account";
 
 export function generateStaticParams() {
   return LOCALES.map((lang) => ({ lang }));
@@ -57,6 +58,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           {children}
           <PwaLayer />
           <CookieConsent />
+          <RememberAccount />
         </I18nProvider>
       </body>
     </html>
