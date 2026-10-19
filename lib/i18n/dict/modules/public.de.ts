@@ -468,4 +468,5 @@ export const public_de: Record<string, string> = {
   "Refresh the page in a moment, or": "Laden Sie die Seite gleich neu, oder",
   "browse all venues": "alle Veranstaltungen ansehen",
   "extended": "verlängert",
+  "Location and dates to be announced": "Ort und Termine folgen",
 };

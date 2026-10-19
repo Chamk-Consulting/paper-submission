@@ -36,7 +36,7 @@ export function OpenCallRows({ calls, generatedAt, tone }: { calls: OpenCall[]; 
                 {t(c.label)}{c.extended ? ` · ${t("extended")}` : ""}
               </div>
             </div>
-            <div className={`col-span-6 text-[13px] sm:col-span-3 ${s.where}`}>{[c.location, month(c.startsOn, t.intl)].filter(Boolean).join(" · ") || "—"}</div>
+            <div className={`col-span-6 text-[13px] sm:col-span-3 ${s.where}`}>{[c.location, month(c.startsOn, t.intl)].filter(Boolean).join(" · ") || <span className="italic">{t("Location and dates to be announced")}</span>}</div>
             <div className="col-span-6 text-right sm:col-span-3">
               <div className={`font-mono text-[14px] font-semibold ${soon ? s.soon : s.when}`} aria-label={t("Closes in {time}", { time: countdown(ms) })}>{countdown(ms)}</div>
               <div className={`text-[12px] ${s.sub}`} title={tz}>{fmtLocal(c.deadline, tz, true, t.intl)} · {cityOf(tz)}</div>
