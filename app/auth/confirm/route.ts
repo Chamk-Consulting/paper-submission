@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { safeNext } from "@/lib/config/site";
 import { markRecovery } from "@/lib/auth/recovery-cookie";
+import { refuseIfLocked } from "@/lib/auth/lock-check";
 
 // Handles every email link: sign-up confirmation, password recovery, magic link, email change.
 // Supabase email templates must point here:
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
   if (tokenHash && type) {
     const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
+      if (await refuseIfLocked(supabase)) return NextResponse.redirect(new URL("/auth-error?reason=locked", origin));
       if (type === "recovery" && data.user) await markRecovery(data.user.id);
       if (type === "magiclink" || type === "email") await recordSignIn(supabase, "email_link");
       const dest = type === "recovery" ? "/reset-password" : type === "signup" ? "/create-account/profile" : next;
@@ -29,6 +31,7 @@ export async function GET(request: NextRequest) {
     // PKCE flow (default links and OAuth)
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      if (await refuseIfLocked(supabase)) return NextResponse.redirect(new URL("/auth-error?reason=locked", origin));
       await recordSignIn(supabase, "email_link");
       return NextResponse.redirect(new URL(next, origin));
     }
