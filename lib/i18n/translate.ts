@@ -41,6 +41,9 @@ import { data_de } from "@/lib/i18n/dict/modules/data.de";
 import { venuepolish_fr } from "@/lib/i18n/dict/modules/venuepolish.fr";
 import { venuepolish_it } from "@/lib/i18n/dict/modules/venuepolish.it";
 import { venuepolish_de } from "@/lib/i18n/dict/modules/venuepolish.de";
+import { orgtools_fr } from "@/lib/i18n/dict/modules/orgtools.fr";
+import { orgtools_it } from "@/lib/i18n/dict/modules/orgtools.it";
+import { orgtools_de } from "@/lib/i18n/dict/modules/orgtools.de";
 
 
 
@@ -51,9 +54,9 @@ import { venuepolish_de } from "@/lib/i18n/dict/modules/venuepolish.de";
 export type Dict = Record<string, string>;
 export const DICTS: Record<Locale, Dict> = {
   en: {},
-  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr, ...reviewpolish_fr, ...data_fr, ...venuepolish_fr, ...authpolish_fr },
-  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it, ...reviewpolish_it, ...data_it, ...venuepolish_it, ...authpolish_it },
-  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de, ...reviewpolish_de, ...data_de, ...venuepolish_de, ...authpolish_de },
+  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr, ...reviewpolish_fr, ...data_fr, ...venuepolish_fr, ...authpolish_fr, ...orgtools_fr },
+  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it, ...reviewpolish_it, ...data_it, ...venuepolish_it, ...authpolish_it, ...orgtools_it },
+  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de, ...reviewpolish_de, ...data_de, ...venuepolish_de, ...authpolish_de, ...orgtools_de },
 };
 export type Vars = Record<string, string | number>;
 export type T = (key: string, vars?: Vars) => string;
