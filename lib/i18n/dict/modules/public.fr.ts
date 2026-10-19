@@ -461,4 +461,11 @@ export const public_fr: Record<string, string> = {
   "{n} reviews": "{n} évaluations",
   "{n}% accepted last year": "{n} % acceptés l’an dernier",
   "{where} · {n} talks": "{where} · {n} exposés",
+  "Closes in {time}": "Ferme dans {time}",
+  "Closes in · your time zone": "Ferme dans · votre fuseau horaire",
+  "New calls for papers appear here as soon as a venue publishes its deadlines.": "Les nouveaux appels à communications apparaissent ici dès qu’un événement publie ses dates limites.",
+  "Open calls couldn't load.": "Les appels ouverts n’ont pas pu être chargés.",
+  "Refresh the page in a moment, or": "Actualisez la page dans un instant, ou",
+  "browse all venues": "parcourez tous les événements",
+  "extended": "prolongé",
 };

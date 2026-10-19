@@ -1,29 +1,11 @@
 import Link from "next/link";
-import { cacheLife, cacheTag } from "next/cache";
-import { createPublicClient } from "@/lib/supabase/public";
+import { Suspense } from "react";
 import { getT } from "@/lib/i18n/server";
+import { OpenCallsList } from "@/components/open-calls/list";
+import { OpenCallsSkeleton } from "@/components/open-calls/rows";
 
-type Call = { slug: string; name: string; short_name: string | null; location: string | null; starts_on: string | null; kind: string };
-
-async function getOpenCalls(): Promise<Call[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag("venues");
-  const { data } = await createPublicClient()
-    .from("venues")
-    .select("slug, name, short_name, location, starts_on, kind")
-    .eq("is_published", true)
-    .order("starts_on", { ascending: true })
-    .limit(4);
-  return (data as Call[] | null) ?? [];
-}
-
-const month = (d: string | null, intl: string) =>
-  d ? new Date(`${d}T00:00:00Z`).toLocaleString(intl, { month: "short", year: "numeric", timeZone: "UTC" }) : null;
-
-/** Right-hand navy panel of canvas PR02, filled with real published venues. */
+/** Right-hand navy panel of canvas PR02: real upcoming submission deadlines with live countdowns. */
 export async function OpenCallsPanel() {
-  const calls = await getOpenCalls();
   const t = await getT();
   return (
     <aside aria-label={t("Open calls for papers")} className="box-border flex min-w-0 flex-[7_1_520px] flex-col justify-center bg-[#0E1B3D] px-6 py-14 text-[#F5F6F3] sm:px-16">
@@ -33,24 +15,9 @@ export async function OpenCallsPanel() {
         <div className="grid grid-cols-12 gap-3 border-b border-[#24335C] px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.06em] text-[#B9C3DA]">
           <span className="col-span-6">{t("Venue")}</span><span className="col-span-3">{t("Where")}</span><span className="col-span-3 text-right">{t("Closes in")}</span>
         </div>
-        {calls.length ? (
-          calls.map((v) => (
-            <div key={v.slug} className="grid grid-cols-12 items-center gap-3 border-t border-[#24335C] px-5 py-3.5">
-              <div className="col-span-6 min-w-0">
-                <div className="font-semibold">{v.name}</div>
-                <div className="mt-0.5 text-[13px] text-[#B9C3DA]">
-                  <span className="mr-1.5 rounded-[2px] bg-[#E6EDFC] px-1.5 py-px font-mono text-[11px] uppercase text-[#1F47A8]">{v.short_name ?? t(v.kind)}</span>
-                  {t(v.kind)}
-                </div>
-              </div>
-              <div className="col-span-3 text-[13px] text-[#D6DCEA]">{[v.location, month(v.starts_on, t.intl)].filter(Boolean).join(" · ") || "—"}</div>
-              {/* TODO(data): submission deadlines (submission_types table, week 2) -> countdown; saffron when < 7 days. */}
-              <div className="col-span-3 text-right font-mono text-[14px] font-medium text-[#D6DCEA]">{t("Open")}</div>
-            </div>
-          ))
-        ) : (
-          <div className="border-t border-[#24335C] px-5 py-6 text-[14px] text-[#B9C3DA]">{t("No open calls yet — new venues appear here as soon as they publish.")}</div>
-        )}
+        <Suspense fallback={<OpenCallsSkeleton tone="dark" />}>
+          <OpenCallsList tone="dark" limit={4} />
+        </Suspense>
       </div>
       <div className="mt-3.5 flex flex-wrap justify-between gap-3">
         <span className="font-mono text-[12px] text-[#B9C3DA]">{t("Saffron = closes within 7 days.")}</span>
