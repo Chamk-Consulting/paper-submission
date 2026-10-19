@@ -23,7 +23,7 @@ async function Inner({ params }: P) {
   const t = await getT();
   const supabase = await createClient();
   const { data } = await supabase.from("registrations")
-    .select("id, number, reg_type, full_name, email, affiliation, covers_papers, paid_at, checked_in_at, source, registration_papers(submissions(id, number, title))")
+    .select("id, number, reg_type, full_name, email, affiliation, covers_papers, paid_at, checked_in_at, source, status, invoice_number, amount_cents, currency, payment_method, registration_papers(submissions(id, number, title))")
     .eq("venue_id", ctx.venue.id).order("number").limit(5000);
   const rows: RegRow[] = ((data ?? []) as unknown as Raw[]).map(({ registration_papers, ...r }) => ({
     ...r, papers: registration_papers.map((x) => x.submissions).filter((x): x is RegRow["papers"][number] => !!x).sort((a, b) => a.number - b.number),
@@ -31,7 +31,10 @@ async function Inner({ params }: P) {
   return (
     <ManagePage ctx={ctx} active="finals" crumb={<>{t("Final versions")} · {ctx.label}</>} title={t("Registrations")}
       sub={t("Who is registered, which papers each registration covers, and payment.")}
-      actions={<Link href={`/manage/${slug}/finals`} className={ui.ghost}>← {t("Final versions")}</Link>}>
+      actions={<>
+        <Link href={`/manage/${slug}/finals`} className={ui.ghost}>← {t("Final versions")}</Link>
+        <Link href={`/manage/${slug}/checkin`} className={ui.ghost}>{t("Badges & check-in")}</Link>
+      </>}>
       <RegistrationsBoard slug={slug} rows={rows} />
     </ManagePage>
   );

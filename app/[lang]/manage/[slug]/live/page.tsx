@@ -85,7 +85,10 @@ async function Inner({ params, searchParams }: P) {
 
   return (
     <ManagePage ctx={ctx} active="live" title={t("Event day")} sub={t("Live rooms, check-in desk, announcements and no-shows.")}
-      actions={<Link href={`/manage/${slug}/registrations`} className={ui.ghost}>{t("Registrations")}</Link>}>
+      actions={<>
+        <Link href={`/manage/${slug}/registrations`} className={ui.ghost}>{t("Registrations")}</Link>
+        <Link href={`/manage/${slug}/checkin`} className={ui.primary}>{t("Badges & check-in")}</Link>
+      </>}>
       <div className="flex flex-col gap-5">
         {!isToday ? <p className={`${ui.warn} m-0`}>{days.length ? t("The event is not running today — showing {day}.", { day: fmtDayLabel(day, INTL[locale]) }) : t("No sessions yet — build the program first.")}</p> : null}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

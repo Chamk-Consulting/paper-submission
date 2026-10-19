@@ -59,7 +59,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
         <section aria-labelledby="talks-h" className="min-w-0 flex-auto">
           <h2 id="talks-h" className="m-0 mb-3 font-serif text-[24px] font-normal">{t(s.kind === "poster" ? "Posters" : "Talks")}</h2>
           {changed ? <p className="mb-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]"><strong>{t("Room change:")}</strong> {t("this session moved from {old} to {room}.", { old: s.previousRoom ?? "", room: s.room ?? "" })}</p> : null}
-          <TalkList session={s} tz={tz} />
+          <TalkList session={s} tz={tz} slug={venue.slug} />
         </section>
         <aside className="flex w-full flex-col gap-4 lg:w-[300px] lg:flex-none">
           <section className="rounded-[8px] border border-[#DADDE3] bg-white px-[18px] py-4 text-[14px]">
