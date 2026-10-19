@@ -7,7 +7,7 @@ export type PublicAward = { award_id: string; award: string; submission_id: stri
 
 export async function loadPublicAwards(venueId: string): Promise<PublicAward[]> {
   const supabase = await createClient();
-  const { data } = await supabase.rpc("public_awards", { p_venue: venueId });
+  const { data } = await supabase.rpc("public_award_winners", { p_venue: venueId });
   return (data ?? []) as PublicAward[];
 }
 

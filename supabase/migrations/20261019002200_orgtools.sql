@@ -333,14 +333,29 @@ begin
   );
 end $$;
 
--- announced winners, for public program, session and paper pages
+-- announced winners of a published venue, for the public archive (PV01p): award, paper title, authors as one display string
 create or replace function public.public_awards(p_venue uuid)
+returns table (award text, title text, authors text)
+language sql stable security definer set search_path = '' as $$
+  select a.name, s.title,
+         (select string_agg(p.display_name, ', ' order by sa.position) from public.submission_authors sa join public.persons p on p.id = sa.person_id where sa.submission_id = s.id)
+  from public.awards a
+  join public.submissions s on s.id = a.winner_submission
+  join public.venues v on v.id = a.venue_id
+  where a.venue_id = p_venue and a.announced_at is not null and v.is_published
+  order by a.sort, a.created_at
+$$;
+
+-- the same winners with ids, for award badges on public program, session and paper pages
+create or replace function public.public_award_winners(p_venue uuid)
 returns table (award_id uuid, award text, submission_id uuid, number integer, title text, announced_at timestamptz)
 language sql stable security definer set search_path = '' as $$
   select a.id, a.name, s.id, s.number, s.title, a.announced_at
-  from public.awards a join public.submissions s on s.id = a.winner_submission
-  where a.venue_id = p_venue and a.announced_at is not null
-  order by a.sort
+  from public.awards a
+  join public.submissions s on s.id = a.winner_submission
+  join public.venues v on v.id = a.venue_id
+  where a.venue_id = p_venue and a.announced_at is not null and v.is_published
+  order by a.sort, a.created_at
 $$;
 
 -- certificate data: authors of the winning paper and organizers, once announced
@@ -493,7 +508,7 @@ revoke all on function public.similarity_overview(uuid), public.save_similarity(
   public.announce_award(uuid), public.awards_board(uuid), public.award_certificate(uuid),
   public.billing_overview(uuid), public.save_billing_details(uuid, jsonb), public.change_plan(uuid, text),
   public.request_invoice(uuid), public.set_invoice_checkout(uuid, text), public.stripe_mark_paid(text, uuid),
-  public.public_awards(uuid) from public, anon;
+  public.public_awards(uuid), public.public_award_winners(uuid) from public, anon;
 grant execute on function public.similarity_overview(uuid), public.save_similarity(uuid, numeric, numeric, text, jsonb, text, text),
   public.import_similarity(uuid, jsonb), public.mark_similarity_checked(uuid, boolean), public.set_similarity_settings(uuid, integer, boolean),
   public.create_award(uuid, text), public.set_award_committee(uuid, uuid[]), public.nominate_paper(uuid, uuid, text),
@@ -501,5 +516,5 @@ grant execute on function public.similarity_overview(uuid), public.save_similari
   public.announce_award(uuid), public.awards_board(uuid), public.award_certificate(uuid),
   public.billing_overview(uuid), public.save_billing_details(uuid, jsonb), public.change_plan(uuid, text),
   public.request_invoice(uuid), public.set_invoice_checkout(uuid, text) to authenticated;
-grant execute on function public.public_awards(uuid) to anon, authenticated;
+grant execute on function public.public_awards(uuid), public.public_award_winners(uuid) to anon, authenticated;
 grant execute on function public.stripe_mark_paid(text, uuid) to service_role;
