@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
 import { AuthCard } from "@/components/ui";
+import { SupportLine } from "@/components/site/support-line";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -29,7 +30,7 @@ export default async function Page() {
           </li>
         ))}
       </ul>
-      {/* TODO(domain): real support address. */}
+      <SupportLine lead="Still stuck? Write to" />
     </AuthCard>
   );
 }

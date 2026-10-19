@@ -2,6 +2,9 @@ import type { Locale } from "@/lib/i18n/config";
 import { fr } from "@/lib/i18n/dict/fr";
 import { it } from "@/lib/i18n/dict/it";
 import { de } from "@/lib/i18n/dict/de";
+import { authpolish_fr } from "@/lib/i18n/dict/modules/authpolish.fr";
+import { authpolish_it } from "@/lib/i18n/dict/modules/authpolish.it";
+import { authpolish_de } from "@/lib/i18n/dict/modules/authpolish.de";
 import { manage_fr } from "@/lib/i18n/dict/modules/manage.fr";
 import { manage_it } from "@/lib/i18n/dict/modules/manage.it";
 import { manage_de } from "@/lib/i18n/dict/modules/manage.de";
@@ -48,9 +51,9 @@ import { venuepolish_de } from "@/lib/i18n/dict/modules/venuepolish.de";
 export type Dict = Record<string, string>;
 export const DICTS: Record<Locale, Dict> = {
   en: {},
-  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr, ...reviewpolish_fr, ...data_fr, ...venuepolish_fr },
-  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it, ...reviewpolish_it, ...data_it, ...venuepolish_it },
-  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de, ...reviewpolish_de, ...data_de, ...venuepolish_de },
+  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr, ...reviewpolish_fr, ...data_fr, ...venuepolish_fr, ...authpolish_fr },
+  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it, ...reviewpolish_it, ...data_it, ...venuepolish_it, ...authpolish_it },
+  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de, ...reviewpolish_de, ...data_de, ...venuepolish_de, ...authpolish_de },
 };
 export type Vars = Record<string, string | number>;
 export type T = (key: string, vars?: Vars) => string;

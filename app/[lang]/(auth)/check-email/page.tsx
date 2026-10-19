@@ -4,6 +4,8 @@ import { getT } from "@/lib/i18n/server";
 import { AuthCard } from "@/components/ui";
 import { AuthSkeleton } from "@/components/skeletons";
 import { Reveal } from "@/components/motion/reveal";
+import { ResendConfirmation } from "@/components/auth/resend-confirmation";
+import { senderDomain } from "@/lib/config/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -24,7 +26,14 @@ async function Inner({ searchParams }: { searchParams: Promise<{ email?: string 
         <li>{t("Not there after a few minutes? Check spam or promotions.")}</li>
         <li>{t("If you already have an account with this email, sign in or reset your password instead.")}</li>
       </ul>
-      {/* TODO(auth): "Resend link" button (supabase.auth.resend) with a 60s cooldown. */}
+      {email ? (
+        <div className="mt-5 border-t border-[#EEF0EC] pt-4">
+          <ResendConfirmation email={email} />
+        </div>
+      ) : null}
+      <p className="mt-4 text-[13px] text-[#4A5263]">
+        {t("Not arriving? Check spam, or ask your IT team to allow mail from")} <span className="font-mono">{senderDomain()}</span>.
+      </p>
     </AuthCard>
   );
 }

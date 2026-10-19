@@ -23,6 +23,8 @@ type Props = {
   changeHref: string;
   /** signup = PR07 (confirm email), recovery = PR10b (password reset code). */
   kind?: "signup" | "recovery";
+  /** Domain the emails come from (lib/config/site senderDomain()). */
+  senderDomain?: string;
 };
 
 const COPY = {
@@ -41,7 +43,7 @@ const COPY = {
 };
 
 /** Canvas PR07 / PR10b: six code boxes with paste, resend timer, wrong/expired/locked states. */
-export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }: Props) {
+export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", senderDomain = "[sender domain]" }: Props) {
   const copy = COPY[kind];
   const verify = kind === "recovery" ? verifyResetCode : verifySignupCode;
   const resendCode = kind === "recovery" ? resendResetCode : resendSignupCode;
@@ -168,8 +170,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
           <p role={mode === "wrong" ? "alert" : "status"} aria-live="polite" className="mt-2 text-[13px]" style={{ color: msgInk }}>{msg}</p>
           {resends >= 3 && !limit ? (
             <p className="mt-1.5 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-2.5 py-2 text-[13px] text-[#3B2A07]">
-              {/* TODO(domain): real sender domain */}
-              {t("Still nothing after {n} tries? Check spam, or ask IT to allow mail from", { n: resends })} <span className="font-mono">[sender domain]</span>. {t("Resend now waits a little longer each time.")}
+              {t("Still nothing after {n} tries? Check spam, or ask IT to allow mail from", { n: resends })} <span className="font-mono">{senderDomain}</span>. {t("Resend now waits a little longer each time.")}
             </p>
           ) : null}
         </fieldset>
@@ -217,7 +218,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup" }:
         <ul className={`mt-2.5 flex flex-col gap-1.5 pl-[18px] ${ui.muted}`}>
           {copy.tips.map((tip) =>
             tip === "ask-it" ? (
-              <li key={tip}>{t("Ask IT to allow mail from")} <span className="font-mono">[sender domain]</span>.</li>
+              <li key={tip}>{t("Ask IT to allow mail from")} <span className="font-mono">{senderDomain}</span>.</li>
             ) : tip === "recover" ? (
               <li key={tip}>{t("Still stuck?")} <Link href="/account-help" className={ui.link}>{t("Recover your account")}</Link> {t("with ORCID or help from support.")}</li>
             ) : (

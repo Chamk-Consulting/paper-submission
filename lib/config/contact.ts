@@ -2,15 +2,16 @@
  * Contact details shown on /contact, /help and the system pages.
  * PLACEHOLDERS — every value in [brackets] must be replaced before launch.
  * Team inbox for the contact form is the CONTACT_TO env var (set in Vercel, never here).
+ * The public support address comes from NEXT_PUBLIC_SUPPORT_EMAIL (works in the browser and on the server).
  */
 export const contact = {
   replyTime: "[1 working day]",
   languages: "English, French, Italian or German",
-  supportEmail: "[support email]",
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || "[support email]",
   salesEmail: "[sales email]",
   securityEmail: "[security email]",
   privacyEmail: "[privacy email]",
-  noReplyEmail: "no-reply@plenary.example",
+  noReplyEmail: process.env.NEXT_PUBLIC_NO_REPLY_EMAIL?.trim() || "[no-reply address]",
   company: {
     legalName: "[Company legal name]",
     address: "[Postal address]",

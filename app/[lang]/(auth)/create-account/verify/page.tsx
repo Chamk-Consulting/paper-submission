@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { NavyAside, SetupSteps, ShieldNote, SplitLayout, ui } from "@/components/auth/split-layout";
 import { OtpVerify } from "@/components/auth/otp-verify";
-import { safeNext } from "@/lib/config/site";
+import { safeNext, senderDomain, site } from "@/lib/config/site";
 import { AuthAsideSkeleton, AuthFormSkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -37,7 +37,7 @@ async function Left({ searchParams }: { searchParams: Promise<Search> }) {
         {t("We sent a 6-digit code and a link to")} <strong className="text-[#121826]">{email}</strong>{" "}
         <Link href={back(s)} className={`text-[14px] ${ui.link}`}>{t("Change")}</Link>
       </p>
-      <OtpVerify email={email} onSuccessHref={after} changeHref={back(s)} />
+      <OtpVerify email={email} onSuccessHref={after} changeHref={back(s)} senderDomain={senderDomain()} />
     </>
   );
 }
@@ -57,8 +57,7 @@ async function Aside({ searchParams }: { searchParams: Promise<Search> }) {
           { title: t("Your research profile"), text: t("Affiliation and ORCID — then you get your Plenary ID and go back to where you started."), state: "next" },
         ]}
       />
-      {/* TODO(domain): name the real domain here. */}
-      <ShieldNote><strong className="text-[#F5F6F3]">{t("Plenary staff will never ask for this code.")}</strong> {t("Only enter it on this site. Didn't sign up? Ignore the email — no account is created without it.")}</ShieldNote>
+      <ShieldNote><strong className="text-[#F5F6F3]">{t("Plenary staff will never ask for this code.")}</strong> {t("Only enter it on {host}. Didn't sign up? Ignore the email — no account is created without it.", { host: new URL(site.url).host })}</ShieldNote>
     </NavyAside>
   );
 }

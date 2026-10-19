@@ -9,6 +9,9 @@ import { getMe } from "@/lib/auth/me";
 import { safeNext } from "@/lib/config/site";
 import { Reveal } from "@/components/motion/reveal";
 import { AuthSkeleton } from "@/components/skeletons";
+import { venueDeadline, venueSlugFrom } from "@/lib/auth/venue-deadline";
+import { Countdown, LocalDeadline } from "@/components/auth/deadline-bits";
+import { BadgeDownload } from "@/components/auth/badge-download";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -34,6 +37,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
   const dest = next ? safeNext(next) : "/workspace";
   const hasNext = Boolean(next);
   const t = await getT();
+  const venue = await venueDeadline(venueSlugFrom(next), t.intl);
 
   return (
     <SplitLayout
@@ -41,17 +45,23 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
       aside={
         <NavyAside label={t("What's next")} kicker={t("What’s next")} title={t("Pick up where you started.")} titleSize={40}>
           <div className="mt-7 max-w-[560px] rounded-[10px] border border-[#2B3D70] bg-[#17285A] px-[22px] py-5">
-            <span className="rounded-[2px] bg-[#E6EDFC] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em] text-[#1F47A8]">{hasNext ? t("YOUR SUBMISSION") : t("OPEN CALLS")}</span>
-            {/* TODO(data): show the venue, deadline and countdown once submissions exist. */}
-            <div className="mt-2.5 font-serif text-[24px] leading-[1.2]">{hasNext ? t("Continue where you left off") : t("Find a venue to submit to")}</div>
-            <div className="mt-1 text-[14px] text-[#B9C3DA]">{hasNext ? t("We’ll take you straight back.") : t("Conferences, workshops and journals with open calls.")}</div>
-            <Link href={hasNext ? dest : "/"} className={`mt-4 h-[46px] ${ui.primary}`}>{hasNext ? t("Start your submission") : t("Browse open calls")}</Link>
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <span className="rounded-[2px] bg-[#E6EDFC] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em] text-[#1F47A8]">{hasNext ? t("YOUR SUBMISSION") : t("OPEN CALLS")}</span>
+              {venue?.iso ? <span className="font-mono text-[13px] font-semibold text-[#F2A93B]"><Countdown iso={venue.iso} generatedAt={venue.generatedAt} /></span> : null}
+            </div>
+            <div className="mt-2.5 font-serif text-[24px] leading-[1.2]">{venue ? venue.name : hasNext ? t("Continue where you left off") : t("Find a venue to submit to")}</div>
+            <div className="mt-1 text-[14px] text-[#B9C3DA]">
+              {venue?.iso && venue.aoe ? (
+                <>{[venue.label, venue.city].filter(Boolean).join(" · ")}{venue.label || venue.city ? " · " : ""}{t("deadline {when}", { when: venue.aoe })}<span className="block">{t("That's")} <LocalDeadline iso={venue.iso} /> {t("for you")}.</span></>
+              ) : venue ? t("No upcoming deadline listed — check the venue page.") : hasNext ? t("We’ll take you straight back.") : t("Conferences, workshops and journals with open calls.")}
+            </div>
+            <Link href={hasNext ? dest : venue ? `/venues/${venue.slug}` : "/venues"} className={`mt-4 h-[46px] ${ui.primary}`}>{hasNext ? t("Start your submission") : venue ? t("Open the venue") : t("Browse open calls")}</Link>
           </div>
           <p className="mb-2.5 mt-7 font-mono text-[11px] uppercase tracking-[0.06em] text-[#B9C3DA]">{t("When you have a minute")}</p>
           <ul className="m-0 flex max-w-[560px] list-none flex-col gap-2 p-0">
             {[
               { href: "/import", label: "Bring your PaperCept history", s: "Past papers and reviews, from your society’s export or ORCID." },
-              { href: "/workspace", label: "Add your research keywords", s: "So editors invite you to review papers you know." }, // TODO(ui): keywords settings page
+              { href: "/settings/profile", label: "Add your research keywords", s: "So editors invite you to review papers you know." },
               { href: "/workspace", label: "Look around My workspace", s: "Submissions, reviews and messages, all in one list." },
             ].map((x) => (
               <li key={x.label}>
@@ -104,7 +114,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
         </div>
         <div className={`flex flex-wrap justify-between gap-3 border-t border-[#EEF0EC] bg-[#F5F6F3] px-5 py-2.5 text-[12px] ${ui.muted}`}>
           <span>{t("Finds you for co-authors and chairs — never signs you in.")}</span>
-          {/* TODO(ui): downloadable badge (PNG/PDF). */}
+          {id && qrSvg ? <BadgeDownload name={name} affiliation={me.affiliation?.institution ?? ""} id={id} orcid={p?.orcid ?? null} qrSvg={qrSvg} /> : null}
         </div>
       </div>
 
