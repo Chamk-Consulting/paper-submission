@@ -44,7 +44,7 @@ async function Inner({ params, searchParams }: P) {
   ]);
 
   return (
-    <ManagePage ctx={ctx} active="live" crumb={<>{t("Event day")} · {ctx.label}</>} title={t("Badges & check-in")}
+    <ManagePage ctx={ctx} active="checkin" crumb={<>{t("Event day")} · {ctx.label}</>} title={t("Badges & check-in")}
       sub={t("Each registered person gets a badge with a QR code. The desk scans it — no lists, no typing.")}
       actions={<>
         <Link href={`/manage/${slug}/live`} className={ui.ghost}>← {t("Event day")}</Link>

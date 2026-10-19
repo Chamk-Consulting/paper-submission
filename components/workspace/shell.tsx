@@ -23,12 +23,15 @@ type Key = "home" | "submissions" | "reviews" | "sessions" | "venues" | "inbox" 
 
 /** Organizer links of the event sidebar (canvas EM20–EM44). key → path under /manage/[slug]. */
 export const ORGANIZER_NAV: [string, string, string][] = [
-  ["dashboard", "Event dashboard", ""], ["papers", "Papers", "/papers"], ["assignment", "Assignment", "/assignment"],
-  ["reviews", "Review progress", "/reviews"], ["decisions", "Decisions", "/decisions"], ["finals", "Final versions", "/finals"],
-  ["program", "Program builder", "/program"], ["live", "Event day", "/live"], ["proceedings", "Proceedings & reports", "/proceedings"],
-  ["people", "People", "/people"], ["email", "Email centre", "/email"], ["setup", "Setup", "/setup"],
+  ["dashboard", "Event dashboard", ""], ["papers", "Papers", "/papers"], ["similarity", "Similarity check", "/similarity"], ["assignment", "Assignment", "/assignment"],
+  ["reviews", "Review progress", "/reviews"], ["decisions", "Decisions", "/decisions"], ["awards", "Awards", "/awards"], ["finals", "Final versions", "/finals"],
+  ["program", "Program builder", "/program"], ["registrations", "Registrations", "/registrations"], ["live", "Event day", "/live"], ["checkin", "Badges & check-in", "/checkin"],
+  ["proceedings", "Proceedings & reports", "/proceedings"],
+  ["people", "People", "/people"], ["email", "Email centre", "/email"], ["setup", "Setup", "/setup"], ["billing", "Billing", "/billing"],
   ["committee", "Committee", "/setup/committee"], ["roles", "My roles & conflicts", "@/manage/roles"], ["audit", "Audit log", "/audit"],
 ];
+/** Organizer items only the event owner sees. */
+const OWNER_ONLY = new Set(["billing"]);
 
 function NavItem({ t, href, icon, label, active, badge, soon }: { t: T; href?: string; icon: ReactNode; label: string; active?: boolean; badge?: ReactNode; soon?: boolean }) {
   const cls = `flex h-10 items-center justify-between rounded-[6px] px-3 text-[14px] no-underline ${active ? "bg-[#E6EDFC] font-semibold text-[#0E1B3D]" : soon ? "text-[#9AA3B5]" : "text-[#121826] hover:bg-[#F5F6F3]"}`;
@@ -113,7 +116,7 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
                   <span className="rounded-[3px] bg-[#0E1B3D] px-1.5 py-px font-mono text-[10px] uppercase text-[#F2A93B]">{t(ev.roleLabel)}</span>
                 </div>
                 <div className="truncate px-3 pb-1 text-[12px] text-[#4A5263]">{ev.name}</div>
-                {ORGANIZER_NAV.map(([k, l, path]) => {
+                {ORGANIZER_NAV.filter(([k]) => !OWNER_ONLY.has(k) || /owner/i.test(ev.roleLabel)).map(([k, l, path]) => {
                   const href = path.startsWith("@") ? path.slice(1) : `/manage/${ev.slug}${path}`;
                   const on = active === `m:${k}`;
                   return (

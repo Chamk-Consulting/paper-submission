@@ -60,7 +60,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
           <p className="mb-2.5 mt-7 font-mono text-[11px] uppercase tracking-[0.06em] text-[#B9C3DA]">{t("When you have a minute")}</p>
           <ul className="m-0 flex max-w-[560px] list-none flex-col gap-2 p-0">
             {[
-              { href: "/import", label: "Bring your PaperCept history", s: "Past papers and reviews, from your society’s export or ORCID." },
+              { href: "/contact?topic=import", label: "Bring your PaperCept history", s: "Past papers and reviews, from your society’s export or ORCID." },
               { href: "/settings/profile", label: "Add your research keywords", s: "So editors invite you to review papers you know." },
               { href: "/workspace", label: "Look around My workspace", s: "Submissions, reviews and messages, all in one list." },
             ].map((x) => (

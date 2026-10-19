@@ -29,7 +29,7 @@ async function Inner({ params }: P) {
     ...r, papers: registration_papers.map((x) => x.submissions).filter((x): x is RegRow["papers"][number] => !!x).sort((a, b) => a.number - b.number),
   }));
   return (
-    <ManagePage ctx={ctx} active="finals" crumb={<>{t("Final versions")} · {ctx.label}</>} title={t("Registrations")}
+    <ManagePage ctx={ctx} active="registrations" crumb={<>{t("Final versions")} · {ctx.label}</>} title={t("Registrations")}
       sub={t("Who is registered, which papers each registration covers, and payment.")}
       actions={<>
         <Link href={`/manage/${slug}/finals`} className={ui.ghost}>← {t("Final versions")}</Link>

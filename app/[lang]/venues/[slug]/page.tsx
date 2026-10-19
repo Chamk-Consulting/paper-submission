@@ -67,6 +67,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
                 <div className="mt-5 flex flex-wrap gap-2.5">
                   <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
                   <FollowButton venueId={v.id} slug={v.slug} />
+                  <Link href={`/venues/${v.slug}/register`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Register to attend")}</Link>
                   <a href={`/venues/${v.slug}/calendar.ics`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Add deadlines to calendar")}</a>
                 </div>
               </div>

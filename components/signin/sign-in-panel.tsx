@@ -144,7 +144,7 @@ export function SignInPanel({ next, initialTab = "signin", senderDomain = "[send
               <span id="pr-id-hint" className="text-[13px]" style={{ color: tone.hint }}>{t(d.hint)}</span>
               <FieldError id="pr-id-err" errors={idErrors} />
               {d.kind === "pin" ? (
-                <Link href="/import" className="mt-1 flex items-center gap-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3 py-2.5 text-[13px] text-[#3B2A07] no-underline">
+                <Link href="/contact?topic=import" className="mt-1 flex items-center gap-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3 py-2.5 text-[13px] text-[#3B2A07] no-underline">
                   <span className="flex-auto"><strong>{t("Looks like a PaperCept PIN.")}</strong> {t("It can’t sign you in here, but it can bring your history across.")}</span>
                   <span className="whitespace-nowrap font-semibold text-[#7A4508]">{t("Bring history →")}</span>
                 </Link>
@@ -189,7 +189,7 @@ export function SignInPanel({ next, initialTab = "signin", senderDomain = "[send
             <button type="button" onClick={() => comingSoon("Institution")} className={`h-11 text-[14px] ${SECONDARY}`}><InstitutionIcon />{t("Institution")}</button>
             <button type="button" onClick={() => comingSoon("Google")} className={`h-11 text-[14px] ${SECONDARY}`}><GoogleIcon />Google</button>
           </div>
-          <p className={`mt-5 text-[14px] ${MUTED}`}>{t("Had a PIN on another conference system?")} <Link href="/import" className={LINK}>{t("Bring your history")}</Link></p>
+          <p className={`mt-5 text-[14px] ${MUTED}`}>{t("Had a PIN on another conference system?")} <Link href="/contact?topic=import" className={LINK}>{t("Bring your history")}</Link></p>
         </>
       ) : (
         <CreateStep state={createState} action={createAction} pending={createPending} next={next} onOrcid={() => comingSoon("ORCID")} soon={soon} />

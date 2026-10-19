@@ -99,7 +99,7 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
         <button type="submit" disabled={pending} className={`mt-[18px] ${ui.primary}`}>{pending ? t("Sending your code…") : t("Continue")}</button>
       </form>
       <p className={`mt-3 text-[13px] ${ui.muted}`}>{t("We'll email you a 6-digit code to confirm it's you.")}</p>
-      <p className={`mt-[22px] text-[14px] ${ui.muted}`}>{t("Used PaperCept before?")} <Link href="/import" className={ui.link}>{t("Bring your history")}</Link> {t("after you sign up.")}</p>
+      <p className={`mt-[22px] text-[14px] ${ui.muted}`}>{t("Used PaperCept before?")} <Link href="/contact?topic=import" className={ui.link}>{t("Bring your history")}</Link> {t("after you sign up.")}</p>
     </>
   );
 }
