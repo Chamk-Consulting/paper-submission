@@ -31,10 +31,7 @@ export default async function Page() {
           </li>
         ))}
       </ul>
-<<<<<<< HEAD
       <SupportLine lead="Still stuck? Write to" />
-=======
->>>>>>> af5091d
     </AuthCard>
   );
 }
