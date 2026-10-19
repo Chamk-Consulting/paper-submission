@@ -6,12 +6,16 @@ import { ui } from "@/components/manage/ui";
 import { Act, FieldErr, StateLine, Submit } from "@/components/manage/ops2/act";
 import { deleteRegistration, importRegistrations, saveRegistration, unlinkPaper, type Ops2State } from "@/lib/manage/ops2-actions";
 import { paperNo } from "@/lib/manage/ops2-time";
+import { markRegistrationPaid } from "@/lib/attend/actions";
+import { fmtMoney } from "@/lib/attend/money";
 
 const tagGreen = "bg-[#E1F3EA] text-[#14603F]", tagAmber = "bg-[#FFF6E6] text-[#7A5410]";
 
 export type RegRow = {
   id: string; number: string; reg_type: string; full_name: string | null; email: string | null; affiliation: string | null; covers_papers: number;
   paid_at: string | null; checked_in_at: string | null; source: string; papers: { id: string; number: number; title: string }[];
+  // online registrations (RG01)
+  status?: string; invoice_number?: string | null; amount_cents?: number | null; currency?: string | null; payment_method?: string | null;
 };
 
 function RegForm({ slug, row, onDone }: { slug: string; row: RegRow | null; onDone: () => void }) {
@@ -105,8 +109,18 @@ export function RegistrationsBoard({ slug, rows }: { slug: string; rows: RegRow[
                       </div>
                     </td>
                     <td className={ui.td}>
-                      <span className={`${ui.tag} ${r.paid_at ? tagGreen : tagAmber}`}>{t(r.paid_at ? "PAID" : "UNPAID")}</span>
+                      {r.status === "cancelled" ? <span className={`${ui.tag} bg-[#EEF0EC] text-[#4A5263]`}>{t("CANCELLED")}</span>
+                        : <span className={`${ui.tag} ${r.paid_at ? tagGreen : tagAmber}`}>{t(r.paid_at ? "PAID" : r.status === "awaiting_payment" ? "AWAITING PAYMENT" : "UNPAID")}</span>}
                       {r.checked_in_at ? <span className={`${ui.tag} ml-1 bg-[#E8EEFB] text-[#1F3F8F]`}>{t("CHECKED IN")}</span> : null}
+                      {r.invoice_number ? (
+                        <span className="mt-1 block text-[11px] text-[#4A5263]">
+                          <a href={`/venues/${slug}/register/document?r=${r.id}&kind=invoice`} className="font-mono">{r.invoice_number}</a>
+                          {r.amount_cents != null && r.currency ? ` · ${fmtMoney(r.amount_cents, r.currency, t.intl)}` : ""}{r.payment_method === "card" ? ` · ${t("card")}` : ""}
+                        </span>
+                      ) : null}
+                      {r.status === "awaiting_payment" && !r.paid_at ? (
+                        <div className="mt-1"><Act action={markRegistrationPaid} fields={{ slug, id: r.id, paid: "1" }} className="cursor-pointer border-0 bg-transparent p-0 text-[12px] font-semibold text-[#14603F] underline" pendingLabel={t("Saving…")}>{t("Mark paid")}</Act></div>
+                      ) : null}
                     </td>
                     <td className={`${ui.td} whitespace-nowrap text-right`}>
                       <button type="button" onClick={() => { setEdit(r); setTab("add"); }} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#2F5FD0] underline">{t("Edit")}</button>{" "}

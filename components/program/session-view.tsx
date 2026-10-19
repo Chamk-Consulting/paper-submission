@@ -29,7 +29,7 @@ export function SaveButton({ session, all, slug, signedIn }: { session: Session;
   );
 }
 
-export function TalkList({ session, tz }: { session: Session; tz: string }) {
+export function TalkList({ session, tz, slug }: { session: Session; tz: string; slug?: string }) {
   const t = useT();
   const [open, setOpen] = useState<string | null>(session.talks[0]?.id ?? null);
   if (!session.talks.length) return <p className="rounded-[8px] border border-dashed border-[#DADDE3] bg-white p-8 text-center text-[#4A5263]">{t("No talks listed for this session.")}</p>;
@@ -53,6 +53,7 @@ export function TalkList({ session, tz }: { session: Session; tz: string }) {
               <div className="border-t border-[#EEF0EC] px-4 pb-4 pt-3 sm:pl-[78px]">
                 <p className="m-0 max-w-[70ch] text-[14px] leading-[1.6]">{x.abstract ?? t("The abstract will appear here once the authors publish it.")}</p>
                 <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-[#4A5263]">
+                  {slug && x.number ? <Link href={`/program/${slug}/papers/${x.number}`} className="font-semibold">{t("Paper page, slides & citation")}</Link> : null}
                   <span>{t("Paper (IEEE Xplore after the event)")}</span>
                   {x.presenter ? <span>{t("Presenter: {name}", { name: x.presenter })}</span> : null}
                 </div>
