@@ -37,12 +37,11 @@ export function download(name: string, text: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function PeopleTable({ slug, label, rows, canMessage, canViewAs }: { slug: string; label: string; rows: PersonRow[]; canMessage: boolean; canViewAs: boolean }) {
+export function PeopleTable({ slug, rows, canMessage, canViewAs }: { slug: string; label?: string; rows: PersonRow[]; canMessage: boolean; canViewAs: boolean }) {
   const t = useT();
   const [f, setF] = useState<F>("all");
   const [q, setQ] = useState("");
   const [msgTo, setMsgTo] = useState<PersonRow | null>(null);
-  const [viewAs, setViewAs] = useState<PersonRow | null>(null);
   const [, start] = useTransition();
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -52,15 +51,6 @@ export function PeopleTable({ slug, label, rows, canMessage, canViewAs }: { slug
   const exportCsv = () => {
     download(`${slug}-people.csv`, csv([["Name", "Plenary ID", "Email", "Institution", "Roles", "Papers", "Reviews"], ...shown.map((p) => [p.name, p.plenaryId, p.email, p.institution, p.roles.join(" "), p.papers, p.reviews])]));
     start(async () => { await logOrganizerEvent(slug, "data.export", { what: "people", rows: shown.length, filter: f }); });
-  };
-  const openViewAs = (p: PersonRow) => {
-    setViewAs(p);
-    start(async () => { await logOrganizerEvent(slug, "view_as.started", { person: p.id, name: p.name }); });
-  };
-  const closeViewAs = () => {
-    const p = viewAs;
-    setViewAs(null);
-    if (p) start(async () => { await logOrganizerEvent(slug, "view_as.ended", { person: p.id }); });
   };
   return (
     <>
@@ -80,22 +70,6 @@ export function PeopleTable({ slug, label, rows, canMessage, canViewAs }: { slug
         </div>
       </div>
 
-      {viewAs ? (
-        <section role="region" aria-label={t("View as")} className="mt-4 rounded-[8px] border border-[#F2A93B] bg-[#FFF8EC] p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className={ui.kicker}>{t("Viewing as {name}", { name: viewAs.name })}</p>
-              <p className="mt-1 text-[14px] text-[#4A5263]">{t("Read-only. You see what they see at {venue}; nothing you do is sent as them. This is logged (A6).", { venue: label })}</p>
-            </div>
-            <button type="button" onClick={closeViewAs} className={ui.navy}>{t("Stop viewing")}</button>
-          </div>
-          <dl className="m-0 mt-4 grid gap-3 sm:grid-cols-3">
-            <div><dt className={ui.hint}>{t("Roles")}</dt><dd className="m-0 mt-1 flex flex-wrap gap-1">{viewAs.roles.map((r) => <RoleTag key={r} role={r} />)}</dd></div>
-            <div><dt className={ui.hint}>{t("Papers at this event")}</dt><dd className="m-0 mt-1 font-mono">{viewAs.papers}</dd></div>
-            <div><dt className={ui.hint}>{t("Reviews at this event")}</dt><dd className="m-0 mt-1 font-mono">{viewAs.reviews}</dd></div>
-          </dl>
-        </section>
-      ) : null}
 
       <section className={`${ui.card} mt-4`}>
         <div className="overflow-x-auto">
@@ -113,7 +87,7 @@ export function PeopleTable({ slug, label, rows, canMessage, canViewAs }: { slug
                     {[p.papers ? t("{n} papers", { n: p.papers }) : null, p.reviews ? t("{n} reviews", { n: p.reviews }) : null].filter(Boolean).join(" · ") || "—"}
                   </td>
                   <td className={`${ui.td} whitespace-nowrap text-right`}>
-                    {canViewAs && !p.you ? <button type="button" onClick={() => openViewAs(p)} className="border-0 bg-transparent p-0 text-[13px] text-[#1F47A8] underline">{t("View as")}</button> : null}
+                    {canViewAs && !p.you ? <Link href={`/manage/${slug}/people/${p.id}/view`} className="text-[13px] text-[#1F47A8] underline">{t("View as")}</Link> : null}
                     {canMessage && !p.you ? <button type="button" onClick={() => setMsgTo(p)} className="ml-3 border-0 bg-transparent p-0 text-[13px] text-[#1F47A8] underline">{t("Message")}</button> : null}
                   </td>
                 </tr>

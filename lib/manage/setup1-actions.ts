@@ -178,7 +178,7 @@ export async function deleteType(slug: string, id: string): Promise<ManageState>
   const supabase = await createClient();
   const { data: t } = await supabase.from("submission_types").select("name").eq("id", id).eq("venue_id", venue).maybeSingle();
   if (!t) return { error: "Type not found." };
-  const { count } = await supabase.from("submissions").select("id", { count: "exact", head: true }).eq("venue_id", venue).eq("paper_type", t.name as string);
+  const { count } = await supabase.from("submissions").select("id", { count: "exact", head: true }).eq("venue_id", venue).eq("paper_type", t.name as string).eq("is_test", false);
   if (count) return { error: "Papers already use this type — switch it off instead (K3)." };
   const { error } = await supabase.from("submission_types").delete().eq("id", id).eq("venue_id", venue);
   if (error) return { error: friendlyDb(error.message) };

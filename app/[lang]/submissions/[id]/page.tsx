@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fmtMonth } from "@/lib/venues/time";
 import { Reveal } from "@/components/motion/reveal";
 import { StatusSkeleton } from "@/components/skeletons";
+import { TestBanner } from "@/components/submission/test-banner";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -100,6 +101,7 @@ async function Inner({ params }: P) {
       <div className="border-b border-[#DADDE3] bg-white">
         <div className="flex flex-col gap-4 px-5 pb-5 pt-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
+            {sub.isTest ? <TestBanner venueSlug={venue.slug} passed={!!sub.testSubmittedAt} /> : null}
             <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("My workspace")}</Link> / {venue.acr} / {no}</p>
             <h1 className="mt-2 font-serif text-[26px] font-normal leading-[1.2] sm:text-[32px]">{sub.title}</h1>
             <p className="mt-1 text-[15px] text-[#4A5263]">{no} · {venue.acr} · {t(sub.paperType)}{me?.corresponding ? ` · ${t("you are the corresponding author")}` : ""}</p>

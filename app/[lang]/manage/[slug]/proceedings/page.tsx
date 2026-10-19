@@ -7,6 +7,7 @@ import { paperNo } from "@/lib/manage/ops2-time";
 import { ManagePage, ui } from "@/components/manage/chrome";
 import { ArchiveForm, NoshowDecision, StepButton } from "@/components/manage/ops2/proceedings-parts";
 import { Reveal } from "@/components/motion/reveal";
+import { XplorePackage } from "@/components/manage/opspolish/xplore-package";
 import { ProceedingsSkeleton } from "@/components/skeletons/ops2";
 
 type P = { params: Promise<{ slug: string }> };
@@ -51,7 +52,7 @@ async function Inner({ params }: P) {
     { key: "confirmed", n: 1, title: t("Confirm presented papers"), sub: t("{p} presented · {n} no-shows · {w} withdrawn after acceptance", { p: st.presented, n: st.no_shows, w: st.withdrawn_after }), cta: t("Confirm") },
     { key: "noshows", n: 2, title: t("Decide on no-shows"), sub: undecided ? t("{n} still to decide — keep with an exception, or leave out of Xplore (H6)", { n: undecided }) : t("Keep with an exception, or leave out of Xplore (H6)"), cta: t("Continue") },
     { key: "metadata", n: 3, title: t("Check metadata"), sub: problems.length ? t("{n} paper(s) need attention: titles, authors and affiliations must match the locked versions (G2)", { n: problems.length }) : t("Titles, authors and affiliations match the locked versions (G2)"), cta: t("Run checks") },
-    { key: "exported", n: 4, title: t("Export to IEEE Xplore"), sub: t("XML + PDFs to the IEEE Conference Publishing portal · {n} papers", { n: kept.length }), cta: t("Mark as uploaded") },
+    { key: "exported", n: 4, title: t("Export to IEEE Xplore"), sub: t("Download the package, then upload it in the IEEE portal yourself · {n} papers", { n: kept.length }), cta: t("Mark as uploaded") },
   ];
 
   return (
@@ -69,7 +70,7 @@ async function Inner({ params }: P) {
                     <p className="m-0 font-medium">{s.title}</p>
                     <p className="m-0 text-[13px] text-[#4A5263]">{s.sub}</p>
                     {done ? <p className="m-0 font-mono text-[11px] text-[#14603F]">{t("done {when}", { when: done })}</p> : null}
-                    {s.key === "exported" && prevDone ? <a href={`/api/manage/${slug}/proceedings`} className="mt-1 inline-block text-[13px]" download>{t("Download Xplore XML ({n} papers)", { n: kept.length })}</a> : null}
+                    {s.key === "exported" && prevDone ? <XplorePackage slug={slug} /> : null}
                   </div>
                   {canEdit && !archived ? <StepButton slug={slug} step={s.key} label={s.cta} done={done} disabled={!prevDone} /> : null}
                 </li>

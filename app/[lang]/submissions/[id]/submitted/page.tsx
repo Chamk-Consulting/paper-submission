@@ -8,6 +8,8 @@ import { StepRail, TitleBand, WizardHeader, WizardLayout, asideCard, card, ghost
 import { fmtLocal } from "@/lib/venues/time";
 import { Reveal } from "@/components/motion/reveal";
 import { StatusSkeleton } from "@/components/skeletons";
+import { TestBanner } from "@/components/submission/test-banner";
+import { DeleteTestButton } from "@/components/manage/opspolish/test-papers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -21,6 +23,32 @@ async function Inner({ params }: P) {
   const ctx = await requireCtx(id, "submitted");
   const { sub, venue, authors } = ctx;
   const t = await getT();
+  if (sub.isTest) {
+    if (!sub.testSubmittedAt) redirect(`/submissions/${id}/review`);
+    const nm = ctx.me.person ? `${ctx.me.person.given_name} ${ctx.me.person.family_name}` : ctx.me.email;
+    const checked = [t("Type and track"), t("Title, abstract and declarations"), t("Authors and corresponding author"), t("Keywords"), t("PDF upload and checks"), t("Conflicts"), t("Final confirmations")];
+    return (
+      <WizardLayout
+        header={<><StepMark n={8} /><WizardHeader initials={initialsOf(nm, ctx.me.email)} right={<span className="hidden items-center gap-2 text-[14px] text-[#4A5263] sm:flex"><span className="size-2 rounded-full bg-[#A8600F]" />{t("Test submission")}</span>} /></>}
+        band={<TitleBand crumb={t("Test submission")} title={t("Test submission passed")} venue={venue} generatedAt={new Date().toISOString()} />}
+        rail={<StepRail rail={{ done: { type: true, details: true, authors: true, keywords: true, files: true, conflicts: true, review: true }, current: null, reachable: 7, base: `/submissions/${id}` }} footer={false} />}
+      >
+        <TestBanner venueSlug={venue.slug} passed />
+        <section className={`${card} border-t-4 border-t-[#18744F]`}>
+          <p className="m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-[#14603F]">{t("Test passed")} · {new Date(sub.testSubmittedAt!).toLocaleString(t.intl, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" })} UTC</p>
+          <h2 className="mt-3 font-serif text-[24px] font-normal leading-[1.25]">{sub.title}</h2>
+          <p className="mt-1.5 text-[15px] text-[#4A5263]">{t("Every check a real author meets passed. No paper ID was taken and nobody was emailed.")}</p>
+          <ul className="m-0 mt-4 grid list-none gap-1.5 p-0 sm:grid-cols-2">
+            {checked.map((c) => <li key={c} className="flex items-center gap-2 text-[15px]"><span aria-hidden className="text-[#18744F]">✓</span>{c}</li>)}
+          </ul>
+          <div className="mt-5 flex flex-wrap items-start gap-2.5">
+            <Link href={`/manage/${venue.slug}/setup/go-live`} className={primaryBtn}>{t("Back to go-live review")}</Link>
+            <DeleteTestButton slug={venue.slug} id={id} after={`/manage/${venue.slug}/setup/go-live`} className={ghostBtn} />
+          </div>
+        </section>
+      </WizardLayout>
+    );
+  }
   if (sub.stage === "draft" || !sub.number) redirect(`/submissions/${id}/review`);
   const no = `#${String(sub.number).padStart(4, "0")}`;
   const invites = authors.filter((a) => !a.hasAccount);

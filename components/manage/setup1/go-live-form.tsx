@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useState, useTransition, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import { useT } from "@/lib/i18n/client";
 import { openSubmissions, sendGoLiveTest } from "@/lib/manage/setup1-actions";
@@ -10,7 +10,7 @@ import type { ManageState } from "@/lib/manage/actions-util";
 
 /* EM13 — automatic checks with Fix links, two acknowledgements, then "Open submissions now" → Live state. */
 
-export type Check = { key: string; ok: boolean; note: string; label: string; fix: string };
+export type Check = { key: string; ok: boolean; note: string; label: string; fix: string; advisory?: boolean };
 
 function OpenButton({ disabled }: { disabled: boolean }) {
   const t = useT();
@@ -18,15 +18,15 @@ function OpenButton({ disabled }: { disabled: boolean }) {
   return <button type="submit" disabled={disabled || pending} className={`${ui.primary} w-full`}>{pending ? t("Opening…") : t("Open submissions now")}</button>;
 }
 
-export function GoLiveForm({ slug, checks, committee, canOpen, live, liveSince, opensLabel, myEmail }: {
-  slug: string; checks: Check[]; committee: number; canOpen: boolean; live: boolean; liveSince: string | null; opensLabel: string | null; myEmail: string | null;
+export function GoLiveForm({ slug, checks, committee, canOpen, live, liveSince, opensLabel, myEmail, testPanel }: {
+  slug: string; checks: Check[]; committee: number; canOpen: boolean; live: boolean; liveSince: string | null; opensLabel: string | null; myEmail: string | null; testPanel?: ReactNode;
 }) {
   const t = useT();
   const [state, action] = useActionState<ManageState, FormData>(openSubmissions, {});
   const [ack, setAck] = useState(false);
   const [test, setTest] = useState<ManageState | null>(null);
   const [testing, start] = useTransition();
-  const failing = checks.filter((c) => !c.ok).length;
+  const failing = checks.filter((c) => !c.ok && !c.advisory).length;
   const isLive = live || !!state.ok;
 
   if (isLive) {
@@ -54,10 +54,10 @@ export function GoLiveForm({ slug, checks, committee, canOpen, live, liveSince, 
         <ul className="m-0 mt-3 list-none p-0">
           {checks.map((c) => (
             <li key={c.key} className="flex items-start gap-3 border-b border-[#EEF0EC] py-3 last:border-0">
-              <span aria-hidden className={`mt-0.5 grid size-6 flex-none place-items-center rounded-full text-[13px] font-bold ${c.ok ? "bg-[#E1F3EA] text-[#14603F]" : "bg-[#FDECEA] text-[#8C1D18]"}`}>{c.ok ? "✓" : "!"}</span>
+              <span aria-hidden className={`mt-0.5 grid size-6 flex-none place-items-center rounded-full text-[13px] font-bold ${c.ok ? "bg-[#E1F3EA] text-[#14603F]" : c.advisory ? "bg-[#FBEFDD] text-[#7A4508]" : "bg-[#FDECEA] text-[#8C1D18]"}`}>{c.ok ? "✓" : c.advisory ? "–" : "!"}</span>
               <span className="min-w-0 flex-auto"><strong className="block text-[15px]">{t(c.label)}</strong><span className="block text-[13px] text-[#4A5263]">{t(c.note)}</span></span>
-              <span className="sr-only">{c.ok ? t("Passed") : t("Not passed")}</span>
-              {!c.ok ? <Link href={c.fix} className="flex-none text-[14px] font-medium">{t("Fix")}</Link> : null}
+              <span className="sr-only">{c.ok ? t("Passed") : c.advisory ? t("Recommended") : t("Not passed")}</span>
+              {!c.ok ? <Link href={c.fix} className="flex-none text-[14px] font-medium">{c.advisory ? t("Run it") : t("Fix")}</Link> : null}
             </li>
           ))}
         </ul>
@@ -69,6 +69,7 @@ export function GoLiveForm({ slug, checks, committee, canOpen, live, liveSince, 
           <Link href={`/venues/${slug}`} target="_blank" className="rounded-[8px] border border-[#DADDE3] px-4 py-3 text-[#121826] no-underline hover:bg-[#F7F8F6]"><strong className="block">{t("Public page")}</strong><span className="text-[13px] text-[#4A5263]">{t("As visitors see it")} ↗</span></Link>
           <Link href={`/manage/${slug}/setup/emails`} className="rounded-[8px] border border-[#DADDE3] px-4 py-3 text-[#121826] no-underline hover:bg-[#F7F8F6]"><strong className="block">{t("Email previews")}</strong><span className="text-[13px] text-[#4A5263]">{t("Confirmation, reminders")}</span></Link>
         </div>
+        {testPanel ? <div id="test">{testPanel}</div> : null}
         {myEmail ? (
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button type="button" disabled={testing} onClick={() => start(async () => setTest(await sendGoLiveTest(slug, myEmail)))} className={ui.ghost}>{testing ? t("Sending…") : t("Send a test email to me")}</button>
