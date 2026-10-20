@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n/client";
 import { DAY, cityOf, countdown, fmtLocal } from "@/lib/venues/time";
 import { KIND_LABEL } from "@/lib/venues/types";
 import type { OpenCall } from "@/lib/venues/open-calls";
+import { VenueCoverImage } from "@/components/venues/cover";
 
 const month = (d: string | null, intl: string) => (d ? new Date(`${d}T00:00:00Z`).toLocaleString(intl, { month: "short", year: "numeric", timeZone: "UTC" }) : null);
 
@@ -29,11 +30,14 @@ export function OpenCallRows({ calls, generatedAt, tone }: { calls: OpenCall[]; 
         const soon = ms < 7 * DAY;
         return (
           <li key={c.slug} className={`grid grid-cols-12 items-center gap-3 px-5 py-3.5 ${s.row}`}>
-            <div className="col-span-12 min-w-0 sm:col-span-6">
+            <div className="col-span-12 flex min-w-0 items-start gap-3 sm:col-span-6">
+              <span className="relative mt-0.5 hidden h-[40px] w-[56px] flex-none overflow-hidden rounded-[4px] sm:block"><VenueCoverImage cover={c.cover} field={c.field} alt="" /></span>
+              <div className="min-w-0">
               <Link href={`/venues/${c.slug}`} className={`font-semibold no-underline hover:underline ${s.name}`}>{c.name}</Link>
               <div className={`mt-0.5 text-[13px] ${s.sub}`}>
                 <span className={`mr-1.5 rounded-[2px] px-1.5 py-px font-mono text-[11px] uppercase ${s.tag}`}>{c.shortName ?? t(KIND_LABEL[c.kind as keyof typeof KIND_LABEL] ?? c.kind)}</span>
                 {t(c.label)}{c.extended ? ` · ${t("extended")}` : ""}
+              </div>
               </div>
             </div>
             <div className={`col-span-6 text-[13px] sm:col-span-3 ${s.where}`}>{[c.location, month(c.startsOn, t.intl)].filter(Boolean).join(" · ") || <span className="italic">{t("Location and dates to be announced")}</span>}</div>

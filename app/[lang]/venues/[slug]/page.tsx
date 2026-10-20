@@ -8,6 +8,7 @@ import { AttendingSection, GallerySection, TravelSection } from "@/components/ve
 import { ContactOrganizers } from "@/components/venues/venue-client";
 import { FIELD_COLOR, FIELD_LABEL, FORMAT_LABEL } from "@/lib/venues/types";
 import { fmtRange } from "@/lib/venues/time";
+import { VenueCoverImage, hasRealCover } from "@/components/venues/cover";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
 import { VenueSkeleton } from "@/components/skeletons";
@@ -49,10 +50,14 @@ async function Venue({ params }: { params: Promise<Params> }) {
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <LiveHeader />
       <section className="bg-white">
-        <div className="mx-auto max-w-[1280px] px-5 pb-7 pt-6 sm:px-8">
-          <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#4A5263]">
-            <Link href="/venues" className="text-[#121826] underline">{t("Venues")}</Link>
-            {v.field ? <> / <Link href="/venues" className="text-[#121826] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
+        {/* PV02 cover header: the organizers' cover image (or the field artwork) behind the title. */}
+        <div className="relative overflow-hidden bg-[#0E1B3D] text-[#F5F6F3]">
+          <VenueCoverImage cover={v.cover} field={v.field} alt={t("Cover image of {venue}", { venue: v.acr })} priority />
+          <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,27,61,0.92)_0%,rgba(14,27,61,0.74)_50%,rgba(14,27,61,0.3)_100%)]" />
+        <div className="relative mx-auto max-w-[1280px] px-5 pb-10 pt-7 sm:px-8 lg:min-h-[380px]">
+          <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#D6DCEA]">
+            <Link href="/venues" className="text-[#F5F6F3] underline">{t("Venues")}</Link>
+            {v.field ? <> / <Link href="/venues" className="text-[#F5F6F3] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
           </nav>
           <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex min-w-0 gap-5">
@@ -61,9 +66,9 @@ async function Venue({ params }: { params: Promise<Params> }) {
                 <div className="flex flex-wrap gap-1.5">
                   {tags.map((tag, i) => <span key={tag} className="rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em]" style={i === 0 && v.field ? { background: fbg, color: fink } : { background: "#EEF0EC", color: "#4A5263" }}>{tag}</span>)}
                 </div>
-                <h1 className="mt-2.5 font-serif text-[40px] font-normal leading-[1.05] tracking-[-0.01em] sm:text-[48px]">{v.acr}</h1>
-                <p className="mt-1.5 text-[19px]">{v.name}</p>
-                <p className="mt-1.5 text-[15px] text-[#4A5263]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
+                <h1 className="mt-2.5 font-serif text-[42px] font-normal leading-[1.03] tracking-[-0.01em] text-white sm:text-[56px]">{v.acr}</h1>
+                <p className="mt-1.5 text-[20px] text-[#F5F6F3]">{v.name}</p>
+                <p className="mt-1.5 text-[15px] text-[#D6DCEA]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
                 <div className="mt-5 flex flex-wrap gap-2.5">
                   <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
                   <FollowButton venueId={v.id} slug={v.slug} />
@@ -72,8 +77,14 @@ async function Venue({ params }: { params: Promise<Params> }) {
                 </div>
               </div>
             </div>
-            <CountdownCard dates={v.dates} generatedAt={generatedAt} />
+            <div className="rounded-[8px] shadow-[0_12px_32px_rgba(0,0,0,0.28)] ring-1 ring-white/15"><CountdownCard dates={v.dates} generatedAt={generatedAt} /></div>
           </div>
+          {hasRealCover(v.cover) && v.cover?.credit ? (
+            <p className="absolute bottom-2.5 right-5 m-0 max-w-[60%] truncate text-right text-[12px] text-white/80 sm:right-8">
+              {t("Cover:")} {v.cover.creditUrl ? <a href={v.cover.creditUrl} className="text-white/90 underline" rel="noopener noreferrer" target="_blank">{v.cover.credit}</a> : v.cover.credit}
+            </p>
+          ) : null}
+        </div>
         </div>
         <nav aria-label={t("On this page")} className="sticky top-0 z-10 border-y border-[#DADDE3] bg-white">
           <div className="mx-auto flex max-w-[1280px] gap-6 overflow-x-auto px-5 text-[15px] sm:px-8">

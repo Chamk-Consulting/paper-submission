@@ -5,7 +5,7 @@ import type { DirectoryVenue, VenueDate, VenueDetails } from "@/lib/venues/types
 import type { ArchiveAward, ArchiveSession, Fee, VenueArchive, VenuePublic, VenuePublicInfo } from "@/lib/venues/polish-types";
 
 const COLS =
-  "id, slug, short_name, name, kind, society, field, format, review_mode, page_limit, indexed_in, accepting, city, country, location, region, latitude, longitude, place_hint, starts_on, ends_on, papers_count, acceptance_rate, best_paper, imported_from, venue_dates(id, kind, label, starts_at, ends_at, is_hard, is_extended, extended_from)";
+  "id, slug, short_name, name, kind, society, field, format, review_mode, page_limit, indexed_in, accepting, city, country, location, region, latitude, longitude, place_hint, starts_on, ends_on, papers_count, acceptance_rate, best_paper, imported_from, cover:details->cover, venue_dates(id, kind, label, starts_at, ends_at, is_hard, is_extended, extended_from)";
 
 type Row = Record<string, unknown> & { venue_dates?: Record<string, unknown>[] };
 
@@ -30,6 +30,7 @@ function mapVenue(r: Row): DirectoryVenue {
     startsOn: (r.starts_on as string) ?? null, endsOn: (r.ends_on as string) ?? null, papersCount: (r.papers_count as number) ?? null,
     acceptanceRate: r.acceptance_rate == null ? null : Number(r.acceptance_rate), bestPaper: (r.best_paper as string) ?? null,
     importedFrom: (r.imported_from as string) ?? null, dates: mapDates(r.venue_dates),
+    cover: (r.cover as DirectoryVenue["cover"]) ?? ((r.details as { cover?: DirectoryVenue["cover"] } | undefined)?.cover ?? null),
   };
 }
 

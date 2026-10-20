@@ -9,6 +9,7 @@ import { useT } from "@/lib/i18n/client";
 import { useClock, useFollows } from "@/components/venues/use-clock";
 import { FIELD_COLOR, FIELD_LABEL, FORMAT_LABEL, KIND_LABEL, type DirectoryVenue, type Field } from "@/lib/venues/types";
 import { cityOf, fmtRange, statusOf, type Status } from "@/lib/venues/time";
+import { VenueCoverImage, hasRealCover } from "@/components/venues/cover";
 
 type View = "list" | "calendar" | "map" | "past";
 type Win = "any" | "d7" | "d30" | "open";
@@ -297,8 +298,12 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
   const where = v.kind === "journal" ? t("Online") : [v.city, v.country].filter(Boolean).join(", ") || v.location || "";
   const href = `/venues/${v.slug}`;
   return (
-    <article className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white px-5 py-[18px] sm:flex-row sm:items-start">
-      <span aria-hidden className="flex size-14 flex-none items-center justify-center rounded-[8px] px-1 text-center font-mono text-[11px] font-semibold leading-[1.1]" style={{ background: fbg, color: fink }}>{v.society ?? v.acr.slice(0, 6)}</span>
+    <article className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white p-4 sm:flex-row sm:items-start">
+      <Link href={href} aria-label={t("Open {venue}", { venue: v.acr })} className="relative block aspect-video w-full flex-none overflow-hidden rounded-[6px] bg-[#EEF0EC] no-underline sm:w-[200px]">
+        <VenueCoverImage cover={v.cover} field={v.field} alt={t("Cover image of {venue}", { venue: v.acr })} />
+        <span className="absolute left-2 top-2 rounded-[2px] bg-white/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.04em] text-[#121826]">{v.society ?? v.acr.slice(0, 10)}</span>
+        {hasRealCover(v.cover) && v.cover?.credit ? <span className="absolute bottom-1.5 right-2 max-w-[90%] truncate text-[10px] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,.6)]">{v.cover.credit}</span> : null}
+      </Link>
       <div className="min-w-0 flex-auto">
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1.5">
           <h2 className="m-0 text-[22px] font-semibold leading-[1.2]"><Link href={href} className="text-[#121826] no-underline hover:underline">{v.acr}</Link></h2>

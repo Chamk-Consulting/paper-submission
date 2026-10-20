@@ -39,7 +39,13 @@ export type DirectoryVenue = {
   bestPaper: string | null;
   importedFrom: string | null;
   dates: VenueDate[];
+  cover: VenueCover | null;
 };
+
+/** Focus point of a cover image (which part stays visible in every crop). */
+export type CoverFocus = "top-left" | "top" | "top-right" | "left" | "center" | "right" | "bottom-left" | "bottom" | "bottom-right";
+/** Cover image, stored in venues.details.cover: an uploaded file (path in 'venue-media') or a licensed external URL. */
+export type VenueCover = { path?: string | null; url?: string | null; alt?: string | null; credit?: string | null; creditUrl?: string | null; focus?: CoverFocus | null };
 
 export type VenueDetails = {
   cfp?: string;

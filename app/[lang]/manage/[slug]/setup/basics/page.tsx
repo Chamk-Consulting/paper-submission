@@ -3,6 +3,9 @@ import { getT } from "@/lib/i18n/server";
 import { requireEvent, groupStatus, lastChange } from "@/lib/manage/data";
 import { ManagePage, SetupLayout } from "@/components/manage/chrome";
 import { BasicsForm } from "@/components/manage/basics-form";
+import { CoverForm } from "@/components/manage/cover-form";
+import { createClient } from "@/lib/supabase/server";
+import type { VenueCover } from "@/lib/venues/types";
 import { Reveal } from "@/components/motion/reveal";
 import { ManageSkeleton } from "@/components/skeletons";
 
@@ -19,6 +22,8 @@ async function Inner({ params }: P) {
   const t = await getT();
   const v = ctx.venue;
   const s = (k: string) => ((v[k] as string | null) ?? "");
+  const { data: extra } = await (await createClient()).from("venues").select("details, field").eq("id", v.id as string).maybeSingle();
+  const cover = ((extra?.details as { cover?: VenueCover } | null)?.cover) ?? null;
   return (
     <ManagePage ctx={ctx} active="setup" crumb={<>{t("Setup")} · {ctx.label}</>} title={t("Basics & branding")} sub={t("What visitors see on the public venue page.")}>
       <SetupLayout ctx={ctx} current="basics">
@@ -26,6 +31,7 @@ async function Inner({ params }: P) {
           v={{ slug: v.slug, name: v.name, short_name: s("short_name"), tagline: s("tagline"), website: s("website"), accent: s("accent") || "navy",
                public_text: s("public_text"), venue_address: s("venue_address"), hotels: s("hotels"), contact_email: s("contact_email") }}
           status={groupStatus(ctx, ["basics"])} last={lastChange(ctx, ["basics"])} canEdit={ctx.isChair} />
+        <CoverForm venueId={v.id as string} slug={v.slug as string} acr={(s("short_name") || (v.name as string))} field={(extra?.field as string | null) ?? null} initial={cover} canEdit={ctx.isChair} />
       </SetupLayout>
     </ManagePage>
   );
