@@ -41,11 +41,10 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
       // TODO(auth): captchaToken (Cloudflare Turnstile).
     },
   });
-  if (error && (error.status === 429 || /rate limit|seconds/i.test(error.message))) {
-    return { message: "Please wait a moment before asking for another code." };
-  }
+  // Rate limited: a code was sent moments ago, so still go to the code screen and say so.
+  const limited = !!error && (error.status === 429 || /rate limit|seconds|too many/i.test(error.message));
   // Existing accounts get a sign-in code instead — same screen, no account enumeration.
-  redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`));
+  redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`) + (limited ? "&wait=1" : ""));
 }
 
 export type ResendResult = { ok: boolean; message?: string };

@@ -507,4 +507,5 @@ export const public_de: Record<string, string> = {
   "top left": "oben links",
   "top right": "oben rechts",
   "© Photographer · licence": "© Fotograf · Lizenz",
+  "A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute.": "Gerade wurde ein Code gesendet — verwenden Sie den Code in Ihrem Posteingang (auch im Spam nachsehen). In einer Minute können Sie einen neuen anfordern.",
 };

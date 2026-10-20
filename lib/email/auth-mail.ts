@@ -4,7 +4,7 @@ import "server-only";
 
 export type AuthAction = "signup" | "magiclink" | "recovery" | "invite" | "email_change" | "email" | "reauthentication";
 
-const COPY: Record<string, { subject: string; title: string; lead: string; button: string }> = {
+const copy: Record<string, { subject: string; title: string; lead: string; button: string }> = {
   magiclink: { subject: "Your Plenary sign-in code", title: "Sign in to Plenary", lead: "Enter this code on the sign-in page, or use the button. Both work once and expire in 1 hour.", button: "Sign in" },
   email: { subject: "Your Plenary sign-in code", title: "Sign in to Plenary", lead: "Enter this code on the sign-in page, or use the button. Both work once and expire in 1 hour.", button: "Sign in" },
   signup: { subject: "Confirm your email for Plenary", title: "Confirm your email", lead: "Enter this code to finish creating your account, or use the button. It expires in 1 hour.", button: "Confirm email" },
@@ -17,7 +17,7 @@ const COPY: Record<string, { subject: string; title: string; lead: string; butto
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export function authMail(action: string, code: string | null, link: string | null, to: string) {
-  const c = COPY[action] ?? COPY.magiclink;
+  const c = copy[action] ?? copy.magiclink;
   const codeBlock = code
     ? `<p style="margin:24px 0 6px;font:500 12px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:#4A5263">Your code</p>
        <p style="margin:0;font:600 34px/1.2 ui-monospace,Menlo,monospace;letter-spacing:.18em;color:#0E1B3D">${esc(code)}</p>`

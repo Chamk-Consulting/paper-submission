@@ -16,6 +16,8 @@ export type SignInState = {
   email?: string;
   mode?: "signin" | "create";
   message?: string;
+  /** Shown on the code step, e.g. when a code was sent moments ago. */
+  notice?: string;
   fieldErrors?: Record<string, string[] | undefined>;
 };
 
@@ -84,9 +86,10 @@ export async function sendSignInCode(_: SignInState, formData: FormData): Promis
       emailRedirectTo: absoluteUrl(`/auth/confirm?next=${encodeURIComponent(safeNext(parsed.data.next))}`),
     },
   });
-  if (error && /rate limit|seconds/i.test(error.message)) return { message: "Please wait a moment before asking for another code." };
+  // Rate limited means a code went out moments ago: still show the code step, with a note.
+  const limited = !!error && (error.status === 429 || /rate limit|seconds|too many/i.test(error.message));
   // Same answer whether or not the account exists.
-  return { step: "sent", sentTo: email, sentKind: kind, email, mode: "signin" };
+  return { step: "sent", sentTo: email, sentKind: kind, email, mode: "signin", notice: limited ? "A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute." : undefined };
 }
 
 const verifySchema = z.object({

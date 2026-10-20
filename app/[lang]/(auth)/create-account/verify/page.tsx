@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return { title: t("Confirm your email") };
 }
-type Search = { email?: string; name?: string; next?: string; venue?: string };
+type Search = { email?: string; name?: string; next?: string; venue?: string; wait?: string };
 
 function back(s: Search) {
   const q = new URLSearchParams();
@@ -37,6 +37,7 @@ async function Left({ searchParams }: { searchParams: Promise<Search> }) {
         {t("We sent a 6-digit code and a link to")} <strong className="text-[#121826]">{email}</strong>{" "}
         <Link href={back(s)} className={`text-[14px] ${ui.link}`}>{t("Change")}</Link>
       </p>
+      {s.wait ? <p role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">{t("A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute.")}</p> : null}
       <OtpVerify email={email} onSuccessHref={after} changeHref={back(s)} senderDomain={senderDomain()} />
     </>
   );

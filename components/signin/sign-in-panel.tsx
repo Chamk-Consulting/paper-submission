@@ -243,6 +243,7 @@ function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; n
       <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">{t("Link sent")}</p>
       <h1 className={`mt-2.5 ${H1}`}>{t("Check your inbox")}</h1>
       <p className={`mt-2.5 ${MUTED}`}>{lead} <strong className={INK}>{state.sentTo}</strong>. {t("It expires in 15 minutes. On another device? Enter the code from the same email.")}</p>
+      {state.notice ? <p role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">{t(state.notice)}</p> : null}
       <form action={vAction} noValidate>
         <input type="hidden" name="email" value={state.email ?? ""} />
         <input type="hidden" name="next" value={next ?? ""} />
