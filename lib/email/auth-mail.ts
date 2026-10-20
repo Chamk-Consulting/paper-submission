@@ -32,11 +32,11 @@ export function authMail(i: AuthMailInput) {
   const subject = i.code ? `${c.subject}: ${i.code}` : c.subject;
 
   const digits = i.code
-    ? i.code.split("").map((d, k) => `${k === 3 ? '<td style="width:10px"></td>' : ""}<td style="width:44px;height:56px;border:1px solid #DADDE3;border-radius:6px;background:#ffffff;text-align:center;font:600 30px/56px ${MONO};color:#0E1B3D">${esc(d)}</td>`).join('<td style="width:6px"></td>')
+    ? i.code.split("").map((d, k) => `${k === Math.ceil(i.code!.length / 2) ? '<td style="width:10px"></td>' : ""}<td style="width:44px;height:56px;border:1px solid #DADDE3;border-radius:6px;background:#ffffff;text-align:center;font:600 30px/56px ${MONO};color:#0E1B3D">${esc(d)}</td>`).join('<td style="width:6px"></td>')
     : "";
   const codeBlock = i.code ? `
     <table role="presentation" width="100%" style="margin-top:22px;background:#F5F6F3;border-radius:8px"><tr><td style="padding:18px;text-align:center">
-      <p style="margin:0;font:500 11px/1.4 ${MONO};letter-spacing:.08em;text-transform:uppercase;color:#4A5263">Your 6-digit code</p>
+      <p style="margin:0;font:500 11px/1.4 ${MONO};letter-spacing:.08em;text-transform:uppercase;color:#4A5263">Your ${i.code ? i.code.length : 6}-digit code</p>
       <table role="presentation" align="center" style="margin:10px auto 0;border-collapse:separate"><tr>${digits}</tr></table>
       <p style="margin:10px 0 0;font:13px/1.5 ${SANS};color:#4A5263">Expires in ${minutes} minutes · works once</p>
     </td></tr></table>` : "";

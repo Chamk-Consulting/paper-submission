@@ -94,7 +94,7 @@ export async function sendSignInCode(_: SignInState, formData: FormData): Promis
 
 const verifySchema = z.object({
   email: z.string().email(),
-  code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code from the email"),
+  code: z.string().trim().regex(/^\d{6,10}$/, "Enter the 6-digit code from the email"),
   next: z.string().optional(),
 });
 

@@ -56,7 +56,7 @@ export async function resendResetCode(email: string): Promise<{ ok: boolean; mes
 
 /** PR10b: check the 6-digit recovery code. On success the person has a session for PR11. */
 export async function verifyResetCode(email: string, code: string): Promise<{ ok: true } | { ok: false; reason: "wrong" | "locked" | "invalid" }> {
-  if (!z.string().email().safeParse(email).success || !/^\d{6}$/.test(code)) return { ok: false, reason: "invalid" };
+  if (!z.string().email().safeParse(email).success || !/^\d{6,10}$/.test(code)) return { ok: false, reason: "invalid" };
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "recovery" });
   if (error || !data.user) return { ok: false, reason: error?.status === 429 ? "locked" : "wrong" };

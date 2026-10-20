@@ -68,7 +68,7 @@ export type VerifyResult = { ok: true } | { ok: false; reason: "wrong" | "locked
 
 /** PR07: check the 6-digit code. On success the person is signed in (cookies set). */
 export async function verifySignupCode(email: string, code: string): Promise<VerifyResult> {
-  if (!z.string().email().safeParse(email).success || !/^\d{6}$/.test(code)) return { ok: false, reason: "invalid" };
+  if (!z.string().email().safeParse(email).success || !/^\d{6,10}$/.test(code)) return { ok: false, reason: "invalid" };
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
   if (!error) return { ok: true };
