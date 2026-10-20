@@ -12,7 +12,7 @@ import { absoluteUrl, safeNext, site } from "@/lib/config/site";
  */
 
 type Payload = {
-  user: { email: string; new_email?: string };
+  user: { email: string; new_email?: string; user_metadata?: { given_name?: string } };
   email_data: { token?: string; token_hash?: string; redirect_to?: string; email_action_type: string; site_url?: string; token_new?: string; token_hash_new?: string };
 };
 
@@ -73,8 +73,10 @@ export async function POST(req: Request) {
     mails.push({ to: p.user.email, code: action === "invite" ? null : d.token ?? null, link: confirmLink(d.token_hash, linkType, action === "recovery" ? "/reset-password" : next) });
   }
 
+  const host = new URL(absoluteUrl("/")).host;
+  const continueTo = /^\/(venues|submit|program)\//.test(next) ? `${host}${next}` : null;
   for (const m of mails) {
-    const { subject, html, text } = authMail(action, m.code, m.link, m.to);
+    const { subject, html, text } = authMail({ action, code: m.code, link: m.link, to: m.to, name: p.user.user_metadata?.given_name ?? null, minutes: 60, continueTo, siteHost: host });
     const r = await sendEmail({ to: m.to, from: site.email.authFrom, subject, html, text });
     if (!r.ok) return fail(500, r.skipped ? "RESEND_API_KEY not configured" : `Email not sent: ${r.error}`);
   }
