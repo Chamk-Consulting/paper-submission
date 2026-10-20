@@ -19,6 +19,18 @@ export default async function proxy(request: NextRequest) {
   const locale = explicit ?? (isLocale(cookieLocale) ? cookieLocale : negotiate(request.headers.get("accept-language")));
   const skipLocale = NO_LOCALE.some((r) => r.test(bare));
 
+  // Supabase sends people to the Site URL (e.g. "/?code=…") when the redirect it was given isn't allow-listed.
+  // Hand any auth code or token that lands outside /auth/* to the confirm route so the sign-in still completes.
+  if (!bare.startsWith("/auth/")) {
+    const q = request.nextUrl.searchParams;
+    if ((q.has("code") && /^[0-9a-f-]{20,}$/i.test(q.get("code") ?? "")) || (q.has("token_hash") && q.has("type"))) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/confirm";
+      if (!q.has("next")) url.searchParams.set("next", bare === "/" ? "/workspace" : bare);
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Visible URLs stay unprefixed (/venues); the page renders from /[lang]/venues. /fr/venues also works and is remembered.
   const target = request.nextUrl.clone();
   if (!skipLocale && !explicit) target.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
