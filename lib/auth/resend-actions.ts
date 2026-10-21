@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { absoluteUrl, safeNext } from "@/lib/config/site";
+import { accountEmailFor } from "@/lib/auth/plenary-id";
 
 export type ResendState = { ok: boolean; message?: string };
 
@@ -10,8 +11,11 @@ const RATE = "Please wait a little longer before asking again.";
 const isRate = (e: { status?: number; message: string }) => e.status === 429 || /rate limit|seconds|too many/i.test(e.message);
 
 /** PR04 "Resend code" on the sign-in code step: a new link + code (never creates an account). */
-export async function resendSignInCode(email: string, next?: string): Promise<ResendState> {
-  if (!z.string().email().max(254).safeParse(email).success) return { ok: false, message: "That email doesn’t look right." };
+export async function resendSignInCode(identifier: string, next?: string): Promise<ResendState> {
+  // The code step carries a Plenary ID instead of the email when the person signed in with their ID.
+  const { email, id } = await accountEmailFor(identifier);
+  if (id && !email) return { ok: true }; // unknown ID: same answer as a real one
+  if (!email || !z.string().email().max(254).safeParse(email).success) return { ok: false, message: "That email doesn’t look right." };
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,

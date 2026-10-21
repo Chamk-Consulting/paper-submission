@@ -7,6 +7,7 @@ import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 // private areas. Real permission checks live in server actions and RLS.
 const PROTECTED_PREFIXES = ["/workspace", "/submissions", "/submit", "/manage", "/reviews", "/settings", "/inbox", "/chair", "/search", "/admin"];
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/create-account"];
+const TWO_STEP_GUARDED = [...PROTECTED_PREFIXES, "/create-account/profile", "/welcome"];
 // Route handlers live outside app/[lang] and are never rewritten.
 const NO_LOCALE = [/^\/(?:robots\.txt|sitemap\.xml)$/, /^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
 
@@ -60,6 +61,17 @@ export default async function proxy(request: NextRequest) {
     url.pathname = `${prefix}/sign-in`;
     url.search = `?next=${encodeURIComponent(bare + search)}`;
     return NextResponse.redirect(url);
+  }
+  // Two-step sign-in: an account with an authenticator app must enter its code before private pages open.
+  // The level comes from the session token itself (no network call).
+  if (user && TWO_STEP_GUARDED.some((p) => bare === p || bare.startsWith(`${p}/`))) {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      const url = request.nextUrl.clone();
+      url.pathname = `${prefix}/sign-in/two-step`;
+      url.search = `?next=${encodeURIComponent(bare + search)}`;
+      return NextResponse.redirect(url);
+    }
   }
   if (user && AUTH_PAGES.includes(bare)) {
     const url = request.nextUrl.clone();

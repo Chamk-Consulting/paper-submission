@@ -7,7 +7,9 @@ import { createClient } from "@/lib/supabase/server";
 import { newToken } from "@/lib/tokens";
 import { scorePassword } from "@/lib/auth/password-rules";
 import { notifyEvents } from "@/lib/account/data";
-import { absoluteUrl } from "@/lib/config/site";
+import { absoluteUrl, supabaseEnv } from "@/lib/config/site";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { sendSecurityNotice } from "@/lib/email/security-mail";
 
 export type AccountState = { error?: string; fieldErrors?: Record<string, string>; ok?: boolean; savedAt?: string; info?: string; value?: string };
 
@@ -186,13 +188,17 @@ export async function changePassword(_: AccountState, fd: FormData): Promise<Acc
   if (!scorePassword(next, email).ok) return { fieldErrors: { next: MSG.weakPassword } };
   if (next === current) return { fieldErrors: { next: MSG.samePassword } };
   if (!current) return { fieldErrors: { current: MSG.wrongPassword } };
-  const check = await c.supabase.auth.signInWithPassword({ email, password: current });
+  // Check the current password on a throwaway client so the signed-in session (and its two-step level) is kept.
+  const probe = createSupabaseClient(supabaseEnv.url(), supabaseEnv.publishableKey(), { auth: { persistSession: false, autoRefreshToken: false } });
+  const check = await probe.auth.signInWithPassword({ email, password: current });
+  if (!check.error) await probe.auth.signOut({ scope: "local" }).catch(() => {});
   if (check.error) {
     await c.supabase.rpc("record_sign_in", { p_method: "password", p_place: null, p_user_agent: await userAgent(), p_result: "password change: wrong current password" });
     return { fieldErrors: { current: MSG.wrongPassword } };
   }
   const { error } = await c.supabase.auth.updateUser({ password: next });
-  if (error) return { error: /weak|pwned|leaked/i.test(error.message) ? MSG.weakPassword : MSG.generic };
+  if (error) return { error: /weak|pwned|leaked/i.test(error.message) ? MSG.weakPassword : /aal2|assurance/i.test(error.message) ? "Enter your authenticator code first — sign out and back in." : MSG.generic };
+  await sendSecurityNotice("password_changed", email);
   page("/settings/security");
   return saved();
 }

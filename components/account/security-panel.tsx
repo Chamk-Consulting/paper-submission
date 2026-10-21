@@ -9,6 +9,8 @@ import { scorePassword, MIN_PASSWORD } from "@/lib/auth/password-rules";
 import { sx } from "@/components/account/styles";
 import { FieldErr } from "@/components/account/save-bar";
 import { deviceName } from "@/lib/account/ua";
+import type { SecurityPlus } from "@/lib/account/security-data";
+import { EmailAddresses, SignInMethods } from "@/components/account/security-extras";
 
 /* Canvas ST02 — Sign-in & security. */
 
@@ -16,7 +18,7 @@ const small = "inline-flex h-8 items-center whitespace-nowrap rounded-[4px] bord
 const tagCls = "rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em]";
 const METHOD_LABELS: Record<string, string> = { password: "Password", email_code: "Email code", magic_link: "Email link", passkey: "Passkey", orcid: "ORCID", google: "Google", reset: "Password reset" };
 
-export function SecurityPanel({ email, device, providers, events }: { email: string; device: string; providers: string[]; events: SignInEvent[] }) {
+export function SecurityPanel({ email, device, providers, events, plus }: { email: string; device: string; providers: string[]; events: SignInEvent[]; plus: SecurityPlus }) {
   const t = useT();
   const [state, action, pending] = useActionState<AccountState, FormData>(changePassword, {});
   const [pw, setPw] = useState("");
@@ -26,31 +28,10 @@ export function SecurityPanel({ email, device, providers, events }: { email: str
   const fmt = new Intl.DateTimeFormat(t.intl, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   const orcid = providers.includes("orcid");
 
-  const methods: { name: string; detail: string; tag: string; on: boolean; cta: React.ReactNode }[] = [
-    { name: t("Passkey"), detail: t("Face or fingerprint — fastest and safest"), tag: t("OFF"), on: false, cta: <span className={`${small} text-[#9AA3B5]!`} aria-disabled title={t("Coming soon")}>{t("Coming soon")}</span> },
-    { name: t("Email code"), detail: `${email} · ${t("always available as backup")}`, tag: t("ON"), on: true, cta: <span className={`${small} text-[#9AA3B5]!`} aria-disabled title={t("Coming soon")}>{t("Change email")}</span> },
-    { name: t("Password"), detail: t("At least {n} characters.", { n: MIN_PASSWORD }), tag: t("ON"), on: true, cta: <a href="#password" className={small + " no-underline"}>{t("Change below")}</a> },
-    { name: t("Authenticator app (2-step)"), detail: t("Adds a 6-digit code after your password"), tag: t("OFF"), on: false, cta: <span className={`${small} text-[#9AA3B5]!`} aria-disabled title={t("Coming soon")}>{t("Coming soon")}</span> },
-    { name: t("ORCID / institution sign-in"), detail: orcid ? t("ORCID linked") : t("Sign in with ORCID or your institution"), tag: orcid ? t("LINKED") : t("OFF"), on: orcid, cta: <span className={`${small} text-[#9AA3B5]!`} aria-disabled title={t("Coming soon")}>{t("Coming soon")}</span> },
-  ];
-
   return (
     <>
-      <section className={sx.card}>
-        <h2 className={sx.h2}>{t("Sign-in methods")}</h2>
-        <p className={sx.sub + " text-[13px]"}>{t("Use at least two, so you can always get back in.")}</p>
-        <div className="mt-3.5">
-          {methods.map((m) => (
-            <div key={m.name} className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0EC] py-3">
-              <span className="min-w-0"><strong className="text-[14px]">{m.name}</strong><span className="block break-all text-[13px] text-[#4A5263]">{m.detail}</span></span>
-              <span className="flex items-center gap-2">
-                <span className={`${tagCls} ${m.on ? "bg-[#E1F3EA] text-[#14603F]" : "bg-[#EEF0EC] text-[#4A5263]"}`}>{m.tag}</span>
-                {m.cta}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <SignInMethods email={email} plus={plus} orcid={orcid} />
+      <EmailAddresses email={email} plus={plus} />
 
       <section id="password" className={sx.card}>
         <h2 className={sx.h2}>{t("Password")}</h2>

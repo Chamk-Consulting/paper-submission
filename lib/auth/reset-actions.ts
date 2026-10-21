@@ -5,6 +5,8 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { absoluteUrl } from "@/lib/config/site";
 import { detectIdentifier } from "@/lib/auth/identifier";
+import { accountEmailFor, plenaryIdSignIn } from "@/lib/auth/plenary-id";
+import { sendSecurityNotice } from "@/lib/email/security-mail";
 import { scorePassword } from "@/lib/auth/password-rules";
 import { clearRecovery, hasRecovery, markRecovery } from "@/lib/auth/recovery-cookie";
 
@@ -36,9 +38,16 @@ export async function startPasswordReset(_: ForgotState, formData: FormData): Pr
   const raw = parsed.data.identifier;
   const kind = detectIdentifier(raw).kind;
   if (kind === "none") return { fieldErrors: { identifier: ["Enter the email, phone, Plenary ID or alias you use for Plenary."] } };
+  if (kind === "id" && plenaryIdSignIn()) {
+    // Plenary ID: look up the email server-side; the code page carries the ID, never the email.
+    const { email, id } = await accountEmailFor(raw);
+    if (id) {
+      if (email && (await sendRecovery(email)) === "rate") return { message: "Please wait a minute before asking for another code." };
+      redirect(`/forgot-password/code?email=${encodeURIComponent(id)}`);
+    }
+  }
   if (kind !== "email") {
-    // TODO(auth): look up the account email for a Plenary ID / alias / phone via a
-    // security-definer RPC that answers the same way whether or not it exists.
+    // TODO(auth): alias and phone lookup.
     const what = { id: "Plenary ID", alias: "alias", phone: "phone number", pin: "PaperCept PIN" }[kind as string] ?? "that";
     return { fieldErrors: { identifier: [kind === "pin" ? "Plenary doesn’t use PaperCept PINs. Use your email." : `Resetting with a ${what} isn’t available yet — use your email for now.`] } };
   }
@@ -48,15 +57,20 @@ export async function startPasswordReset(_: ForgotState, formData: FormData): Pr
 }
 
 /** PR10b "Resend code". */
-export async function resendResetCode(email: string): Promise<{ ok: boolean; message?: string }> {
-  if (!z.string().email().safeParse(email).success) return { ok: false, message: "That email doesn’t look right." };
+export async function resendResetCode(identifier: string): Promise<{ ok: boolean; message?: string }> {
+  const { email, id } = await accountEmailFor(identifier);
+  if (id && !email) return { ok: true }; // unknown ID: same answer as a real one
+  if (!email || !z.string().email().safeParse(email).success) return { ok: false, message: "That email doesn’t look right." };
   if ((await sendRecovery(email)) === "rate") return { ok: false, message: "Please wait a little longer before asking again." };
   return { ok: true };
 }
 
 /** PR10b: check the 6-digit recovery code. On success the person has a session for PR11. */
-export async function verifyResetCode(email: string, code: string): Promise<{ ok: true } | { ok: false; reason: "wrong" | "locked" | "invalid" }> {
-  if (!z.string().email().safeParse(email).success || !/^\d{6,10}$/.test(code)) return { ok: false, reason: "invalid" };
+export async function verifyResetCode(identifier: string, code: string): Promise<{ ok: true } | { ok: false; reason: "wrong" | "locked" | "invalid" }> {
+  if (!/^\d{6,10}$/.test(code)) return { ok: false, reason: "invalid" };
+  const { email, id } = await accountEmailFor(identifier);
+  if (id && !email) return { ok: false, reason: "wrong" };
+  if (!email || !z.string().email().safeParse(email).success) return { ok: false, reason: "invalid" };
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "recovery" });
   if (error || !data.user) return { ok: false, reason: error?.status === 429 ? "locked" : "wrong" };
@@ -96,6 +110,6 @@ export async function saveNewPassword(_: NewPasswordState, formData: FormData): 
 
   if (signOutOthers) await supabase.auth.signOut({ scope: "others" });
   await clearRecovery();
-  // TODO(email): send the "password changed" notice (EV03) with a lock-account link.
+  await sendSecurityNotice("password_changed", data.user.email ?? "", "Reset with an emailed code or link");
   return { done: true, signedOutOthers: signOutOthers };
 }

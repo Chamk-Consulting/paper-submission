@@ -5,6 +5,7 @@ import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { safeNext } from "@/lib/config/site";
 import { markRecovery } from "@/lib/auth/recovery-cookie";
 import { refuseIfLocked } from "@/lib/auth/lock-check";
+import { needsTwoStep, twoStepHref } from "@/lib/auth/mfa";
 
 // Handles every email link: sign-up confirmation, password recovery, magic link, email change.
 // Links look like /auth/confirm?token_hash=…&type=<signup|recovery|magiclink|email|email_change|invite>&next=…
@@ -78,6 +79,7 @@ export async function GET(request: NextRequest) {
     if (!error) {
       if (await refuseIfLocked(supabase)) return NextResponse.redirect(new URL("/auth-error?reason=locked", origin));
       await recordSignIn(supabase, "email_link");
+      if (await needsTwoStep(supabase)) return NextResponse.redirect(new URL(twoStepHref(next), origin));
       return NextResponse.redirect(new URL(next, origin));
     }
     const { data } = await supabase.auth.getUser();
@@ -104,6 +106,7 @@ export async function POST(request: NextRequest) {
     if (await refuseIfLocked(supabase)) return NextResponse.redirect(new URL("/auth-error?reason=locked", origin), 303);
     if (type === "recovery" && data.user) await markRecovery(data.user.id);
     if (type === "magiclink" || type === "email") await recordSignIn(supabase, "email_link");
+    if (type !== "recovery" && (await needsTwoStep(supabase))) return NextResponse.redirect(new URL(twoStepHref(destFor(type, next)), origin), 303);
     return NextResponse.redirect(new URL(destFor(type, next), origin), 303);
   }
 
