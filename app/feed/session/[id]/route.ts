@@ -10,7 +10,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   if (!/^[0-9a-f-]{36}$/i.test(id)) return new Response("Not found", { status: 404 });
   const supabase = await createClient();
   const { data: s } = await supabase.from("sessions")
-    .select("id, code, title, starts_at, ends_at, rooms(name), venues(slug, name, short_name, location)")
+    .select("id, code, title, starts_at, ends_at, rooms!sessions_room_id_fkey(name), venues(slug, name, short_name, location)")
     .eq("id", id).maybeSingle();
   if (!s) return new Response("Not found", { status: 404 });
   const one = <X,>(x: X | X[] | null): X | null => (Array.isArray(x) ? x[0] ?? null : x);

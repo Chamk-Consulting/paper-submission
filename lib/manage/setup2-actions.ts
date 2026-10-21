@@ -88,7 +88,7 @@ export async function inviteCommittee(_: ManageState, fd: FormData): Promise<Man
 }
 
 export async function revokeInvitation(slug: string, invitationId: string): Promise<{ error?: string }> {
-  if (!slugSchema.safeParse(slug).success || !z.string().uuid().safeParse(invitationId).success) return { error: "Bad request." };
+  if (!slugSchema.safeParse(slug).success || !z.guid().safeParse(invitationId).success) return { error: "Bad request." };
   const supabase = await createClient();
   const { error } = await supabase.rpc("revoke_invitation", { p_invitation: invitationId });
   if (error) return { error: friendlyDb(error.message) };
@@ -97,7 +97,7 @@ export async function revokeInvitation(slug: string, invitationId: string): Prom
 }
 
 export async function removeMember(slug: string, personId: string, role: string): Promise<{ error?: string }> {
-  if (!slugSchema.safeParse(slug).success || !z.string().uuid().safeParse(personId).success) return { error: "Bad request." };
+  if (!slugSchema.safeParse(slug).success || !z.guid().safeParse(personId).success) return { error: "Bad request." };
   const id = await venueIdBySlug(slug);
   if (!id) return { error: "Event not found." };
   const supabase = await createClient();
@@ -216,7 +216,7 @@ export async function savePublishing(_: ManageState, fd: FormData): Promise<Mana
 }
 
 /* ------------------------------------------------------------------ EM11 program & rooms */
-const roomRow = z.object({ id: z.string().uuid().nullable(), name: z.string().trim().min(1, "Every room needs a name.").max(80), seats: z.number().int().min(1).max(20000).nullable(), equipment: z.string().trim().max(200) });
+const roomRow = z.object({ id: z.guid().nullable(), name: z.string().trim().min(1, "Every room needs a name.").max(80), seats: z.number().int().min(1).max(20000).nullable(), equipment: z.string().trim().max(200) });
 const dayRow = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string().trim().max(80), note: z.string().trim().max(120) });
 export async function saveProgramSetup(_: ManageState, fd: FormData): Promise<ManageState> {
   const v = await resolveVenue(fd);
@@ -261,7 +261,7 @@ export async function saveProgramSetup(_: ManageState, fd: FormData): Promise<Ma
 export async function messagePerson(_: ManageState, fd: FormData): Promise<ManageState> {
   const v = await resolveVenue(fd);
   if (!v) return { error: "Bad request." };
-  const parsed = z.object({ person: z.string().uuid(), subject: z.string().trim().min(2, "Add a subject.").max(200), body: z.string().trim().min(2, "Write a message.").max(8000) })
+  const parsed = z.object({ person: z.guid(), subject: z.string().trim().min(2, "Add a subject.").max(200), body: z.string().trim().min(2, "Write a message.").max(8000) })
     .safeParse({ person: fd.get("person"), subject: fd.get("subject"), body: fd.get("body") });
   if (!parsed.success) return { fieldErrors: Object.fromEntries(parsed.error.issues.map((i) => [String(i.path[0]), i.message])) };
   const supabase = await createClient();
@@ -300,7 +300,7 @@ export async function addDeclaredConflict(_: ManageState, fd: FormData): Promise
 }
 
 export async function removeDeclaredConflict(id: string): Promise<{ error?: string }> {
-  if (!z.string().uuid().safeParse(id).success) return { error: "Bad request." };
+  if (!z.guid().safeParse(id).success) return { error: "Bad request." };
   const supabase = await createClient();
   const { error } = await supabase.from("declared_conflicts").delete().eq("id", id);
   return error ? { error: friendlyDb(error.message) } : {};

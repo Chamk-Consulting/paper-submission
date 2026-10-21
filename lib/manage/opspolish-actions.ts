@@ -9,7 +9,7 @@ import { friendlyDb, venueIdBySlug } from "@/lib/manage/actions-util";
 /* EM13 test submission + EM40 view as. Messages are English keys, translated by the client. */
 
 const slugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/);
-const uuid = z.string().uuid();
+const uuid = z.guid();
 
 /** Create a test paper as myself and open the author wizard on it. */
 export async function startTestSubmission(slug: string): Promise<{ error?: string }> {

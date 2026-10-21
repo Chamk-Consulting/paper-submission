@@ -64,8 +64,8 @@ export function statusOf(v: DirectoryVenue, now: number, tz: string, t: T = iden
 export function fmtMonth(d: string | null, intl = "en-GB") {
   return d ? new Date(`${d}T00:00:00Z`).toLocaleString(intl, { month: "short", year: "numeric", timeZone: "UTC" }) : "";
 }
-export function fmtRange(a: string | null, b: string | null, intl = "en-GB", t: T = identity) {
-  if (!a) return t("Rolling");
+export function fmtRange(a: string | null, b: string | null, intl = "en-GB", t: T = identity, rolling = false) {
+  if (!a) return rolling ? t("Rolling") : t("Dates to be announced");
   const s = new Date(`${a}T00:00:00Z`), e = new Date(`${b ?? a}T00:00:00Z`);
   const mon = (x: Date) => x.toLocaleString(intl, { month: "short", timeZone: "UTC" });
   if (s.getUTCFullYear() !== e.getUTCFullYear()) return `${s.getUTCDate()} ${mon(s)} ${s.getUTCFullYear()} – ${e.getUTCDate()} ${mon(e)} ${e.getUTCFullYear()}`;

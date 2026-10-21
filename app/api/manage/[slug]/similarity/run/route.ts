@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
  */
 
 export const maxDuration = 60;
-const body = z.object({ submissionId: z.string().uuid() });
+const body = z.object({ submissionId: z.guid() });
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { "cache-control": "no-store" } });
 const pct = (v: unknown) => { const n = Number(v); return Number.isFinite(n) && n >= 0 && n <= 100 ? Math.round(n * 10) / 10 : null; };
 

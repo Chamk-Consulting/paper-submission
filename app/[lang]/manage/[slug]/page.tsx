@@ -132,7 +132,7 @@ async function Inner({ params }: P) {
   }
   const mx = Math.max(1, ...chart.bars.map((b) => b.v));
   const next = ms.find((m) => Date.parse(m.at) > now);
-  const sub = [fmtRange(v.starts_on, v.ends_on, t.intl, t), [v.city, v.country].filter(Boolean).join(", "), v.society].filter(Boolean).join(" · ");
+  const sub = [fmtRange(v.starts_on, v.ends_on, t.intl, t, v.kind === "journal"), [v.city, v.country].filter(Boolean).join(", "), v.society].filter(Boolean).join(" · ");
 
   return (
     <ManagePage ctx={ctx} active="dashboard" crumb={<>{t("Organizer")} · {ctx.label}</>} title={t("Event dashboard")} sub={sub || undefined}

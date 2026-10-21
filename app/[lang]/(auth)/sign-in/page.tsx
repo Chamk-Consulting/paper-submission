@@ -20,7 +20,9 @@ type Search = { next?: string; venue?: string; tab?: string };
 async function VenueBanner({ searchParams }: { searchParams: Promise<Search> }) {
   const { venue, next } = await searchParams;
   const t = await getT();
-  const v = await venueDeadline(venueSlugFrom(next, venue), t.intl);
+  // Only when they are on their way to submit: badges, schedules and venue pages also send people here.
+  const submitting = !!venue || /^\/(?:[a-z]{2}\/)?submit\//.test(next ?? "");
+  const v = submitting ? await venueDeadline(venueSlugFrom(next, venue), t.intl) : null;
   if (!v) return null;
   return (
     <div className="mt-7 flex items-start gap-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">

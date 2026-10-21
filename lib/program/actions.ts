@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 /* Program + session-chair actions (PG01–PG03, CH01, M05). The database functions do the permission checks. */
 
 export type ProgramState = { error?: string; ok?: boolean; info?: string };
-const uuid = z.string().uuid();
+const uuid = z.guid();
 
 const friendly = (msg?: string) => {
   if (!msg) return "Something went wrong. Please try again.";
@@ -51,7 +51,7 @@ export async function updateLive(sessionId: string, status: string, delay: numbe
 }
 
 const msgSchema = z.object({
-  sessionId: z.string().uuid(),
+  sessionId: z.guid(),
   subject: z.string().trim().min(2, "Write a subject.").max(200),
   body: z.string().trim().min(2, "Write a message.").max(8000),
 });
@@ -64,7 +64,7 @@ export async function messagePresenters(_: ProgramState, fd: FormData): Promise<
   return { ok: true, info: "Sent to every presenter’s Plenary inbox." };
 }
 
-const noShowSchema = z.object({ talkId: z.string().uuid(), note: z.string().trim().max(1000).optional() });
+const noShowSchema = z.object({ talkId: z.guid(), note: z.string().trim().max(1000).optional() });
 export async function reportNoShow(_: ProgramState, fd: FormData): Promise<ProgramState> {
   const p = noShowSchema.safeParse({ talkId: fd.get("talkId"), note: fd.get("note") || undefined });
   if (!p.success) return { error: "Pick the talk." };

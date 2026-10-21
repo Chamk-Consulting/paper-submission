@@ -22,7 +22,7 @@ export async function getFollowState(): Promise<FollowState> {
 }
 
 export async function toggleFollow(venueId: string): Promise<{ ok: boolean; following?: boolean; reason?: "signin" | "error" }> {
-  if (!z.string().uuid().safeParse(venueId).success) return { ok: false, reason: "error" };
+  if (!z.guid().safeParse(venueId).success) return { ok: false, reason: "error" };
   const { supabase, personId } = await me();
   if (!personId) return { ok: false, reason: "signin" };
   const { data: existing } = await supabase.from("venue_follows").select("venue_id").eq("person_id", personId).eq("venue_id", venueId).maybeSingle();

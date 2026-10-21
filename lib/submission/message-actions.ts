@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/submission/actions";
 
 const schema = z.object({
-  submissionId: z.string().uuid(),
+  submissionId: z.guid(),
   subject: z.string().trim().max(300),
   body: z.string().trim().min(2, "Write your message.").max(8000, "Keep the message under 8,000 characters."),
 });

@@ -309,7 +309,7 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
           <h2 className="m-0 text-[22px] font-semibold leading-[1.2]"><Link href={href} className="text-[#121826] no-underline hover:underline">{v.acr}</Link></h2>
           <span className="text-[14px] text-[#4A5263]">{v.name}</span>
         </div>
-        <div className="mt-1 text-[14px] text-[#4A5263]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t), where, v.society ? t("by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</div>
+        <div className="mt-1 text-[14px] text-[#4A5263]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t, v.kind === "journal"), where, v.society ? t("by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</div>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {v.field ? <span className="rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em]" style={{ background: fbg, color: fink }}>{t(v.field === "ocean" ? "Ocean" : FIELD_LABEL[v.field])}</span> : null}
           {tags.map((tag) => <span key={tag} className="rounded-[2px] bg-[#EEF0EC] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-[#4A5263]">{tag}</span>)}

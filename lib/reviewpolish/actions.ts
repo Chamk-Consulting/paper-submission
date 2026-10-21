@@ -19,7 +19,7 @@ const MSG = {
   signIn: "Sign in again to continue.",
 };
 
-const uuid = z.string().uuid();
+const uuid = z.guid();
 const friendly = (m?: string) => {
   if (!m) return MSG.bad;
   if (/no editor/i.test(m)) return MSG.noEditor;

@@ -61,14 +61,14 @@ async function Venue({ params }: { params: Promise<Params> }) {
           </nav>
           <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex min-w-0 gap-5">
-              <span aria-hidden className="hidden size-[76px] flex-none items-center justify-center rounded-[8px] px-1 text-center font-mono text-[13px] font-semibold leading-[1.15] sm:flex" style={{ background: fbg, color: fink }}>{v.society ?? v.acr.slice(0, 6)}</span>
+              <span aria-hidden className="hidden size-[76px] flex-none items-center justify-center rounded-[8px] px-1 text-center font-mono text-[13px] font-semibold leading-[1.15] sm:flex" style={{ background: fbg, color: fink }}>{v.society ?? v.acr.split(" ")[0].slice(0, 8)}</span>
               <div className="min-w-0">
                 <div className="flex flex-wrap gap-1.5">
                   {tags.map((tag, i) => <span key={tag} className="rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em]" style={i === 0 && v.field ? { background: fbg, color: fink } : { background: "#EEF0EC", color: "#4A5263" }}>{tag}</span>)}
                 </div>
                 <h1 className="mt-2.5 font-serif text-[42px] font-normal leading-[1.03] tracking-[-0.01em] text-white sm:text-[56px]">{v.acr}</h1>
                 <p className="mt-1.5 text-[20px] text-[#F5F6F3]">{v.name}</p>
-                <p className="mt-1.5 text-[15px] text-[#D6DCEA]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
+                <p className="mt-1.5 text-[15px] text-[#D6DCEA]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t, v.kind === "journal"), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
                 <div className="mt-5 flex flex-wrap gap-2.5">
                   <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
                   <FollowButton venueId={v.id} slug={v.slug} />

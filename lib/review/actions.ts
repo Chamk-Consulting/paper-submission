@@ -24,7 +24,7 @@ const MSG = {
   signIn: "Sign in again to continue.",
 };
 
-const uuid = z.string().uuid();
+const uuid = z.guid();
 const friendly = (msg?: string) => {
   if (!msg) return MSG.bad;
   if (/decision has started/i.test(msg)) return MSG.locked;

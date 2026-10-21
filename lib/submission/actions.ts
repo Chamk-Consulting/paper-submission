@@ -9,7 +9,7 @@ import { loadSubmission } from "@/lib/submission/data";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string>; ok?: boolean; savedAt?: string };
 
-const uuid = z.string().uuid();
+const uuid = z.guid();
 const friendly = (msg?: string) => {
   if (!msg) return "Something went wrong. Please try again.";
   if (/closed/i.test(msg)) return "Submissions for this venue are closed.";
@@ -100,7 +100,7 @@ export async function lookupPerson(query: string): Promise<{ found?: { personId:
 }
 
 const authorItem = z.union([
-  z.object({ personId: z.string().uuid(), corresponding: z.boolean() }),
+  z.object({ personId: z.guid(), corresponding: z.boolean() }),
   z.object({ email: z.string().email(), givenName: z.string().max(120), familyName: z.string().max(120), institution: z.string().max(200).optional(), corresponding: z.boolean() }),
 ]);
 export async function saveAuthors(_: ActionState, fd: FormData): Promise<ActionState> {
@@ -193,7 +193,7 @@ export async function continueFromFiles(_: ActionState, fd: FormData): Promise<A
 }
 
 /* SB06 — conflicts. */
-const conflictItem = z.object({ personId: z.string().uuid().nullable(), institution: z.string().max(200).nullable(), reason: z.string().max(200) });
+const conflictItem = z.object({ personId: z.guid().nullable(), institution: z.string().max(200).nullable(), reason: z.string().max(200) });
 export async function saveConflicts(_: ActionState, fd: FormData): Promise<ActionState> {
   const id = String(fd.get("submissionId") ?? "");
   if (!uuid.safeParse(id).success) return { error: "Bad request." };

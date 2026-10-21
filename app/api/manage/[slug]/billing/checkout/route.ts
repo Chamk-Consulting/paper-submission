@@ -7,7 +7,7 @@ import { absUrl } from "@/lib/email/send";
  * The invoice is marked paid only by the webhook (app/api/stripe/webhook), never by the browser coming back.
  */
 
-const body = z.object({ invoiceId: z.string().uuid() });
+const body = z.object({ invoiceId: z.guid() });
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { "cache-control": "no-store" } });
 
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {

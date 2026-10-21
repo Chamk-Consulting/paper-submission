@@ -96,7 +96,7 @@ export async function saveProfile(_: AccountState, fd: FormData): Promise<Accoun
 
 const year = z.string().trim().regex(/^(19[5-9]\d|20\d\d|2100)?$/).transform((v) => (v ? Number(v) : null));
 const affSchema = z.object({
-  id: z.string().uuid().or(z.literal("")),
+  id: z.guid().or(z.literal("")),
   institution: z.string().trim().min(2, MSG.institution).max(200, MSG.institution),
   department: z.string().trim().max(200),
   position_title: z.string().trim().max(120),
@@ -127,7 +127,7 @@ export async function saveAffiliation(_: AccountState, fd: FormData): Promise<Ac
 }
 
 export async function deleteAffiliation(id: string): Promise<AccountState> {
-  if (!z.string().uuid().safeParse(id).success) return { error: MSG.generic };
+  if (!z.guid().safeParse(id).success) return { error: MSG.generic };
   const c = await ctx();
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("affiliations").delete().eq("id", id).eq("person_id", c.personId);
@@ -146,7 +146,7 @@ export async function findPeople(q: string): Promise<PersonHit[]> {
 }
 
 const conflictSchema = z.object({
-  other_person: z.string().uuid().or(z.literal("")),
+  other_person: z.guid().or(z.literal("")),
   institution: z.string().trim().max(200),
   reason: z.string().trim().min(2, MSG.reason).max(200),
 }).refine((v) => v.other_person || v.institution.length >= 2, { message: MSG.conflictTarget, path: ["institution"] });
@@ -166,7 +166,7 @@ export async function addConflict(_: AccountState, fd: FormData): Promise<Accoun
 }
 
 export async function removeConflict(id: string): Promise<AccountState> {
-  if (!z.string().uuid().safeParse(id).success) return { error: MSG.generic };
+  if (!z.guid().safeParse(id).success) return { error: MSG.generic };
   const c = await ctx();
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("declared_conflicts").delete().eq("id", id).eq("person_id", c.personId);
@@ -281,7 +281,7 @@ export async function newFeed(flags: z.infer<typeof flagsSchema>): Promise<FeedR
 }
 
 /* ---------------------------------------------------------------- IN01 inbox */
-const uuid = z.string().uuid();
+const uuid = z.guid();
 async function participant(threadId: string, patch: { read_at?: string | null; archived_at?: string | null }): Promise<AccountState> {
   if (!uuid.safeParse(threadId).success) return { error: MSG.generic };
   const c = await ctx();

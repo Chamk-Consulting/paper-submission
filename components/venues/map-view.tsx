@@ -176,7 +176,7 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
             <div className="mt-1 text-[20px] font-semibold">{sel.acr}</div>
             <div className="text-[13px] text-[#4A5263]">{sel.name}</div>
             <dl className="m-0 mt-2.5 grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-1.5 text-[13px]">
-              <dt className="text-[#4A5263]">{t("When")}</dt><dd className="m-0">{fmtRange(sel.startsOn, sel.endsOn, t.intl, t)}</dd>
+              <dt className="text-[#4A5263]">{t("When")}</dt><dd className="m-0">{fmtRange(sel.startsOn, sel.endsOn, t.intl, t, sel.kind === "journal")}</dd>
               <dt className="text-[#4A5263]">{t("Where")}</dt><dd className="m-0">{[sel.city, sel.country].filter(Boolean).join(", ")}{sel.placeHint ? ` (${sel.placeHint})` : ""}</dd>
               <dt className="text-[#4A5263]">{t("Deadline")}</dt><dd className="m-0">{sel.st.closes}{sel.st.local ? ` · ${sel.st.local}` : ""}</dd>
               {dist != null && home ? <><dt className="text-[#4A5263]">{t("From you")}</dt><dd className="m-0">{t("{dist} from {city} · about {h} h flying", { dist: fmtDist(dist), city: home[2], h: Math.max(1, Math.round(dist / 750)) })}</dd></> : null}

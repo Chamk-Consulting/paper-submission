@@ -12,7 +12,7 @@ import { absUrl, emailConfigured, sendEmail, textToHtml } from "@/lib/email/send
 export type OrgState = ManageState & { matched?: number; unmatched?: number[]; emailed?: boolean; email?: string };
 
 const slugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/);
-const uuid = z.string().uuid();
+const uuid = z.guid();
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
 async function load(fd: FormData, allow: "organizer" | "chair" | "owner" | "ae" = "organizer") {

@@ -8,7 +8,7 @@ import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 const PROTECTED_PREFIXES = ["/workspace", "/submissions", "/submit", "/manage", "/reviews", "/settings", "/inbox", "/chair", "/search", "/admin"];
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/create-account"];
 // Route handlers live outside app/[lang] and are never rewritten.
-const NO_LOCALE = [/^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
+const NO_LOCALE = [/^\/(?:robots\.txt|sitemap\.xml)$/, /^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
 
 export default async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

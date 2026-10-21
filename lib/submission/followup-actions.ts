@@ -43,7 +43,7 @@ const MSG = {
   uploadClosed: "You can't upload files to this paper now.",
 };
 
-const uuid = z.string().uuid();
+const uuid = z.guid();
 const no4 = (n: number | null) => `#${String(n ?? 0).padStart(4, "0")}`;
 
 function friendly(msg?: string): string {
@@ -269,7 +269,7 @@ export async function submitFinal(_: ActionState, fd: FormData): Promise<ActionS
 /* ---------------------------------------------------------------- SB14 revision */
 
 const responseItem = z.object({
-  assignment_id: z.string().uuid().nullable().optional(),
+  assignment_id: z.guid().nullable().optional(),
   comment_no: z.number().int().min(1).max(200),
   quote: z.string().max(3900).optional(),
   response: z.string().max(6000),
@@ -311,7 +311,7 @@ export async function saveRebuttal(_: ActionState, fd: FormData): Promise<Action
   if (!id) return { error: MSG.bad };
   let responses: { assignment_id: string; response: string }[];
   try {
-    responses = z.array(z.object({ assignment_id: z.string().uuid(), response: z.string().max(2000, MSG.tooLong) })).max(20).parse(JSON.parse(String(fd.get("responses") ?? "[]")));
+    responses = z.array(z.object({ assignment_id: z.guid(), response: z.string().max(2000, MSG.tooLong) })).max(20).parse(JSON.parse(String(fd.get("responses") ?? "[]")));
   } catch {
     return { error: MSG.tooLong };
   }

@@ -26,7 +26,7 @@ const fail = (msg?: string): AdminState => {
 };
 
 const source = z.enum(["contact", "help"]);
-const uuid = z.string().uuid();
+const uuid = z.guid();
 
 export async function replySupport(_: AdminState, fd: FormData): Promise<AdminState> {
   const p = z.object({ source, id: uuid, body: z.string().trim().min(2).max(8000) }).safeParse(Object.fromEntries(fd));

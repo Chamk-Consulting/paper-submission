@@ -11,11 +11,11 @@ export const maxDuration = 60;
 const LANGS = { fr: "French", ar: "Arabic", es: "Spanish", pt: "Portuguese", de: "German", zh: "Simplified Chinese" } as const;
 
 const body = z.object({
-  submissionId: z.string().uuid(),
-  fileId: z.string().uuid().optional(),
+  submissionId: z.guid(),
+  fileId: z.guid().optional(),
   // review_* come from the reviewer's viewer (RV03): no file id, plain-text answer
   kind: z.enum(["summary", "translate", "ask", "review_summary", "review_ask"]),
-  assignmentId: z.string().uuid().optional(),
+  assignmentId: z.guid().optional(),
   mode: z.enum(["brief", "detailed", "reviewers"]).optional(),
   lang: z.enum(["fr", "ar", "es", "pt", "de", "zh"]).optional(),
   scope: z.enum(["abstract", "page", "summary"]).optional(),

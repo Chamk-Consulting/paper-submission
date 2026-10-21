@@ -5,7 +5,7 @@
  * The public support address comes from NEXT_PUBLIC_SUPPORT_EMAIL (works in the browser and on the server).
  */
 export const contact = {
-  replyTime: "[1 working day]",
+  replyTime: "1 working day",
   languages: "English, French, Italian or German",
   supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || "[support email]",
   salesEmail: "[sales email]",

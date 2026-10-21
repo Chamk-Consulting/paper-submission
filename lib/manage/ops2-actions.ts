@@ -14,7 +14,7 @@ import { addMinutes, paperNo, zonedToUtc } from "@/lib/manage/ops2-time";
 export type Ops2State = ManageState & { campaignId?: string; count?: number; sentTo?: number; scheduled?: boolean };
 
 const slugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/);
-const uuid = z.string().uuid();
+const uuid = z.guid();
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 const fieldErrors = (e: z.ZodError) => Object.fromEntries(e.issues.map((i) => [String(i.path[0]), i.message]));
 
@@ -108,7 +108,7 @@ export async function finalAdminAction(_: Ops2State, fd: FormData): Promise<Ops2
 /* ================================================================ Registrations */
 
 const regSchema = z.object({
-  id: z.string().uuid().optional().or(z.literal("")),
+  id: z.guid().optional().or(z.literal("")),
   number: z.string().trim().min(1, "Enter a registration number.").max(40),
   reg_type: z.string().trim().min(1, "Choose a registration type.").max(80),
   full_name: z.string().trim().min(2, "Enter the person’s name.").max(200),
@@ -228,12 +228,12 @@ const sessionSchema = z.object({
   code: z.string().trim().min(1, "Enter a code, e.g. TuA1.").max(20),
   title: z.string().trim().min(1, "Enter a session name.").max(200),
   kind: z.enum(["keynote", "oral", "poster", "workshop", "break"]),
-  room: z.string().uuid().optional().or(z.literal("")),
+  room: z.guid().optional().or(z.literal("")),
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a day."),
   start: z.string().regex(/^\d{2}:\d{2}$/, "Enter a start time."),
   end: z.string().regex(/^\d{2}:\d{2}$/, "Enter an end time."),
-  chair: z.string().uuid().optional().or(z.literal("")),
-  cochair: z.string().uuid().optional().or(z.literal("")),
+  chair: z.guid().optional().or(z.literal("")),
+  cochair: z.guid().optional().or(z.literal("")),
 }).refine((v) => v.end > v.start, { message: "The session must end after it starts.", path: ["end"] });
 
 export async function saveSession(_: Ops2State, fd: FormData): Promise<Ops2State> {
@@ -287,7 +287,7 @@ async function retime(supabase: Awaited<ReturnType<typeof createClient>>, sessio
 export async function placeTalk(_: Ops2State, fd: FormData): Promise<Ops2State> {
   return guard(async () => {
     const { slug, ctx, supabase } = await load(fd, "chair");
-    const p = z.object({ session: uuid, submission: uuid, presenter: z.string().uuid().optional().or(z.literal("")) }).safeParse({ session: s(fd, "session"), submission: s(fd, "submission"), presenter: s(fd, "presenter") });
+    const p = z.object({ session: uuid, submission: uuid, presenter: z.guid().optional().or(z.literal("")) }).safeParse({ session: s(fd, "session"), submission: s(fd, "submission"), presenter: s(fd, "presenter") });
     if (!p.success) return { error: "Bad request." };
     const { data: last } = await supabase.from("session_talks").select("position").eq("session_id", p.data.session).order("position", { ascending: false }).limit(1).maybeSingle();
     const mins = Number(ctx.settings?.minutes_per_paper ?? 20);
@@ -387,7 +387,7 @@ export async function setAttendance(_: Ops2State, fd: FormData): Promise<Ops2Sta
 export async function sendAnnouncement(_: Ops2State, fd: FormData): Promise<Ops2State> {
   return guard(async () => {
     const { slug, ctx, supabase, venueId, me } = await load(fd);
-    const p = z.object({ title: z.string().trim().min(2, "Add a short title.").max(200), body: z.string().trim().min(2, "Write the announcement.").max(5000), session: z.string().uuid().optional().or(z.literal("")) })
+    const p = z.object({ title: z.string().trim().min(2, "Add a short title.").max(200), body: z.string().trim().min(2, "Write the announcement.").max(5000), session: z.guid().optional().or(z.literal("")) })
       .safeParse({ title: s(fd, "title"), body: s(fd, "body"), session: s(fd, "session") });
     if (!p.success) return { fieldErrors: fieldErrors(p.error) };
     const { data: aud, error: e1 } = await supabase.rpc("announcement_audience", { p_venue: venueId, p_session: p.data.session || null });

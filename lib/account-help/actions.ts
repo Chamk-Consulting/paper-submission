@@ -101,7 +101,7 @@ export async function findPaper(_: FindState, fd: FormData): Promise<FindState> 
 }
 
 export async function requestClaim(prev: FindState, fd: FormData): Promise<FindState> {
-  const p = z.object({ submissionId: z.string().uuid(), placeholder: z.string().uuid() }).safeParse(Object.fromEntries(fd));
+  const p = z.object({ submissionId: z.guid(), placeholder: z.guid() }).safeParse(Object.fromEntries(fd));
   if (!p.success) return { ...prev, error: GENERIC };
   const supabase = await createClient();
   const { error } = await supabase.rpc("request_paper_claim", { p_submission: p.data.submissionId, p_placeholder: p.data.placeholder });
@@ -115,7 +115,7 @@ export async function requestClaim(prev: FindState, fd: FormData): Promise<FindS
 }
 
 export async function respondClaim(_: HelpState, fd: FormData): Promise<HelpState> {
-  const p = z.object({ id: z.string().uuid(), accept: z.enum(["1", "0"]) }).safeParse(Object.fromEntries(fd));
+  const p = z.object({ id: z.guid(), accept: z.enum(["1", "0"]) }).safeParse(Object.fromEntries(fd));
   if (!p.success) return { error: GENERIC };
   const supabase = await createClient();
   const { error } = await supabase.rpc("respond_paper_claim", { p_claim: p.data.id, p_accept: p.data.accept === "1" });

@@ -127,7 +127,7 @@ export async function readSentSummary(ref: string | undefined): Promise<SentSumm
 
 /** VN01 "Email me venue announcements". */
 export async function toggleAnnouncements(venueId: string, on: boolean): Promise<{ ok: boolean; message?: string }> {
-  if (!z.string().uuid().safeParse(venueId).success) return { ok: false };
+  if (!z.guid().safeParse(venueId).success) return { ok: false };
   const me = await getMe();
   if (!me?.person) return { ok: false, message: "Sign in first." };
   const supabase = await createClient();
@@ -138,7 +138,7 @@ export async function toggleAnnouncements(venueId: string, on: boolean): Promise
   return { ok: true };
 }
 
-const msgSchema = z.object({ venue: z.string().uuid(), person: z.string().uuid(), subject: z.string().trim().min(2, "Add a subject.").max(200), body: z.string().trim().min(2, "Write a message.").max(4000) });
+const msgSchema = z.object({ venue: z.guid(), person: z.guid(), subject: z.string().trim().min(2, "Add a subject.").max(200), body: z.string().trim().min(2, "Write a message.").max(4000) });
 
 /** VN01 contacts → "Send message" (lands in the chair's Plenary inbox). */
 export async function sendVenueMessage(input: { venue: string; person: string; subject: string; body: string }): Promise<{ ok: boolean; message?: string }> {

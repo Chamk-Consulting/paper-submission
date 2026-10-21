@@ -21,7 +21,7 @@ export type ScanResult = {
 };
 
 const slugSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/);
-const uuid = z.string().uuid();
+const uuid = z.guid();
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
 function friendly(msg?: string): string {

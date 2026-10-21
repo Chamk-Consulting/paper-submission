@@ -8,7 +8,7 @@ import type { MyTask, MyVenueStatus, VenuePublicInfo } from "@/lib/venues/polish
 /* Signed-in extras for the cached public venue pages (PV01c "My tasks", PV02 contact form + status card)
    and the organizer editor for the venue page content (EM10). Messages are English keys, translated by the UI. */
 
-const uuid = z.string().uuid();
+const uuid = z.guid();
 
 /** "My tasks" layer of the deadline calendar: the person's own deadlines (reuses the CL01 feed query). */
 export async function getMyTasks(): Promise<{ signedIn: boolean; tasks: MyTask[] }> {
@@ -38,7 +38,7 @@ export async function getMyVenueStatus(venueId: string): Promise<MyVenueStatus |
 export type ContactState = { error?: string; fieldErrors?: { body?: string }; threadId?: string };
 
 const contactSchema = z.object({
-  venueId: z.string().uuid(),
+  venueId: z.guid(),
   topic: z.enum(["general", "submissions", "publication", "registration"]),
   subject: z.string().trim().max(300),
   body: z.string().trim().min(2, "Write your message.").max(8000, "Keep the message under 8,000 characters."),

@@ -18,7 +18,7 @@ import {
 export type OpsResult = { ok?: boolean; error?: string; info?: string; count?: number; emailed?: number; inbox?: number; skipped?: boolean; id?: string };
 
 const slugZ = z.string().regex(/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/);
-const uuid = z.string().uuid();
+const uuid = z.guid();
 
 function touch(slug: string, ...subs: string[]) {
   for (const s of ["", ...subs]) revalidatePath(`/[lang]/manage/${slug}${s}`, "page");
