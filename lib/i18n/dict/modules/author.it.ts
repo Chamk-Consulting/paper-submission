@@ -1,5 +1,12 @@
 /* author screens — it. English text is the key. */
 export const author_it: Record<string, string> = {
+  "Delete draft": "Elimina bozza",
+  "Delete this draft and its files? This can't be undone.": "Eliminare questa bozza e i suoi file? Non si può annullare.",
+  "Deleting…": "Eliminazione…",
+  "Delete": "Elimina",
+  "Deleting drafts needs the latest database update.": "Per eliminare le bozze serve l’ultimo aggiornamento del database.",
+  "Only drafts can be deleted — withdraw a submitted paper instead.": "Si possono eliminare solo le bozze — ritira invece un articolo inviato.",
+  "Only the person who started this draft can delete it.": "Solo chi ha iniziato questa bozza può eliminarla.",
   "A co-author": "Un coautore",
   "A copy of this notice went to your co-authors, and the program chair was told in Plenary.": "Una copia di questo avviso è stata inviata ai tuoi coautori e il presidente del programma è stato avvisato su Plenary.",
   "A response is over 2,000 characters.": "Una risposta supera i 2.000 caratteri.",

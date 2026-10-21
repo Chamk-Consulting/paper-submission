@@ -7,10 +7,10 @@ import { getMyVenueStatus } from "@/lib/venues/polish-actions";
 import type { MyVenueStatus } from "@/lib/venues/polish-types";
 import { useClock, useFollows } from "@/components/venues/use-clock";
 import type { VenueDate } from "@/lib/venues/types";
-import { DAY, cityOf, fmtAoE, fmtLocal } from "@/lib/venues/time";
+import { DAY, cityOf, fmtAoE, fmtLocal, weekdayDate } from "@/lib/venues/time";
 import { useT } from "@/lib/i18n/client";
 
-const dateOnly = (iso: string, tz: string, intl = "en-GB") => new Date(iso).toLocaleDateString(intl, { timeZone: tz, weekday: "short", day: "numeric", month: "short" });
+const dateOnly = (iso: string, tz: string, intl = "en-GB") => weekdayDate(new Date(iso), intl, { timeZone: tz });
 
 const DEADLINE = new Set(["submission", "proposal", "final", "registration"]);
 const pad = (n: number) => String(n).padStart(2, "0");

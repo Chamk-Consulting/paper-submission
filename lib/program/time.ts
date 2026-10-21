@@ -1,3 +1,4 @@
+import { weekdayDate } from "@/lib/venues/time";
 /* Program times in the event's time zone (client + server safe). */
 
 export const fmtTime = (iso: string, tz: string, intl = "en-GB") =>
@@ -7,8 +8,7 @@ export const fmtTime = (iso: string, tz: string, intl = "en-GB") =>
 export const dayKey = (iso: string, tz: string) =>
   new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: tz }).format(new Date(iso));
 
-export const fmtDay = (iso: string, tz: string, intl = "en-GB") =>
-  new Date(iso).toLocaleDateString(intl, { weekday: "short", day: "numeric", month: "short", timeZone: tz });
+export const fmtDay = (iso: string, tz: string, intl = "en-GB") => weekdayDate(new Date(iso), intl, { timeZone: tz });
 
 export function tzLabel(tz: string, at = new Date()) {
   try {

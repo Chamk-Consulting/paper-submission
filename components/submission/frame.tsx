@@ -37,7 +37,7 @@ export async function SubmissionFrame({ ctx, step, children, aside }: { ctx: Ctx
       rail={
         <StepRail
           rail={{ done: ctx.done, current: step, reachable, base: `/submissions/${ctx.sub.id}` }}
-          draft={{ title: ctx.sub.title, venue: ctx.venue.acr, index: idx >= 0 ? idx + 1 : 1, total: Math.max(ctx.drafts.length, 1), switchHref: "/workspace/submissions" }}
+          draft={{ title: ctx.sub.title, venue: ctx.venue.acr, index: idx >= 0 ? idx + 1 : 1, total: Math.max(ctx.drafts.length, 1), switchHref: "/workspace/submissions", deletable: !submitted && !ctx.sub.isTest }}
         />
       }
       aside={aside}

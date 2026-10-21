@@ -44,6 +44,7 @@ async function Inner({ params, searchParams }: P) {
         types={options}
         tracks={tracksOf(venue)}
         initialType={options.find((o) => o.name === type)?.name}
+        closed={!venue.deadline && venue.kind !== "journal"}
       />
     </WizardLayout>
   );

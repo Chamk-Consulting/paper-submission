@@ -51,10 +51,6 @@ export function CheckList({ file }: { file: SubFile }) {
   );
 }
 
-export function checkSummary(file: SubFile | undefined) {
-  const items = (file?.check.items ?? []) as Item[];
-  return { fails: items.filter((i) => i.level === "fail").length, warns: items.filter((i) => i.level === "warn").length };
-}
 
 type Role = "revision" | "highlighted" | "final" | "slides" | "supplementary";
 

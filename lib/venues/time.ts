@@ -29,9 +29,19 @@ export type Status = { label: string; closes: string; aoe: string; local: string
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
+/**
+ * Weekday + date, built from parts. Node's ICU and browsers disagree on the en-GB comma
+ * ("Fri 1 Jan" vs "Fri, 1 Jan"), which breaks hydration (React #418). The parts format identically.
+ */
+export function weekdayDate(d: Date, intl = "en-GB", o: { timeZone?: string; weekday?: "short" | "long"; month?: "short" | "long"; year?: "numeric" } = {}) {
+  const wd = d.toLocaleDateString(intl, { timeZone: o.timeZone, weekday: o.weekday ?? "short" });
+  const dm = d.toLocaleDateString(intl, { timeZone: o.timeZone, day: "numeric", month: o.month ?? "short", year: o.year });
+  return `${wd}${/^(fr|it)/.test(intl) ? " " : ", "}${dm}`;
+}
+
 export function fmtLocal(iso: string, tz: string, withWeekday = true, intl = "en-GB") {
   const d = new Date(iso);
-  const day = d.toLocaleDateString(intl, { timeZone: tz, weekday: withWeekday ? "short" : undefined, day: "numeric", month: "short" });
+  const day = withWeekday ? weekdayDate(d, intl, { timeZone: tz }) : d.toLocaleDateString(intl, { timeZone: tz, day: "numeric", month: "short" });
   const time = d.toLocaleTimeString(intl, { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false });
   return `${day}, ${time}`;
 }

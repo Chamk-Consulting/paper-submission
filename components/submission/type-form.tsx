@@ -9,9 +9,9 @@ import { useT } from "@/lib/i18n/client";
 export type TypeOption = { name: string; note?: string; tags: string[]; when: string; whenVars?: Record<string, string | number>; closed?: boolean };
 
 /** SB01 main column: venue card, type radio cards, track. */
-export function TypeForm({ venue, types, tracks, initialType, initialTrack, submissionId }: {
+export function TypeForm({ venue, types, tracks, initialType, initialTrack, submissionId, closed = false }: {
   venue: { id: string; acr: string; name: string; meta: string; slug: string; badge: string };
-  types: TypeOption[]; tracks: string[]; initialType?: string; initialTrack?: string | null; submissionId?: string;
+  types: TypeOption[]; tracks: string[]; initialType?: string; initialTrack?: string | null; submissionId?: string; closed?: boolean;
 }) {
   const t = useT();
   const [state, action, pending] = useActionState<ActionState, FormData>(saveType, {});
@@ -45,7 +45,7 @@ export function TypeForm({ venue, types, tracks, initialType, initialTrack, subm
         {types.map((ty) => {
           const on = pick === ty.name;
           return (
-            <button key={ty.name} type="button" role="radio" aria-checked={on} disabled={ty.closed} onClick={() => setPick(ty.name)}
+            <button key={ty.name} type="button" role="radio" aria-checked={on} disabled={ty.closed || closed} onClick={() => setPick(ty.name)}
               className="flex w-full items-start gap-3.5 rounded-[8px] bg-white px-4 py-4 text-left disabled:opacity-55"
               style={{ border: on ? "2px solid #F2A93B" : "1px solid #DADDE3", background: on ? "#FFFBF3" : "#FFFFFF", padding: on ? "15px" : undefined }}>
               <span aria-hidden className="mt-0.5 box-border size-[18px] flex-none rounded-full bg-white" style={{ border: on ? "5px solid #0E1B3D" : "1.5px solid #B7BDC9" }} />
@@ -74,7 +74,7 @@ export function TypeForm({ venue, types, tracks, initialType, initialTrack, subm
       {state.error ? <p role="alert" className="mt-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2 text-[14px] text-[#5C1A15]">{t(state.error)}</p> : null}
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-[#DADDE3] pt-6">
         {submissionId ? <button type="submit" name="intent" value="exit" className={ghostBtn}>{t("Save and exit")}</button> : <Link href={`/venues/${venue.slug}`} className={ghostBtn}>{t("Cancel")}</Link>}
-        <button type="submit" name="intent" value="next" disabled={pending} className={primaryBtn}>{pending ? t("Saving…") : t("Continue to details →")}</button>
+        <button type="submit" name="intent" value="next" disabled={pending || closed} className={primaryBtn}>{pending ? t("Saving…") : t("Continue to details →")}</button>
       </div>
       <p className="sr-only" aria-live="polite">{chosen ? t("Selected {name}", { name: chosen.name }) : ""}</p>
     </form>

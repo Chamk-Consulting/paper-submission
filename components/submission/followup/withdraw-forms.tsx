@@ -8,13 +8,7 @@ import { card, ghostBtn, h2 } from "@/components/submission/shell";
 import { ErrorBox, FieldError } from "@/components/submission/followup/bits";
 import { useT } from "@/lib/i18n/client";
 
-export const WITHDRAW_REASONS: [string, string][] = [
-  ["error", "Found an error in the results"],
-  ["other_venue", "Submitted to another venue"],
-  ["not_ready", "Not ready — will submit later"],
-  ["disagreement", "Author disagreement"],
-  ["other", "Other"],
-];
+import { WITHDRAW_REASONS } from "@/lib/submission/followup-shared";
 
 const dangerBtn = "inline-flex h-12 items-center justify-center rounded-[4px] border-0 bg-[#B3261E] px-5 text-[16px] font-semibold text-white hover:bg-[#9A1F18] disabled:opacity-60";
 

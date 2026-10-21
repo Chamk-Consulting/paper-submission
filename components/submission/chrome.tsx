@@ -1,5 +1,6 @@
 "use client";
 
+import { DeleteDraftButton } from "@/components/submission/delete-draft";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { DeadlinePill } from "@/components/submission/live";
@@ -62,7 +63,7 @@ export function TitleBand({ crumb, title, venue, generatedAt }: { crumb: string;
 
 export type RailState = { done: Record<StepKey, boolean>; current: StepKey | null; reachable: number; base: string; loading?: boolean };
 
-export function StepRail({ rail, draft, footer = true }: { rail: RailState; draft?: { title: string; venue: string; index: number; total: number; switchHref?: string } | "loading"; footer?: boolean }) {
+export function StepRail({ rail, draft, footer = true }: { rail: RailState; draft?: { title: string; venue: string; index: number; total: number; switchHref?: string; deletable?: boolean } | "loading"; footer?: boolean }) {
   const t = useT();
   const cur = STEPS.find((s) => s.key === rail.current);
   return (
@@ -82,6 +83,7 @@ export function StepRail({ rail, draft, footer = true }: { rail: RailState; draf
           </div>
           <div className="mt-1 line-clamp-2 text-[14px] font-semibold">{draft.title}</div>
           <div className="text-[12px] text-[#4A5263]">{draft.venue}</div>
+          {draft.deletable && rail.base.startsWith("/submissions/") ? <DeleteDraftButton id={rail.base.split("/")[2]} /> : null}
         </div>
       ) : null}
       <p className="mb-2 mt-5 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{cur ? t("Step {n} of 7", { n: cur.n }) : t("Submitted · all steps done")}</p>

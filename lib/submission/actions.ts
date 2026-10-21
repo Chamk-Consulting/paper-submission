@@ -242,3 +242,18 @@ export async function withdrawPaper(_: ActionState, fd: FormData): Promise<Actio
   revalidatePath(`/submissions/${id}`, "layout");
   redirect(`/submissions/${id}`);
 }
+
+/** Delete a draft the person started (never a submitted paper). */
+export async function deleteDraft(id: string): Promise<{ error?: string }> {
+  if (!uuid.safeParse(id).success) return { error: "Bad request." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_draft", { p_submission: id });
+  if (error) {
+    if (/function .*delete_draft|does not exist|PGRST202/i.test(error.message)) return { error: "Deleting drafts needs the latest database update." };
+    if (/only drafts/i.test(error.message)) return { error: "Only drafts can be deleted — withdraw a submitted paper instead." };
+    if (/not your draft/i.test(error.message)) return { error: "Only the person who started this draft can delete it." };
+    return { error: friendly(error.message) };
+  }
+  revalidatePath("/workspace/submissions");
+  redirect("/workspace/submissions");
+}

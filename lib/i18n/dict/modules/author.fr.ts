@@ -1,5 +1,12 @@
 /* author screens — fr. English text is the key. */
 export const author_fr: Record<string, string> = {
+  "Delete draft": "Supprimer le brouillon",
+  "Delete this draft and its files? This can't be undone.": "Supprimer ce brouillon et ses fichiers ? C’est définitif.",
+  "Deleting…": "Suppression…",
+  "Delete": "Supprimer",
+  "Deleting drafts needs the latest database update.": "La suppression des brouillons nécessite la dernière mise à jour de la base de données.",
+  "Only drafts can be deleted — withdraw a submitted paper instead.": "Seuls les brouillons peuvent être supprimés — retirez plutôt un article soumis.",
+  "Only the person who started this draft can delete it.": "Seule la personne qui a commencé ce brouillon peut le supprimer.",
   "A co-author": "Un co-auteur",
   "A copy of this notice went to your co-authors, and the program chair was told in Plenary.": "Une copie de cet avis a été envoyée à vos co-auteurs, et le président du programme a été prévenu dans Plenary.",
   "A response is over 2,000 characters.": "Une réponse dépasse 2 000 caractères.",

@@ -8,6 +8,7 @@ import { ui } from "@/components/manage/ui";
 import { SaveBar } from "@/components/manage/save-bar";
 import { Rules } from "@/components/manage/setup1/bits";
 import type { ManageState } from "@/lib/manage/actions-util";
+import { weekdayDate } from "@/lib/venues/time";
 
 /* EM04 — nine milestones stored as AoE; local time shown next to each; C6 order checked as you type and again on the server. */
 
@@ -29,7 +30,8 @@ export function DatesForm({ slug, initial, status, last, canEdit, opened }: {
     const d = values[k];
     if (!d || !zone) return "—";
     const m = MILESTONES.find((x) => x.key === k)!;
-    return new Date(aoeInstant(d, m.startOfDay)).toLocaleString(t.intl, { timeZone: zone, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const x = new Date(aoeInstant(d, m.startOfDay));
+    return `${weekdayDate(x, t.intl, { timeZone: zone })}, ${x.toLocaleTimeString(t.intl, { timeZone: zone, hour: "2-digit", minute: "2-digit" })}`;
   };
   const city = zone?.split("/").pop()?.replace(/_/g, " ");
   const timeline = MILESTONES.filter((m) => values[m.key]).sort((a, b) => (values[a.key]! < values[b.key]! ? -1 : 1));

@@ -1,3 +1,4 @@
+import { weekdayDate } from "@/lib/venues/time";
 /* Time helpers for the program builder and event day: sessions are entered and shown in the event's time zone. */
 
 function parts(date: Date, tz: string) {
@@ -42,7 +43,7 @@ export function addMinutes(iso: string, min: number): string {
 }
 
 export function fmtDayLabel(day: string, intl: string): string {
-  return new Date(`${day}T12:00:00Z`).toLocaleDateString(intl, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  return weekdayDate(new Date(`${day}T12:00:00Z`), intl, { timeZone: "UTC" });
 }
 
 export function fmtTime(iso: string, tz: string, intl: string): string {

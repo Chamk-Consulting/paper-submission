@@ -7,7 +7,7 @@ import { asideCard, card, ghostBtn, h2, primaryBtn } from "@/components/submissi
 import { FlowFrame, no4, steps } from "@/components/submission/followup/flow-frame";
 import { LocalDate } from "@/components/submission/followup/due-pill";
 import { NextSteps } from "@/components/submission/followup/next-steps";
-import { WITHDRAW_REASONS } from "@/components/submission/followup/withdraw-forms";
+import { WITHDRAW_REASONS } from "@/lib/submission/followup-shared";
 import { loadInfo } from "@/lib/submission/followup-data";
 import { Reveal } from "@/components/motion/reveal";
 import { FlowSkeleton } from "@/components/skeletons/author";
