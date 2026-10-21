@@ -1,5 +1,6 @@
 /* public screens — it. English text is the key. */
 export const public_it: Record<string, string> = {
+  "Hotels": "Hotel",
   "(optional)": "(facoltativo)",
   "1 hour": "1 ora",
   "A checklist, not a manual": "Una checklist, non un manuale",

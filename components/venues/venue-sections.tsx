@@ -83,7 +83,7 @@ export async function AttendingSection({ pub, acr }: { pub: VenuePublic; acr: st
   );
 }
 
-export async function TravelSection({ pub, name, fallbackPlace }: { pub: VenuePublic; name: string; fallbackPlace: string | null }) {
+export async function TravelSection({ pub, name, fallbackPlace, hotelsNote = null }: { pub: VenuePublic; name: string; fallbackPlace: string | null; hotelsNote?: string | null }) {
   const t = await getT();
   const tr = pub.info.travel ?? {};
   const address = tr.address || fallbackPlace;
@@ -125,6 +125,12 @@ export async function TravelSection({ pub, name, fallbackPlace }: { pub: VenuePu
           </div>
         </div>
         <div className="flex flex-col gap-4">
+          {hotelsNote && !hotels.length ? (
+            <div className={card}>
+              <h3 className="m-0 text-[16px] font-semibold">{t("Hotels")}</h3>
+              <p className="m-0 mt-2 text-[14px]">{hotelsNote}</p>
+            </div>
+          ) : null}
           {directions.length ? (
             <div className={card}>
               <h3 className="m-0 text-[16px] font-semibold">{t("Getting there")}</h3>

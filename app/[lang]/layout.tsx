@@ -1,3 +1,4 @@
+import { KeepFormValues } from "@/components/site/keep-form-values";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 // Fonts are self-hosted (no request to Google: faster and GDPR-friendly).
@@ -59,6 +60,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           <PwaLayer />
           <CookieConsent />
           <RememberAccount />
+          <KeepFormValues />
         </I18nProvider>
       </body>
     </html>

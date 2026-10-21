@@ -17,7 +17,7 @@ export function SaveBar({ state, status, last, readOnly = false }: {
   return (
     <div className="sticky bottom-0 z-10 mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#DADDE3] bg-[#F5F6F3]/95 py-3.5 backdrop-blur">
       <p role="status" className="m-0 text-[13px] text-[#4A5263]">
-        {state.error ? <span className="text-[#B3261E]">{t(state.error)}</span>
+        {state.error ? <span data-form-error className="text-[#B3261E]">{t(state.error)}</span>
           : state.savedAt ? (ready ? t("Marked ready · you, just now") : t("Saved just now"))
           : when ? t("Last changed by {who} · {when}", { who: last.by ?? t("someone"), when }) : t("Not saved yet")}
       </p>
@@ -38,5 +38,5 @@ export function SaveBar({ state, status, last, readOnly = false }: {
 export function FieldError({ state, name }: { state: ManageState; name: string }) {
   const t = useT();
   const e = state.fieldErrors?.[name];
-  return e ? <span className="text-[13px] font-normal text-[#B3261E]">{t(e)}</span> : null;
+  return e ? <span data-form-error className="text-[13px] font-normal text-[#B3261E]">{t(e)}</span> : null;
 }

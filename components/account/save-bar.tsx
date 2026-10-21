@@ -13,7 +13,7 @@ export function AccountSaveBar({ state, dirty }: { state: AccountState; dirty: b
   const savedNow = !dirty && !state.error && !hasFieldErrors && !!state.savedAt;
   return (
     <div className="sticky bottom-0 z-10 mt-1 flex flex-wrap items-center justify-between gap-3 rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3">
-      <span role="status" className={`text-[13px] ${state.error || hasFieldErrors ? "text-[#B3261E]" : savedNow ? "text-[#14603F]" : "text-[#4A5263]"}`}>
+      <span role="status" data-form-error={state.error || hasFieldErrors ? "" : undefined} className={`text-[13px] ${state.error || hasFieldErrors ? "text-[#B3261E]" : savedNow ? "text-[#14603F]" : "text-[#4A5263]"}`}>
         {pending ? t("Saving…")
           : state.error ? t(state.error)
           : hasFieldErrors ? t("Check the highlighted fields.")

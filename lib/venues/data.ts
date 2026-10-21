@@ -50,15 +50,30 @@ export async function getDirectory(): Promise<{ ready: boolean; venues: Director
   return { ready: true, venues: ((data ?? []) as Row[]).map(mapVenue), generatedAt };
 }
 
-export async function getVenue(slug: string): Promise<{ venue: DirectoryVenue; details: VenueDetails; doubleBlind: boolean; website: string | null } | null> {
+export type VenueBasics = { tagline: string | null; publicText: string | null; venueAddress: string | null; hotels: string | null };
+
+export async function getVenue(slug: string): Promise<{ venue: DirectoryVenue; details: VenueDetails; doubleBlind: boolean; website: string | null; basics: VenueBasics; dbTypes: NonNullable<VenueDetails["types"]> } | null> {
   "use cache";
   cacheLife("minutes");
   cacheTag("venues", `venue:${slug}`);
   if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) return null;
-  const { data } = await createPublicClient().from("venues").select(`${COLS}, details, double_blind, website`).eq("slug", slug).eq("is_published", true).maybeSingle();
+  const { data } = await createPublicClient().from("venues").select(`${COLS}, details, double_blind, website, tagline, public_text, venue_address, hotels`).eq("slug", slug).eq("is_published", true).maybeSingle();
   if (!data) return null;
   const r = data as Row;
-  return { venue: mapVenue(r), details: (r.details as VenueDetails) ?? {}, doubleBlind: !!r.double_blind, website: (r.website as string) ?? null };
+  // Paper types set up by the organizers (EM05); the public page prefers them over the seeded details.types.
+  const { data: ty } = await createPublicClient().from("submission_types")
+    .select("name, description, pages, extra_pages, blind_override").eq("venue_id", r.id as string).eq("enabled", true).order("sort");
+  const blind = (b: string | null) => (b === "double" ? "Double-blind" : b === "single" ? "Single-blind" : b === "open" ? "Open review" : null);
+  const dbTypes = ((ty ?? []) as { name: string; description: string | null; pages: number; extra_pages: number; blind_override: string | null }[]).map((x) => ({
+    name: x.name, note: x.description ?? undefined,
+    length: `${x.pages}${x.extra_pages ? ` + ${x.extra_pages}` : ""} pages`,
+    review: blind(x.blind_override) ?? (r.review_mode as string | null) ?? undefined,
+  }));
+  const s = (k: string) => ((r[k] as string | null) || null);
+  return {
+    venue: mapVenue(r), details: (r.details as VenueDetails) ?? {}, doubleBlind: !!r.double_blind, website: (r.website as string) ?? null,
+    basics: { tagline: s("tagline"), publicText: s("public_text"), venueAddress: s("venue_address"), hotels: s("hotels") }, dbTypes,
+  };
 }
 
 /** PV02 Attending / Venue & travel / Gallery content and the fee table (null = not published or migration not applied). */

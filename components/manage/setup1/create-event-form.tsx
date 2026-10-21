@@ -43,7 +43,7 @@ export function CreateEventForm({ past }: { past: PastEvent[] }) {
   const t = useT();
   const [state, action] = useActionState<ManageState, FormData>(createEvent, {});
   const [from, setFrom] = useState("");
-  const fe = (k: string) => (state.fieldErrors?.[k] ? <span className="text-[13px] font-normal text-[#B3261E]">{t(state.fieldErrors[k])}</span> : null);
+  const fe = (k: string) => (state.fieldErrors?.[k] ? <span data-form-error className="text-[13px] font-normal text-[#B3261E]">{t(state.fieldErrors[k])}</span> : null);
   return (
     <form action={action} className="flex flex-col gap-5">
       {state.error ? <p role="alert" className={`m-0 ${ui.bad}`}>{t(state.error)}</p> : null}

@@ -84,7 +84,7 @@ export async function inviteCommittee(_: ManageState, fd: FormData): Promise<Man
   }
   refresh(v.slug, "/setup/committee");
   if (!sent) return { error: errors.join(" · ") || "No invitation sent." };
-  return { ok: true, savedAt: new Date().toISOString(), info: errors.length ? `${sent} sent · ${errors.join(" · ")}` : mailed < sent ? `${sent} sent · email not configured, inbox only` : `${sent} sent` };
+  return { ok: true, savedAt: new Date().toISOString(), info: errors.length ? `${sent} sent · ${errors.join(" · ")}` : mailed < sent ? (process.env.RESEND_API_KEY ? `${sent} sent · ${sent - mailed} email(s) could not be delivered — they will see it in their Plenary inbox` : `${sent} sent · email not configured, inbox only`) : `${sent} sent` };
 }
 
 export async function revokeInvitation(slug: string, invitationId: string): Promise<{ error?: string }> {

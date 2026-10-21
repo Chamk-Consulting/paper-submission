@@ -29,14 +29,14 @@ async function Venue({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const [data, t, pub] = await Promise.all([getVenue(slug), getT(), getVenuePublic(slug)]);
   if (!data) notFound();
-  const { venue: v, details, website } = data;
+  const { venue: v, details, website, basics, dbTypes } = data;
   const online = v.kind === "journal" || v.format === "online";
   const generatedAt = new Date().toISOString();
   const [fbg, fink] = v.field ? FIELD_COLOR[v.field] : ["#E6EDFC", "#1F47A8"];
   const tags = [v.field ? (v.field === "ocean" ? t("Ocean") : v.field) : null, v.format ? t(FORMAT_LABEL[v.format]) : null, v.reviewMode ? t(v.reviewMode) : null, v.indexedIn.length ? v.indexedIn.join(" · ") : null].filter(Boolean) as string[];
   const where = v.kind === "journal" ? t("Online journal") : [v.location ?? [v.city, v.country].filter(Boolean).join(", ")].filter(Boolean).join("");
   const topics = details.topics ?? [];
-  const types = details.types ?? [];
+  const types = dbTypes.length ? dbTypes : details.types ?? [];
   const policies = details.policies ?? [];
   const organizers = details.organizers ?? [];
   const nav: [string, string][] = [
@@ -68,6 +68,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
                 </div>
                 <h1 className="mt-2.5 font-serif text-[42px] font-normal leading-[1.03] tracking-[-0.01em] text-white sm:text-[56px]">{v.acr}</h1>
                 <p className="mt-1.5 text-[20px] text-[#F5F6F3]">{v.name}</p>
+                {basics.tagline ? <p className="mt-1 text-[16px] italic text-[#D6DCEA]">{basics.tagline}</p> : null}
                 <p className="mt-1.5 text-[15px] text-[#D6DCEA]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t, v.kind === "journal"), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
                 <div className="mt-5 flex flex-wrap gap-2.5">
                   <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
@@ -97,7 +98,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
         <main className="min-w-0 flex-auto">
           <section id="cfp" aria-labelledby="cfp-h" className={section}>
             <h2 id="cfp-h" className={h2}>{t("Call for papers")}</h2>
-            <p className="mt-3 max-w-[68ch] text-[17px]">{details.cfp ?? t("{acr} — the organizers haven't published the call text yet.", { acr: v.acr })}</p>
+            <p className="mt-3 max-w-[68ch] whitespace-pre-line text-[17px]">{basics.publicText ?? details.cfp ?? t("{acr} — the organizers haven't published the call text yet.", { acr: v.acr })}</p>
             {topics.length ? <div className="mt-4 flex flex-wrap gap-2">{topics.map((tp) => <span key={tp} className="rounded-full border border-[#DADDE3] bg-white px-3 py-1.5 text-[14px]">{tp}</span>)}</div> : null}
             {v.accepting ? <p className="mt-4 text-[14px] text-[#4A5263]">{t("Accepting:")} {t(v.accepting)}</p> : null}
           </section>
@@ -156,7 +157,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
           </section>
 
           {pub && !online ? <AttendingSection pub={pub} acr={v.acr} /> : null}
-          {pub && !online ? <TravelSection pub={pub} name={v.acr} fallbackPlace={v.location ?? ([v.city, v.country].filter(Boolean).join(", ") || null)} /> : null}
+          {pub && !online ? <TravelSection pub={pub} name={v.acr} fallbackPlace={basics.venueAddress ?? v.location ?? ([v.city, v.country].filter(Boolean).join(", ") || null)} hotelsNote={basics.hotels} /> : null}
           {pub ? <GallerySection pub={pub} /> : null}
 
           <section id="program" aria-labelledby="program-h" className={section}>
