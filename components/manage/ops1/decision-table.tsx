@@ -27,7 +27,11 @@ export function DecisionTable({ slug, rows, min, canChangeReleased }: { slug: st
   const und = opt.filter((r) => !r.decision && can(r)).length;
   const blocked = opt.filter((r) => !can(r) && !r.decision).length;
 
-  function pick(r: DecisionRow, d: string) {
+  const [ask, setAsk] = useState<{ r: DecisionRow; d: string } | null>(null);
+  function pick(r: DecisionRow, d: string, sure = false) {
+    // Authors of a released paper have already been told: ask before changing it.
+    if (r.released && !sure) { setAsk({ r, d }); return; }
+    setAsk(null);
     const next = r.decision === d ? null : d;
     setErr(null);
     start(async () => {
@@ -69,6 +73,16 @@ export function DecisionTable({ slug, rows, min, canChangeReleased }: { slug: st
         <Link href={`/manage/${slug}/decisions/letters`} className={`${ui.navy} h-9! text-[13px]!`}>{t("Review letters & release")} →</Link>
       </div>
       {err ? <p role="alert" className={`${ui.bad} m-0`}>{err}</p> : null}
+      {ask ? (
+        <div role="alertdialog" aria-label={t("Change a released decision?")} className="flex flex-wrap items-center gap-3 rounded-[8px] border border-[#F1D29A] bg-[#FFF6E6] px-4 py-3 text-[14px] text-[#3B2A07]">
+          <span className="min-w-0 flex-auto">
+            <strong>{t("{paper} was already released to its authors.", { paper: paperId(ask.r.number) })}</strong>{" "}
+            {ask.r.decision === ask.d ? t("Clearing it changes what they were told.") : t("Changing it to {d} changes what they were told — send them a new letter afterwards.", { d: t(DECISION_LABEL[ask.d] ?? ask.d) })}
+          </span>
+          <button type="button" disabled={pending} onClick={() => pick(ask.r, ask.d, true)} className="h-8 rounded-[4px] border-0 bg-[#B3261E] px-3 text-[13px] font-semibold text-white">{t("Change it")}</button>
+          <button type="button" onClick={() => setAsk(null)} className="h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[13px]">{t("Cancel")}</button>
+        </div>
+      ) : null}
 
       <div className="overflow-x-auto rounded-[8px] border border-[#DADDE3] bg-white">
         <table className={`${ui.table} min-w-[980px]`} aria-busy={pending}>

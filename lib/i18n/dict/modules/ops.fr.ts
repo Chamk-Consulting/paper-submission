@@ -1,5 +1,10 @@
 /* ops screens — fr. English text is the key. */
 export const ops_fr: Record<string, string> = {
+  "Change a released decision?": "Modifier une décision déjà communiquée ?",
+  "{paper} was already released to its authors.": "{paper} a déjà été communiqué à ses auteurs.",
+  "Clearing it changes what they were told.": "L’effacer modifie ce qui leur a été annoncé.",
+  "Changing it to {d} changes what they were told — send them a new letter afterwards.": "Passer à {d} modifie ce qui leur a été annoncé — envoyez-leur ensuite une nouvelle lettre.",
+  "Change it": "Modifier",
   " and by email": " et par e-mail",
   " and in Plenary": " et dans Plenary",
   " — email sending isn’t configured, so no email went out": " — l’envoi d’e-mails n’est pas configuré, aucun e-mail n’est parti",

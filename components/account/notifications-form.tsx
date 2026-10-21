@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useMemo } from "react";
+import { useActionState, useMemo, useSyncExternalStore } from "react";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { LOCALES, LOCALE_NAMES } from "@/lib/i18n/config";
 import { setLanguageCookie } from "@/lib/consent-client";
@@ -26,6 +26,8 @@ const REMINDERS: ["d7" | "d3" | "h24", string][] = [["d7", "7 days before"], ["d
 const radio = "m-0 size-[22px] cursor-pointer appearance-none rounded-full border-[1.5px] border-solid border-[#8A93A6] bg-white checked:border-[7px] checked:border-[#2F5FD0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]";
 const th = "py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]";
 
+const noopSubscribe = () => () => {};
+
 function offsetLabel(tz: string) {
   try {
     const part = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "shortOffset" }).formatToParts(new Date()).find((p) => p.type === "timeZoneName");
@@ -46,12 +48,16 @@ export function NotificationsForm({ prefs }: { prefs: Prefs }) {
     }
     return r;
   }, {});
+  // Time-zone names, offsets and the browser's own zone differ between server and browser, so the
+  // full list is built only after hydration (otherwise React #418).
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const zones = useMemo(() => {
+    if (!mounted) { const z = prefs.timezone || "UTC"; return [[z, z.replace(/_/g, " ")]] as const; }
     const list = Intl.supportedValuesOf("timeZone");
     if (prefs.timezone && !list.includes(prefs.timezone)) list.unshift(prefs.timezone);
     return list.map((z) => [z, `${z.replace(/_/g, " ")} (${offsetLabel(z)})`] as const);
-  }, [prefs.timezone]);
-  const guess = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "UTC";
+  }, [prefs.timezone, mounted]);
+  const guess = mounted ? Intl.DateTimeFormat().resolvedOptions().timeZone : "UTC";
 
   return (
     <form action={action} onSubmit={onSubmit} onChange={onChange} className="flex flex-col gap-[18px]">
@@ -91,7 +97,7 @@ export function NotificationsForm({ prefs }: { prefs: Prefs }) {
         <h2 className={sx.h2}>{t("Time zone and language")}</h2>
         <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
           <label className={sx.label}>{t("Time zone")}
-            <select name="timezone" defaultValue={prefs.timezone || guess} className={sx.input}>
+            <select key={mounted ? "client" : "server"} name="timezone" defaultValue={prefs.timezone || guess} className={sx.input}>
               {zones.map(([z, l]) => <option key={z} value={z}>{l}</option>)}
             </select>
             <span className={sx.help}>{t("Deadlines show in AoE and in this zone.")}</span>
