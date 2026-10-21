@@ -101,6 +101,7 @@ export const account_de: Record<string, string> = {
   "My submission deadlines": "Fristen meiner Einreichungen",
   "Name in another script": "Name in einer anderen Schrift",
   "Name, affiliation, topics and published papers.": "Name, Zugehörigkeit, Themen und veröffentlichte Beiträge.",
+  "Email or Plenary ID": "E-Mail oder Plenary-ID",
   "Name, email or Plenary ID": "Name, E-Mail oder Plenary-ID",
   "Networked control": "Vernetzte Regelung",
   "New address made. Any older address has stopped working.": "Neue Adresse erstellt. Ältere Adressen funktionieren nicht mehr.",

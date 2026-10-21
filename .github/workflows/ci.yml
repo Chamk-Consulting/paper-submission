@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npx next typegen   # route types (LayoutProps, PageProps) must exist before the type check
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run build

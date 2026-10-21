@@ -12,9 +12,20 @@ export type MailResult = { ok: boolean; skipped?: boolean; id?: string; error?: 
 
 export const emailConfigured = () => !!process.env.RESEND_API_KEY;
 
+// Reserved test domains (RFC 2606/6761) never receive mail: sending there only bounces and hurts the domain's
+// reputation. Such sends are logged and reported as delivered so test flows keep working.
+const RESERVED = /@(?:[^@\s]+\.)?(?:example\.(?:com|org|net)|example|test|invalid|localhost)$/i;
+
 export async function sendEmail(m: Mail): Promise<MailResult> {
   const key = process.env.RESEND_API_KEY;
   if (!key) return { ok: false, skipped: true };
+  const to = (Array.isArray(m.to) ? m.to : [m.to]).filter(Boolean);
+  const real = to.filter((a) => !RESERVED.test(a.trim()));
+  if (real.length === 0) {
+    console.info(`[email] not sent to reserved test address(es): ${to.join(", ")} · ${m.subject}`);
+    return { ok: true, id: "test-address" };
+  }
+  if (real.length < to.length) m = { ...m, to: real };
   const u = m.unsubscribeUrl;
   const text = u ? `${m.text}\n\n—\nStop these emails: ${u}` : m.text;
   const html = m.html ? (u ? `${m.html}${unsubFooter(u)}` : m.html) : textToHtml(m.text, u);

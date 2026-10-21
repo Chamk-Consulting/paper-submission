@@ -96,7 +96,10 @@ export async function lookupPerson(query: string): Promise<{ found?: { personId:
   if (error) return { error: friendly(error.message) };
   const r = (data as Record<string, unknown>[] | null)?.[0];
   if (!r) return {};
-  return { found: { personId: r.person_id as string, name: (r.display_name as string) || q, institution: (r.institution as string) ?? null, plenaryId: (r.plenary_id as string) ?? null } };
+  // Found by email: only initials come back (no harvesting names), so show the email they typed with the initials.
+  const byEmail = q.includes("@");
+  const name = byEmail ? `${q.toLowerCase()}${r.display_name ? ` (${r.display_name as string})` : ""}` : (r.display_name as string) || q;
+  return { found: { personId: r.person_id as string, name, institution: (r.institution as string) ?? null, plenaryId: (r.plenary_id as string) ?? null } };
 }
 
 const authorItem = z.union([
@@ -230,23 +233,21 @@ export async function submitPaper(_: ActionState, fd: FormData): Promise<ActionS
   redirect(`/submissions/${id}/submitted`);
 }
 
-/* SB09 — withdraw. */
-export async function withdrawPaper(_: ActionState, fd: FormData): Promise<ActionState> {
-  const id = String(fd.get("submissionId") ?? "");
-  if (!uuid.safeParse(id).success) return { error: "Bad request." };
-  if (String(fd.get("confirm") ?? "").trim().toUpperCase() !== "WITHDRAW") return { error: "Type WITHDRAW to confirm." };
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("withdraw_paper", { p_submission: id });
-  if (error) return { error: friendly(error.message) };
-  revalidatePath("/workspace", "layout");
-  revalidatePath(`/submissions/${id}`, "layout");
-  redirect(`/submissions/${id}`);
-}
-
 /** Delete a draft the person started (never a submitted paper). */
 export async function deleteDraft(id: string): Promise<{ error?: string }> {
   if (!uuid.safeParse(id).success) return { error: "Bad request." };
   const supabase = await createClient();
+  // Files first, through Storage (SQL can't delete storage rows). Only the draft's author may: papers_delete policy.
+  const { data: draft } = await supabase.from("submissions").select("id, stage").eq("id", id).maybeSingle();
+  if (!draft) return { error: "Only the person who started this draft can delete it." };
+  if (draft.stage !== "draft") return { error: "Only drafts can be deleted — withdraw a submitted paper instead." };
+  const { data: listed } = await supabase.storage.from("papers").list(id, { limit: 1000 });
+  const { data: rows } = await supabase.from("submission_files").select("storage_path").eq("submission_id", id);
+  const paths = [...new Set([
+    ...((listed ?? []) as { name: string }[]).map((f) => `${id}/${f.name}`),
+    ...((rows ?? []) as { storage_path: string | null }[]).map((f) => f.storage_path).filter((p): p is string => !!p),
+  ])];
+  if (paths.length) await supabase.storage.from("papers").remove(paths);
   const { error } = await supabase.rpc("delete_draft", { p_submission: id });
   if (error) {
     if (/function .*delete_draft|does not exist|PGRST202/i.test(error.message)) return { error: "Deleting drafts needs the latest database update." };

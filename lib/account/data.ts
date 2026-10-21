@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { readMyPerson } from "@/lib/auth/my-person";
 
 /* Reads for the account pages (ST01–ST04, CL01), inbox (IN01) and search (SR01). RLS limits every read to the signed-in person. */
 
@@ -34,7 +35,7 @@ async function me() {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
-  const { data: person } = await supabase.from("persons").select("*").eq("user_id", auth.user.id).maybeSingle();
+  const person = await readMyPerson(supabase, auth.user.id);
   if (!person) return null;
   return { supabase, user: auth.user, person: person as PersonRow };
 }

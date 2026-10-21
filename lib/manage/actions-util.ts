@@ -11,7 +11,9 @@ export const friendlyDb = (msg?: string) => {
   if (/row-level security|permission denied|not allowed|42501/i.test(msg)) return "You don’t have permission to change this.";
   if (/locked since submissions opened/i.test(msg)) return "This setting is locked since submissions opened — ask an owner.";
   if (/duplicate key|23505/i.test(msg)) return "That already exists.";
-  return msg.replace(/^.*?ERROR:\s*/, "").slice(0, 200);
+  if (/sign in/i.test(msg) && /invitation|review/i.test(msg)) return "Sign in with the invited email to continue.";
+  // Database messages are written for people; drop internal rule codes like "(F1, B1)" and start with a capital.
+  return msg.replace(/^.*?ERROR:\s*/, "").replace(/\s*\((?:[A-Z]\d+(?:,\s*)?)+\)\s*$/, "").replace(/^\w/, (c) => c.toUpperCase()).slice(0, 200);
 };
 
 export async function venueIdBySlug(slug: string): Promise<string | null> {

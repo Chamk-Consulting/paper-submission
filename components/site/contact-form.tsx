@@ -1,5 +1,6 @@
 "use client";
 
+import Script from "next/script";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
@@ -80,6 +81,10 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
               </div>
 
               <form action={submit} noValidate className="flex flex-col gap-[22px] rounded-[8px] border border-[#DADDE3] bg-white p-5 sm:p-7">
+              <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+                <label>Company website<input type="text" name="company_website" tabIndex={-1} autoComplete="off" /></label>
+              </div>
+              <Turnstile />
                 <input type="hidden" name="kind" value="support" />
                 <input type="hidden" name="topic" value={topic} />
                 {state.message ? <p role="alert" className="m-0 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3.5 py-2.5 text-[14px] text-[#8C1D18]">{t(state.message)}</p> : null}
@@ -182,6 +187,10 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
           <>
             <div className="min-w-0 max-w-[760px] flex-[999_1_560px]">
               <form action={action} noValidate className="flex flex-col gap-[22px] rounded-[8px] border border-[#DADDE3] bg-white p-5 sm:p-7">
+              <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+                <label>Company website<input type="text" name="company_website" tabIndex={-1} autoComplete="off" /></label>
+              </div>
+              <Turnstile />
                 <input type="hidden" name="kind" value="sales" />
                 <input type="hidden" name="eventKind" value={kind} />
                 <div>
@@ -246,6 +255,19 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
           </>
         )}
       </div>
+    </>
+  );
+}
+
+
+/** Cloudflare Turnstile CAPTCHA, shown only when NEXT_PUBLIC_TURNSTILE_SITE_KEY is set in Vercel. */
+function Turnstile() {
+  const key = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  if (!key) return null;
+  return (
+    <>
+      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+      <div className="cf-turnstile" data-sitekey={key} data-theme="light" />
     </>
   );
 }

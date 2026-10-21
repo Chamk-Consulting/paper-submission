@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { readMyPerson } from "@/lib/auth/my-person";
 
 export type Me = {
   userId: string;
@@ -26,7 +27,7 @@ export async function getMe(): Promise<Me | null> {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
-  const { data: person } = await supabase.from("persons").select("*").eq("user_id", auth.user.id).maybeSingle();
+  const person = (await readMyPerson(supabase, auth.user.id)) as Me["person"];
   let affiliation: Me["affiliation"] = null;
   if (person) {
     const { data: aff } = await supabase

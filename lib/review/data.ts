@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { readMyPerson } from "@/lib/auth/my-person";
 import { hashToken } from "@/lib/tokens";
 import type { Criterion, Rec } from "@/lib/review/shared";
 
@@ -30,8 +31,9 @@ export async function getAvailability(personId: string | undefined): Promise<Ava
   const fallback: Availability = { availability: "normal", available_from: null, monthly_limit: 4 };
   if (!personId) return fallback;
   const supabase = await createClient();
-  const { data } = await supabase.from("persons").select("*").eq("id", personId).maybeSingle();
-  const p = (data ?? {}) as Partial<Availability>;
+  const { data: auth } = await supabase.auth.getUser();
+  const data = auth.user ? await readMyPerson(supabase, auth.user.id) : null;
+  const p = (data && data.id === personId ? data : {}) as Partial<Availability>;
   return { availability: p.availability ?? "normal", available_from: p.available_from ?? null, monthly_limit: p.monthly_limit ?? 4 };
 }
 

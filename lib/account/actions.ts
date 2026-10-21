@@ -211,7 +211,8 @@ export async function findPeople(q: string): Promise<PersonHit[]> {
   if (query.length < 3) return [];
   const supabase = await createClient();
   const { data } = await supabase.rpc("find_person", { p_query: query });
-  return ((data ?? []) as PersonHit[]).slice(0, 8);
+  const byEmail = query.includes("@");
+  return ((data ?? []) as PersonHit[]).slice(0, 8).map((h) => byEmail ? { ...h, display_name: `${query.toLowerCase()}${h.display_name ? ` (${h.display_name})` : ""}` } : h);
 }
 
 const conflictSchema = z.object({

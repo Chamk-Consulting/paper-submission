@@ -396,7 +396,7 @@ export async function sendAnnouncement(_: Ops2State, fd: FormData): Promise<Ops2
     const { error } = await supabase.from("announcements").insert({ venue_id: venueId, title: p.data.title, body: p.data.body, channels: ["push", "inbox"], author_role: ctx.roleLabel, affected: people.length, created_by: me });
     if (error) return { error: friendlyDb(error.message) };
     for (let i = 0; i < people.length; i += 1000) {
-      const { error: e2 } = await supabase.rpc("notify_people", { p_venue: venueId, p_people: people.slice(i, i + 1000), p_kind: "venue", p_subject: p.data.title, p_body: p.data.body, p_cta_label: "Open program", p_cta_url: `/venues/${slug}/program` });
+      const { error: e2 } = await supabase.rpc("notify_people", { p_venue: venueId, p_people: people.slice(i, i + 1000), p_kind: "venue", p_subject: p.data.title, p_body: p.data.body, p_cta_label: "Open program", p_cta_url: `/program/${slug}` });
       if (e2) return { error: friendlyDb(e2.message) };
     }
     done(slug, "live");

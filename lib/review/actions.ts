@@ -33,7 +33,8 @@ const friendly = (msg?: string) => {
   if (/not found/i.test(msg)) return MSG.notFound;
   if (/conflict of interest/i.test(msg)) return MSG.coiToken;
   if (/42501|not allowed|not your|permission|row-level|review is /i.test(msg)) return MSG.notAllowed;
-  return msg.replace(/^.*?:\s*/, "").replace(/^\w/, (c) => c.toUpperCase());
+  if (/sign in to accept/i.test(msg)) return "Sign in to accept this review — use the account for the invited email.";
+  return msg.replace(/^.*?:\s*/, "").replace(/\s*\((?:[A-Z]\d+(?:,\s*)?)+\)\s*$/, "").replace(/^\w/, (c) => c.toUpperCase());
 };
 
 /* ---------------------------------------------------------------- RV01 availability */

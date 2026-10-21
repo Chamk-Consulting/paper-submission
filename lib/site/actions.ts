@@ -1,6 +1,7 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { createHash } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -55,6 +56,20 @@ const SENT_COOKIE = "plenary_contact_sent";
 
 /** CT01 → CT02. Stores the message (submit_contact), emails the team (CONTACT_TO) and a copy to the sender. */
 export async function sendContact(_: ContactState, formData: FormData): Promise<ContactState> {
+  // Bots fill every field: a filled hidden field gets a quiet "sent" and nothing is stored or emailed.
+  if (String(formData.get("company_website") ?? "").trim()) redirect("/contact/sent");
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || "";
+  // CAPTCHA (Cloudflare Turnstile) when its keys are set in Vercel.
+  const turnstile = process.env.TURNSTILE_SECRET_KEY;
+  if (turnstile) {
+    const token = String(formData.get("cf-turnstile-response") ?? "");
+    const ok = token && await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST", body: new URLSearchParams({ secret: turnstile, response: token, ...(ip ? { remoteip: ip } : {}) }),
+    }).then((r) => r.json()).then((j: { success?: boolean }) => !!j.success).catch(() => false);
+    if (!ok) return { message: "Please confirm you're not a robot, then send again." };
+  }
+  const ipHash = ip ? createHash("sha256").update(`contact|${ip}|${process.env.PLENARY_SIGNING_SECRET ?? ""}`).digest("hex").slice(0, 32) : "";
   const raw = Object.fromEntries(formData);
   const parsed = raw.kind === "sales" ? salesSchema.safeParse(raw) : supportSchema.safeParse(raw);
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors as ContactState["fieldErrors"] };
@@ -71,14 +86,14 @@ export async function sendContact(_: ContactState, formData: FormData): Promise<
     subject = d.subject; body = d.body; about = d.about;
     const me = await getMe();
     name = me?.person?.display_name ?? "";
-    details = { about: d.about };
+    details = { about: d.about, ...(ipHash ? { ip_hash: ipHash } : {}) };
   } else {
     topicLabel = SALES_KINDS.find((k) => k[0] === d.eventKind)?.[1] ?? d.eventKind;
     name = d.name;
     subject = `${topicLabel}${d.org ? ` · ${d.org}` : ""}`;
     body = d.body || "(no message)";
     about = d.org;
-    details = { org: d.org, role: d.role, eventKind: d.eventKind, size: d.size, deadline: d.deadline, system: d.system, demo: !!d.demo };
+    details = { org: d.org, role: d.role, eventKind: d.eventKind, size: d.size, deadline: d.deadline, system: d.system, demo: !!d.demo, ...(ipHash ? { ip_hash: ipHash } : {}) };
   }
 
   const { data: ref, error } = await supabase.rpc("submit_contact", {
@@ -92,7 +107,7 @@ export async function sendContact(_: ContactState, formData: FormData): Promise<
   }
   const reference = String(ref);
 
-  const lines = Object.entries(details).filter(([, v]) => v !== "" && v !== false).map(([k, v]) => `${k}: ${v}`).join("\n");
+  const lines = Object.entries(details).filter(([k, v]) => k !== "ip_hash" && v !== "" && v !== false).map(([k, v]) => `${k}: ${v}`).join("\n");
   const to = process.env.CONTACT_TO;
   if (to) {
     const mail = {
@@ -105,7 +120,8 @@ export async function sendContact(_: ContactState, formData: FormData): Promise<
   await sendEmail({
     to: d.email,
     subject: `${site.name}: we have your message (${reference})`,
-    text: `Thanks — we have your message. Someone from the team will reply within ${contact.replyTime}.\n\nReference: ${reference}\nTopic: ${topicLabel}\nSubject: ${subject}\n\n${body}\n\nReply to this email to add anything. Never send passwords or sign-in codes — we will never ask for them.\n\n${absUrl("/help")}`,
+    // Never echo what was typed: the confirmation goes to an address nobody verified, so it must carry no sender-chosen text.
+    text: `Thanks — we have your message. Someone from the team will reply within ${contact.replyTime}.\n\nReference: ${reference}\nTopic: ${topicLabel}\n\nReply to this email to add anything. Never send passwords or sign-in codes — we will never ask for them.\n\nDidn't write to us? Ignore this email.\n\n${absUrl("/help")}`,
   });
 
   const summary: SentSummary = { ref: reference, kind: d.kind, email: d.email, topic: topicLabel, about, subject, excerpt: body.slice(0, 220) };

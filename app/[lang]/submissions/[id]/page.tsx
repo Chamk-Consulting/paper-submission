@@ -4,7 +4,8 @@ import { getT } from "@/lib/i18n/server";
 import { StepMark } from "@/components/motion/step-transition";
 import { initialsOf, requireCtx } from "@/components/submission/frame";
 import { WizardHeader } from "@/components/submission/shell";
-import { OpenFile, WithdrawBox } from "@/components/submission/status-bits";
+import { OpenFile } from "@/components/submission/status-bits";
+import { DeleteDraftButton } from "@/components/submission/delete-draft";
 import { OpenViewer } from "@/components/submission/followup/open-viewer";
 import { loadDecision, loadInfo, loadRevision } from "@/lib/submission/followup-data";
 import { createClient } from "@/lib/supabase/server";
@@ -208,7 +209,7 @@ async function Inner({ params }: P) {
               {sub.number ? <a href={`/submissions/${id}/receipt.pdf`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Download receipt")}</a> : null}
               {!["withdrawn", "done", "rejected", "draft"].includes(sub.stage) ? <Link href={`${base}/withdraw`} className="flex h-11 items-center rounded-[4px] border border-[#F3C3BE] bg-white px-3.5 text-[15px] text-[#B3261E] no-underline hover:bg-[#FDECEA]">{t("Withdraw paper")}</Link> : null}
               {/* Drafts have no paper number to type, so they keep the inline confirm. */}
-              {sub.stage === "draft" ? <WithdrawBox id={id} /> : null}
+              {sub.stage === "draft" ? <DeleteDraftButton id={id} /> : null}
               {sub.stage === "withdrawn" ? <Link href={`${base}/withdraw/done`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Withdrawal details")}</Link> : null}
             </div>
           </section>
