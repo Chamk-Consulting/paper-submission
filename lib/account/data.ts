@@ -3,14 +3,19 @@ import { createClient } from "@/lib/supabase/server";
 
 /* Reads for the account pages (ST01–ST04, CL01), inbox (IN01) and search (SR01). RLS limits every read to the signed-in person. */
 
-export type Affiliation = { id: string; institution: string; department: string | null; position_title: string | null; country: string | null; starts_on: string | null; ends_on: string | null };
+export type Affiliation = { id: string; institution: string; department: string | null; position_title: string | null; country: string | null; starts_on: string | null; ends_on: string | null; ror_id: string | null };
+export type NameScript = { lang: string; name: string; latin: string };
+const SCRIPT_LANGS = ["ar", "zh-Hans", "zh-Hant", "ja", "ko", "ru", "uk", "el", "he", "hi", "fa", "th", "other"];
 export type Conflict = { id: string; other_person: string | null; other_name: string | null; other_plenary_id: string | null; institution: string | null; reason: string; until_year: number | null };
 export type Profile = {
   personId: string;
   email: string;
   given_name: string; family_name: string; pronouns: string; plenary_id: string | null; orcid: string | null;
   ieee_member: string; scholar_url: string;
-  name_script: string;
+  middle_name: string; name_order: "given_first" | "family_first"; paper_name: string; badge_name: string; name_pronunciation: string;
+  name_scripts: NameScript[]; other_names: string[]; former_names: string[];
+  orcid_verified: boolean;
+  scopus_id: string; researcher_id: string; dblp_url: string; semantic_scholar_id: string; xplore_author_id: string; website_url: string;
   affiliations: Affiliation[];
   topics: string[];
   conflicts: Conflict[];
@@ -18,8 +23,11 @@ export type Profile = {
 
 type PersonRow = {
   id: string; given_name: string; family_name: string; pronouns: string | null; plenary_id: string | null; orcid: string | null;
-  ieee_member: string | null; scholar_url: string | null; name_scripts: { script?: string; name?: string }[] | null;
+  ieee_member: string | null; scholar_url: string | null; name_scripts: { lang?: string; script?: string; name?: string; latin?: string }[] | null;
   visibility: string | null; timezone: string | null; locale: string | null;
+  middle_name?: string | null; name_order?: string | null; paper_name?: string | null; badge_name?: string | null; name_pronunciation?: string | null;
+  other_names?: string[] | null; former_names?: string[] | null; orcid_verified_at?: string | null;
+  scopus_id?: string | null; researcher_id?: string | null; dblp_url?: string | null; semantic_scholar_id?: string | null; xplore_author_id?: string | null; website_url?: string | null;
 };
 
 async function me() {
@@ -36,7 +44,7 @@ export async function getProfile(): Promise<Profile | null> {
   if (!m) return null;
   const { supabase, user, person } = m;
   const [{ data: affs }, { data: topics }, { data: conflicts }] = await Promise.all([
-    supabase.from("affiliations").select("id, institution, department, position_title, country, starts_on, ends_on").eq("person_id", person.id).order("ends_on", { ascending: false, nullsFirst: true }).order("starts_on", { ascending: false }),
+    supabase.from("affiliations").select("id, institution, department, position_title, country, starts_on, ends_on, ror_id").eq("person_id", person.id).order("ends_on", { ascending: false, nullsFirst: true }).order("starts_on", { ascending: false }),
     supabase.from("person_topics").select("topic").eq("person_id", person.id),
     supabase.rpc("my_conflicts"),
   ]);
@@ -50,7 +58,25 @@ export async function getProfile(): Promise<Profile | null> {
     orcid: person.orcid,
     ieee_member: person.ieee_member ?? "",
     scholar_url: person.scholar_url ?? "",
-    name_script: person.name_scripts?.[0]?.name ?? "",
+    middle_name: person.middle_name ?? "",
+    name_order: person.name_order === "family_first" ? "family_first" : "given_first",
+    paper_name: person.paper_name ?? "",
+    badge_name: person.badge_name ?? "",
+    name_pronunciation: person.name_pronunciation ?? "",
+    // older rows stored {script:"other", name}; newer {lang, name, latin}
+    name_scripts: (person.name_scripts ?? []).filter((x) => x && x.name).map((x) => {
+      const l = x.lang ?? x.script ?? "other";
+      return { lang: SCRIPT_LANGS.includes(l) ? l : l === "zh" ? "zh-Hans" : "other", name: x.name ?? "", latin: x.latin ?? "" };
+    }),
+    other_names: person.other_names ?? [],
+    former_names: person.former_names ?? [],
+    orcid_verified: !!person.orcid_verified_at,
+    scopus_id: person.scopus_id ?? "",
+    researcher_id: person.researcher_id ?? "",
+    dblp_url: person.dblp_url ?? "",
+    semantic_scholar_id: person.semantic_scholar_id ?? "",
+    xplore_author_id: person.xplore_author_id ?? "",
+    website_url: person.website_url ?? "",
     affiliations: (affs ?? []) as Affiliation[],
     topics: ((topics ?? []) as { topic: string }[]).map((x) => x.topic),
     conflicts: (conflicts ?? []) as Conflict[],

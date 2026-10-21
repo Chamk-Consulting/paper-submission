@@ -11,6 +11,7 @@ export type Me = {
     family_name: string;
     display_name: string;
     paper_name?: string | null;
+    badge_name?: string | null;
     plenary_id?: string | null;
     orcid?: string | null;
     country?: string | null;

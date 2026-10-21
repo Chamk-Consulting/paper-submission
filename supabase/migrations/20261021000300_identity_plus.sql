@@ -5,7 +5,6 @@
 alter table public.persons
   add column if not exists middle_name        text check (char_length(middle_name) <= 120),
   add column if not exists name_order         text not null default 'given_first' check (name_order in ('given_first', 'family_first')),
-  add column if not exists citation_name      text check (char_length(citation_name) <= 160),
   add column if not exists badge_name         text check (char_length(badge_name) <= 80),
   add column if not exists name_pronunciation text check (char_length(name_pronunciation) <= 120),
   add column if not exists former_names       text[] not null default '{}' check (cardinality(former_names) <= 6);
@@ -28,7 +27,7 @@ alter table public.persons
   add column if not exists xplore_author_id    text check (xplore_author_id ~ '^\d{4,14}$'),
   add column if not exists website_url         text check (website_url ~ '^https://\S+$' and char_length(website_url) <= 300);
 
-grant update (middle_name, name_order, citation_name, badge_name, name_pronunciation, former_names, other_names,
+grant update (middle_name, name_order, paper_name, badge_name, name_pronunciation, former_names, other_names,
               scopus_id, researcher_id, dblp_url, semantic_scholar_id, xplore_author_id, website_url)
   on public.persons to authenticated;
 

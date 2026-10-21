@@ -54,30 +54,94 @@ async function ctx() {
 const page = (p: string) => revalidatePath(`/[lang]${p}`, "page");
 
 /* ---------------------------------------------------------------- ST01 profile */
+const LANGS = ["ar", "zh-Hans", "zh-Hant", "ja", "ko", "ru", "uk", "el", "he", "hi", "fa", "th", "other"] as const;
+const opt = (max: number, re?: RegExp, msg?: string) => z.string().trim().max(max, msg).refine((v) => !v || !re || re.test(v), msg);
+const shortList = (msg: string) => z.array(z.string().trim().min(1).max(160)).max(6, msg);
 const profileSchema = z.object({
   given_name: z.string().trim().min(1, MSG.firstName).max(120),
+  middle_name: z.string().trim().max(120, "Middle name is too long."),
   family_name: z.string().trim().min(1, MSG.lastName).max(120),
-  name_script: z.string().trim().max(200),
+  name_order: z.enum(["given_first", "family_first"]),
+  paper_name: z.string().trim().max(200, "Name on papers is too long."),
+  badge_name: z.string().trim().max(80, "Badge name is up to 80 characters."),
+  name_pronunciation: z.string().trim().max(120, "Keep the pronunciation under 120 characters."),
   pronouns: z.string().trim().max(40),
+  name_scripts: z.array(z.object({ lang: z.enum(LANGS), name: z.string().trim().min(1).max(200), latin: z.string().trim().max(200) })).max(6, "Up to 6 names in other scripts."),
+  other_names: shortList("Up to 6 other spellings."),
+  former_names: shortList("Up to 6 former names."),
+  orcid: opt(40, /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/, "ORCID iDs look like 0000-0002-1825-0097."),
+  scopus_id: opt(12, /^\d{6,12}$/, "A Scopus Author ID is 6–12 digits."),
+  researcher_id: opt(20, /^[A-Z]{1,3}-\d{4}-\d{4}$/, "A ResearcherID looks like ABC-1234-2020."),
+  dblp_url: opt(300, /^https:\/\/dblp\.org\/pid\/[0-9a-z/-]+(\.html)?$/, "Use your DBLP page address, like https://dblp.org/pid/12/3456."),
+  semantic_scholar_id: opt(12, /^\d{1,12}$/, "A Semantic Scholar author ID is digits only."),
+  xplore_author_id: opt(14, /^\d{4,14}$/, "An IEEE Xplore author ID is 4–14 digits."),
+  website_url: opt(300, /^https:\/\/\S+$/, MSG.scholar),
   ieee_member: z.string().trim().max(20, MSG.ieee),
-  scholar_url: z.string().trim().max(300).refine((v) => !v || /^https:\/\/\S+$/.test(v), MSG.scholar),
+  scholar_url: opt(300, /^https:\/\/scholar\.google\.[a-z.]+\/citations\?(\S*&)?user=[\w-]+/, "Use your Google Scholar profile address (…/citations?user=…)."),
   topics: z.array(z.string().trim().min(1).max(120)).min(3, MSG.topics).max(10, MSG.topics),
 });
 
+/** Light clean-up so pasted identifiers match the stored format. */
+function normalizeIds(fd: FormData) {
+  const orcid = str(fd, "orcid").replace(/^https?:\/\/(www\.)?orcid\.org\//i, "").toUpperCase();
+  let dblp = str(fd, "dblp_url").replace(/^http:\/\//i, "https://");
+  if (dblp && !/^https:\/\//i.test(dblp)) dblp = `https://${dblp}`;
+  dblp = dblp.replace(/^https:\/\/(www\.)?dblp\.(org|uni-trier\.de)\//i, "https://dblp.org/").replace(/[?#].*$/, "").toLowerCase();
+  let site = str(fd, "website_url");
+  if (site && !/^https?:\/\//i.test(site)) site = `https://${site}`;
+  return { orcid, dblp, site: site.replace(/^http:\/\//i, "https://"), researcher: str(fd, "researcher_id").toUpperCase() };
+}
+
+/** ISO 7064 11,2 check digit of an ORCID iD. */
+function orcidChecksumOk(id: string) {
+  const d = id.replace(/-/g, "");
+  let total = 0;
+  for (let i = 0; i < 15; i++) total = (total + Number(d[i])) * 2;
+  const r = (12 - (total % 11)) % 11;
+  return d[15] === (r === 10 ? "X" : String(r));
+}
+
 export async function saveProfile(_: AccountState, fd: FormData): Promise<AccountState> {
+  const ids = normalizeIds(fd);
+  const langs = fd.getAll("script_lang").map(String), names = fd.getAll("script_name").map(String), latins = fd.getAll("script_latin").map(String);
+  const scripts = names.map((name, i) => ({ lang: langs[i] || "other", name: name.trim(), latin: (latins[i] ?? "").trim() })).filter((x) => x.name);
+  const list = (k: string) => [...new Set(fd.getAll(k).map((x) => String(x).trim()).filter(Boolean))];
   const parsed = profileSchema.safeParse({
-    given_name: str(fd, "given_name"), family_name: str(fd, "family_name"), name_script: str(fd, "name_script"), pronouns: str(fd, "pronouns"),
+    given_name: str(fd, "given_name"), middle_name: str(fd, "middle_name"), family_name: str(fd, "family_name"),
+    name_order: str(fd, "name_order") === "family_first" ? "family_first" : "given_first",
+    paper_name: str(fd, "paper_name"), badge_name: str(fd, "badge_name"), name_pronunciation: str(fd, "name_pronunciation"),
+    pronouns: str(fd, "pronouns"), name_scripts: scripts, other_names: list("other_names"), former_names: list("former_names"),
+    orcid: ids.orcid, scopus_id: str(fd, "scopus_id"), researcher_id: ids.researcher, dblp_url: ids.dblp,
+    semantic_scholar_id: str(fd, "semantic_scholar_id"), xplore_author_id: str(fd, "xplore_author_id"), website_url: ids.site,
     ieee_member: str(fd, "ieee_member"), scholar_url: str(fd, "scholar_url"), topics: [...new Set(fd.getAll("topics").map(String))],
   });
   if (!parsed.success) return { fieldErrors: issues(parsed.error) };
+  const v = parsed.data;
+  if (v.orcid && !orcidChecksumOk(v.orcid)) return { fieldErrors: { orcid: "That ORCID iD has a typo — the last character doesn’t match." } };
   const c = await ctx();
   if (!c) return { error: MSG.signIn };
-  const v = parsed.data;
+  const nul = (x: string) => x || null;
   const { error } = await c.supabase.from("persons").update({
-    given_name: v.given_name, family_name: v.family_name, pronouns: v.pronouns || null, ieee_member: v.ieee_member || null, scholar_url: v.scholar_url || null,
-    name_scripts: v.name_script ? [{ script: "other", name: v.name_script }] : [],
+    given_name: v.given_name, middle_name: nul(v.middle_name), family_name: v.family_name, name_order: v.name_order,
+    paper_name: nul(v.paper_name), badge_name: nul(v.badge_name), name_pronunciation: nul(v.name_pronunciation),
+    pronouns: nul(v.pronouns), name_scripts: v.name_scripts, other_names: v.other_names, former_names: v.former_names,
+    ieee_member: nul(v.ieee_member), scholar_url: nul(v.scholar_url), scopus_id: nul(v.scopus_id), researcher_id: nul(v.researcher_id),
+    dblp_url: nul(v.dblp_url), semantic_scholar_id: nul(v.semantic_scholar_id), xplore_author_id: nul(v.xplore_author_id), website_url: nul(v.website_url),
   }).eq("id", c.personId);
   if (error) return { error: friendly(error.message) };
+
+  // ORCID typed by hand goes through set_my_orcid (format, check digit, not used by another account, not verified).
+  if (fd.has("orcid") && (ids.orcid || "") !== str(fd, "orcid_was").toUpperCase()) {
+    const r = await c.supabase.rpc("set_my_orcid", { p_orcid: v.orcid || null });
+    if (r.error) {
+      const m = r.error.message;
+      const msg = /another Plenary account|23505/i.test(m) ? "That ORCID iD is already linked to another Plenary account."
+        : /verified/i.test(m) ? "Your ORCID is verified — disconnect it before changing it."
+        : /typo|check digit/i.test(m) ? "That ORCID iD has a typo — the last character doesn’t match."
+        : /format/i.test(m) ? "ORCID iDs look like 0000-0002-1825-0097." : friendly(m);
+      return { fieldErrors: { orcid: msg } };
+    }
+  }
 
   const { data: cur } = await c.supabase.from("person_topics").select("topic").eq("person_id", c.personId);
   const have = new Set(((cur ?? []) as { topic: string }[]).map((x) => x.topic));
@@ -104,19 +168,20 @@ const affSchema = z.object({
   from: year,
   to: year,
   current: z.boolean(),
+  ror_id: z.string().trim().regex(/^(https:\/\/ror\.org\/0[a-z0-9]{8})?$/),
 }).refine((v) => v.current || !v.from || !v.to || v.to >= v.from, { message: MSG.years, path: ["to"] });
 
 export async function saveAffiliation(_: AccountState, fd: FormData): Promise<AccountState> {
   const parsed = affSchema.safeParse({
     id: str(fd, "id"), institution: str(fd, "institution"), department: str(fd, "department"), position_title: str(fd, "position_title"),
-    from: str(fd, "from"), to: str(fd, "to"), current: fd.get("current") === "on",
+    from: str(fd, "from"), to: str(fd, "to"), current: fd.get("current") === "on", ror_id: str(fd, "ror_id"),
   });
   if (!parsed.success) return { fieldErrors: issues(parsed.error) };
   const c = await ctx();
   if (!c) return { error: MSG.signIn };
   const v = parsed.data;
   const row = {
-    institution: v.institution, department: v.department || null, position_title: v.position_title || null,
+    institution: v.institution, department: v.department || null, position_title: v.position_title || null, ror_id: v.ror_id || null,
     starts_on: v.from ? `${v.from}-01-01` : null, ends_on: v.current ? null : v.to ? `${v.to}-12-31` : v.from ? `${v.from}-12-31` : null,
   };
   const { error } = v.id

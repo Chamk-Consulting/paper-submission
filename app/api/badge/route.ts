@@ -33,7 +33,7 @@ export async function GET() {
   page.drawCircle({ x: mm(7), y: H - mm(8), size: mm(0.6), color: saffron });
   page.drawText("Plenary", { x: mm(10.5), y: H - mm(9.3), size: 11, font: serif, color: ink });
 
-  const name = (p.paper_name || p.display_name || me.email).trim();
+  const name = (p.badge_name || p.paper_name || p.display_name || me.email).trim();
   page.drawText(fit(name, serif, 13, mm(48)), { x: mm(6), y: H - mm(19), size: 13, font: serif, color: ink });
   if (me.affiliation?.institution) page.drawText(fit(me.affiliation.institution, sans, 7, mm(48)), { x: mm(6), y: H - mm(23.5), size: 7, font: sans, color: muted });
   page.drawText("PLENARY ID", { x: mm(6), y: H - mm(33), size: 5.5, font: sans, color: muted });

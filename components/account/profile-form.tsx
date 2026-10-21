@@ -4,8 +4,10 @@ import { useActionState, useRef, useState, useTransition } from "react";
 import { useT } from "@/lib/i18n/client";
 import { addConflict, deleteAffiliation, findPeople, removeConflict, saveAffiliation, saveProfile, type AccountState, type PersonHit } from "@/lib/account/actions";
 import type { Affiliation, Conflict, Profile } from "@/lib/account/data";
+import { searchOrganizations, type Org } from "@/lib/auth/onboarding-actions";
 import { sx } from "@/components/account/styles";
 import { AccountSaveBar, FieldErr, useDirty } from "@/components/account/save-bar";
+import { IdentifiersSection, NameSection } from "@/components/account/profile-identity";
 
 /* Canvas ST01 — Profile & expertise. */
 
@@ -24,39 +26,9 @@ export function ProfileForm({ p }: { p: Profile }) {
 
   return (
     <div onChange={onChange} className="flex flex-col gap-[18px]">
-      <section className={sx.card}>
-        <h2 className={sx.h2}>{t("Name")}</h2>
-        <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
-          <label className={sx.label}>{t("First name")}<input form={F} name="given_name" defaultValue={p.given_name} autoComplete="given-name" required className={sx.input} /><FieldErr state={state} name="given_name" /></label>
-          <label className={sx.label}>{t("Last name")}<input form={F} name="family_name" defaultValue={p.family_name} autoComplete="family-name" required className={sx.input} /><FieldErr state={state} name="family_name" /></label>
-          <label className={sx.label}>{t("Name in another script")}<input form={F} name="name_script" defaultValue={p.name_script} className={sx.input} />
-            <span className={sx.help}>{t("Shown next to your Latin name in programs. Any script — Arabic, Chinese, Cyrillic…")}</span></label>
-          <label className={sx.label}><span>{t("Pronouns")} <span className="font-normal text-[#4A5263]">{t("(optional)")}</span></span><input form={F} name="pronouns" defaultValue={p.pronouns} className={sx.input} /></label>
-        </div>
-      </section>
+      <NameSection p={p} state={state} form={F} onChange={onChange} />
 
-      <section className={sx.card}>
-        <h2 className={sx.h2}>{t("Identifiers")}</h2>
-        <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
-          <div>
-            <div className="text-[14px] font-medium">{t("Plenary ID")}</div>
-            <div className="mt-1.5 font-mono text-[18px]">{p.plenary_id ?? "—"}</div>
-          </div>
-          <div>
-            <div className="text-[14px] font-medium">{t("ORCID")}</div>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              {p.orcid ? (<><span className="font-mono text-[14px]">{p.orcid}</span><span className={`${tagCls} bg-[#E1F3EA] text-[#14603F]`}>{t("VERIFIED")}</span></>)
-                : <span className="text-[14px] text-[#4A5263]">{t("Not connected")}</span>}
-              <span className={`${tagCls} bg-[#EEF0EC] text-[#4A5263]`} title={t("Coming soon")}>{t("Connect · coming soon")}</span>
-            </div>
-          </div>
-          <label className={sx.label}><span>{t("IEEE member number")} <span className="font-normal text-[#4A5263]">{t("(optional)")}</span></span>
-            <input form={F} name="ieee_member" defaultValue={p.ieee_member} inputMode="numeric" className={`${sx.input} font-mono text-[14px]`} />
-            <span className={sx.help}>{t("Used for registration discounts and copyright.")}</span><FieldErr state={state} name="ieee_member" /></label>
-          <label className={sx.label}><span>{t("Google Scholar")} <span className="font-normal text-[#4A5263]">{t("(optional)")}</span></span>
-            <input form={F} name="scholar_url" type="url" defaultValue={p.scholar_url} placeholder="https://scholar.google.com/citations?user=…" className={sx.input} /><FieldErr state={state} name="scholar_url" /></label>
-        </div>
-      </section>
+      <IdentifiersSection p={p} state={state} form={F} />
 
       <Affiliations items={p.affiliations} />
 
@@ -106,6 +78,7 @@ function Affiliations({ items }: { items: Affiliation[] }) {
           <div key={a.id} className="flex items-center justify-between gap-3 border-t border-[#EEF0EC] py-2.5">
             <span className="min-w-0">
               <strong className="text-[14px]">{[a.institution, a.department].filter(Boolean).join(", ")}</strong>
+              {a.ror_id ? <a href={a.ror_id} target="_blank" rel="noopener noreferrer" className={`${tagCls} ml-2 bg-[#E1F3EA] text-[#14603F] no-underline`} title={a.ror_id}>{t("ROR ✓")}</a> : null}
               <span className="block text-[13px] text-[#4A5263]">
                 {[a.position_title, a.starts_on || a.ends_on ? `${yearOf(a.starts_on) || "…"} – ${a.ends_on ? yearOf(a.ends_on) : t("now")}` : null].filter(Boolean).join(" · ")}
               </span>
@@ -138,7 +111,7 @@ function AffEditor({ a, onDone }: { a: Affiliation | null; onDone: () => void })
     <form action={action} className="flex flex-col gap-3 border-t border-[#EEF0EC] py-3.5">
       <input type="hidden" name="id" value={a?.id ?? ""} />
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className={sx.label}>{t("Institution")}<input name="institution" defaultValue={a?.institution ?? ""} required autoFocus className={sx.input} /><FieldErr state={state} name="institution" /></label>
+        <InstitutionPicker a={a} state={state} />
         <label className={sx.label}>{t("Department")} <input name="department" defaultValue={a?.department ?? ""} className={sx.input} /></label>
         <label className={sx.label}>{t("Role")}<input name="position_title" defaultValue={a?.position_title ?? ""} placeholder={t("e.g. Senior lecturer")} className={sx.input} /></label>
         <div className="grid grid-cols-2 gap-3">
@@ -156,6 +129,50 @@ function AffEditor({ a, onDone }: { a: Affiliation | null; onDone: () => void })
         ) : null}
       </div>
     </form>
+  );
+}
+
+/** Institution with a search of the ROR registry; free text still allowed. Picking a result stores its ROR ID. */
+function InstitutionPicker({ a, state }: { a: Affiliation | null; state: AccountState }) {
+  const t = useT();
+  const [name, setName] = useState(a?.institution ?? "");
+  const [ror, setRor] = useState(a?.ror_id ?? "");
+  const [hits, setHits] = useState<Org[]>([]);
+  const [open, setOpen] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const seq = useRef(0);
+  const type = (v: string) => {
+    setName(v); setRor("");
+    if (timer.current) clearTimeout(timer.current);
+    const n = ++seq.current;
+    timer.current = setTimeout(async () => {
+      const r = v.trim().length >= 3 ? await searchOrganizations(v) : [];
+      if (n === seq.current) { setHits(r.filter((o) => o.id)); setOpen(true); }
+    }, 300);
+  };
+  return (
+    <div className="relative">
+      <label className={sx.label}>
+        <span className="flex items-center gap-2">{t("Institution")}{ror ? <span className={`${tagCls} bg-[#E1F3EA] text-[#14603F]`} title={ror}>{t("ROR ✓")}</span> : null}</span>
+        <input name="institution" value={name} onChange={(e) => type(e.target.value)} onBlur={() => setTimeout(() => setOpen(false), 150)} onFocus={() => hits.length && setOpen(true)}
+          required autoFocus autoComplete="off" role="combobox" aria-expanded={open && hits.length > 0} aria-controls="aff-hits" aria-autocomplete="list" className={sx.input} />
+      </label>
+      <input type="hidden" name="ror_id" value={ror} />
+      {open && hits.length ? (
+        <ul id="aff-hits" role="listbox" className="absolute left-0 right-0 z-10 m-0 mt-1 max-h-[260px] list-none overflow-auto rounded-[6px] border border-[#DADDE3] bg-white p-0 shadow-[0_8px_24px_rgba(18,24,38,.12)]">
+          {hits.map((o) => (
+            <li key={o.id} role="option" aria-selected={ror === o.id}>
+              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { setName(o.name); setRor(o.id ?? ""); setOpen(false); }}
+                className="block w-full border-0 bg-transparent px-3 py-2 text-left text-[14px] hover:bg-[#F3F6FD]">
+                <strong>{o.name}</strong> <span className="block text-[12px] text-[#4A5263]">{o.place}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <span className={sx.help}>{ror ? t("Matched in the ROR registry — used for conflict checks.") : t("Type to search the ROR registry, or keep your own wording.")}</span>
+      <FieldErr state={state} name="institution" />
+    </div>
   );
 }
 
