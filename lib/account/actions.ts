@@ -87,10 +87,11 @@ const profileSchema = z.object({
 function normalizeIds(fd: FormData) {
   const orcid = str(fd, "orcid").replace(/^https?:\/\/(www\.)?orcid\.org\//i, "").toUpperCase();
   let dblp = str(fd, "dblp_url").replace(/^http:\/\//i, "https://");
-  if (dblp && !/^https:\/\//i.test(dblp)) dblp = `https://${dblp}`;
+  if (dblp && !/^[a-z][a-z0-9+.-]*:/i.test(dblp)) dblp = `https://${dblp}`;
   dblp = dblp.replace(/^https:\/\/(www\.)?dblp\.(org|uni-trier\.de)\//i, "https://dblp.org/").replace(/[?#].*$/, "").toLowerCase();
   let site = str(fd, "website_url");
-  if (site && !/^https?:\/\//i.test(site)) site = `https://${site}`;
+  // Add https:// only to a bare address ("lab.example.org"); anything with another scheme (ftp://, mailto:) stays as typed and fails the check.
+  if (site && !/^[a-z][a-z0-9+.-]*:/i.test(site)) site = `https://${site}`;
   return { orcid, dblp, site: site.replace(/^http:\/\//i, "https://"), researcher: str(fd, "researcher_id").toUpperCase() };
 }
 
