@@ -36,6 +36,7 @@ const friendly = (msg?: string) => {
   if (!msg) return MSG.generic;
   if (/row-level security|permission denied|not allowed|42501/i.test(msg)) return MSG.denied;
   if (/sign in first/i.test(msg)) return MSG.signIn;
+  if (/replies are not possible|not possible here/i.test(msg)) return "Replies aren’t possible in this conversation — it’s a notice from Plenary.";
   return MSG.generic;
 };
 const saved = (): AccountState => ({ ok: true, savedAt: new Date().toISOString() });

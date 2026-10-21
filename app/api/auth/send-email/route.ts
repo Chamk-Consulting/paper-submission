@@ -29,7 +29,10 @@ function verify(raw: string, h: Headers, secret: string): boolean {
   });
 }
 
-const fail = (status: number, message: string) => Response.json({ error: { http_code: status, message } }, { status });
+const fail = (status: number, message: string) => {
+  if (status >= 500) console.error(`[send-email hook] ${status}: ${message}`);
+  return Response.json({ error: { http_code: status, message } }, { status });
+};
 
 /** Where to go after the button: the "next" Plenary asked for, if any. */
 function nextFrom(redirectTo: string | undefined): string {
@@ -76,7 +79,7 @@ export async function POST(req: Request) {
   const host = new URL(absoluteUrl("/")).host;
   const continueTo = /^\/(venues|submit|program)\//.test(next) ? `${host}${next}` : null;
   for (const m of mails) {
-    const { subject, html, text } = authMail({ action, code: m.code, link: m.link, to: m.to, name: p.user.user_metadata?.given_name ?? null, minutes: 60, continueTo, siteHost: host });
+    const { subject, html, text } = authMail({ action, code: m.code, link: m.link, to: m.to, name: p.user.user_metadata?.given_name ?? null, minutes: 15, continueTo, siteHost: host });
     const r = await sendEmail({ to: m.to, from: site.email.authFrom, subject, html, text });
     if (!r.ok) return fail(500, r.skipped ? "RESEND_API_KEY not configured" : `Email not sent: ${r.error}`);
   }

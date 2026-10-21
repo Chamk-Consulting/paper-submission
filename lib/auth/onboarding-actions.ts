@@ -43,6 +43,11 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
   });
   // Rate limited: a code was sent moments ago, so still go to the code screen and say so.
   const limited = !!error && (error.status === 429 || /rate limit|seconds|too many/i.test(error.message));
+  // Anything else (the email could not be sent, the address was refused): say so instead of showing a code screen for an email that never left.
+  if (error && !limited) {
+    console.error("[signup] code not sent:", error.status, error.message);
+    return { message: "We couldn’t send the confirmation email to that address. Check it and try again — or try another address." };
+  }
   // Existing accounts get a sign-in code instead — same screen, no account enumeration.
   redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`) + (limited ? "&wait=1" : ""));
 }
