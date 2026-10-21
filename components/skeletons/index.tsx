@@ -216,7 +216,7 @@ export function StatusSkeleton() {
       <WizardHeader initials="" />
       <Skeleton>
         <div className="border-b border-[#DADDE3] bg-white px-5 pb-5 pt-6 sm:px-8"><Line size={14} w={240} /><Line size={32} lh={1.15} w="min(640px, 85%)" className="mt-2" /><Line size={15} w="min(360px, 60%)" className="mt-2" /></div>
-        <div className="flex w-full max-w-[1340px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row">
+        <div className="mx-auto box-border flex w-full max-w-[1280px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row">
           <div className="flex min-w-0 flex-auto flex-col gap-4">
             <Card className="p-[22px]!"><Line size={22} w={180} /><Line size={15} w="70%" className="mt-2" /><div className="mt-6 flex justify-between">{Array.from({ length: 7 }, (_, i) => <Bar key={i} w={28} h={28} className="rounded-full!" />)}</div></Card>
             <div className="grid gap-3 sm:grid-cols-4">{Array.from({ length: 4 }, (_, i) => <Card key={i} className="p-4!"><Line size={11} w="60%" /><Line size={18} w="50%" className="mt-1" /></Card>)}</div>

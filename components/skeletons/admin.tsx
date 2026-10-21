@@ -4,11 +4,13 @@ import { Bar, Card, Line, Skeleton } from "@/components/skeletons/parts";
 export function AdminSkeleton() {
   return (
     <Skeleton className="flex min-h-dvh flex-col bg-[#F5F6F3]">
-      <div className="flex min-h-[60px] items-center gap-4 bg-[#121826] px-6">
-        <Bar dark w={120} h={22} /><Bar dark w={110} h={18} /><span className="ml-auto" /><Bar dark w={180} h={14} />
+      <div className="bg-[#121826]">
+        <div className="mx-auto box-border flex min-h-[60px] w-full max-w-[1440px] items-center gap-4 px-6">
+          <Bar dark w={120} h={22} /><Bar dark w={110} h={18} /><span className="ml-auto" /><Bar dark w={180} h={14} />
+        </div>
       </div>
-      <div className="flex flex-auto flex-wrap">
-        <div className="box-border flex w-full flex-col gap-2 border-b border-[#DADDE3] bg-white px-3 py-4 md:w-[220px] md:border-b-0 md:border-r">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-auto flex-wrap">
+        <div className="box-border flex w-full flex-col gap-2 border-b border-[#DADDE3] bg-white px-3 py-4 md:w-[220px] md:border-b-0 md:border-r min-[1441px]:border-l">
           {[0, 1, 2, 3].map((i) => <Bar key={i} h={36} />)}
         </div>
         <div className="box-border min-w-0 flex-[999_1_560px] px-5 py-8 sm:px-10">

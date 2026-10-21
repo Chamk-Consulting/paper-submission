@@ -17,7 +17,7 @@ export function WizardHeader({ initials, right }: { initials: string; right?: Re
   return (
     <Pin name="wz-header">
     <header className="border-b border-[#DADDE3] bg-white">
-      <div className="flex min-h-[60px] items-center justify-between gap-4 px-5 sm:px-8">
+      <div className="mx-auto box-border flex min-h-[60px] w-full max-w-[1280px] items-center justify-between gap-4 px-5 sm:px-8">
         <div className="flex items-center gap-7">
           <Link href="/workspace" className="flex items-center gap-2.5 text-[#121826] no-underline">
             <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
@@ -49,7 +49,7 @@ export function TitleBand({ crumb, title, venue, generatedAt }: { crumb: string;
   return (
     <Pin name="wz-band">
     <div className="border-b border-[#DADDE3] bg-white">
-      <div className="flex flex-col gap-3 px-5 pb-5 pt-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto box-border flex w-full max-w-[1280px] flex-col gap-3 px-5 pb-5 pt-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
           <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("My workspace")}</Link> / {crumb}</p>
           <h1 className="mt-2 font-serif text-[28px] font-normal leading-[1.15] sm:text-[34px]">{title} <span className="text-[#4A5263]">· {venue.acr}</span></h1>

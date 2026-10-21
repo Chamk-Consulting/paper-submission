@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: { absolute: `Plenary — ${t("conference submission and review")}` } };
 }
 
-const wrap = "mx-auto max-w-[1200px] px-6";
+const wrap = "mx-auto max-w-[1280px] px-6";
 const kicker = "m-0 mb-4 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#4A5263]";
 const h2 = "m-0 font-serif text-[36px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[44px]";
 const saffronBtn = "rounded-[4px] bg-[#F2A93B] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]";

@@ -115,7 +115,7 @@ async function Inner({ params }: P) {
         </div>
       </div>
 
-      <div className="flex w-full max-w-[1340px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row lg:items-start">
+      <div className="mx-auto box-border flex w-full max-w-[1280px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row lg:items-start">
         <main className="flex min-w-0 flex-auto flex-col gap-4">
           {myConfirmation === "pending" && sub.stage !== "draft" ? (
             <section role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-[8px] border border-[#BCCDF5] bg-[#E6EDFC] px-[22px] py-4 text-[#1F2E5C]">

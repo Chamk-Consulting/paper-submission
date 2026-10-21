@@ -9,7 +9,7 @@ export function WizardLayout({ header, band, rail, children, aside }: { header: 
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       {header}
       {band}
-      <div className="flex w-full max-w-[1340px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row lg:items-start lg:gap-8">
+      <div className="mx-auto box-border flex w-full max-w-[1280px] flex-col gap-6 px-5 pb-16 pt-7 sm:px-8 lg:flex-row lg:items-start lg:gap-8">
         {rail}
         <main className="w-full min-w-0 lg:max-w-[680px] lg:flex-auto">{children}</main>
         {aside ? <aside className="flex w-full flex-col gap-4 lg:w-[300px] lg:flex-none">{aside}</aside> : null}

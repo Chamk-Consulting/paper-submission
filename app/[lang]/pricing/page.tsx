@@ -21,7 +21,7 @@ export default async function Pricing() {
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <SiteHeader />
-      <main className="mx-auto box-border w-full max-w-[1180px] flex-auto px-5 pb-16 pt-12 sm:px-8">
+      <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-16 pt-12 sm:px-8">
         <h1 className="m-0 font-serif text-[40px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[52px]">{t("Simple pricing per event")}</h1>
         <p className="mt-3 max-w-[60ch] text-[17px] text-[#4A5263]">{t("Authors and reviewers never pay. You pay per accepted paper, only after submissions open.")}</p>
         <PricingPlans />

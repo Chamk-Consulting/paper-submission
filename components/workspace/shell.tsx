@@ -54,11 +54,17 @@ const count = (n: number) => (n ? <span className="font-mono text-[12px] text-[#
 /** ctx = null renders the same chrome with placeholders (used by the loading skeleton). */
 export async function WorkspaceShell({ ctx, active, children, event }: { ctx: WorkspaceCtx | null; active: Key; children: ReactNode; event?: { slug: string; name: string; roleLabel: string } }) {
   const t = await getT();
+  // Page frame (shared with the public pages): content is centred and capped on wide screens.
+  // Organiser pages hold wide tables, so their frame is wider. Literal classes so Tailwind sees them.
+  // (Loading skeletons of organiser pages pass no event, so the menu key decides too — no width jump on load.)
+  const organiser = !!event || (active.startsWith("m:") && (ORGANIZER_NAV.some(([k]) => `m:${k}` === active) || active === "m:setup" || active === "m:roles"));
+  const frame = organiser ? "max-w-[1600px]" : "max-w-[1440px]";
+  const edge = organiser ? "min-[1601px]:border-l" : "min-[1441px]:border-l";
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <Pin name="ws-header">
       <header className="relative bg-[#0E1B3D] text-[#F5F6F3]">
-        <div className="flex min-h-[60px] flex-wrap items-center gap-5 px-6 py-2.5">
+        <div className={`mx-auto box-border flex min-h-[60px] w-full flex-wrap items-center gap-5 px-6 py-2.5 ${frame}`}>
           <Link href="/workspace" className="flex items-center gap-2.5 text-[#F5F6F3] no-underline">
             <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#F5F6F3" strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
             <span className="font-serif text-[22px]">Plenary</span>
@@ -85,9 +91,9 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
       </header>
       </Pin>
 
-      <div className="flex flex-auto">
+      <div className={`mx-auto flex w-full flex-auto ${frame}`}>
         <Pin name="ws-nav">
-        <nav aria-label={t("Workspace")} className="box-border hidden w-[232px] flex-none flex-col gap-0.5 border-r border-[#DADDE3] bg-white px-3 py-5 md:flex">
+        <nav aria-label={t("Workspace")} className={`box-border hidden w-[232px] flex-none flex-col gap-0.5 border-r border-[#DADDE3] bg-white px-3 py-5 md:flex ${edge}`}>
           <NavItem t={t} href="/workspace" icon={Icon.home} label="Home" active={active === "home"} />
           <NavItem t={t} href="/workspace/submissions" icon={Icon.paper} label="My submissions" active={active === "submissions"} badge={ctx ? count(ctx.submissionCount) : null} />
           <NavItem t={t} href="/reviews" icon={Icon.pen} label="Reviews" active={active === "reviews"} />

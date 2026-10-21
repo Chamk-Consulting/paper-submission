@@ -27,7 +27,7 @@ export function AdminShell({ t, name, tab, overview, children }: { t: TT; name: 
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <header className="bg-[#121826] text-[#F5F6F3]">
-        <div className="flex min-h-[60px] flex-wrap items-center gap-4 px-6 py-2">
+        <div className="mx-auto box-border flex min-h-[60px] w-full max-w-[1440px] flex-wrap items-center gap-4 px-6 py-2">
           <Link href="/admin" className="flex items-center gap-2.5 text-[#F5F6F3] no-underline">
             <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#F5F6F3" strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
             <span className="font-serif text-[22px]">Plenary</span>
@@ -37,8 +37,8 @@ export function AdminShell({ t, name, tab, overview, children }: { t: TT; name: 
           <Link href="/workspace" className="text-[14px] text-[#F5F6F3]">{t("Leave admin")}</Link>
         </div>
       </header>
-      <div className="flex flex-auto flex-wrap">
-        <nav aria-label={t("Admin")} className="box-border flex w-full flex-col gap-0.5 border-b border-[#DADDE3] bg-white px-3 py-4 md:w-[220px] md:flex-none md:border-b-0 md:border-r">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-auto flex-wrap">
+        <nav aria-label={t("Admin")} className="box-border flex w-full flex-col gap-0.5 border-b border-[#DADDE3] bg-white px-3 py-4 md:w-[220px] md:flex-none md:border-b-0 md:border-r min-[1441px]:border-l">
           {nav.map(([k, label, n]) => (
             <Link key={k} href={`/admin?tab=${k}`} aria-current={tab === k ? "page" : undefined}
               className={`flex h-10 items-center justify-between rounded-[6px] px-3 text-[14px] text-[#121826] no-underline hover:bg-[#F5F6F3] ${tab === k ? "bg-[#E6EDFC] font-semibold" : ""}`}>
