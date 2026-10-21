@@ -7,6 +7,8 @@ import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { refuseIfLocked } from "@/lib/auth/lock-check";
 import { absoluteUrl, safeNext } from "@/lib/config/site";
 import { detectIdentifier } from "@/lib/auth/identifier";
+import { accountEmailFor, maskEmail, plenaryIdSignIn } from "@/lib/auth/plenary-id";
+import { needsTwoStep, twoStepHref } from "@/lib/auth/mfa";
 
 export type SignInState = {
   step?: "email" | "sent";
@@ -24,13 +26,17 @@ export type SignInState = {
 const GENERIC = "Those details didn't match an account, or the email isn't confirmed yet.";
 
 /**
- * Turns whatever was typed into the account email.
- * TODO(auth): Plenary ID, alias and phone lookup (needs persons.plenary_id / alias / phone columns and a
- * server-side lookup that answers identically whether or not the account exists).
+ * Turns whatever was typed into the account email. A Plenary ID is looked up server-side (signed request,
+ * lib/auth/plenary-id.ts); `lookedUp` marks that case so the caller never shows the full email back.
+ * TODO(auth): alias and phone lookup.
  */
-async function resolveEmail(identifier: string): Promise<{ email: string | null; kind: string }> {
+async function resolveEmail(identifier: string): Promise<{ email: string | null; kind: string; lookedUp?: boolean }> {
   const d = detectIdentifier(identifier);
   if (d.kind === "email") return { email: identifier.trim().toLowerCase(), kind: "email" };
+  if (d.kind === "id" && plenaryIdSignIn()) {
+    const r = await accountEmailFor(identifier);
+    if (r.id) return { email: r.email, kind: "id", lookedUp: true };
+  }
   return { email: null, kind: d.kind };
 }
 
@@ -53,8 +59,8 @@ const passwordSchema = z.object({
 export async function signInWithPassword(_: SignInState, formData: FormData): Promise<SignInState> {
   const parsed = passwordSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
-  const { email, kind } = await resolveEmail(parsed.data.identifier);
-  if (!email) return notYet(kind);
+  const { email, kind, lookedUp } = await resolveEmail(parsed.data.identifier);
+  if (!email) return lookedUp ? { message: GENERIC } : notYet(kind);
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
@@ -62,6 +68,7 @@ export async function signInWithPassword(_: SignInState, formData: FormData): Pr
   const locked = await refuseIfLocked(supabase);
   if (locked) return { message: locked };
   await recordSignIn(supabase, "password");
+  if (await needsTwoStep(supabase)) redirect(twoStepHref(safeNext(parsed.data.next)));
   // TODO(auth): "Keep me signed in" unchecked -> session-only cookies (no persistent maxAge).
   redirect(safeNext(parsed.data.next));
 }
@@ -75,7 +82,9 @@ const codeRequestSchema = z.object({
 export async function sendSignInCode(_: SignInState, formData: FormData): Promise<SignInState> {
   const parsed = codeRequestSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
-  const { email, kind } = await resolveEmail(parsed.data.identifier);
+  const { email, kind, lookedUp } = await resolveEmail(parsed.data.identifier);
+  // Unknown Plenary ID: the same code step as a real one, so nobody can test which IDs exist.
+  if (!email && lookedUp) return { step: "sent", sentKind: kind, email: parsed.data.identifier.trim().toUpperCase(), mode: "signin" };
   if (!email) return notYet(kind);
 
   const supabase = await createClient();
@@ -89,11 +98,12 @@ export async function sendSignInCode(_: SignInState, formData: FormData): Promis
   // Rate limited means a code went out moments ago: still show the code step, with a note.
   const limited = !!error && (error.status === 429 || /rate limit|seconds|too many/i.test(error.message));
   // Same answer whether or not the account exists.
-  return { step: "sent", sentTo: email, sentKind: kind, email, mode: "signin", notice: limited ? "A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute." : undefined };
+  // For a Plenary ID the form carries the ID, never the email (verify and resend look it up again).
+  return { step: "sent", sentTo: lookedUp ? maskEmail(email) : email, sentKind: kind, email: lookedUp ? parsed.data.identifier.trim().toUpperCase() : email, mode: "signin", notice: limited ? "A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute." : undefined };
 }
 
 const verifySchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().min(3).max(254),
   code: z.string().trim().regex(/^\d{6,10}$/, "Enter the 6-digit code from the email"),
   next: z.string().optional(),
 });
@@ -102,12 +112,16 @@ export async function verifyCode(prev: SignInState, formData: FormData): Promise
   const parsed = verifySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ...prev, step: "sent", fieldErrors: parsed.error.flatten().fieldErrors };
 
+  const { email } = await accountEmailFor(parsed.data.email);
+  const wrong: SignInState = { ...prev, step: "sent", fieldErrors: { code: ["That code is wrong or has expired. Check the latest email or ask for a new one."] } };
+  if (!email) return wrong;
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ email: parsed.data.email, token: parsed.data.code, type: "email" });
+  const { error } = await supabase.auth.verifyOtp({ email, token: parsed.data.code, type: "email" });
   if (error) return { ...prev, step: "sent", fieldErrors: { code: ["That code is wrong or has expired. Check the latest email or ask for a new one."] } };
   const locked = await refuseIfLocked(supabase);
   if (locked) return { ...prev, step: "sent", message: locked };
   await recordSignIn(supabase, "email_code");
+  if (await needsTwoStep(supabase)) redirect(twoStepHref(safeNext(parsed.data.next)));
 
   redirect(safeNext(parsed.data.next));
 }

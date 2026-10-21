@@ -16,10 +16,13 @@ export async function generateMetadata(): Promise<Metadata> {
 type Search = { email?: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PID_RE = /^PL-\d{4}-\d{4}$/;
+/** The email, or a Plenary ID when the person reset with their ID (the email is never put in the address). */
+const who = (raw?: string) => { const v = (raw ?? "").trim(); return PID_RE.test(v.toUpperCase()) ? v.toUpperCase() : v.toLowerCase(); };
 
 async function Left({ searchParams }: { searchParams: Promise<Search> }) {
-  const email = ((await searchParams).email ?? "").trim().toLowerCase();
-  if (!EMAIL_RE.test(email)) redirect("/forgot-password");
+  const email = who((await searchParams).email);
+  if (!EMAIL_RE.test(email) && !PID_RE.test(email)) redirect("/forgot-password");
   const t = await getT();
   return (
     <>
@@ -35,7 +38,7 @@ async function Left({ searchParams }: { searchParams: Promise<Search> }) {
 }
 
 async function Aside({ searchParams }: { searchParams: Promise<Search> }) {
-  const email = ((await searchParams).email ?? "").trim().toLowerCase().slice(0, 254);
+  const email = who((await searchParams).email).slice(0, 254);
   const t = await getT();
   return (
     <NavyAside label={t("Password reset progress")} kicker={t("Resetting your password")} title={t("Locked out? Let’s get you back in.")}>

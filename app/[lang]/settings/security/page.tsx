@@ -9,6 +9,7 @@ import { SettingsSkeleton } from "@/components/skeletons/site2";
 import { Reveal } from "@/components/motion/reveal";
 import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { getSecurity } from "@/lib/account/data";
+import { getSecurityPlus } from "@/lib/account/security-data";
 import { getT } from "@/lib/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,12 +18,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function Inner() {
-  const [ctx, sec, h] = await Promise.all([getWorkspaceCtx(), getSecurity(), headers()]);
-  if (!ctx || !sec) redirect("/sign-in?next=/settings/security");
+  const [ctx, sec, h, plus] = await Promise.all([getWorkspaceCtx(), getSecurity(), headers(), getSecurityPlus()]);
+  if (!ctx || !sec || !plus) redirect("/sign-in?next=/settings/security");
   return (
     <WorkspaceShell ctx={ctx} active="m:settings">
       <SettingsFrame active="security">
-        <SecurityPanel email={sec.email} device={deviceName(h.get("user-agent"))} providers={sec.providers} events={sec.events} />
+        <SecurityPanel email={sec.email} device={deviceName(h.get("user-agent"))} providers={sec.providers} events={sec.events} plus={plus} />
       </SettingsFrame>
     </WorkspaceShell>
   );
