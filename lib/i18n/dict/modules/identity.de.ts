@@ -1,5 +1,10 @@
 /* identity (profile names + identifiers) — de. English text is the key. */
 export const identity_de: Record<string, string> = {
+  "Your legal or professional name, as on your papers.": "Ihr amtlicher oder beruflicher Name, wie auf Ihren Beiträgen.",
+  "How your name appears": "Wie Ihr Name erscheint",
+  "Optional. Leave empty to use your name above.": "Optional. Leer lassen, um den Namen oben zu verwenden.",
+  "Other names": "Weitere Namen",
+  "Used to match your papers and check conflicts of interest.": "Dienen zum Zuordnen Ihrer Beiträge und zur Prüfung von Interessenkonflikten.",
   "A ResearcherID looks like ABC-1234-2020.": "Eine ResearcherID sieht so aus: ABC-1234-2020.",
   "A Scopus Author ID is 6–12 digits.": "Eine Scopus-Autoren-ID hat 6–12 Ziffern.",
   "A Semantic Scholar author ID is digits only.": "Eine Semantic-Scholar-Autoren-ID besteht nur aus Ziffern.",

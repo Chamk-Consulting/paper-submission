@@ -45,8 +45,10 @@ export function NameSection({ p, state, form, onChange }: { p: Profile; state: A
   const setScript = (i: number, k: keyof NameScript, v: string) => { setScripts(scripts.map((x, j) => (j === i ? { ...x, [k]: v } : x))); onChange(); };
 
   return (
+    <>
     <section className={sx.card}>
       <h2 className={sx.h2}>{t("Name")}</h2>
+      <p className={sx.sub + " text-[13px]"}>{t("Your legal or professional name, as on your papers.")}</p>
       <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
         <label className={sx.label}>{t("First name")}
           <input form={form} name="given_name" value={given} onChange={(e) => setGiven(e.target.value)} autoComplete="given-name" required className={sx.input} /><FieldErr state={state} name="given_name" /></label>
@@ -67,6 +69,16 @@ export function NameSection({ p, state, form, onChange }: { p: Profile; state: A
             </label>
           </div>
         </fieldset>
+      </div>
+      <p className="mb-0 mt-3 rounded-[6px] bg-[#F7F8F6] px-3 py-2 text-[13px] text-[#4A5263]" aria-live="polite">
+        {t("Shown as")} <strong className="text-[#121826]">{shown}</strong>
+      </p>
+    </section>
+
+    <section className={sx.card}>
+      <h2 className={sx.h2}>{t("How your name appears")}</h2>
+      <p className={sx.sub + " text-[13px]"}>{t("Optional. Leave empty to use your name above.")}</p>
+      <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
         <label className={sx.label}><Opt label="Name on papers" />
           <input form={form} name="paper_name" value={citation} onChange={(e) => setCitation(e.target.value)} placeholder={auto} className={sx.input} />
           <span className={sx.help}>{t("How you appear in author lists and proceedings.")}</span><FieldErr state={state} name="paper_name" /></label>
@@ -80,10 +92,15 @@ export function NameSection({ p, state, form, onChange }: { p: Profile; state: A
           <input form={form} name="pronouns" defaultValue={p.pronouns} maxLength={40} className={sx.input} /></label>
       </div>
       <p className="mb-0 mt-3 rounded-[6px] bg-[#F7F8F6] px-3 py-2 text-[13px] text-[#4A5263]" aria-live="polite">
-        {t("Shown as")} <strong className="text-[#121826]">{shown}</strong> · {t("On papers")} <strong className="text-[#121826]">{onPapers}</strong> · {t("On badge")} <strong className="text-[#121826]">{onBadge}</strong>
+        {t("On papers")} <strong className="text-[#121826]">{onPapers}</strong> · {t("On badge")} <strong className="text-[#121826]">{onBadge}</strong>
       </p>
 
-      <h3 className="mb-0 mt-5 text-[15px] font-semibold">{t("Names in other scripts")}</h3>
+    </section>
+
+    <section className={sx.card}>
+      <h2 className={sx.h2}>{t("Other names")}</h2>
+      <p className={sx.sub + " text-[13px]"}>{t("Used to match your papers and check conflicts of interest.")}</p>
+      <h3 className="mb-0 mt-4 text-[15px] font-semibold">{t("Names in other scripts")}</h3>
       <p className={sx.sub + " text-[13px]"}>{t("Shown next to your Latin name in programs. Up to 6.")}</p>
       <div className="mt-2 flex flex-col gap-2.5">
         {scripts.map((x, i) => (
@@ -115,6 +132,7 @@ export function NameSection({ p, state, form, onChange }: { p: Profile; state: A
       </div>
       <FieldErr state={state} name="other_names" /> <FieldErr state={state} name="former_names" />
     </section>
+    </>
   );
 }
 
