@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, BadgeCheck, CalendarPlus, CalendarRange, FileCheck, Gauge, Receipt, Ticket, UserRound } from "lucide-react";
+import { ArrowDownUp, Award, BadgeCheck, CalendarPlus, CalendarRange, FileCheck, Gauge, Receipt, Ticket, Search, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
@@ -57,6 +57,60 @@ function Chips<K extends string>({ items, value, onChange, all }: { items: [K, s
   );
 }
 
+/* ---------------------------------------------------------------- search, sort, filter (shared) */
+const words = (q: string) => q.toLowerCase().split(/\s+/).filter(Boolean);
+/** Every word must appear somewhere: acronym, name, place, field, society, your roles, your paper titles and numbers. */
+function matches(r: EventRow, q: string) {
+  const w = words(q);
+  if (!w.length) return true;
+  const v = r.v;
+  const hay = [v.acr, v.name, v.location, v.city, v.country, v.field, v.society, v.kind, ...(r.mine?.roles ?? []), ...roleChips(r.mine?.roles ?? []),
+    ...(r.mine?.papers ?? []).flatMap((p) => [p.title, p.number ? `#${p.number}` : ""]), (v.startsOn ?? "").slice(0, 4)].join(" ").toLowerCase();
+  return w.every((x) => hay.includes(x));
+}
+const nextMs = (r: EventRow, now: number) => { const d = r.v.dates.find((x) => Date.parse(x.startsAt) > now); return d ? Date.parse(d.startsAt) : Number.MAX_SAFE_INTEGER; };
+const startMs = (r: EventRow) => (r.v.startsOn ? Date.parse(r.v.startsOn) : Number.MAX_SAFE_INTEGER);
+const endKey = (r: EventRow) => r.v.endsOn ?? r.v.startsOn ?? "";
+const byName = (a: EventRow, b: EventRow) => a.v.acr.localeCompare(b.v.acr);
+
+function Toolbar<S extends string>({ id, q, setQ, sort, setSort, sorts, shown, total, onClear, active, placeholder }: {
+  id: string; q: string; setQ: (v: string) => void; sort: S; setSort: (v: S) => void; sorts: [S, string][]; shown: number; total: number; onClear: () => void; active: boolean; placeholder: string;
+}) {
+  const t = useT();
+  return (
+    <div className="flex flex-col gap-2.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <div role="search" className="flex h-10 min-w-[220px] flex-[1_1_320px] items-center gap-2 rounded-[6px] border border-[#B7BDC9] bg-white px-3 focus-within:border-[#2F5FD0]">
+          <Search size={16} strokeWidth={1.75} aria-hidden className="flex-none text-[#4A5263]" />
+          <label htmlFor={`${id}-q`} className="sr-only">{t("Search")}</label>
+          <input id={`${id}-q`} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t(placeholder)}
+            className="h-9 min-w-0 flex-auto border-0 bg-transparent text-[14px] text-[#121826] outline-none" />
+        </div>
+        <label className="flex h-10 items-center gap-2 text-[13px] text-[#4A5263]">
+          <ArrowDownUp size={15} aria-hidden />
+          <span className="sr-only sm:not-sr-only">{t("Sort")}</span>
+          <select value={sort} onChange={(e) => setSort(e.target.value as S)} className="h-10 rounded-[6px] border border-[#B7BDC9] bg-white px-2.5 text-[14px] text-[#121826]">
+            {sorts.map(([k, l]) => <option key={k} value={k}>{t(l)}</option>)}
+          </select>
+        </label>
+      </div>
+      <p aria-live="polite" className="m-0 text-[13px] text-[#4A5263]">
+        {active ? t("Showing {n} of {total}", { n: shown, total }) : t("{n} events", { n: total })}
+        {active ? <> · <button type="button" onClick={onClear} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-[#2F5FD0] underline">{t("Clear")}</button></> : null}
+      </p>
+    </div>
+  );
+}
+
+function NoMatch({ onClear }: { onClear: () => void }) {
+  const t = useT();
+  return (
+    <div className={`${card} text-[14px] text-[#4A5263]`}>
+      {t("No events match.")} <button type="button" onClick={onClear} className="cursor-pointer border-0 bg-transparent p-0 text-[14px] font-semibold text-[#2F5FD0] underline">{t("Clear search and filters")}</button>
+    </div>
+  );
+}
+
 function Empty({ text, href, cta }: { text: string; href: string; cta: string }) {
   const t = useT();
   return (
@@ -71,12 +125,28 @@ export function MyEventsList({ rows, generatedAt }: { rows: EventRow[]; generate
   const t = useT();
   const { now, tz } = useClock(generatedAt);
   const [k, setK] = useState<Kind | "all">("all");
+  const [q, setQ] = useState("");
+  const [todo, setTodo] = useState(false);
+  const [sort, setSort] = useState<"next" | "start" | "name" | "papers">("next");
+  const needs = (r: EventRow) => (r.mine?.papers ?? []).some((p) => ["draft", "revise", "final"].includes(p.stage)) || (!!r.reg && !r.reg.paid);
   const counts = KINDS.map(([key, label]) => [key, label, rows.filter((r) => kindsOf(r).includes(key)).length] as [Kind, string, number]).filter((x) => x[2] > 0);
-  const shown = k === "all" ? rows : rows.filter((r) => kindsOf(r).includes(k));
+  const nNeeds = rows.filter(needs).length;
+  const order = { next: (a: EventRow, b: EventRow) => nextMs(a, now) - nextMs(b, now), start: (a: EventRow, b: EventRow) => startMs(a) - startMs(b), name: byName,
+    papers: (a: EventRow, b: EventRow) => (b.mine?.papers.length ?? 0) - (a.mine?.papers.length ?? 0) }[sort];
+  const shown = rows.filter((r) => (k === "all" || kindsOf(r).includes(k)) && (!todo || needs(r)) && matches(r, q)).sort(order);
+  const active = k !== "all" || todo || !!q.trim();
+  const clear = () => { setK("all"); setTodo(false); setQ(""); };
   if (!rows.length) return <Empty text="You’re not part of any event yet. Submit a paper, review, or register to attend, and it appears here." href="/workspace/events" cta="Explore events" />;
   return (
     <div className="flex flex-col gap-3.5">
-      <Chips items={counts} value={k} onChange={setK} all={rows.length} />
+      <Toolbar id="me" q={q} setQ={setQ} sort={sort} setSort={setSort} shown={shown.length} total={rows.length} onClear={clear} active={active}
+        placeholder="Search by event, place, role or paper title"
+        sorts={[["next", "Next deadline"], ["start", "Starting soonest"], ["name", "Name (A–Z)"], ["papers", "Most papers"]]} />
+      <div className="flex flex-wrap items-center gap-1.5">
+        {nNeeds ? <button type="button" aria-pressed={todo} onClick={() => setTodo(!todo)} className={`${chipBtn(todo)} ${todo ? "" : "border-[#F2C98A]! bg-[#FFF6E6]! text-[#7A4508]!"}`}>{t("Needs action")} <span className="opacity-70">{nNeeds}</span></button> : null}
+        <Chips items={counts} value={k} onChange={setK} all={rows.length} />
+      </div>
+      {!shown.length ? <NoMatch onClear={clear} /> : null}
       {shown.map((r) => {
         const v = r.v;
         const st = statusOf(v, now, tz, t, t.intl);
@@ -135,10 +205,27 @@ export function FollowingList({ rows, generatedAt }: { rows: EventRow[]; generat
     const st = statusOf(r.v, now, tz, t, t.intl);
     return { r, open: ["soon", "open", "later", "rolling"].includes(st.state) && st.closes !== "—" };
   }), [rows, now, tz, t]);
+  const [q, setQ] = useState("");
+  const [f, setF] = useState<"all" | "open" | "d30" | "online">("all");
+  const [sort, setSort] = useState<"next" | "start" | "name">("next");
   if (!rows.length) return <Empty text="Follow events to keep their deadlines here." href="/workspace/events" cta="Explore events" />;
-  const groups: [string, typeof withSt][] = [["Open for papers", withSt.filter((x) => x.open)], ["Other events you follow", withSt.filter((x) => !x.open)]];
+  const soon = (x: { r: EventRow }) => nextMs(x.r, now) - now <= 30 * 86_400_000;
+  const online = (x: { r: EventRow }) => x.r.v.format === "online" || x.r.v.format === "hybrid";
+  const test = { all: () => true, open: (x: { open: boolean }) => x.open, d30: soon, online }[f] as (x: { r: EventRow; open: boolean }) => boolean;
+  const order = { next: (a: { r: EventRow }, b: { r: EventRow }) => nextMs(a.r, now) - nextMs(b.r, now), start: (a: { r: EventRow }, b: { r: EventRow }) => startMs(a.r) - startMs(b.r), name: (a: { r: EventRow }, b: { r: EventRow }) => byName(a.r, b.r) }[sort];
+  const kept = withSt.filter((x) => test(x) && matches(x.r, q)).sort(order);
+  const active = f !== "all" || !!q.trim();
+  const clear = () => { setF("all"); setQ(""); };
+  const fl: ["open" | "d30" | "online", string, number][] = ([["open", "Open for papers", withSt.filter((x) => x.open).length], ["d30", "Deadline within 30 days", withSt.filter(soon).length], ["online", "Online or hybrid", withSt.filter(online).length]] as ["open" | "d30" | "online", string, number][]).filter((x) => x[2] > 0);
+  const groups: [string, typeof withSt][] = [["Open for papers", kept.filter((x) => x.open)], ["Other events you follow", kept.filter((x) => !x.open)]];
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2.5">
+        <Toolbar id="fo" q={q} setQ={setQ} sort={sort} setSort={setSort} shown={kept.length} total={rows.length} onClear={clear} active={active}
+          placeholder="Search by event, place or field" sorts={[["next", "Next deadline"], ["start", "Starting soonest"], ["name", "Name (A–Z)"]]} />
+        <Chips items={fl} value={f} onChange={setF} all={rows.length} />
+      </div>
+      {!kept.length ? <NoMatch onClear={clear} /> : null}
       {groups.map(([title, list]) => list.length ? (
         <section key={title} aria-label={t(title)}>
           <h2 className="m-0 mb-2.5 text-[14px] font-semibold text-[#4A5263]">{t(title)} <span className="font-normal">· {list.length}</span></h2>
@@ -171,11 +258,19 @@ export function PastList({ rows }: { rows: EventRow[] }) {
   const years = [...new Set(rows.map((r) => (r.v.endsOn ?? r.v.startsOn ?? "").slice(0, 4)).filter(Boolean))].sort().reverse();
   const [year, setYear] = useState<string | "all">("all");
   const [who, setWho] = useState<"all" | "yours" | "followed">("all");
+  const [q, setQ] = useState("");
+  const [sort, setSort] = useState<"recent" | "oldest" | "name">("recent");
   if (!rows.length) return <Empty text="Events you took part in or followed appear here after they end." href="/workspace/events" cta="Explore events" />;
   const yours = (r: EventRow) => !!r.mine || !!r.reg;
-  const shown = rows.filter((r) => (year === "all" || (r.v.endsOn ?? r.v.startsOn ?? "").startsWith(year)) && (who === "all" || (who === "yours" ? yours(r) : r.following && !yours(r))));
+  const order = { recent: (a: EventRow, b: EventRow) => endKey(b).localeCompare(endKey(a)), oldest: (a: EventRow, b: EventRow) => endKey(a).localeCompare(endKey(b)), name: byName }[sort];
+  const shown = rows.filter((r) => (year === "all" || endKey(r).startsWith(year)) && (who === "all" || (who === "yours" ? yours(r) : r.following && !yours(r))) && matches(r, q)).sort(order);
+  const active = year !== "all" || who !== "all" || !!q.trim();
+  const clear = () => { setYear("all"); setWho("all"); setQ(""); };
   return (
     <div className="flex flex-col gap-3.5">
+      <Toolbar id="pa" q={q} setQ={setQ} sort={sort} setSort={setSort} shown={shown.length} total={rows.length} onClear={clear} active={active}
+        placeholder="Search by event, place, year or paper title" sorts={[["recent", "Most recent"], ["oldest", "Oldest first"], ["name", "Name (A–Z)"]]} />
+      {!shown.length ? <NoMatch onClear={clear} /> : null}
       <div className="flex flex-wrap items-center gap-3">
         <Chips items={years.map((y) => [y, y, rows.filter((r) => (r.v.endsOn ?? r.v.startsOn ?? "").startsWith(y)).length] as [string, string, number])} value={year} onChange={setYear} all={rows.length} />
         <Chips items={([["yours", "Yours", rows.filter(yours).length], ["followed", "Followed", rows.filter((r) => r.following && !yours(r)).length]] as ["yours" | "followed", string, number][]).filter((x) => x[2] > 0)} value={who} onChange={setWho} all={rows.length} />
