@@ -313,4 +313,8 @@ export const signup4_de: Record<string, string> = {
   "Email center": "E-Mail-Center",
   "Dashboard": "Übersicht",
   "Your roles at each event, and the conflicts organisers see for you:": "Ihre Rollen bei jeder Veranstaltung und die Konflikte, die Organisatoren für Sie sehen:",
+  "Registered, not paid": "Angemeldet, nicht bezahlt",
+  "Took part": "Teilgenommen",
+  "Only followed": "Nur gefolgt",
+  "{n} of {total} papers accepted": "{n} von {total} Beiträgen angenommen",
 };

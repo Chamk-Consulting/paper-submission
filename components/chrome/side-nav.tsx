@@ -433,9 +433,10 @@ export function NavList({ p, s, onPick, tab }: { p: string; s: Summary | null; o
           {top.map(render)}
           <Sep />
           {tree.middle.map(render)}
-          {tree.org ? <><Sep label={t("Organizing")} /><EventSwitcher org={tree.org} p={p} t={t} />{tree.org.groups.map(render)}</> : null}
           <Sep />
           {tree.after.map(render)}
+          {tree.org ? <><Sep label={t("Organizing")} /><EventSwitcher org={tree.org} p={p} t={t} />{tree.org.groups.map(render)}</> : null}
+          <Sep />
           {render(helpGroup(p))}
         </>
       )}
@@ -508,6 +509,8 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
         {q ? <FilterResults nodes={[...top, ...tree.all]} q={q} t={t} /> : (
           <div className="flex flex-col gap-0.5 rail:items-center">
             {tree.middle.map(both)}
+            <div aria-hidden className="mx-2 my-2 border-t border-[#EEF0EC] rail:w-8" />
+            {tree.after.map(both)}
             {tree.org ? (
               <>
                 <Sep label={t("Organizing")} />
@@ -516,8 +519,6 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
                 {tree.org.groups.map(both)}
               </>
             ) : null}
-            <div aria-hidden className="mx-2 my-2 border-t border-[#EEF0EC] rail:w-8" />
-            {tree.after.map(both)}
           </div>
         )}
       </div>
