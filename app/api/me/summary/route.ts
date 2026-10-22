@@ -4,6 +4,7 @@ import { myFollows } from "@/lib/workspace/events";
 import { createClient } from "@/lib/supabase/server";
 import { parseUi } from "@/lib/account/ui-prefs";
 import { byNext, getEventRows } from "@/lib/workspace/events-pages";
+import { getWorkCounts } from "@/lib/workspace/my-work";
 
 /** What the shared header and side menu need about the signed-in person. Never cached. */
 export async function GET() {
@@ -14,6 +15,7 @@ export async function GET() {
   const [{ data: admin }, following, ev] = await Promise.all([supabase.rpc("is_platform_admin"), myFollows(ctx.me.person?.id), getEventRows()]);
   const nowMs = Date.parse(ev.generatedAt);
   const current = ev.rows.filter((r) => !r.past && (r.mine || r.reg)).sort(byNext(nowMs));
+  const work = await getWorkCounts(ctx.me.person?.id, ev.rows, nowMs, ctx.venues.flatMap((v) => v.roles));
   return NextResponse.json({
     signedIn: true,
     name: ctx.name,
@@ -27,6 +29,7 @@ export async function GET() {
     following: following.slice(0, 12).map((f) => ({ slug: f.slug, name: f.name, shortName: f.shortName })),
     currentEvents: current.slice(0, 3).map((r) => ({ slug: r.v.slug, name: r.v.acr })),
     myEventsCount: current.length,
+    work,
     followingCount: ev.rows.filter((r) => r.following && !r.past).length,
     timezone: (ctx.me.person as { timezone?: string | null } | null)?.timezone ?? null,
     ui: parseUi((ctx.me.person as { ui_prefs?: unknown } | null)?.ui_prefs),

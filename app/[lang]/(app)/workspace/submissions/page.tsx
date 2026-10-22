@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { WorkspaceShell } from "@/components/workspace/shell";
 import { PapersList } from "@/components/workspace/papers-list";
 import { getMyPapers, getWorkspaceCtx } from "@/lib/workspace/data";
+import { getEventRows } from "@/lib/workspace/events-pages";
+import { nextDateOf } from "@/lib/workspace/my-work";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
 import { WorkspaceSkeleton } from "@/components/skeletons";
@@ -14,17 +16,21 @@ import { LocalWhen } from "@/components/reviewpolish/local-when";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t("My submissions") };
+  return { title: t("Papers") };
 }
 
 const card = "rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5";
 const kicker = "m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]";
 
-async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+type Search = { q?: string; status?: string; event?: string; sort?: string; co?: string };
+
+async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
   const pid = getMe().then((m) => m?.person?.id);
-  const [ctx, { ready, papers }, { q }, reviews, follows, inbox] = await Promise.all([
-    getWorkspaceCtx(), pid.then(getMyPapers), searchParams, getMyReviews(), pid.then(getFollowedDeadlines), getMyInbox(3),
+  const [ctx, { ready, papers }, sp, reviews, follows, inbox, ev] = await Promise.all([
+    getWorkspaceCtx(), pid.then(getMyPapers), searchParams, getMyReviews(), pid.then(getFollowedDeadlines), getMyInbox(3), getEventRows(),
   ]);
+  const nowMs = Date.parse(ev.generatedAt);
+  const next = Object.fromEntries(ev.rows.map((r) => [r.v.id, nextDateOf(r, nowMs)]));
   if (!ctx) redirect("/sign-in?next=/workspace/submissions");
   const due = reviews.filter((r) => r.status === "accepted" || r.status === "invited").length;
   const t = await getT();
@@ -34,10 +40,10 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="m-0 font-mono text-[12px] text-[#4A5263]">{t("Author")}</p>
-          <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("My submissions")}</h1>
+          <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("Papers")}</h1>
           <p className="mt-1.5 text-[#4A5263]">{t("Every paper you are an author on, grouped by venue. One venue can hold several of your papers, each at its own stage.")}</p>
         </div>
-        <Link href="/venues" className="inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("+ New submission")}</Link>
+        <Link href="/workspace/events?intent=submit" className="inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("+ New submission")}</Link>
       </div>
 
       {!ready ? (
@@ -48,7 +54,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
 
       <div className="mt-[22px] flex flex-col items-start gap-6 xl:flex-row">
         <div className="w-full min-w-0 flex-auto">
-          <PapersList papers={papers} initialQuery={q ?? ""} />
+          <PapersList papers={papers} next={next} init={sp} />
         </div>
 
         <aside className="flex w-full flex-col gap-3.5 xl:w-[300px] xl:flex-none">
@@ -100,7 +106,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
 }
 
 /** Canvas WS02-Submissions. */
-export default function Page({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
   return (
     <Reveal fallback={<WorkspaceSkeleton active="submissions" />}>
       <Inner searchParams={searchParams} />

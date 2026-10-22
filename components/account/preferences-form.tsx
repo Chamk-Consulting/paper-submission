@@ -101,7 +101,7 @@ export function PreferencesForm({ locale, timezone, ui }: { locale: string; time
       <section className={sx.card}>
         <h2 className={sx.h2}>{t("Workspace")}</h2>
         <div className="mt-3.5 flex flex-col gap-4">
-          <Choice name="start" value={ui.start} legend={t("Start page after sign-in")} options={[["home", t("Home")], ["submissions", t("My submissions")], ["reviews", t("Reviews")], ["events", t("Find events")]]} />
+          <Choice name="start" value={ui.start} legend={t("Start page after sign-in")} options={[["home", t("Home")], ["submissions", t("Papers")], ["reviews", t("Reviews")], ["events", t("Find events")]]} />
           <Choice name="sidebar" value={ui.sidebar} legend={t("Side menu")} help={t("You can still fold or open it any time with the button at its foot.")} options={[["auto", t("Open on wide screens")], ["folded", t("Folded to icons")]]} />
         </div>
       </section>

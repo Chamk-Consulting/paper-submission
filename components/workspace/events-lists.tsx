@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, BadgeCheck, CalendarPlus, CalendarRange, Gauge, Receipt, Ticket, Search, UserRound } from "lucide-react";
+import { Award, BadgeCheck, CalendarPlus, CalendarRange, Gauge, Receipt, Ticket, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
@@ -9,12 +9,11 @@ import { DeadlineStrip, FollowButton } from "@/components/venues/venue-live";
 import { fmtRange, statusOf } from "@/lib/venues/time";
 import { STAGE_LABEL, STAGE_TONE, primaryAction, roleChips } from "@/lib/workspace/event-action";
 import type { EventRow } from "@/lib/workspace/events-pages";
+import { Chips, NoMatch, Toolbar, chipBtn, listCard as card } from "@/components/workspace/list-toolbar";
 
 /* Events › My events, Following, Past events. One look for all three: a white card per event in one column. */
 
 const ORGANIZER = /^(owner|chair|program_chair|deputy_chair|ceb_chair|publication_chair|registration_chair|staff)$/;
-const card = "rounded-[8px] border border-[#DADDE3] bg-white p-[18px] shadow-[0_1px_0_rgba(18,24,38,.04)]";
-const chipBtn = (on: boolean) => `inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-[13px] ${on ? "border-[#0E1B3D] bg-[#0E1B3D] font-semibold text-white" : "border-[#DADDE3] bg-white text-[#121826] hover:border-[#B7BDC9]"}`;
 const linkCls = "inline-flex h-9 items-center gap-1.5 rounded-[6px] px-2.5 text-[14px] text-[#121826] no-underline hover:bg-[#F5F6F3]";
 const primary = "inline-flex h-10 items-center whitespace-nowrap rounded-[4px] px-3.5 text-[14px] font-semibold no-underline";
 
@@ -44,19 +43,6 @@ function Head({ v }: { v: EventRow["v"] }) {
   );
 }
 
-function Chips<K extends string>({ items, value, onChange, all }: { items: [K, string, number][]; value: K | "all"; onChange: (k: K | "all") => void; all: number }) {
-  const t = useT();
-  if (items.length < 2) return null;
-  return (
-    <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("Show")}>
-      <button type="button" aria-pressed={value === "all"} onClick={() => onChange("all")} className={chipBtn(value === "all")}>{t("All")} <span className="opacity-70">{all}</span></button>
-      {items.map(([k, label, n]) => (
-        <button key={k} type="button" aria-pressed={value === k} onClick={() => onChange(k)} className={chipBtn(value === k)}>{t(label)} <span className="opacity-70">{n}</span></button>
-      ))}
-    </div>
-  );
-}
-
 /* ---------------------------------------------------------------- search, sort, filter (shared) */
 const words = (q: string) => q.toLowerCase().split(/\s+/).filter(Boolean);
 /** Every word must appear somewhere: acronym, name, place, field, society, your roles, your paper titles and numbers. */
@@ -72,41 +58,6 @@ const nextMs = (r: EventRow, now: number) => { const d = r.v.dates.find((x) => D
 const startMs = (r: EventRow) => (r.v.startsOn ? Date.parse(r.v.startsOn) : Number.MAX_SAFE_INTEGER);
 const endKey = (r: EventRow) => r.v.endsOn ?? r.v.startsOn ?? "";
 const byName = (a: EventRow, b: EventRow) => a.v.acr.localeCompare(b.v.acr);
-
-function Toolbar<S extends string>({ id, q, setQ, sort, setSort, sorts, shown, total, onClear, active, placeholder }: {
-  id: string; q: string; setQ: (v: string) => void; sort: S; setSort: (v: S) => void; sorts: [S, string][]; shown: number; total: number; onClear: () => void; active: boolean; placeholder: string;
-}) {
-  const t = useT();
-  return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex flex-wrap items-center gap-2">
-        <div role="search" className="flex h-10 min-w-[220px] flex-[1_1_320px] items-center gap-2 rounded-[6px] border border-[#B7BDC9] bg-white px-3 focus-within:border-[#2F5FD0]">
-          <Search size={16} strokeWidth={1.75} aria-hidden className="flex-none text-[#4A5263]" />
-          <label htmlFor={`${id}-q`} className="sr-only">{t("Search")}</label>
-          <input id={`${id}-q`} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t(placeholder)}
-            className="h-9 min-w-0 flex-auto border-0 bg-transparent text-[14px] text-[#121826] outline-none" />
-        </div>
-        <select aria-label={t("Sort")} value={sort} onChange={(e) => setSort(e.target.value as S)}
-          className="h-10 cursor-pointer rounded-[6px] border border-[#B7BDC9] bg-white px-2.5 text-[14px] text-[#121826] hover:border-[#8A93A6]">
-          {sorts.map(([k, l]) => <option key={k} value={k}>{t(l)}</option>)}
-        </select>
-      </div>
-      <p aria-live="polite" className="m-0 text-[13px] text-[#4A5263]">
-        {active ? t("Showing {n} of {total}", { n: shown, total }) : (total === 1 ? t("1 event") : t("{n} events", { n: total }))}
-        {active ? <> · <button type="button" onClick={onClear} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-[#2F5FD0] underline">{t("Clear")}</button></> : null}
-      </p>
-    </div>
-  );
-}
-
-function NoMatch({ onClear }: { onClear: () => void }) {
-  const t = useT();
-  return (
-    <div className={`${card} text-[14px] text-[#4A5263]`}>
-      {t("No events match.")} <button type="button" onClick={onClear} className="cursor-pointer border-0 bg-transparent p-0 text-[14px] font-semibold text-[#2F5FD0] underline">{t("Clear search and filters")}</button>
-    </div>
-  );
-}
 
 function Empty({ text, href, cta }: { text: string; href: string; cta: string }) {
   const t = useT();

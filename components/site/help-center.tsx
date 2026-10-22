@@ -15,9 +15,9 @@ type Guide = { id: string; title: string; body: string; href?: string; cta?: str
 const GROUPS: { title: string; icon: string; guides: Guide[] }[] = [
   { title: "Authors", icon: "A", guides: [
     { id: "submit", title: "Submit a paper", body: "Pick a venue with an open call, then follow the seven steps: type, details, authors, keywords, files, conflicts and review. Your draft saves as you go, and you can submit any time before the deadline.", href: "/venues", cta: "Find an open call" },
-    { id: "edit", title: "Edit or withdraw", body: "Until the deadline you can change anything from the paper’s page. After it, the venue decides what can change. Withdrawing tells the chairs and every co-author.", href: "/workspace/submissions", cta: "My submissions" },
-    { id: "final", title: "Final version and copyright", body: "After acceptance, lock the exact title and author list, sign the copyright form, then upload the final PDF. The page tells you about extra pages and fees before you upload.", href: "/workspace/submissions", cta: "My submissions" },
-    { id: "respond", title: "Respond to reviewers", body: "If the venue has a rebuttal or revision round, the paper’s page shows the reviews and a response form with its own deadline. Answer point by point and keep it polite.", href: "/workspace/submissions", cta: "My submissions" },
+    { id: "edit", title: "Edit or withdraw", body: "Until the deadline you can change anything from the paper’s page. After it, the venue decides what can change. Withdrawing tells the chairs and every co-author.", href: "/workspace/submissions", cta: "My papers" },
+    { id: "final", title: "Final version and copyright", body: "After acceptance, lock the exact title and author list, sign the copyright form, then upload the final PDF. The page tells you about extra pages and fees before you upload.", href: "/workspace/submissions", cta: "My papers" },
+    { id: "respond", title: "Respond to reviewers", body: "If the venue has a rebuttal or revision round, the paper’s page shows the reviews and a response form with its own deadline. Answer point by point and keep it polite.", href: "/workspace/submissions", cta: "My papers" },
   ] },
   { title: "Reviewers", icon: "R", guides: [
     { id: "accept", title: "Accept or decline", body: "Invitations open with one click, without signing in. Declining early helps chairs find someone else — you can suggest a colleague.", href: "/reviews", cta: "My reviews" },
@@ -28,9 +28,9 @@ const GROUPS: { title: string; icon: string; guides: Guide[] }[] = [
     { id: "orcid", title: "Get credit on ORCID", body: "Connect ORCID in your account and Plenary can add your completed reviews to your record, without naming the paper.", href: "/settings", cta: "Account settings" },
   ] },
   { title: "Session chairs", icon: "S", guides: [
-    { id: "run", title: "Run your session", body: "Sessions I chair lists your rooms and talks. On the day, mark talks as started, report delays and keep time — attendees see changes live.", href: "/chair", cta: "Sessions I chair" },
-    { id: "noshow", title: "Report a no-show", body: "Mark the talk as no-show from your session page. The program chairs are told at once and the proceedings rules of the venue apply.", href: "/chair", cta: "Sessions I chair" },
-    { id: "presenters", title: "Message presenters", body: "From the session page, write to all presenters at once. Messages land in their Plenary inbox and by email.", href: "/chair", cta: "Sessions I chair" },
+    { id: "run", title: "Run your session", body: "Talks & sessions lists the sessions you chair, their rooms and talks. On the day, mark talks as started, report delays and keep time — attendees see changes live.", href: "/chair", cta: "Talks & sessions" },
+    { id: "noshow", title: "Report a no-show", body: "Mark the talk as no-show from your session page. The program chairs are told at once and the proceedings rules of the venue apply.", href: "/chair", cta: "Talks & sessions" },
+    { id: "presenters", title: "Message presenters", body: "From the session page, write to all presenters at once. Messages land in their Plenary inbox and by email.", href: "/chair", cta: "Talks & sessions" },
   ] },
   { title: "Your account", icon: "Y", guides: [
     { id: "passkeys", title: "Sign-in and passkeys", body: "Sign in with your email and a password or a one-time code. Add a passkey in Settings to sign in with your fingerprint or face. Plenary never uses PINs.", href: "/settings", cta: "Account settings" },

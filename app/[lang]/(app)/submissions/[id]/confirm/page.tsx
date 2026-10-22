@@ -36,7 +36,7 @@ async function Inner({ params }: P) {
   const deadline = ctx.sub.submittedAt ? new Date(Date.parse(ctx.sub.submittedAt) + 5 * 864e5).toISOString() : null;
   return (
     <WorkspaceShell ctx={ws} active="submissions">
-      <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("My submissions")}</Link> / {t("Co-author request")}</p>
+      <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("Papers")}</Link> / {t("Co-author request")}</p>
       <h1 className="mt-2 font-serif text-[34px] font-normal leading-[1.15]">{t("Confirm you are a co-author")}</h1>
       <p className="mt-1.5 text-[15px] text-[#4A5263]">{t("{name} added you to {no} · {venue}", { name: info?.addedBy ?? corresponding?.name ?? t("A co-author"), no: no4(ctx.sub.number), venue: ctx.venue.acr })}</p>
       <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start">

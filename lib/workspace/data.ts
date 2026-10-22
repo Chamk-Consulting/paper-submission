@@ -83,11 +83,17 @@ export type MyPaper = {
   detail: string;
   checks: { pdf: Check; copyright: Check; registration: Check };
   venue: { id: string; slug: string; name: string; shortName: string | null; kind: string; location: string | null; startsOn: string | null };
+  /** A co-author request I still have to confirm. */
+  pending: boolean;
+  updatedAt: string;
+  /** Other authors' names, for search. */
+  authors: string[];
 };
 
 type Row = {
   is_corresponding: boolean;
   position: number;
+  confirmation: string | null;
   submissions: {
     id: string; number: number | null; title: string; paper_type: string; stage: Stage; stage_detail: string | null; draft_step: number | null;
     pdf_check: Check; copyright_check: Check; registration_check: Check; updated_at: string;
@@ -102,7 +108,7 @@ export async function getMyPapers(personId: string | undefined): Promise<{ ready
   const { data, error } = await supabase
     .from("submission_authors")
     .select(
-      "is_corresponding, position, submissions(id, number, title, paper_type, stage, stage_detail, draft_step, pdf_check, copyright_check, registration_check, updated_at, venues(id, slug, name, short_name, kind, location, starts_on))",
+      "is_corresponding, position, confirmation, submissions(id, number, title, paper_type, stage, stage_detail, draft_step, pdf_check, copyright_check, registration_check, updated_at, venues(id, slug, name, short_name, kind, location, starts_on))",
     )
     .eq("person_id", personId);
   if (error) return { ready: false, papers: [] };
@@ -115,15 +121,26 @@ export async function getMyPapers(personId: string | undefined): Promise<{ ready
       const role = r.is_corresponding ? "Corresponding author" : r.position === 1 ? "Author" : "Co-author";
       const detail = s.stage === "draft" ? `Step ${Math.min(s.draft_step ?? 1, 7)} of 7` : s.stage_detail ?? "";
       const STEP = ["type", "type", "details", "authors", "keywords", "files", "conflicts", "review"];
-      const href = s.stage === "draft" ? `/submissions/${s.id}/${STEP[Math.min(s.draft_step ?? 1, 7)]}` : `/submissions/${s.id}`;
+      const pending = r.confirmation === "pending";
+      const href = pending ? `/submissions/${s.id}/confirm` : s.stage === "draft" ? `/submissions/${s.id}/${STEP[Math.min(s.draft_step ?? 1, 7)]}` : `/submissions/${s.id}`;
       return {
         id: s.id, href, number: s.number, title: s.title, paperType: s.paper_type, role, stage: s.stage, detail,
         checks: { pdf: s.pdf_check, copyright: s.copyright_check, registration: s.registration_check },
         venue: { id: v.id, slug: v.slug, name: v.name, shortName: v.short_name, kind: v.kind, location: v.location, startsOn: v.starts_on },
-        _updated: s.updated_at,
+        pending, updatedAt: s.updated_at, authors: [] as string[],
       };
     })
-    .sort((a, b) => (a._updated < b._updated ? 1 : -1))
-    .map(({ _updated, ...p }) => { void _updated; return p; });
+    .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  // co-authors' names, so a search for "Rabeh" finds the paper (rows the person can't see are simply missing)
+  if (papers.length) {
+    const { data: co } = await supabase.from("submission_authors").select("submission_id, persons(display_name, given_name, family_name)")
+      .in("submission_id", papers.map((p) => p.id)).neq("person_id", personId);
+    const by = new Map<string, string[]>();
+    for (const r of (co ?? []) as unknown as { submission_id: string; persons: { display_name: string | null; given_name: string | null; family_name: string | null } | null }[]) {
+      const n = r.persons ? r.persons.display_name || [r.persons.given_name, r.persons.family_name].filter(Boolean).join(" ") : "";
+      if (n) by.set(r.submission_id, [...(by.get(r.submission_id) ?? []), n]);
+    }
+    for (const p of papers) p.authors = by.get(p.id) ?? [];
+  }
   return { ready: true, papers };
 }

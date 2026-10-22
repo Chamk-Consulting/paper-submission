@@ -31,8 +31,10 @@ const ic = (C: typeof House) => <C {...I} />;
 
 /* ---------------------------------------------------------------- the tree */
 
-export type Leaf = { kind: "leaf"; key: string; label: string; icon?: ReactNode; href: string; count?: number; on: boolean; isNew?: boolean };
-export type Group = { kind: "group"; key: string; label: string; icon: ReactNode; items: MenuNode[]; def?: string; dot?: string };
+/** `warn`: the count is amber (something due within 7 days). */
+export type Leaf = { kind: "leaf"; key: string; label: string; icon?: ReactNode; href: string; count?: number; warn?: boolean; on: boolean; isNew?: boolean };
+/** `toggle`: the name only opens and closes the group (My work), instead of going to a page. */
+export type Group = { kind: "group"; key: string; label: string; icon: ReactNode; items: MenuNode[]; def?: string; dot?: string; toggle?: boolean };
 type MenuNode = Leaf | Group;
 
 const ORGANIZER_ROLES = /^(owner|chair|program_chair|deputy_chair|ceb_chair|publication_chair|registration_chair|staff)$/;
@@ -96,15 +98,18 @@ function useOrganizer(p: string, s: Summary | null) {
 
 /** Everything in the middle part, in order. Rows the person can't use are left out. */
 function useMiddle(p: string, s: Summary | null) {
-  const reviewer = hasRole(s, /^(reviewer|associate_editor|chair|program_chair|deputy_chair|owner)$/) || p.startsWith("/reviews");
-  const sessionChair = hasRole(s, /^session_chair$/) || p.startsWith("/chair");
+  // Rows by role: Papers and Agenda for everyone; Reviews once you've been asked to review; Talks & sessions once you
+  // chair a session or have an accepted paper. Counts are only what waits for you.
+  const w = s?.work;
+  const reviewer = !!w?.hasReviews || hasRole(s, /^(reviewer|associate_editor)$/) || p.startsWith("/reviews");
+  const talks = !!w?.hasTalks || hasRole(s, /^session_chair$/) || p.startsWith("/chair");
   const myWork: Group = {
-    kind: "group", key: "work", label: "My work", icon: ic(Briefcase), def: "subs",
+    kind: "group", key: "work", label: "My work", icon: ic(Briefcase), def: "subs", toggle: true,
     items: [
-      { kind: "leaf", key: "subs", label: "My submissions", icon: ic(FileText), href: "/workspace/submissions", count: s?.submissionCount, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
-      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "Reviews to write", icon: ic(PenLine), href: "/reviews", on: p.startsWith("/reviews") }] : []),
-      ...(sessionChair ? [{ kind: "leaf" as const, key: "chair", label: "Sessions I chair", icon: ic(Presentation), href: "/chair", on: p.startsWith("/chair") }] : []),
-      { kind: "leaf", key: "schedule", label: "My schedule", icon: ic(CalendarClock), href: "/workspace/schedule", on: p.startsWith("/workspace/schedule") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
+      { kind: "leaf", key: "subs", label: "Papers", icon: ic(FileText), href: "/workspace/submissions", count: w?.papers || undefined, warn: w?.papersSoon, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
+      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "Reviews", icon: ic(PenLine), href: "/reviews", count: w?.reviews || undefined, warn: w?.reviewsSoon, on: p.startsWith("/reviews") }] : []),
+      ...(talks ? [{ kind: "leaf" as const, key: "chair", label: "Talks & sessions", icon: ic(Presentation), href: "/chair", on: p.startsWith("/chair") }] : []),
+      { kind: "leaf", key: "schedule", label: "Agenda", icon: ic(CalendarClock), href: "/workspace/schedule", on: p.startsWith("/workspace/schedule") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
     ],
   };
   const current = s?.currentEvents ?? [];
@@ -195,15 +200,18 @@ const rowBase = "flex items-center gap-2.5 rounded-[6px] px-3 text-[14px] no-und
 const rowOn = "bg-[#E6EDFC] font-semibold text-[#0E1B3D]";
 const rowOff = "text-[#121826] hover:bg-[#F5F6F3]";
 
-function Count({ n }: { n?: number }) {
-  return n ? <span className="ms-auto font-mono text-[12px] text-[#4A5263] rail:hidden">{n > 99 ? "99+" : n}</span> : null;
+function Count({ n, warn }: { n?: number; warn?: boolean }) {
+  if (!n) return null;
+  return warn
+    ? <span className="ms-auto rounded-full bg-[#FBEFDD] px-1.5 font-mono text-[12px] font-semibold text-[#7A4508] rail:hidden">{n > 99 ? "99+" : n}</span>
+    : <span className="ms-auto font-mono text-[12px] text-[#4A5263] rail:hidden">{n > 99 ? "99+" : n}</span>;
 }
 
 function LeafRow({ l, depth, onPick, t }: { l: Leaf; depth: number; onPick?: () => void; t: (k: string) => string }) {
   return (
     <Link href={l.href} onClick={onPick} aria-current={l.on ? "page" : undefined} prefetch={depth === 0 ? null : undefined}
       className={`${rowBase} ${depth ? "h-[34px]" : "h-9"} ${l.on ? rowOn : rowOff}`}>
-      {depth > 1 ? null : l.icon}<span className="min-w-0 truncate">{t(l.label)}</span><Count n={l.count} />
+      {depth > 1 ? null : l.icon}<span className="min-w-0 truncate">{t(l.label)}</span><Count n={l.count} warn={l.warn} />
     </Link>
   );
 }
@@ -219,10 +227,17 @@ function GroupRow({ g, depth, open, onFold, last, onPick, t }: {
   return (
     <div>
       <div className={`group/row flex items-center rounded-[6px] ${active && !isOpen ? "bg-[#EEF2FB]" : ""} hover:bg-[#F5F6F3]`}>
-        <Link href={go.href} onClick={() => { onFold(g.key, true); onPick?.(); }} title={t(g.label)}
-          className={`flex h-9 min-w-0 flex-auto items-center gap-2.5 ps-3 text-[14px] no-underline ${active ? "font-semibold text-[#0E1B3D]" : "text-[#121826]"}`}>
-          {g.icon}<span className="min-w-0 truncate">{t(g.label)}</span>
-        </Link>
+        {g.toggle ? (
+          <button type="button" onClick={() => onFold(g.key, !isOpen)} tabIndex={-1} aria-hidden title={t(g.label)}
+            className={`flex h-9 min-w-0 flex-auto cursor-pointer items-center gap-2.5 border-0 bg-transparent ps-3 text-start text-[14px] ${active ? "font-semibold text-[#0E1B3D]" : "text-[#121826]"}`}>
+            {g.icon}<span className="min-w-0 truncate">{t(g.label)}</span>
+          </button>
+        ) : (
+          <Link href={go.href} onClick={() => { onFold(g.key, true); onPick?.(); }} title={t(g.label)}
+            className={`flex h-9 min-w-0 flex-auto items-center gap-2.5 ps-3 text-[14px] no-underline ${active ? "font-semibold text-[#0E1B3D]" : "text-[#121826]"}`}>
+            {g.icon}<span className="min-w-0 truncate">{t(g.label)}</span>
+          </Link>
+        )}
         <button type="button" aria-expanded={isOpen} aria-label={t(g.label)}
           onClick={() => onFold(g.key, !isOpen)}
           className="flex size-9 flex-none cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#E9ECF2]">

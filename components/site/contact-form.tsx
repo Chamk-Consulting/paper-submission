@@ -79,7 +79,7 @@ export function ContactPage({ initialTab, email, signedIn, tone = "navy" }: { in
             <div className="flex min-w-0 max-w-[760px] flex-[999_1_560px] flex-col gap-4">
               <div className="flex items-start gap-3 rounded-[8px] bg-[#E6EDFC] px-4 py-3.5 text-[14px] text-[#1F2E5C]">
                 <Info size={18} strokeWidth={1.75} color="#1F47A8" className="mt-px flex-none" aria-hidden />
-                <span><strong>{t("About a paper’s review, deadline or decision?")}</strong> {t("The venue’s chairs decide those, not Plenary. Message them from the paper’s page in")} <Link href="/workspace/submissions" className="text-[#1F47A8]">{t("My submissions")}</Link>.</span>
+                <span><strong>{t("About a paper’s review, deadline or decision?")}</strong> {t("The venue’s chairs decide those, not Plenary. Message them from the paper’s page in")} <Link href="/workspace/submissions" className="text-[#1F47A8]">{t("My papers")}</Link>.</span>
               </div>
 
               <form action={submit} noValidate className="flex flex-col gap-[22px] rounded-[8px] border border-[#DADDE3] bg-white p-5 sm:p-7">

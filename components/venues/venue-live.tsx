@@ -136,7 +136,7 @@ function MyStatus({ venueId, acr, slug }: { venueId: string; acr: string; slug: 
   }, [venueId]);
   if (s === undefined) return <div aria-busy="true" className="mt-2 h-14 animate-pulse rounded-[6px] bg-[#F5F6F3]" />;
   const empty = !s || (!s.roles.length && !s.papers.length && !s.reviews.length);
-  if (empty) return <p className="mt-1.5 text-[14px] text-[#4A5263]">{t("You have no papers or roles at {acr} yet.", { acr })} <Link href="/workspace/submissions" className="text-[#2F5FD0] underline">{t("My submissions")}</Link></p>;
+  if (empty) return <p className="mt-1.5 text-[14px] text-[#4A5263]">{t("You have no papers or roles at {acr} yet.", { acr })} <Link href="/workspace/submissions" className="text-[#2F5FD0] underline">{t("My papers")}</Link></p>;
   const no = (n: number | null) => (n ? `#${String(n).padStart(4, "0")}` : t("Draft"));
   return (
     <>

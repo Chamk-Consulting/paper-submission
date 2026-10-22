@@ -25,7 +25,7 @@ async function Inner({ params, searchParams }: P) {
   const subject = `${no4(ctx.sub.number)} · ${about === "decision" ? t("Question about the decision") : about === "withdraw" ? t("Question about withdrawing") : t("Question about my paper")}`;
   return (
     <WorkspaceShell ctx={ws} active="submissions">
-      <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("My submissions")}</Link> / <Link href={`/submissions/${id}`} className="text-[#121826] underline">{no4(ctx.sub.number)}</Link> / {t("Message")}</p>
+      <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("Papers")}</Link> / <Link href={`/submissions/${id}`} className="text-[#121826] underline">{no4(ctx.sub.number)}</Link> / {t("Message")}</p>
       <h1 className="mt-2 font-serif text-[34px] font-normal leading-[1.15]">{t("Message the program chair")}</h1>
       <p className="mt-1.5 text-[15px] text-[#4A5263]">{ctx.sub.title} · {ctx.venue.acr}</p>
       <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start">

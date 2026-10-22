@@ -20,49 +20,51 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("Reviews") };
 }
 
-async function Inner() {
+type Search = { tab?: string; q?: string; event?: string; sort?: string; week?: string };
+
+async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
   // everything starts together; the shell summary no longer holds up the page's own queries
-  const [ctx, reviews, overview, avail, t] = await Promise.all([
-    getWorkspaceCtx(), getMyReviews(), getOverview(), getMe().then((m) => getAvailability(m?.person?.id)), getT(),
+  const [ctx, reviews, overview, avail, t, sp] = await Promise.all([
+    getWorkspaceCtx(), getMyReviews(), getOverview(), getMe().then((m) => getAvailability(m?.person?.id)), getT(), searchParams,
   ]);
   if (!ctx) redirect("/sign-in?next=/reviews");
   const now = nowMs();
   const certs = certificateVenues(reviews);
 
   const rows: Row[] = reviews.map((r) => {
-    const base = { id: r.assignment_id, no: paperNo(r.paper_number), title: r.title };
+    const base = { id: r.assignment_id, no: paperNo(r.paper_number), title: r.title, venue: r.venue_short, venueSlug: r.venue_slug, num: r.paper_number };
     const due = daysUntil(r.due_at, now);
     if (r.status === "invited") {
-      return { ...base, tab: "todo", tone: "b", tag: t("INVITATION"), detail: `${r.venue_short} · ${t("reply by {d}", { d: fmtDay(r.reply_by, t.intl) })}`,
+      return { ...base, tab: "answer", at: r.reply_by, week: daysUntil(r.reply_by, now) <= 7, tone: "b", tag: t("INVITATION"), detail: `${r.venue_short} · ${t("reply by {d}", { d: fmtDay(r.reply_by, t.intl) })}`,
         when: relDay(r.reply_by, now, t.intl), soon: daysUntil(r.reply_by, now) <= 2, cta: t("Respond"), href: `/reviews/invitations/${r.assignment_id}` };
     }
     if (r.status === "accepted") {
       const r2 = r.round > 1;
-      return { ...base, tab: "todo", tone: "a", tag: r2 ? t("ROUND 2") : t("IN PROGRESS"),
+      return { ...base, tab: "write", at: r.due_at, week: due <= 7, tone: "a", tag: r2 ? t("ROUND 2") : t("IN PROGRESS"),
         detail: `${r.venue_short} · ${r2 ? t("revised paper") : r.draft_scores ? t("draft saved") : t("not started")} · ${t("due {d}", { d: fmtDay(r.due_at, t.intl) })}`,
         when: due < 0 ? t("overdue") : relDay(r.due_at, now, t.intl), soon: due <= 3,
         cta: r2 || !r.draft_scores ? t("Start") : t("Continue"), href: r2 ? `/reviews/${r.assignment_id}/round-2` : `/reviews/${r.assignment_id}` };
     }
     if (r.status === "submitted" && !r.decision_released && r.discussion_posts > 0) {
-      return { ...base, tab: "todo", tone: "b", tag: t("DISCUSSION"), detail: `${r.venue_short} · ${t("{n} messages", { n: r.discussion_posts })}`,
+      return { ...base, tab: "write", at: r.submitted_at ?? r.due_at, week: false, tone: "b", tag: t("DISCUSSION"), detail: `${r.venue_short} · ${t("{n} messages", { n: r.discussion_posts })}`,
         when: r.submitted_at ? relDay(r.submitted_at, now, t.intl) : "", soon: false, cta: t("Join"), href: `/reviews/${r.assignment_id}/discussion` };
     }
     if (r.status === "submitted") {
-      return { ...base, tab: "done", tone: "g", tag: r.decision_released ? t("DECIDED") : t("SUBMITTED"),
+      return { ...base, tab: "done", at: r.submitted_at ?? r.due_at, week: false, tone: "g", tag: r.decision_released ? t("DECIDED") : t("SUBMITTED"),
         detail: `${r.venue_short} · ${t("submitted {d}", { d: fmtDay(r.submitted_at, t.intl) })}`,
         when: r.submitted_at ? relDay(r.submitted_at, now, t.intl) : "", soon: false,
         cta: r.decision_released ? t("Check") : t("View"), href: r.decision_released ? `/reviews/${r.assignment_id}/decision` : `/reviews/${r.assignment_id}/submitted` };
     }
     const label = r.status === "expired" ? t("EXPIRED") : r.status === "handed_back" ? t("HANDED BACK") : r.status === "cancelled" ? t("CANCELLED") : t("DECLINED");
-    return { ...base, tab: "declined", tone: "n", tag: label, detail: r.venue_short, when: fmtDay(r.reply_by, t.intl), soon: false, cta: t("View"), href: `/reviews/invitations/${r.assignment_id}` };
+    return { ...base, tab: "declined", at: r.reply_by, week: false, tone: "n", tag: label, detail: r.venue_short, when: fmtDay(r.reply_by, t.intl), soon: false, cta: t("View"), href: `/reviews/invitations/${r.assignment_id}` };
   });
 
   return (
     <WorkspaceShell ctx={ctx} active="reviews">
       <Head kicker={t("Reviewer")} title={t("Reviews")} sub={t("Invitations to review, reviews in progress and everything you have submitted.")}
-        right={<Link href="/settings" className="text-[14px] text-[#2F5FD0] no-underline hover:underline">{t("Edit my review topics →")}</Link>} />
+        right={<Link href="/settings/reviewing" className="text-[14px] text-[#2F5FD0] no-underline hover:underline">{t("Edit my review topics →")}</Link>} />
       <Cols
-        main={<ReviewsList rows={rows} />}
+        main={<ReviewsList rows={rows} init={sp} />}
         aside={
           <>
             <section className={box}>
@@ -105,10 +107,10 @@ async function Inner() {
 }
 
 /** Canvas RV01-Reviews. */
-export default function Page() {
+export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
   return (
     <Reveal fallback={<ReviewSkeleton variant="list" />}>
-      <Inner />
+      <Inner searchParams={searchParams} />
     </Reveal>
   );
 }

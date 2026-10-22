@@ -8,6 +8,7 @@ export type Summary = {
   venues?: VenueRef[]; organizerOf?: string | null; isAdmin?: boolean;
   following?: { slug: string; name: string; shortName: string | null }[];
   currentEvents?: { slug: string; name: string }[]; myEventsCount?: number; followingCount?: number;
+  work?: { papers: number; papersSoon: boolean; reviews: number; reviewsSoon: boolean; hasReviews: boolean; hasTalks: boolean };
   timezone?: string | null; ui?: import("@/lib/account/ui-prefs").UiPrefs;
 };
 
