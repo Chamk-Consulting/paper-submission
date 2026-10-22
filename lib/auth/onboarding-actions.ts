@@ -1,21 +1,34 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { absoluteUrl, safeNext } from "@/lib/config/site";
+import { scorePassword } from "@/lib/auth/password-rules";
+import { isPwnedPassword } from "@/lib/auth/pwned";
+import { turnstileOk } from "@/lib/site/turnstile";
 
-export type StartState = { message?: string; fieldErrors?: Record<string, string[] | undefined> };
+export type StartState = {
+  message?: string;
+  fieldErrors?: Record<string, string[] | undefined>;
+  /** The email already has a confirmed Plenary account: offer sign-in instead. */
+  exists?: { email: string };
+};
 
 const startSchema = z.object({
   firstName: z.string().trim().min(1, "Enter your first and last name as they appear on your papers.").max(120),
   lastName: z.string().trim().min(1, "Enter your first and last name as they appear on your papers.").max(120),
-  email: z.string().trim().toLowerCase().max(254).email("That doesn’t look like a full email, e.g. name@university.edu"),
-  affiliation: z.string().trim().max(200).optional(),
+  email: z.string().trim().toLowerCase().min(1, "Enter your email address.").max(254).email("That doesn’t look like a full email, e.g. name@university.edu"),
+  password: z.string().max(128, "Use 128 characters or fewer."),
+  confirm: z.string(),
   consent: z.literal("on", { message: "Please agree to continue." }),
   next: z.string().optional(),
   venue: z.string().optional(),
 });
+
+const SIGNUPS_PER_HOUR = 8;
 
 function verifyUrl(email: string, next?: string, venue?: string, name?: string) {
   const q = new URLSearchParams({ email });
@@ -25,31 +38,74 @@ function verifyUrl(email: string, next?: string, venue?: string, name?: string) 
   return `/create-account/verify?${q.toString()}`;
 }
 
-/** PR06 step 1: create the account (no password) and email a 6-digit code + link. */
+function profileHref(next?: string) {
+  return `/create-account/profile${next ? `?next=${encodeURIComponent(safeNext(next))}` : ""}`;
+}
+
+const emailLimited = (e: { status?: number; code?: string; message: string }) =>
+  e.status === 429 || e.code === "over_email_send_rate_limit" || /rate limit|too many/i.test(e.message);
+
+/** A few sign-ups per hour per visitor (keyed hash of the IP). Skipped on a database without the counter. */
+async function tooManySignups(supabase: Awaited<ReturnType<typeof createClient>>): Promise<boolean> {
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || "";
+  if (!ip) return false;
+  const key = createHash("sha256").update(`signup|${ip}|${process.env.PLENARY_SIGNING_SECRET ?? ""}`).digest("hex").slice(0, 32);
+  const { data, error } = await supabase.rpc("note_auth_attempt", { p_kind: "signup", p_key_hash: key, p_window_minutes: 60 });
+  return !error && Number(data) > SIGNUPS_PER_HOUR;
+}
+
+/**
+ * PR06 step 1: create the account with a password, then email a code + link to confirm the address.
+ * An email that already has a confirmed account is told so (with Sign in / reset / code options) — protected by
+ * the CAPTCHA and a per-visitor limit so the form can't be used to check emails in bulk.
+ */
 export async function startSignup(_: StartState, formData: FormData): Promise<StartState> {
   const parsed = startSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
-  const { firstName, lastName, email, affiliation, next, venue } = parsed.data;
+  const { firstName, lastName, email, password, confirm, next, venue } = parsed.data;
 
+  const rules = scorePassword(password, email);
+  if (!rules.ok) return { fieldErrors: { password: ["Choose a password that meets all three rules."] } };
+  if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
+
+  const h = await headers();
+  if (!(await turnstileOk(formData, (h.get("x-forwarded-for") ?? "").split(",")[0].trim()))) {
+    return { message: "Please confirm you're not a robot, then try again." };
+  }
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
+  if (await tooManySignups(supabase)) {
+    return { message: "Too many sign-up attempts from this connection. Please wait an hour and try again." };
+  }
+  if (await isPwnedPassword(password)) {
+    return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
+  }
+
+  const { data, error } = await supabase.auth.signUp({
     email,
+    password,
     options: {
-      shouldCreateUser: true,
-      data: { given_name: firstName, family_name: lastName, affiliation: affiliation || null, consent_at: new Date().toISOString() },
-      emailRedirectTo: absoluteUrl(`/auth/confirm?next=${encodeURIComponent("/create-account/profile")}`),
-      // TODO(auth): captchaToken (Cloudflare Turnstile).
+      data: { given_name: firstName, family_name: lastName, consent_at: new Date().toISOString() },
+      emailRedirectTo: absoluteUrl(`/auth/confirm?next=${encodeURIComponent(profileHref(next))}`),
     },
   });
-  // Rate limited: a code was sent moments ago, so still go to the code screen and say so.
-  const limited = !!error && (error.status === 429 || /rate limit|seconds|too many/i.test(error.message));
-  // Anything else (the email could not be sent, the address was refused): say so instead of showing a code screen for an email that never left.
-  if (error && !limited) {
-    console.error("[signup] code not sent:", error.status, error.message);
-    return { message: "We couldn’t send the confirmation email to that address. Check it and try again — or try another address." };
+
+  if (error) {
+    const code = error.code ?? "";
+    if (code === "user_already_exists" || code === "email_exists" || /already registered|already exists/i.test(error.message)) return { exists: { email } };
+    if (code === "weak_password" || /weak|pwned|leaked/i.test(error.message)) {
+      return { fieldErrors: { password: ["That password isn't accepted. Choose a longer one you don't use anywhere else."] } };
+    }
+    if (emailLimited(error)) {
+      return { message: "We can’t send confirmation emails right now — too many were sent in the last hour. Please try again a little later." };
+    }
+    console.error("[signup] failed:", error.status, code, error.message);
+    return { message: "We couldn’t create your account. Check your email address and try again." };
   }
-  // Existing accounts get a sign-in code instead — same screen, no account enumeration.
-  redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`) + (limited ? "&wait=1" : ""));
+  // Supabase answers an existing, confirmed email with a user that has no sign-in identities (and sends nothing).
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) return { exists: { email } };
+
+  redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`));
 }
 
 export type ResendResult = { ok: boolean; message?: string };
@@ -59,23 +115,23 @@ export async function resendSignupCode(email: string): Promise<ResendResult> {
   const parsed = z.string().email().safeParse(email);
   if (!parsed.success) return { ok: false, message: "That email doesn’t look right." };
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email: parsed.data,
-    options: { shouldCreateUser: true, emailRedirectTo: absoluteUrl(`/auth/confirm?next=${encodeURIComponent("/create-account/profile")}`) },
-  });
-  if (error && (error.status === 429 || /rate limit|seconds/i.test(error.message))) {
-    return { ok: false, message: "Please wait a little longer before asking again." };
-  }
+  const { error } = await supabase.auth.resend({ type: "signup", email: parsed.data });
+  if (!error) return { ok: true };
+  if (emailLimited(error)) return { ok: false, message: "Email sending is paused for a little while (too many emails this hour). Please try again later." };
+  // Already confirmed (e.g. confirmed by the link in another tab): a sign-in code works the same way.
+  const { error: e2 } = await supabase.auth.signInWithOtp({ email: parsed.data, options: { shouldCreateUser: false } });
+  if (e2 && emailLimited(e2)) return { ok: false, message: "Email sending is paused for a little while (too many emails this hour). Please try again later." };
   return { ok: true };
 }
 
 export type VerifyResult = { ok: true } | { ok: false; reason: "wrong" | "locked" | "invalid" };
 
-/** PR07: check the 6-digit code. On success the person is signed in (cookies set). */
+/** PR07: check the emailed code. On success the person is signed in (cookies set). */
 export async function verifySignupCode(email: string, code: string): Promise<VerifyResult> {
   if (!z.string().email().safeParse(email).success || !/^\d{6,10}$/.test(code)) return { ok: false, reason: "invalid" };
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+  let { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+  if (error && error.status !== 429) ({ error } = await supabase.auth.verifyOtp({ email, token: code, type: "signup" }));
   if (!error) return { ok: true };
   if (error.status === 429) return { ok: false, reason: "locked" };
   return { ok: false, reason: "wrong" };

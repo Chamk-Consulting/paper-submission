@@ -35,15 +35,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           <SetupSteps
             doneLabel={t("Done")}
             steps={[
-              { title: t("Your name and email"), text: t("So co-authors and chairs can find you."), state: "current" },
-              { title: t("Confirm your email"), text: t("A 6-digit code, valid for 15 minutes."), state: "next" },
+              { title: t("Your name, email and password"), text: t("So co-authors and chairs can find you."), state: "current" },
+              { title: t("Confirm your email"), text: t("A code by email, valid for 15 minutes."), state: "next" },
               { title: t("Your research profile"), text: t("Affiliation and ORCID — then you get your Plenary ID."), state: "next" },
             ]}
           />
           <div className="mt-4 grid max-w-[560px] grid-cols-3 gap-4 border-t border-[#24335C] pt-6">
             <div><div className="text-[14px] font-semibold">{t("Your Plenary ID")}</div><div className="mt-0.5 text-[13px] text-[#B9C3DA]">{t("Given on day one. Chairs find you with it.")}</div></div>
             <div><div className="text-[14px] font-semibold">{t("Works with ORCID")}</div><div className="mt-0.5 text-[13px] text-[#B9C3DA]">{t("Fill in your profile in one click.")}</div></div>
-            <div><div className="text-[14px] font-semibold">{t("No password to forget")}</div><div className="mt-0.5 text-[13px] text-[#B9C3DA]">{t("Email codes or a passkey.")}</div></div>
+            <div><div className="text-[14px] font-semibold">{t("Safe sign-in")}</div><div className="mt-0.5 text-[13px] text-[#B9C3DA]">{t("Passwords are checked against known leaks.")}</div></div>
           </div>
         </NavyAside>
       }

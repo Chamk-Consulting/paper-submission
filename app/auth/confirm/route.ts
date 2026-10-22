@@ -38,7 +38,7 @@ function page(tokenHash: string, type: string, next: string) {
   const sans = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
   const mono = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><meta name="referrer" content="no-referrer"><title>${esc(c.title)} · Plenary</title></head>
+<meta name="robots" content="noindex"><meta name="referrer" content="same-origin"><title>${esc(c.title)} · Plenary</title></head>
 <body style="margin:0;min-height:100vh;background:#EEF0EC;font:16px/1.55 ${sans};color:#121826">
 <main style="max-width:480px;margin:0 auto;padding:56px 16px">
 <div style="background:#fff;border:1px solid #DADDE3;border-radius:10px;padding:32px 28px">
@@ -91,10 +91,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const { origin } = request.nextUrl;
+  // Cross-site posts are refused. Browsers may send Origin "null" for this page's own form (privacy settings),
+  // so fall back to Fetch Metadata: same-origin (or a direct navigation) is fine.
   const sentFrom = request.headers.get("origin");
-  if (sentFrom && sentFrom !== origin) return NextResponse.redirect(new URL("/auth-error?reason=link", origin), 303);
+  const site = request.headers.get("sec-fetch-site");
+  const crossSite = sentFrom && sentFrom !== "null" ? sentFrom !== origin : site === "cross-site";
+  if (crossSite) return NextResponse.redirect(new URL("/auth-error?reason=link", origin), 303);
 
-  const form = await request.formData();
+  const form = await request.formData().catch(() => null);
+  if (!form) return NextResponse.redirect(new URL("/auth-error?reason=link", origin), 303);
   const tokenHash = String(form.get("token_hash") ?? "");
   const type = String(form.get("type") ?? "");
   const next = safeNext(String(form.get("next") ?? ""));

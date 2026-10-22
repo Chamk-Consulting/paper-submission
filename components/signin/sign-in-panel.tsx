@@ -3,7 +3,6 @@
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { detectIdentifier, type Detected } from "@/lib/auth/identifier";
-import { startSignup, type StartState } from "@/lib/auth/onboarding-actions";
 import {
   sendSignInCode,
   signInWithPassword,
@@ -19,8 +18,6 @@ import type { DeviceAccount } from "@/lib/auth/device-accounts";
 /* Canvas PR02 tokens */
 const INK = "text-[#121826]";
 const MUTED = "text-[#4A5263]";
-const INPUT =
-  "h-11 box-border rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[16px] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]";
 const LABEL = "text-[14px] font-medium";
 const PRIMARY =
   "flex h-[46px] w-full items-center justify-center rounded-[4px] border-0 bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] hover:bg-[#E89B26] disabled:opacity-60";
@@ -73,15 +70,15 @@ const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><path d="M15 9a6 6 0 1 1-1.8-4.3M15 3.5V7h-3.5" /></svg>
 );
 
-export function SignInPanel({ next, initialTab = "signin", senderDomain = "[sender domain]" }: { next?: string; initialTab?: "signin" | "create"; senderDomain?: string }) {
-  const [tab, setTab] = useState<"signin" | "create">(initialTab);
-  const [identifier, setIdentifier] = useState("");
+export function SignInPanel({ next, senderDomain = "[sender domain]", initialIdentifier = "" }: { next?: string; senderDomain?: string; initialIdentifier?: string }) {
+  const tab = "signin" as const;
+  const [identifier, setIdentifier] = useState(initialIdentifier);
   const [showPass, setShowPass] = useState(false);
   const [soon, setSoon] = useState<string | null>(null);
   const t = useT();
   // PR03: accounts used on this device. The chooser shows until one is picked or "Use another account".
   const [accounts, removeAccount] = useDeviceAccounts();
-  const [chooserDone, setChooserDone] = useState(false);
+  const [chooserDone, setChooserDone] = useState(!!initialIdentifier);
   const [picked, setPicked] = useState<DeviceAccount | null>(null);
   const showChooser = !chooserDone && accounts.length > 0;
   const pick = (a: DeviceAccount) => { setPicked(a); setIdentifier(a.id ?? ""); setChooserDone(true); };
@@ -89,7 +86,6 @@ export function SignInPanel({ next, initialTab = "signin", senderDomain = "[send
 
   const [pwState, pwAction, pwPending] = useActionState(signInWithPassword, {} as SignInState);
   const [codeState, codeAction, codePending] = useActionState(sendSignInCode, {} as SignInState);
-  const [createState, createAction, createPending] = useActionState(startSignup, {} as StartState);
 
   // The code step shows when the current tab's action just sent a code (until "Use a different email").
   const [dismissed, setDismissed] = useState<SignInState | null>(null);
@@ -107,8 +103,8 @@ export function SignInPanel({ next, initialTab = "signin", senderDomain = "[send
   return (
     <div className="w-full max-w-[420px]">
       <div role="tablist" aria-label={t("Account")} className="flex gap-1 rounded-[6px] bg-[#E9EBE6] p-1">
-        <button type="button" role="tab" aria-selected={tab === "signin"} className={tabBtn(tab === "signin")} onClick={() => { setTab("signin"); setSoon(null); }}>{t("Sign in")}</button>
-        <button type="button" role="tab" aria-selected={tab === "create"} className={tabBtn(tab === "create")} onClick={() => { setTab("create"); setSoon(null); }}>{t("Create account")}</button>
+        <span role="tab" aria-selected className={tabBtn(true) + " flex items-center justify-center"}>{t("Sign in")}</span>
+        <Link href={`/create-account${next ? `?next=${encodeURIComponent(next)}` : ""}`} role="tab" aria-selected={false} className={tabBtn(false) + " flex items-center justify-center no-underline"}>{t("Create account")}</Link>
       </div>
 
       {sent ? (
@@ -191,45 +187,8 @@ export function SignInPanel({ next, initialTab = "signin", senderDomain = "[send
           </div>
           <p className={`mt-5 text-[14px] ${MUTED}`}>{t("Had a PIN on another conference system?")} <Link href="/contact?topic=import" className={LINK}>{t("Bring your history")}</Link></p>
         </>
-      ) : (
-        <CreateStep state={createState} action={createAction} pending={createPending} next={next} onOrcid={() => comingSoon("ORCID")} soon={soon} />
-      )}
+      ) : null}
     </div>
-  );
-}
-
-function CreateStep({ state, action, pending, next, onOrcid, soon }: {
-  state: StartState; action: (fd: FormData) => void; pending: boolean; next?: string; onOrcid: () => void; soon: string | null;
-}) {
-  const t = useT();
-  const e = state.fieldErrors;
-  const nameErr = e?.firstName?.[0] ?? e?.lastName?.[0];
-  const inv = (k: string) => (e?.[k]?.length ? { "aria-invalid": true as const, style: { borderColor: "#B3261E" } } : {});
-  return (
-    <>
-      <h1 className={`mt-7 ${H1}`}>{t("Create your account")}</h1>
-      <p className={`mt-2 ${MUTED}`}>{t("Free for authors and reviewers. Takes about a minute.")}</p>
-      {state.message ? <Banner>{t(state.message)}</Banner> : null}
-      {soon ? <Banner tone="info">{soon}</Banner> : null}
-      <button type="button" onClick={onOrcid} className={`mt-5 h-[46px] w-full text-[15px] font-semibold ${SECONDARY}`}><OrcidIcon />{t("Fill in from ORCID")}</button>
-      <form action={action} noValidate>
-        <input type="hidden" name="next" value={next ?? ""} />
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-first" className={LABEL}>{t("First name")}</label><input id="pr-first" name="firstName" autoComplete="given-name" className={INPUT} {...inv("firstName")} /></div>
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-last" className={LABEL}>{t("Last name")}</label><input id="pr-last" name="lastName" autoComplete="family-name" className={INPUT} {...inv("lastName")} /></div>
-        </div>
-        {nameErr ? <p className="mt-1.5 text-[13px] text-[#B3261E]">{t(nameErr)}</p> : null}
-        <div className="mt-3 flex flex-col gap-3">
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-cemail" className={LABEL}>{t("Email")}</label><input id="pr-cemail" name="email" type="email" autoComplete="email" placeholder={t("Institutional email preferred")} className={INPUT} {...inv("email")} /><FieldError id="e-email" errors={e?.email} /></div>
-          <div className="flex flex-col gap-1.5"><label htmlFor="pr-aff" className={LABEL}>{t("Affiliation")}</label><input id="pr-aff" name="affiliation" autoComplete="organization" placeholder={t("University or company")} className={INPUT} /></div>
-          <label className="flex items-start gap-2.5 text-[14px]"><input type="checkbox" name="consent" className="mt-0.5 size-[18px] flex-none accent-[#0E1B3D]" />
-            <span>{t("I agree to the")} <Link href="/legal/terms" className={LINK}>{t("Terms")}</Link> {t("and the")} <Link href="/legal/privacy" className={LINK}>{t("Privacy notice")}</Link> (GDPR).</span>
-          </label>
-          <FieldError id="e-consent" errors={e?.consent} />
-        </div>
-        <button type="submit" disabled={pending} className={`mt-[18px] ${PRIMARY}`}>{pending ? t("Creating…") : t("Create account")}</button>
-      </form>
-    </>
   );
 }
 
@@ -237,7 +196,7 @@ function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; n
   const t = useT();
   const [vState, vAction, vPending] = useActionState(verifyCode, state);
   const byEmail = state.sentKind === "email";
-  const lead = byEmail ? t("We sent a link and a 6-digit code to") : t("We sent a link and a 6-digit code to your account email");
+  const lead = byEmail ? t("We sent a link and a code to") : t("We sent a link and a code to your account email");
   return (
     <>
       <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">{t("Link sent")}</p>
@@ -249,7 +208,7 @@ function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; n
         <input type="hidden" name="next" value={next ?? ""} />
         <div className="mt-[22px] flex flex-col gap-1.5">
           <label htmlFor="pr-code" className={LABEL}>{t("Verification code")}</label>
-          <input id="pr-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" aria-describedby="pr-code-err"
+          <input id="pr-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={10} placeholder="00000000" aria-describedby="pr-code-err"
             className="box-border h-[46px] rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 font-mono text-[18px] tracking-[0.3em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
             style={vState.fieldErrors?.code?.length ? { borderColor: "#B3261E" } : undefined} />
           <FieldError id="pr-code-err" errors={vState.fieldErrors?.code} />

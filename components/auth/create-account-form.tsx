@@ -5,6 +5,8 @@ import { useActionState, useState } from "react";
 import { startSignup, type StartState } from "@/lib/auth/onboarding-actions";
 import { OrcidIcon, ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
+import { PasswordFields } from "@/components/auth/password-fields";
+import { Turnstile } from "@/components/site/turnstile";
 
 type EmailCheck = { border: string; chip?: string; chipBg?: string; chipInk?: string; hint: string; hintInk: string };
 
@@ -31,6 +33,7 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
   const [agree, setAgree] = useState(false);
   const [tried, setTried] = useState(false);
   const [orcidSoon, setOrcidSoon] = useState(false);
+  const [pwOk, setPwOk] = useState(false);
   const t = useT();
 
   const e = checkEmail(email, tried);
@@ -51,8 +54,9 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
 
       <p className={`mt-[26px] ${ui.kicker}`}>{t("Step 1 of 3")}</p>
       <h1 className={`mt-1.5 ${ui.h1}`}>{t("Create your account")}</h1>
-      <p className={`mt-2 ${ui.muted}`}>{t("Free for authors and reviewers. About a minute — no password needed.")}</p>
+      <p className={`mt-2 ${ui.muted}`}>{t("Free for authors and reviewers. Takes about a minute.")}</p>
 
+      {state.exists ? <ExistingAccount email={state.exists.email} next={next} /> : null}
       {state.message ? <div role="alert" className="mt-4 rounded-[6px] border border-[#F0C2BE] bg-[#FDF0EF] px-3.5 py-3 text-[14px] text-[#7A1C15]">{t(state.message)}</div> : null}
       {orcidSoon ? <div role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">{t("ORCID sign-up is coming soon. Use your email for now.")}</div> : null}
 
@@ -63,7 +67,11 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
         <span className="h-px flex-auto bg-[#DADDE3]" />{t("or use your email")}<span className="h-px flex-auto bg-[#DADDE3]" />
       </div>
 
-      <form action={action} noValidate onSubmit={() => setTried(true)}>
+      <form action={action} noValidate onSubmit={(ev) => {
+        setTried(true);
+        // stay on the page (keeping everything typed) until the basics are right; the server checks again
+        if (!first.trim() || !last.trim() || !agree || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()) || !pwOk) ev.preventDefault();
+      }}>
         <input type="hidden" name="next" value={next ?? ""} />
         <input type="hidden" name="venue" value={venue ?? ""} />
         <div className="grid grid-cols-2 gap-3">
@@ -89,6 +97,8 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
           <span id="pr6-email-hint" className="text-[13px]" style={{ color: emailErr ? "#B3261E" : e.hintInk }}>{t(emailErr ?? e.hint)}</span>
         </div>
 
+        <PasswordFields email={email} tried={tried} serverErrors={{ password: fe?.password, confirm: fe?.confirm }} idPrefix="pr6" onValid={setPwOk} />
+
         <label className="mt-4 flex items-start gap-2.5 text-[14px]">
           <input type="checkbox" name="consent" checked={agree} onChange={(ev) => setAgree(ev.target.checked)} aria-invalid={agreeErr || undefined} className="mt-0.5 size-[18px] flex-none accent-[#0E1B3D]" />
           {/* Supabase project region: eu-central-1 (Frankfurt). */}
@@ -96,10 +106,32 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
         </label>
         {agreeErr ? <p className={`ml-7 mt-1.5 ${ui.error}`}>{t("Please agree to continue.")}</p> : null}
 
-        <button type="submit" disabled={pending} className={`mt-[18px] ${ui.primary}`}>{pending ? t("Sending your code…") : t("Continue")}</button>
+        <Turnstile />
+        <button type="submit" disabled={pending} className={`mt-[18px] ${ui.primary}`}>{pending ? t("Creating your account…") : t("Create account")}</button>
       </form>
-      <p className={`mt-3 text-[13px] ${ui.muted}`}>{t("We'll email you a 6-digit code to confirm it's you.")}</p>
+      <p className={`mt-3 text-[13px] ${ui.muted}`}>{t("Next, we'll email you a code to confirm your address.")}</p>
       <p className={`mt-[22px] text-[14px] ${ui.muted}`}>{t("Used PaperCept before?")} <Link href="/contact?topic=import" className={ui.link}>{t("Bring your history")}</Link> {t("after you sign up.")}</p>
     </>
+  );
+}
+
+/** The email already has a Plenary account: go to sign-in (email filled in) or reset the password. */
+function ExistingAccount({ email, next }: { email: string; next?: string }) {
+  const t = useT();
+  const q = (extra: Record<string, string>) => {
+    const p = new URLSearchParams(extra);
+    if (next) p.set("next", next);
+    return p.toString();
+  };
+  return (
+    <div role="alert" className="mt-4 rounded-[8px] border border-[#BCCDF3] bg-[#F3F6FD] px-4 py-3.5 text-[14px] text-[#121826]">
+      <p className="m-0 font-semibold">{t("You already have a Plenary account")}</p>
+      <p className="m-0 mt-1 text-[#4A5263]">{t("{email} is already registered. Sign in instead — your papers and reviews are there.", { email })}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link href={`/sign-in?${q({ email })}`} className="inline-flex h-10 items-center rounded-[4px] bg-[#0E1B3D] px-4 text-[14px] font-semibold text-white no-underline">{t("Sign in")}</Link>
+        <Link href={`/forgot-password?${q({ email })}`} className="inline-flex h-10 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[14px] font-medium text-[#121826] no-underline">{t("Forgot password?")}</Link>
+      </div>
+      <p className="m-0 mt-2.5 text-[13px] text-[#4A5263]">{t("No password yet? On the sign-in page choose “Email me a link” — it also contains a code.")}</p>
+    </div>
   );
 }

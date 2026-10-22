@@ -1,6 +1,6 @@
 "use client";
 
-import Script from "next/script";
+import { Turnstile } from "@/components/site/turnstile";
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
@@ -261,13 +261,3 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
 
 
 /** Cloudflare Turnstile CAPTCHA, shown only when NEXT_PUBLIC_TURNSTILE_SITE_KEY is set in Vercel. */
-function Turnstile() {
-  const key = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  if (!key) return null;
-  return (
-    <>
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-      <div className="cf-turnstile" data-sitekey={key} data-theme="light" />
-    </>
-  );
-}

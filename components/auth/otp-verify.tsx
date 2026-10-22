@@ -7,10 +7,11 @@ import { resendSignupCode, verifySignupCode } from "@/lib/auth/onboarding-action
 import { resendResetCode, verifyResetCode } from "@/lib/auth/reset-actions";
 import { ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
+import { EMAIL_CODE_LENGTH, EMAIL_CODE_MIN } from "@/lib/auth/code-length";
 
 type Mode = "wait" | "sent" | "wrong" | "ok" | "expired" | "locked";
 const EXPIRES = 15 * 60; // TODO(auth): set Supabase Auth "Email OTP expiration" to 900s so this matches.
-const WAITS = [30, 60, 120, 120, 120, 120];
+const WAITS = [60, 60, 120, 120, 120, 120]; // Supabase allows a new email to the same address after 60 s
 const MAX_RESENDS = 5;
 const MAX_TRIES = 5;
 
@@ -42,13 +43,16 @@ const COPY = {
   },
 };
 
-/** Canvas PR07 / PR10b: six code boxes with paste, resend timer, wrong/expired/locked states. */
+/** Canvas PR07 / PR10b: code boxes (as many as the emailed code has) with paste, resend timer, wrong/expired/locked states. */
 export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", senderDomain = "[sender domain]" }: Props) {
   const copy = COPY[kind];
   const verify = kind === "recovery" ? verifyResetCode : verifySignupCode;
   const resendCode = kind === "recovery" ? resendResetCode : resendSignupCode;
   const router = useRouter();
-  const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  // box count follows the emailed code; a pasted/autofilled code of another length (6–10) re-sizes the boxes
+  const [len, setLen] = useState(EMAIL_CODE_LENGTH);
+  const blank = (n = len) => Array<string>(n).fill("");
+  const [digits, setDigits] = useState<string[]>(() => Array<string>(EMAIL_CODE_LENGTH).fill(""));
   const [mode, setMode] = useState<Mode>("wait");
   const [tries, setTries] = useState(MAX_TRIES);
   const [resends, setResends] = useState(0);
@@ -78,7 +82,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
 
   function submit(d: string[]) {
     const code = d.join("");
-    if (code.length < 6 || pending) return;
+    if (code.length < EMAIL_CODE_MIN || pending) return;
     startTransition(async () => {
       const r = await verify(email, code);
       if (r.ok) {
@@ -87,7 +91,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
         return;
       }
       if (r.reason === "locked" || tries - 1 <= 0) {
-        setMode("locked"); setLock(15 * 60); setTries(0); setDigits(["", "", "", "", "", ""]);
+        setMode("locked"); setLock(15 * 60); setTries(0); setDigits(blank());
         return;
       }
       setTries((n) => n - 1); setMode("wrong"); focus(0);
@@ -108,7 +112,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
       if (!r.ok) { setNote(r.message ?? ""); return; }
       const n = resends + 1;
       setResends(n); setLeft(WAITS[Math.min(n, WAITS.length - 1)]); setExp(EXPIRES); setTries(MAX_TRIES);
-      setDigits(["", "", "", "", "", ""]); setSentAt(stamp(t.intl)); setMode("sent"); setNote(""); focus(0);
+      setDigits(blank()); setSentAt(stamp(t.intl)); setMode("sent"); setNote(""); focus(0);
     });
   }
 
@@ -123,8 +127,8 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
     <>
       {!locked && !expired ? (
         <fieldset className="m-0 mt-4 border-0 p-0">
-          <legend className="mb-2 text-[14px] font-medium">{t("6-digit code")}</legend>
-          <div className="grid grid-cols-6 gap-2">
+          <legend className="mb-2 text-[14px] font-medium">{t("Code from the email")}</legend>
+          <div className="grid gap-1.5 sm:gap-2" style={{ gridTemplateColumns: `repeat(${len}, minmax(0, 1fr))` }}>
             {digits.map((v, i) => {
               const border = mode === "wrong" ? "2px solid #B3261E" : mode === "ok" ? "2px solid #18744F" : i === firstEmpty ? "2px solid #2F5FD0" : v ? "1px solid #121826" : "1px solid #B7BDC9";
               const bg = mode === "wrong" ? "#FFF7F6" : mode === "ok" ? "#F3FAF6" : "#FFFFFF";
@@ -132,36 +136,40 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
                 <input
                   key={i}
                   ref={(el) => { refs.current[i] = el; }}
-                  type="text" inputMode="numeric" pattern="[0-9]*" maxLength={i === 0 ? 6 : 2}
-                  autoComplete={i === 0 ? "one-time-code" : "off"} aria-label={t("Digit {n} of 6", { n: i + 1 })} aria-invalid={mode === "wrong" || undefined}
+                  type="text" inputMode="numeric" pattern="[0-9]*" maxLength={i === 0 ? 10 : 2}
+                  autoComplete={i === 0 ? "one-time-code" : "off"} aria-label={t("Digit {n} of {total}", { n: i + 1, total: len })} aria-invalid={mode === "wrong" || undefined}
                   value={v} disabled={pending}
                   onChange={(e) => {
                     let raw = e.target.value.replace(/[^0-9]/g, "");
-                    const base = mode === "wrong" ? ["", "", "", "", "", ""] : digits.slice();
+                    const whole = raw.length >= EMAIL_CODE_MIN && raw.length <= 10 && raw.length !== len && i === 0;
+                    if (whole) { setLen(raw.length); update(raw.split(""), raw.length - 1); return; }
+                    const base = mode === "wrong" ? blank() : digits.slice();
                     if (raw.length === 2 && raw[0] === digits[i]) raw = raw[1];
                     if (raw.length > 1) {
                       let j = i;
-                      for (const ch of raw) if (j < 6) base[j++] = ch;
-                      update(base, Math.min(j, 5));
+                      for (const ch of raw) if (j < len) base[j++] = ch;
+                      update(base, Math.min(j, len - 1));
                       return;
                     }
                     base[i] = raw;
-                    update(base, raw && i < 5 ? i + 1 : undefined);
+                    update(base, raw && i < len - 1 ? i + 1 : undefined);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Backspace" && !digits[i] && i > 0) { const d = digits.slice(); d[i - 1] = ""; setDigits(d); focus(i - 1); }
                     if (e.key === "ArrowLeft" && i > 0) focus(i - 1);
-                    if (e.key === "ArrowRight" && i < 5) focus(i + 1);
+                    if (e.key === "ArrowRight" && i < len - 1) focus(i + 1);
                   }}
                   onPaste={(e) => {
-                    const pasted = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 6);
+                    const pasted = e.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, 10);
                     if (!pasted) return;
                     e.preventDefault();
-                    const d = ["", "", "", "", "", ""];
-                    pasted.split("").forEach((ch, k) => { d[k] = ch; });
-                    update(d, Math.min(pasted.length, 5));
+                    const n = pasted.length >= EMAIL_CODE_MIN ? pasted.length : len;
+                    if (n !== len) setLen(n);
+                    const d = blank(n);
+                    pasted.split("").forEach((ch, k) => { if (k < n) d[k] = ch; });
+                    update(d, Math.min(pasted.length, n - 1));
                   }}
-                  className="box-border h-14 w-full rounded-[6px] text-center font-mono text-[24px] font-medium text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
+                  className={`box-border h-14 w-full rounded-[6px] text-center font-mono ${len > 6 ? "text-[20px]" : "text-[24px]"} font-medium text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]`}
                   style={{ border, background: bg }}
                 />
               );
@@ -195,7 +203,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
       {note ? <p role="status" className="mt-3 text-[13px] text-[#7A4508]">{t(note)}</p> : null}
 
       {!locked && !expired ? (
-        <button type="button" onClick={() => submit(digits)} disabled={pending || digits.join("").length < 6} className={`mt-5 h-12 ${ui.primary}`}>
+        <button type="button" onClick={() => submit(digits)} disabled={pending || digits.join("").length < EMAIL_CODE_MIN} className={`mt-5 h-12 ${ui.primary}`}>
           {pending ? t("Checking…") : t(copy.submit)}
         </button>
       ) : null}

@@ -8,6 +8,7 @@ import { detectIdentifier } from "@/lib/auth/identifier";
 import { accountEmailFor, plenaryIdSignIn } from "@/lib/auth/plenary-id";
 import { sendSecurityNotice } from "@/lib/email/security-mail";
 import { scorePassword } from "@/lib/auth/password-rules";
+import { isPwnedPassword } from "@/lib/auth/pwned";
 import { clearRecovery, hasRecovery, markRecovery } from "@/lib/auth/recovery-cookie";
 
 /*
@@ -100,6 +101,7 @@ export async function saveNewPassword(_: NewPasswordState, formData: FormData): 
   const r = scorePassword(password, data.user.email ?? "");
   if (!r.ok) return { fieldErrors: { password: ["Choose a password that meets all three rules."] } };
   if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
+  if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SignInPanel } from "@/components/signin/sign-in-panel";
@@ -15,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("Sign in") };
 }
 
-type Search = { next?: string; venue?: string; tab?: string };
+type Search = { next?: string; venue?: string; tab?: string; email?: string };
 
 async function VenueBanner({ searchParams }: { searchParams: Promise<Search> }) {
   const { venue, next } = await searchParams;
@@ -40,8 +41,11 @@ async function VenueBanner({ searchParams }: { searchParams: Promise<Search> }) 
 }
 
 async function Panel({ searchParams }: { searchParams: Promise<Search> }) {
-  const { next, tab } = await searchParams;
-  return <SignInPanel next={next} initialTab={tab === "create" ? "create" : "signin"} senderDomain={senderDomain()} />;
+  const { next, tab, email } = await searchParams;
+  // the old in-panel sign-up form is gone: ?tab=create goes to the real sign-up page
+  if (tab === "create") redirect(`/create-account${next ? `?next=${encodeURIComponent(next)}` : ""}`);
+  const prefill = typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email.trim().toLowerCase().slice(0, 254) : "";
+  return <SignInPanel next={next} senderDomain={senderDomain()} initialIdentifier={prefill} />;
 }
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {

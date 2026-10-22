@@ -10,6 +10,7 @@ import { getMe } from "@/lib/auth/me";
 import { sendEmail, absUrl } from "@/lib/email/send";
 import { site } from "@/lib/config/site";
 import { contact, CONTACT_TOPICS, SALES_KINDS } from "@/lib/config/contact";
+import { turnstileOk } from "@/lib/site/turnstile";
 
 export type ContactState = { fieldErrors?: Record<string, string[] | undefined>; message?: string };
 
@@ -61,14 +62,7 @@ export async function sendContact(_: ContactState, formData: FormData): Promise<
   const h = await headers();
   const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || "";
   // CAPTCHA (Cloudflare Turnstile) when its keys are set in Vercel.
-  const turnstile = process.env.TURNSTILE_SECRET_KEY;
-  if (turnstile) {
-    const token = String(formData.get("cf-turnstile-response") ?? "");
-    const ok = token && await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST", body: new URLSearchParams({ secret: turnstile, response: token, ...(ip ? { remoteip: ip } : {}) }),
-    }).then((r) => r.json()).then((j: { success?: boolean }) => !!j.success).catch(() => false);
-    if (!ok) return { message: "Please confirm you're not a robot, then send again." };
-  }
+  if (!(await turnstileOk(formData, ip))) return { message: "Please confirm you're not a robot, then send again." };
   const ipHash = ip ? createHash("sha256").update(`contact|${ip}|${process.env.PLENARY_SIGNING_SECRET ?? ""}`).digest("hex").slice(0, 32) : "";
   const raw = Object.fromEntries(formData);
   const parsed = raw.kind === "sales" ? salesSchema.safeParse(raw) : supportSchema.safeParse(raw);

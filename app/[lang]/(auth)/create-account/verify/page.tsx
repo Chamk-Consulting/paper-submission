@@ -34,7 +34,7 @@ async function Left({ searchParams }: { searchParams: Promise<Search> }) {
       <p className={`mt-4 ${ui.kicker}`}>{t("Step 2 of 3")}</p>
       <h1 className={`mt-1.5 ${ui.h1}`}>{t("Confirm your email")}</h1>
       <p className={`mt-2.5 ${ui.muted}`}>
-        {t("We sent a 6-digit code and a link to")} <strong className="text-[#121826]">{email}</strong>{" "}
+        {t("We sent a code and a link to")} <strong className="text-[#121826]">{email}</strong>{" "}
         <Link href={back(s)} className={`text-[14px] ${ui.link}`}>{t("Change")}</Link>
       </p>
       {s.wait ? <p role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">{t("A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute.")}</p> : null}
@@ -53,7 +53,7 @@ async function Aside({ searchParams }: { searchParams: Promise<Search> }) {
       <SetupSteps
         doneLabel={t("Done")}
         steps={[
-          { title: t("Your name and email"), text: [full, s.email].filter(Boolean).join(" · "), state: "done" },
+          { title: t("Your name, email and password"), text: [full, s.email].filter(Boolean).join(" · "), state: "done" },
           { title: t("Confirm your email"), text: t("Code sent · expires in 15 minutes."), state: "current" },
           { title: t("Your research profile"), text: t("Affiliation and ORCID — then you get your Plenary ID and go back to where you started."), state: "next" },
         ]}
