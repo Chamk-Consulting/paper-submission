@@ -102,6 +102,7 @@ async function Inner({ params }: P) {
           <Link href={`/submissions/${id}`} className={primaryBtn}>{t("View paper status")}</Link>
           <a href={`/submissions/${id}/receipt.pdf`} className={ghostBtn}>{t("Download receipt (PDF)")}</a>
           <Link href={`/submit/${venue.slug}`} className={ghostBtn}>{t("Submit another paper")}</Link>
+          <Link href="/workspace/submissions" className={ghostBtn}>{t("My submissions")}</Link>
         </div>
       </section>
       <section className={`${card} mt-6`}>

@@ -1,15 +1,26 @@
-import type { ComponentProps } from "react";
-import PublicPage, { generateMetadata } from "@/app/[lang]/(site)/venues/[slug]/page";
+import type { Metadata } from "next";
+import { VenuePage } from "@/components/venues/venue-page";
+import { generateMetadata as publicMetadata } from "@/app/[lang]/(site)/venues/[slug]/page";
+import { Reveal } from "@/components/motion/reveal";
+import { VenueSkeleton } from "@/components/skeletons";
 
-/* Workspace version of the public /venues/[slug] page: same content, inside the workspace frame (side
-   menu, no public header or footer). Signed-in people are sent here by proxy.ts. */
-export { generateMetadata };
+type Params = { slug: string };
 
-export default function Page(props: ComponentProps<typeof PublicPage>) {
+export async function generateMetadata(props: { params: Promise<Params> }): Promise<Metadata> {
+  return publicMetadata(props);
+}
+
+async function Inner({ params }: { params: Promise<Params> }) {
+  const { slug } = await params;
+  return <VenuePage slug={slug} mode="workspace" />;
+}
+
+/** An event inside the workspace: same content as the public page, with your participation and your next step. */
+export default function Page({ params }: { params: Promise<Params> }) {
   return (
     <>
       <span data-bleed hidden />
-      <PublicPage {...props} />
+      <Reveal fallback={<VenueSkeleton />}><Inner params={params} /></Reveal>
     </>
   );
 }

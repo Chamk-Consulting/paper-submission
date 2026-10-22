@@ -49,13 +49,13 @@ export function CountdownCard({ dates, generatedAt }: { dates: VenueDate[]; gene
   );
 }
 
-export function FollowButton({ venueId, slug }: { venueId: string; slug: string }) {
+export function FollowButton({ venueId, slug, compact }: { venueId: string; slug: string; compact?: boolean }) {
   const t = useT();
   const f = useFollows();
   const on = f.followed.includes(venueId);
   return (
     <button type="button" onClick={() => f.toggle(venueId, `/venues/${slug}`)} aria-pressed={on}
-      className="h-11 rounded-[4px] px-4 text-[15px] font-medium"
+      className={compact ? "h-10 whitespace-nowrap rounded-[4px] px-3.5 text-[14px] font-semibold" : "h-11 rounded-[4px] px-4 text-[15px] font-medium"}
       style={{ color: on ? "#7A4508" : "#121826", background: on ? "#FFF6E6" : "#FFFFFF", border: `1px solid ${on ? "#F1D29A" : "#B7BDC9"}` }}>
       {on ? `★ ${t("Following")}` : `☆ ${t("Follow venue")}`}
     </button>

@@ -11,6 +11,7 @@ import { useClock, useFollows } from "@/components/venues/use-clock";
 import { FIELD_COLOR, FIELD_LABEL, FORMAT_LABEL, KIND_LABEL, type DirectoryVenue, type Field } from "@/lib/venues/types";
 import { cityOf, fmtRange, statusOf, type Status } from "@/lib/venues/time";
 import { VenueCoverImage, hasRealCover } from "@/components/venues/cover";
+import { STAGE_LABEL, STAGE_TONE, primaryAction, roleChips, type MyEvent, type MyEvents } from "@/lib/workspace/event-action";
 
 type View = "list" | "calendar" | "map" | "past";
 type Win = "any" | "d7" | "d30" | "open";
@@ -50,9 +51,21 @@ function Check({ on, label, n, onClick }: { on: boolean; label: string; n: numbe
 function toggleIn<T>(arr: T[], v: T) { return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]; }
 
 /** Canvas PV01: venue directory with list, deadline calendar, map and past venues. */
-export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVenue[]; generatedAt: string; ready: boolean }) {
+type Scope = "all" | "mine" | "following";
+const SCOPES: [Scope, string][] = [["all", "All open calls"], ["mine", "My events"], ["following", "Following"]];
+const isOpenCall = (v: Row) => ["soon", "open", "later", "rolling"].includes(v.st.state) && v.st.closes !== "—";
+
+/**
+ * The venue directory. Public (/venues): navy banner, cards open the public page. Workspace (/workspace/events, `mine`
+ * given): a light header with All open calls · My events · Following, cards that show your roles and papers at each
+ * event and the one button that matters to you (Continue draft, Submit, Open my paper), links that stay in the workspace.
+ */
+export function Directory({ venues, generatedAt, ready, mine }: { venues: DirectoryVenue[]; generatedAt: string; ready: boolean; mine?: MyEvents }) {
   const t = useT();
+  const ws = !!mine;
   const [view, setViewState] = useState<View>("list");
+  const [scope, setScopeState] = useState<Scope>("all");
+  const [intent, setIntent] = useState(false);
   const [q, setQ] = useState("");
   // Read ?view= and ?q= after hydration so the list itself is server-rendered (and indexable).
   useEffect(() => {
@@ -61,6 +74,9 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
       const v = VIEWS.find(([k]) => k === p.get("view"))?.[0];
       if (v) setViewState(v);
       if (p.get("q")) setQ(p.get("q") ?? "");
+      const sc = SCOPES.find(([k]) => k === p.get("tab"))?.[0];
+      if (sc) setScopeState(sc);
+      if (p.get("intent") === "submit") setIntent(true);
     }, 0);
     return () => clearTimeout(tm);
   }, []);
@@ -73,6 +89,8 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
   const [region, setRegion] = useSoftState("");
   const [sort, setSort] = useSoftState<"close" | "event" | "name">("close");
   const [followOnly, setFollowOnly] = useSoftState(false);
+  // "New submission" opens this page as ?intent=submit: start on the events open for submission.
+  useEffect(() => { if (intent) setWin("open"); }, [intent]); // eslint-disable-line react-hooks/exhaustive-deps
   const [shown, setShown] = useSoftState(20);
   useEffect(() => {
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
@@ -83,6 +101,19 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { now, tz } = useClock(generatedAt);
   const follows = useFollows();
+
+  function setScope(v: Scope) {
+    startTransition(() => setScopeState(v));
+    const u = new URL(window.location.href);
+    if (v === "all") u.searchParams.delete("tab"); else u.searchParams.set("tab", v);
+    window.history.replaceState(null, "", u);
+  }
+  // The sidebar's "My events" / "Following" links change ?tab= while this page stays open.
+  useEffect(() => {
+    const on = () => { const sc = SCOPES.find(([k]) => k === new URLSearchParams(window.location.search).get("tab"))?.[0] ?? "all"; setScopeState(sc); };
+    window.addEventListener("popstate", on);
+    return () => window.removeEventListener("popstate", on);
+  }, []);
 
   function setView(v: View) {
     startTransition(() => setViewState(v));
@@ -99,9 +130,13 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
     [venues, now, tz, t],
   );
   const current = rows.filter((r) => !r.past);
+  const mineRows = rows.filter((r) => mine?.[r.slug]);
+  const followRows = rows.filter((r) => (follows.loaded && follows.signedIn ? follows.followed.includes(r.id) : !!mine?.[r.slug]?.following));
+  // My events and Following keep past events too (your papers there still matter); All open calls is current only.
+  const pool = scope === "mine" ? mineRows : scope === "following" ? followRows : current;
 
   const needle = q.trim().toLowerCase();
-  const list = current
+  const list = pool
     .filter((v) => {
       if (field !== "all" && v.field !== field) return false;
       if (needle && !`${v.acr} ${v.name} ${v.society ?? ""} ${v.location ?? ""} ${v.city ?? ""} ${v.country ?? ""} ${v.field ?? ""}`.toLowerCase().includes(needle)) return false;
@@ -145,6 +180,57 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <PublicHeader signedIn={follows.signedIn} />
 
+      {ws ? (
+      <section className="border-b border-[#DADDE3] bg-white text-[#121826]">
+        <div className="mx-auto max-w-[1280px] px-5 pb-0 pt-7 sm:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+            <div className="min-w-0">
+              <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("Find events")}</p>
+              <h1 className="mt-1.5 font-serif text-[30px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[36px]">{t("Find your next call for papers")}</h1>
+              <p className="mb-0 mt-1.5 text-[14px] text-[#4A5263]">
+                {t("deadlines in")} <strong className="text-[#121826]">{tz === "UTC" ? t("your time zone") : `${cityOf(tz)} (${tz})`}</strong>, {t("AoE alongside")}
+              </p>
+            </div>
+            <div role="tablist" aria-label={t("Show")} className="grid w-full grid-cols-3 gap-1 rounded-[8px] border border-[#DADDE3] bg-[#F5F6F3] p-1 sm:flex sm:w-auto">
+              {SCOPES.map(([k, label]) => {
+                const n = k === "mine" ? mineRows.length : k === "following" ? followRows.length : current.length;
+                const on = scope === k;
+                return (
+                  <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setScope(k)}
+                    className={`flex h-9 min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-[6px] border-0 px-2 text-[13px] font-semibold sm:flex-none sm:px-3 sm:text-[14px] ${on ? "bg-white text-[#0E1B3D] shadow-[0_1px_2px_rgba(18,24,38,.12)]" : "bg-transparent text-[#4A5263] hover:text-[#121826]"}`}>
+                    <span className="truncate">{k === "all" ? <><span className="sm:hidden">{t("All")}</span><span className="hidden sm:inline">{t(label)}</span></> : t(label)}</span><span className={`flex-none rounded-full px-1.5 font-mono text-[11px] ${on ? "bg-[#E6EDFC] text-[#1F47A8]" : "bg-[#E9ECF2] text-[#4A5263]"}`}>{n}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div role="search" className="mt-5 flex h-11 items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#2F5FD0]">
+            <Search size={17} strokeWidth={1.75} color="#4A5263" className="flex-none" aria-hidden />
+            <label htmlFor="v-q" className="sr-only">{t("Search venues")}</label>
+            <input id="v-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Acronym, name, topic, society or city — e.g. CDC 2027, robotics, IFAC")}
+              className="h-10 min-w-0 flex-auto border-0 bg-transparent text-[15px] text-[#121826] outline-none" />
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {FIELDS.map(([k, label]) => {
+              const on = field === k;
+              return (
+                <button key={k} type="button" aria-pressed={on} onClick={() => setField(k)}
+                  className={`h-8 cursor-pointer rounded-full px-3 text-[13px] font-semibold ${on ? "border border-[#0E1B3D] bg-[#0E1B3D] text-white" : "border border-[#DADDE3] bg-white text-[#121826] hover:border-[#B7BDC9]"}`}>{t(label)}</button>
+              );
+            })}
+          </div>
+          <div role="tablist" aria-label={t("View")} className="mt-4 flex gap-1 overflow-x-auto">
+            {VIEWS.map(([k, label]) => {
+              const on = view === k;
+              return (
+                <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setView(k)}
+                  className={`h-[42px] flex-none cursor-pointer border-0 border-b-[3px] bg-transparent px-3.5 text-[14px] font-semibold ${on ? "border-[#F2A93B] text-[#121826]" : "border-transparent text-[#4A5263] hover:text-[#121826]"}`}>{t(label)}</button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+      ) : (
       <section className="bg-[#0E1B3D] text-[#F5F6F3]">
         <div className="mx-auto max-w-[1280px] px-5 pb-0 pt-10 sm:px-8">
           <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Venue directory")}</p>
@@ -178,6 +264,7 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
           </div>
         </div>
       </section>
+      )}
 
       <div className="mx-auto box-border flex w-full max-w-[1280px] flex-col items-start gap-8 px-5 pb-14 pt-7 sm:px-8 lg:flex-row">
         <button type="button" onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen} aria-controls="v-filters"
@@ -185,7 +272,7 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
           <span>{t("Filters")}{chips.length ? ` · ${chips.length}` : ""}</span><span aria-hidden>{filtersOpen ? "▴" : "▾"}</span>
         </button>
         <aside id="v-filters" aria-label={t("Filters")} className={`${filtersOpen ? "flex" : "hidden"} -mt-4 w-full flex-col gap-[22px] lg:mt-0 lg:flex lg:w-[250px] lg:flex-none`}>
-          {follows.signedIn ? (
+          {follows.signedIn && !ws ? (
             <button type="button" role="switch" aria-checked={followOnly} onClick={() => setFollowOnly((v) => !v)} className="flex items-center justify-between gap-2.5 rounded-[8px] border border-[#DADDE3] bg-white px-3 py-2.5 text-[14px] font-semibold text-[#121826]">
               <span>{t("★ Following only")}</span>
               <span aria-hidden className="relative h-5 w-[34px] rounded-full" style={{ background: followOnly ? "#18744F" : "#B7BDC9" }}><span className="absolute top-0.5 size-4 rounded-full bg-white" style={{ left: followOnly ? 16 : 2 }} /></span>
@@ -234,6 +321,12 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
         </aside>
 
         <section aria-label={t("Results")} className="w-full min-w-0 flex-auto">
+          {ws && intent ? (
+            <div role="status" className="mb-3.5 flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[#F1D29A] bg-[#FFF6E6] px-4 py-3 text-[14px] text-[#3B2A07]">
+              <span><strong>{t("Choose where to submit.")}</strong> {t("Only events open for submission are shown; press Submit a paper on the one you want.")}</span>
+              <button type="button" onClick={() => { setIntent(false); setWin("any"); }} className="cursor-pointer border-0 bg-transparent p-0 text-[14px] font-semibold text-[#7A4508] underline">{t("Show all events")}</button>
+            </div>
+          ) : null}
           {!ready ? (
             <p role="status" className="mb-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">{t("Deadlines, filters and the map appear once the venue directory database update is installed.")}</p>
           ) : null}
@@ -264,12 +357,14 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
             <div className="mt-3.5 flex flex-col gap-3">
               {list.slice(0, shown).map((v) => (
                 <ViewTransition key={v.id} enter={VT.cardIn} exit={VT.cardOut} update={VT.cardMove} default="none">
-                  <VenueCard v={v} following={follows.followed.includes(v.id)} onFollow={() => follows.toggle(v.id, "/venues")} />
+                  <VenueCard v={v} following={follows.followed.includes(v.id)} onFollow={() => follows.toggle(v.id, ws ? "/workspace/events" : "/venues")} ws={ws} mine={mine?.[v.slug]} intent={intent} />
                 </ViewTransition>
               ))}
               {list.length === 0 ? (
                 <div className="rounded-[8px] border border-dashed border-[#DADDE3] bg-white p-9 text-center text-[#4A5263]">
-                  {current.length ? <>{t("No venues match.")} <button type="button" onClick={clearAll} className="border-0 bg-transparent p-0 text-[14px] text-[#2F5FD0] underline">{t("Clear filters")}</button></> : t("No open calls yet — new venues appear here as soon as they publish.")}
+                  {ws && scope === "mine" && !mineRows.length ? t("No events yet — events where you have a paper or a role appear here.")
+                    : ws && scope === "following" && !followRows.length ? t("You don’t follow any events yet. Follow one to get its deadline reminders.")
+                    : pool.length ? <>{t("No venues match.")} <button type="button" onClick={clearAll} className="border-0 bg-transparent p-0 text-[14px] text-[#2F5FD0] underline">{t("Clear filters")}</button></> : t("No open calls yet — new venues appear here as soon as they publish.")}
                 </div>
               ) : null}
               {list.length > shown ? (
@@ -290,13 +385,15 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
   );
 }
 
-function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onFollow: () => void }) {
+function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; following: boolean; onFollow: () => void; ws?: boolean; mine?: MyEvent; intent?: boolean }) {
   const t = useT();
   const [fbg, fink] = v.field ? FIELD_COLOR[v.field] : ["#EEF0EC", "#4A5263"];
   const soon = v.st.state === "soon";
   const tags = [v.format ? t(FORMAT_LABEL[v.format]) : null, v.reviewMode ? t(v.reviewMode) : null, v.pageLimit, v.indexedIn.length ? v.indexedIn.join(" · ") : null].filter(Boolean) as string[];
   const where = v.kind === "journal" ? t("Online") : [v.city, v.country].filter(Boolean).join(", ") || v.location || "";
-  const href = `/venues/${v.slug}`;
+  const href = ws ? `/workspace/events/${v.slug}` : `/venues/${v.slug}`;
+  const act = ws ? (intent && isOpenCall(v) ? { label: "Submit a paper", href: `/submit/${v.slug}` } : primaryAction(v.slug, mine, isOpenCall(v))) : null;
+  const roles = mine ? roleChips(mine.roles) : [];
   return (
     <article className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white p-4 sm:flex-row sm:items-start">
       <Link href={href} aria-label={t("Open {venue}", { venue: v.acr })} className="relative block aspect-video w-full flex-none overflow-hidden rounded-[6px] bg-[#EEF0EC] no-underline sm:w-[200px]">
@@ -315,8 +412,20 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
           {tags.map((tag) => <span key={tag} className="rounded-[2px] bg-[#EEF0EC] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-[#4A5263]">{tag}</span>)}
         </div>
         {v.accepting ? <div className="mt-2 text-[13px] text-[#4A5263]">{t("Accepting:")} {t(v.accepting)}</div> : null}
+        {ws && (roles.length || mine?.papers.length) ? (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[#EEF0EC] pt-2.5 text-[12px]">
+            <span className="me-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("You")}</span>
+            {roles.map((r) => <span key={r} className="rounded-full bg-[#0E1B3D] px-2 py-0.5 font-semibold text-white">{t(r)}</span>)}
+            {mine?.papers.slice(0, 3).map((p) => (
+              <Link key={p.id} href={p.href} title={p.title} className="inline-flex max-w-[220px] items-center gap-1 rounded-full px-2 py-0.5 font-semibold no-underline" style={{ background: STAGE_TONE[p.stage][0], color: STAGE_TONE[p.stage][1] }}>
+                {p.number ? <span className="truncate">#{p.number} ·</span> : null} {t(STAGE_LABEL[p.stage])}
+              </Link>
+            ))}
+            {mine && mine.papers.length > 3 ? <span className="text-[#4A5263]">+{mine.papers.length - 3}</span> : null}
+          </div>
+        ) : null}
       </div>
-      <div className="flex-none text-left sm:w-[200px] sm:text-right">
+      <div className="flex-none text-left sm:w-[220px] sm:text-right">
         <div className="flex items-center gap-1.5 sm:justify-end">
           {v.st.extended ? <span className="rounded-[2px] bg-[#E6EDFC] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em] text-[#1F47A8]">{t("EXTENDED")}</span> : null}
           <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: soon ? "#A8600F" : "#4A5263" }}>{soon ? t("Closes soon · {what}", { what: t(v.st.label).toLowerCase() }) : t(v.st.label)}</span>
@@ -324,12 +433,16 @@ function VenueCard({ v, following, onFollow }: { v: Row; following: boolean; onF
         <div className="mt-0.5 font-mono text-[22px] font-medium" style={{ color: soon ? "#A8600F" : v.st.state === "now" ? "#14603F" : "#121826" }}>{v.st.closes}</div>
         <div className="text-[12px] text-[#4A5263]">{v.st.aoe}</div>
         <div className="text-[12px] font-medium text-[#121826]">{v.st.local}</div>
-        <div className="mt-2.5 flex gap-1.5 sm:justify-end">
+        <div className="mt-2.5 flex flex-wrap gap-1.5 whitespace-nowrap sm:justify-end">
           <button type="button" onClick={onFollow} aria-pressed={following} aria-label={following ? t("Unfollow {venue}", { venue: v.acr }) : t("Follow {venue}", { venue: v.acr })} className="h-[34px] rounded-[4px] px-2.5 text-[13px] font-semibold"
             style={{ color: following ? "#7A4508" : "#121826", background: following ? "#FFF6E6" : "#FFFFFF", border: `1px solid ${following ? "#F1D29A" : "#B7BDC9"}` }}>
             {following ? t("★ Following") : t("☆ Follow")}
           </button>
-          <Link href={href} className="inline-flex h-[34px] items-center rounded-[4px] bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("View call")}</Link>
+          {act ? (
+            <Link href={act.href} className={`inline-flex h-[34px] items-center rounded-[4px] px-3 text-[13px] font-semibold no-underline ${act.label === "View event" ? "bg-[#0E1B3D] text-white hover:bg-[#17285A]" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>
+          ) : (
+            <Link href={href} className="inline-flex h-[34px] items-center rounded-[4px] bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("View call")}</Link>
+          )}
         </div>
       </div>
     </article>

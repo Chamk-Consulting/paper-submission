@@ -6,6 +6,7 @@ export type VenueRef = { slug: string; name: string; shortName: string | null; r
 export type Summary = {
   signedIn: boolean; name?: string; initials?: string; plenaryId?: string | null; unread?: number; submissionCount?: number;
   venues?: VenueRef[]; organizerOf?: string | null; isAdmin?: boolean;
+  following?: { slug: string; name: string; shortName: string | null }[];
 };
 
 /*

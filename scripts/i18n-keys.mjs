@@ -8,7 +8,7 @@ import path from "node:path";
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const SRC = ["app", "components", "lib"];
 const files = [];
-const walk = (d) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, f.name); if (f.isDirectory()) walk(p); else if (/\.(tsx?|mjs)$/.test(f.name) && !p.includes("/i18n/dict/")) files.push(p); } };
+const walk = (d) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, f.name); if (f.isDirectory()) walk(p); else if (/\.(tsx?|mjs)$/.test(f.name) && !p.includes("/i18n/dict/") && !p.includes("/lib/dev/") && !p.includes("dev-preview")) files.push(p); } };
 SRC.forEach((d) => walk(path.join(ROOT, d)));
 
 const keys = new Set();

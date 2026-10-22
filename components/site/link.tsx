@@ -3,14 +3,16 @@
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import type { ComponentProps, FocusEvent, MouseEvent, TouchEvent } from "react";
+import { useWorkspaceHref } from "@/components/site/workspace-links";
 
 /**
  * Link that loads the next page when the person shows intent (hover, focus, touch) instead of fetching every
  * link on screen. A page full of links (workspace, lists) used to start ~75 background requests on arrival.
  * Pass `prefetch` to opt back into Next's default (e.g. the few main menu links): prefetch={null}.
  */
-export default function Link({ prefetch, onMouseEnter, onTouchStart, onFocus, ...props }: ComponentProps<typeof NextLink>) {
+export default function Link({ prefetch, onMouseEnter, onTouchStart, onFocus, ...rest }: ComponentProps<typeof NextLink>) {
   const router = useRouter();
+  const props = { ...rest, href: useWorkspaceHref(rest.href) as typeof rest.href };
   if (prefetch !== undefined) return <NextLink prefetch={prefetch} onMouseEnter={onMouseEnter} onTouchStart={onTouchStart} onFocus={onFocus} {...props} />;
   const href = typeof props.href === "string" ? props.href : null;
   const warm = () => {

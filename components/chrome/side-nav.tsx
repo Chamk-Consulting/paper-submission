@@ -6,7 +6,7 @@ import {
   FileStack, FileText, Files, Filter, Gauge, Gavel, History, House, IdCard, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
   Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
   Search, Send, Settings, Settings2, ShieldAlert, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
-  UsersRound, X, Check,
+  UsersRound, X, Check, Star,
 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -88,7 +88,7 @@ function useOrganizer(p: string, s: Summary | null) {
 }
 
 /** Everything in the middle part, in order. Rows the person can't use are left out. */
-function useMiddle(p: string, s: Summary | null) {
+function useMiddle(p: string, s: Summary | null, tab?: string) {
   const reviewer = hasRole(s, /^(reviewer|associate_editor|chair|program_chair|deputy_chair|owner)$/) || p.startsWith("/reviews");
   const sessionChair = hasRole(s, /^session_chair$/) || p.startsWith("/chair");
   const myWork: Group = {
@@ -101,7 +101,24 @@ function useMiddle(p: string, s: Summary | null) {
       { kind: "leaf", key: "id", label: "My Plenary ID & badge", icon: ic(IdCard), href: "/settings/profile#plenary-id", on: false },
     ],
   };
-  const find: Leaf = { kind: "leaf", key: "find", label: "Find events", icon: ic(Compass), href: "/workspace/events", on: p === "/workspace/events" };
+  const onEvents = p === "/workspace/events";
+  const followed = s?.following ?? [];
+  const find: Group = {
+    kind: "group", key: "find", label: "Find events", icon: ic(Compass), def: "all",
+    items: [
+      { kind: "leaf", key: "all", label: "All open calls", icon: ic(Search), href: "/workspace/events", on: onEvents && !tab },
+      { kind: "leaf", key: "mine", label: "My events", icon: ic(Briefcase), href: "/workspace/events?tab=mine", on: onEvents && tab === "mine" },
+      followed.length
+        ? {
+          kind: "group" as const, key: "following", label: "Following", icon: ic(Star), def: "tab",
+          items: [
+            { kind: "leaf" as const, key: "tab", label: "All followed", href: "/workspace/events?tab=following", count: followed.length, on: onEvents && tab === "following" },
+            ...followed.map((f) => ({ kind: "leaf" as const, key: f.slug, label: f.shortName ?? f.name, href: `/workspace/events/${f.slug}`, on: p === `/workspace/events/${f.slug}` })),
+          ],
+        }
+        : { kind: "leaf" as const, key: "following", label: "Following", icon: ic(Star), href: "/workspace/events?tab=following", on: onEvents && tab === "following" },
+    ],
+  };
   const venues: Group | null = s?.venues?.length ? {
     kind: "group", key: "venues", label: "Your venues", icon: ic(Building2),
     items: s.venues.map((v, i) => {
@@ -333,9 +350,9 @@ function EventSwitcher({ org, p, t }: { org: NonNullable<ReturnType<typeof useOr
 
 /* ---------------------------------------------------------------- lists */
 
-function useTree(p: string, s: Summary | null) {
+function useTree(p: string, s: Summary | null, tab?: string) {
   const org = useOrganizer(p, s);
-  const m = useMiddle(p, s);
+  const m = useMiddle(p, s, tab);
   const middle: MenuNode[] = [m.myWork, m.find, ...(m.venues ? [m.venues] : [])];
   const after: MenuNode[] = [...(m.admin ? [m.admin] : []), m.settings];
   return { org, middle, after, all: [...middle, ...(org?.groups ?? []), ...after, helpGroup(p)] };
@@ -405,9 +422,9 @@ function MenuFilter({ q, setQ, t }: { q: string; setQ: (v: string) => void; t: (
 }
 
 /** The menu body: used by the phone menu (always full, everything in one scroll). */
-export function NavList({ p, s, onPick }: { p: string; s: Summary | null; onPick?: () => void }) {
+export function NavList({ p, s, onPick, tab }: { p: string; s: Summary | null; onPick?: () => void; tab?: string }) {
   const t = useT();
-  const tree = useTree(p, s);
+  const tree = useTree(p, s, tab);
   const [q, setQ] = useState("");
   const open = useMap(OPEN_KEY);
   const last = useMap(LAST_KEY);
@@ -450,10 +467,10 @@ function Sep({ label }: { label?: string }) {
 }
 
 /** The side menu (768 px and up). `data-rail` drives the icon-bar look through the `rail:` variant (globals.css). */
-export function SideMenu({ p, s }: { p: string; s: Summary | null }) {
+export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: string }) {
   const t = useT();
   const rail = useRail();
-  const tree = useTree(p, s);
+  const tree = useTree(p, s, tab);
   const [q, setQ] = useState("");
   const open = useMap(OPEN_KEY);
   const last = useMap(LAST_KEY);
@@ -487,7 +504,7 @@ export function SideMenu({ p, s }: { p: string; s: Summary | null }) {
           className="mx-auto hidden size-10 cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#F5F6F3] rail:flex">
           <Search {...I} /><span className="sr-only">{t("Filter menu")}</span>
         </button>
-        <Link href="/workspace/events" title={t("New submission")}
+        <Link href="/workspace/events?intent=submit" title={t("New submission")}
           className="mb-1 flex h-9 items-center justify-center gap-2 rounded-[6px] bg-[#F2A93B] text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] rail:size-10 rail:p-0">
           <Plus size={16} strokeWidth={2.25} aria-hidden /><span className="rail:sr-only">{t("New submission")}</span>
         </Link>

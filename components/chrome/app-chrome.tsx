@@ -2,7 +2,7 @@
 import { Mail, Menu, Plus, Search, X } from "lucide-react";
 
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { LanguageSelect } from "@/components/i18n/language-select";
@@ -10,6 +10,7 @@ import { AccountMenu } from "@/components/workspace/account-menu";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { barePath } from "@/lib/site/chrome-mode";
 import { NavList, SideMenu, isOn } from "@/components/chrome/side-nav";
+import { WorkspaceLinks } from "@/components/site/workspace-links";
 import { refreshSummary, syncAuth, useSummary, type Summary } from "@/components/chrome/summary";
 
 /*
@@ -81,7 +82,7 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
               {s.plenaryId ? <Link href="/settings/profile#plenary-id" className="font-mono text-[12px] text-[#2F5FD0] no-underline">{s.plenaryId} · {t("My Plenary ID")}</Link> : null}
             </div>
           ) : null}
-          <Link href="/workspace/events" onClick={onClose} className="mb-2 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("New submission")}</Link>
+          <Link href="/workspace/events?intent=submit" onClick={onClose} className="mb-2 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("New submission")}</Link>
           <NavList p={p} s={s} onPick={onClose} />
         </div>
         <div className="auth-out flex flex-col gap-0.5 px-3 py-4">
@@ -136,7 +137,7 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
           </span>
           <span className="auth-in flex items-center gap-2.5 sm:gap-3">
             {variant === "site" ? (
-              <Link href="/workspace/events" className="hidden h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] lg:flex">
+              <Link href="/workspace/events?intent=submit" className="hidden h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] lg:flex">
                 <Plus size={15} strokeWidth={2.25} aria-hidden />{t("New submission")}
               </Link>
             ) : null}
@@ -200,7 +201,8 @@ export function SiteHeader({ variant = "site" }: { variant?: Variant }) {
 
 function SideMenuLive() {
   const s = useSummary();
-  return <SideMenu p={barePath(usePathname() ?? "/")} s={s} />;
+  const tab = useSearchParams()?.get("tab") ?? undefined;
+  return <SideMenu p={barePath(usePathname() ?? "/")} s={s} tab={tab} />;
 }
 
 /** Signed-in areas: the side menu pinned to the left edge, the page centred in the rest (1120 px; organiser pages
@@ -213,7 +215,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
         <SideMenuLive />
       </Suspense>
       <main id="main-content" className="app-frame box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10 has-[[data-bleed]]:p-0">
-        <div className="mx-auto w-full max-w-[1120px] has-[[data-wide-frame]]:max-w-[1360px] has-[[data-bleed]]:max-w-none">{children}</div>
+        <div className="mx-auto w-full max-w-[1120px] has-[[data-wide-frame]]:max-w-[1360px] has-[[data-bleed]]:max-w-none"><WorkspaceLinks>{children}</WorkspaceLinks></div>
       </main>
       {s?.signedIn ? <InstallPrompt /> : null}
     </div>
