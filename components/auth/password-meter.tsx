@@ -46,15 +46,19 @@ type Mark = "ok" | "bad" | "todo" | "wait";
 export function PasswordMeter({ pw, email, current, flag, leak, id }: { pw: string; email: string; current?: string; flag: boolean; leak: LeakState; id: string }) {
   const t = useT();
   const r = scorePassword(pw, email, current);
-  const sc = leak === "leaked" ? 1 : r.sc;
+  const same = current !== undefined && !!current && !!pw && !r.different;
+  const sc = leak === "leaked" || same ? Math.min(r.sc, 1) : r.sc;
+  // Rules met by typing more (length, mix) stay grey until a submit; rules a password breaks for good (common,
+  // leaked, has your email, same as now) turn red at once.
   const m = (pass: boolean): Mark => (pass ? "ok" : flag ? "bad" : "todo");
+  const hard = (pass: boolean): Mark => (pass ? "ok" : pw ? "bad" : "todo");
   const rules: [Mark, string, string?][] = [
     [m(r.long), "At least 12 characters"],
     [m(r.mixed), "Mix of letters, numbers and symbols", r.mixed ? undefined : "At least 3 of: lowercase, uppercase, number, symbol — or 16+ characters"],
-    [!r.notCommon ? m(false) : leak === "leaked" ? "bad" : leak === "checking" ? "wait" : leak === "clean" || leak === "unknown" ? "ok" : m(false), "Not a common or leaked password",
+    [!r.notCommon ? hard(false) : leak === "leaked" ? "bad" : leak === "checking" ? "wait" : leak === "clean" || leak === "unknown" ? "ok" : m(false), "Not a common or leaked password",
       leak === "leaked" ? "Found in a known data leak — choose another" : leak === "unknown" ? "Couldn’t check leaks right now; we check again when you save" : undefined],
-    [m(r.notEmail), "Doesn’t contain your name or email"],
-    ...(current !== undefined ? [[m(!!current && !!pw && r.different), "Different from your current password", current ? undefined : "Type your current password first"] as [Mark, string, string?]] : []),
+    [hard(r.notEmail), "Doesn’t contain your name or email"],
+    ...(current !== undefined ? [[same ? "bad" : m(!!current && !!pw && r.different), "Different from your current password", current ? undefined : "Type your current password first"] as [Mark, string, string?]] : []),
   ];
   const kinds: [boolean, string][] = [[r.kinds.lower, "abc"], [r.kinds.upper, "ABC"], [r.kinds.number, "123"], [r.kinds.symbol, "#$&"]];
   return (
