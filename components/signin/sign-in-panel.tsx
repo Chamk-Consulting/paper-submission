@@ -201,7 +201,7 @@ function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; n
         <input type="hidden" name="next" value={next ?? ""} />
         <div className="mt-[22px] flex flex-col gap-1.5">
           <label htmlFor="pr-code" className={LABEL}>{t("Verification code")}</label>
-          <input id="pr-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={10} placeholder="00000000" aria-describedby="pr-code-err"
+          <input id="pr-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={10} placeholder="000000" aria-describedby="pr-code-err"
             className="box-border h-[46px] rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 font-mono text-[18px] tracking-[0.3em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
             style={vState.fieldErrors?.code?.length ? { borderColor: "#B3261E" } : undefined} />
           <FieldError id="pr-code-err" errors={vState.fieldErrors?.code} />

@@ -64,6 +64,8 @@ export async function POST(req: Request) {
   const next = nextFrom(d.redirect_to);
   // token_hash type for verifyOtp: links use the same names Supabase does.
   const linkType = action === "magiclink" || action === "email" ? "email" : action;
+  // The code's length (never the code) — shows which "Email OTP length" Supabase is set to.
+  console.info(`[auth-email] ${action} code_length=${d.token ? d.token.length : 0}`);
 
   const mails: { to: string; code: string | null; link: string | null }[] = [];
   if (action === "email_change") {
