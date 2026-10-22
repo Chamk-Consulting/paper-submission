@@ -198,4 +198,5 @@ export const signup4_de: Record<string, string> = {
   "Search or add a topic": "Thema suchen oder hinzufügen",
   "Suggested from {source}": "Vorschläge aus {source}",
   "{n} of {max} chosen": "{n} von {max} gewählt",
+  "{topic} — already added": "{topic} – bereits hinzugefügt",
 };

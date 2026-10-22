@@ -36,7 +36,9 @@ export function ReviewingForm({ p, suggestions }: { p: Profile; suggestions: { g
   const remove = (x: string) => { setTopics(topics.filter((y) => y !== x)); onChange(); };
   const all = [...new Set(suggestions.flatMap((g) => g.keywords))];
   const matches = q.trim().length >= 2 ? all.filter((k) => k.toLowerCase().includes(q.trim().toLowerCase()) && !topics.includes(k)).slice(0, 8) : [];
-  const exact = all.some((k) => k.toLowerCase() === q.trim().toLowerCase());
+  const needle = q.trim().toLowerCase();
+  const chosen = needle.length >= 2 ? topics.filter((k) => k.toLowerCase().includes(needle)) : [];
+  const exact = all.some((k) => k.toLowerCase() === needle) || topics.some((k) => k.toLowerCase() === needle);
 
   return (
     <form id="rv" action={action} onSubmit={onSubmit} className="flex flex-col gap-[18px]">
@@ -59,12 +61,15 @@ export function ReviewingForm({ p, suggestions }: { p: Profile; suggestions: { g
         <div className="relative mt-3 max-w-[460px]">
           <label htmlFor="rv-q" className="sr-only">{t("Search or add a topic")}</label>
           <input id="rv-q" value={q} disabled={full} onChange={(e) => setQ(e.target.value)} autoComplete="off"
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(matches[0] && !exact ? matches[0] : q); } }}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); if (matches[0]) add(matches[0]); else if (!exact && !chosen.length) add(q); } }}
             placeholder={full ? t("10 topics chosen — remove one to add another") : t("Search or add a topic")} className={`${sx.input} disabled:bg-[#F7F8F6]`} />
           {q.trim().length >= 2 ? (
             <div className="absolute inset-x-0 top-[46px] z-10 rounded-[8px] border border-[#DADDE3] bg-white p-1.5 shadow-[0_12px_32px_rgba(18,24,38,.14)]">
               {matches.map((k) => (
                 <button key={k} type="button" onClick={() => add(k)} className="flex h-9 w-full cursor-pointer items-center rounded-[6px] border-0 bg-transparent px-2.5 text-start text-[14px] hover:bg-[#F5F6F3]">{t(k)}</button>
+              ))}
+              {chosen.map((k) => (
+                <span key={k} className="flex h-9 items-center gap-2 px-2.5 text-[14px] text-[#4A5263]"><span aria-hidden className="text-[#14603F]">✓</span>{t("{topic} — already added", { topic: t(k) })}</span>
               ))}
               {!exact ? (
                 <button type="button" onClick={() => add(q)} className="flex h-9 w-full cursor-pointer items-center rounded-[6px] border-0 bg-transparent px-2.5 text-start text-[14px] text-[#2F5FD0] hover:bg-[#F5F6F3]">
