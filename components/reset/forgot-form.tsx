@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { startPasswordReset, type ForgotState } from "@/lib/auth/reset-actions";
 import { ui } from "@/components/auth/split-layout";

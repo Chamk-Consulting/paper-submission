@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { ReactNode } from "react";
 import { WizardHeader, WizardLayout } from "@/components/submission/shell";
 import { Pin } from "@/components/motion/pin";

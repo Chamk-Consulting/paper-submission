@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { useWhen } from "@/components/site/due-next";
 

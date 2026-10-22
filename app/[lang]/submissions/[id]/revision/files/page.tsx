@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
 import { card, ghostBtn, h2, primaryBtn } from "@/components/submission/shell";

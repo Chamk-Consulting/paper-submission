@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useT } from "@/lib/i18n/client";
 import { CATEGORIES, CONSENT_COOKIE } from "@/lib/consent";

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { readMyPerson } from "@/lib/auth/my-person";
@@ -23,11 +24,12 @@ export type Me = {
 };
 
 /** The signed-in person (RLS: only their own rows). `select("*")` so pending columns don't break reads. */
-export async function getMe(): Promise<Me | null> {
+export const getMe = cache(async function getMe(): Promise<Me | null> {
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  // the profile read and the sign-in check go out together (my_person works from the session token)
+  const [{ data: auth }, early] = await Promise.all([supabase.auth.getUser(), supabase.rpc("my_person")]);
   if (!auth.user) return null;
-  const person = (await readMyPerson(supabase, auth.user.id)) as Me["person"];
+  const person = (!early.error ? early.data : await readMyPerson(supabase, auth.user.id)) as Me["person"];
   let affiliation: Me["affiliation"] = null;
   if (person) {
     const { data: aff } = await supabase
@@ -47,4 +49,4 @@ export async function getMe(): Promise<Me | null> {
     person: (person as Me["person"]) ?? null,
     affiliation,
   };
-}
+});

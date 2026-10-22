@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useRef, useState, useTransition } from "react";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { ui } from "@/components/manage/ui";
 import { FieldError } from "@/components/manage/save-bar";

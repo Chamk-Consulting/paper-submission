@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { site } from "@/lib/config/site";
 import { LiveHeader } from "@/components/venues/venue-live";

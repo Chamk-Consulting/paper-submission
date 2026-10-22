@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useT } from "@/lib/i18n/client";
 import { saveUnsub, setUnsub, type UnsubInfo } from "@/lib/data/unsub";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { getFollowState, toggleFollow, type FollowState } from "@/lib/venues/actions";
 
 /**
@@ -27,17 +27,25 @@ const loadFollows = () =>
     .catch(() => ({ signedIn: false, followed: [] }))
     .finally(() => setTimeout(() => { pending = null; }, 2000)));
 
+// Last answer, kept for the life of the tab: moving between public pages doesn't ask again or flicker.
+let known: FollowState | null = null;
+// Before the answer arrives, the session cookie tells us (readable, set by @supabase/ssr) — no "Sign in" flash.
+const hasSession = () => /(?:^|;\s*)sb-[a-z0-9]+-auth-token(?:\.0)?=/.test(document.cookie);
+const noop = () => () => {};
+
 /** Signed-in state and follows, loaded after the (cached, public) page renders. */
 export function useFollows() {
   const router = useRouter();
-  const [state, setState] = useState<FollowState & { loaded: boolean }>({ signedIn: false, followed: [], loaded: false });
+  const cookieSays = useSyncExternalStore(noop, hasSession, () => false);
+  const [state, setState] = useState<FollowState & { loaded: boolean }>(() => (known ? { ...known, loaded: true } : { signedIn: false, followed: [], loaded: false }));
   useEffect(() => {
     let live = true;
-    loadFollows().then((s) => { if (live) setState({ ...s, loaded: true }); });
+    loadFollows().then((s) => { known = s; if (live) setState({ ...s, loaded: true }); });
     return () => { live = false; };
   }, []);
+  const signedIn = state.loaded ? state.signedIn : cookieSays;
   async function toggle(venueId: string, nextHref: string) {
-    if (!state.signedIn) { router.push(`/sign-in?next=${encodeURIComponent(nextHref)}`); return; }
+    if (!signedIn) { router.push(`/sign-in?next=${encodeURIComponent(nextHref)}`); return; }
     const was = state.followed.includes(venueId);
     setState((p) => ({ ...p, followed: was ? p.followed.filter((x) => x !== venueId) : [...p.followed, venueId] }));
     const r = await toggleFollow(venueId);
@@ -46,5 +54,5 @@ export function useFollows() {
       if (r.reason === "signin") router.push(`/sign-in?next=${encodeURIComponent(nextHref)}`);
     }
   }
-  return { ...state, toggle };
+  return { ...state, signedIn, toggle };
 }

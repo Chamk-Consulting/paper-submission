@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import { saveProfile, searchOrganizations, type Org, type ProfileState } from "@/lib/auth/onboarding-actions";
 import { OrcidIcon, ui } from "@/components/auth/split-layout";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { Suspense } from "react";
 import { getT } from "@/lib/i18n/server";
 import { OpenCallsList } from "@/components/open-calls/list";

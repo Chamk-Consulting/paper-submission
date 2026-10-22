@@ -5,7 +5,7 @@ import { useT } from "@/lib/i18n/client";
 import { placeBid } from "@/lib/review/actions";
 import type { BidPaper } from "@/lib/review/data";
 import { paperNo } from "@/lib/review/shared";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { Tag } from "@/components/review/parts";
 
 type Level = "eager" | "willing" | "not_my_area" | "conflict";

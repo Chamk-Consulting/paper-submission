@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useState, useTransition } from "react";
 import { lookupPerson, saveAuthors, type ActionState } from "@/lib/submission/actions";
 import { card, ghostBtn, h2, primaryBtn } from "@/components/submission/shell";

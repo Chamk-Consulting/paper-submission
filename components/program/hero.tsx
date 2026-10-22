@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { ReactNode } from "react";
 import { tzLabel } from "@/lib/program/time";
 import { fmtRange } from "@/lib/venues/time";

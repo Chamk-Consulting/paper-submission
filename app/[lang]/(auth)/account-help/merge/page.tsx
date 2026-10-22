@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getT } from "@/lib/i18n/server";

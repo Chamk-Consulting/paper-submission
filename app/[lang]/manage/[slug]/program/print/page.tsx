@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { getLocale, getT } from "@/lib/i18n/server";
 import { requireEvent } from "@/lib/manage/data";
 import { loadRooms, loadSessions } from "@/lib/manage/ops2-data";

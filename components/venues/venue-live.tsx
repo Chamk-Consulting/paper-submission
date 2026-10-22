@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useEffect, useState } from "react";
 import { PublicHeader } from "@/components/venues/public-header";
 import { getMyVenueStatus } from "@/lib/venues/polish-actions";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site/site-header";
 import { PublicFooter } from "@/components/venues/public-header";

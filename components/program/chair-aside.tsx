@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { fmtDay, fmtTime } from "@/lib/program/time";
 import type { ChairListItem, ChairSession } from "@/lib/program/data";
 import type { getT } from "@/lib/i18n/server";

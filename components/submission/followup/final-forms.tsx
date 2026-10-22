@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { saveFinalCopyright, saveFinalPresenter, saveFinalTitle, submitFinal } from "@/lib/submission/followup-actions";
 import type { ActionState } from "@/lib/submission/actions";

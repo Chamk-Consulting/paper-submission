@@ -1,4 +1,5 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
+import { LandingAccount } from "@/components/site/landing-account";
 import type { Metadata } from "next";
 import { OpenCallsStrip } from "@/components/landing/open-calls-strip";
 import { site } from "@/lib/config/site";
@@ -84,7 +85,7 @@ export default async function Landing() {
             </nav>
             <div className="flex items-center gap-2">
               <LanguageSelect id="landing-lang" className="hidden border-[#2A3C6E]! bg-[#17285A]! text-[#F5F6F3]! sm:block" />
-              <Link href="/sign-in" className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline">{t("Sign in")}</Link>
+              <LandingAccount className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline" />
               <Link href="/manage/new" className={`px-4 py-2.5 text-[14px] ${saffronBtn}`}>{t("Host a conference")}</Link>
             </div>
           </div>

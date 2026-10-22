@@ -1,11 +1,10 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { ReactNode } from "react";
-import { AccountMenu } from "@/components/workspace/account-menu";
+import { Account, Block, Count } from "@/components/workspace/remembered";
 import { venueColor, type WorkspaceCtx } from "@/lib/workspace/data";
 import { LanguageSelect } from "@/components/i18n/language-select";
 import { getT } from "@/lib/i18n/server";
 import type { T } from "@/lib/i18n/translate";
-import { Pin } from "@/components/motion/pin";
 import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 
@@ -45,10 +44,10 @@ function NavItem({ t, href, icon, label, active, badge, soon }: { t: T; href?: s
     </>
   );
   if (!href || soon) return <span className={cls} aria-disabled title={t("Coming soon")}>{inner}</span>;
-  return <Link href={href} aria-current={active ? "page" : undefined} className={cls}>{inner}</Link>;
+  return <Link href={href} prefetch={null} aria-current={active ? "page" : undefined} className={cls}>{inner}</Link>;
 }
 
-const count = (n: number) => (n ? <span className="font-mono text-[12px] text-[#4A5263]">{n}</span> : null);
+const COUNT = "font-mono text-[12px] text-[#4A5263]";
 
 
 /** ctx = null renders the same chrome with placeholders (used by the loading skeleton). */
@@ -62,7 +61,6 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
   const edge = organiser ? "min-[1601px]:border-l" : "min-[1441px]:border-l";
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
-      <Pin name="ws-header">
       <header className="relative bg-[#0E1B3D] text-[#F5F6F3]">
         <div className={`mx-auto box-border flex min-h-[60px] w-full flex-wrap items-center gap-5 px-6 py-2.5 ${frame}`}>
           <Link href="/workspace" className="flex items-center gap-2.5 text-[#F5F6F3] no-underline">
@@ -83,24 +81,23 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
             </Link>
             <Link href="/inbox" aria-label={ctx?.unread ? `${t("Inbox")} · ${ctx.unread} ${t("unread")}` : t("Inbox")} title={t("Inbox")} className="relative box-border flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E] no-underline hover:bg-[#17285A]">
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#F5F6F3" strokeWidth="1.5"><rect x="2" y="4" width="14" height="10" rx="1.5" /><path d="M2.5 5l6.5 5 6.5-5" /></svg>
-              {ctx?.unread ? <span aria-hidden className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#F2A93B] px-1 text-[11px] font-bold text-[#0E1B3D]">{ctx.unread > 9 ? "9+" : ctx.unread}</span> : null}
+              <Count id="unread-top" value={ctx ? ctx.unread : undefined} cap={9} className="absolute -right-1.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#F2A93B] px-1 text-[11px] font-bold text-[#0E1B3D]" />
             </Link>
-            {ctx ? <AccountMenu name={ctx.name} initials={ctx.initials} plenaryId={ctx.me.person?.plenary_id ?? null} /> : <span aria-hidden className="sk-dark block size-10 rounded-full!" />}
+            <Account data={ctx ? { name: ctx.name, initials: ctx.initials, plenaryId: ctx.me.person?.plenary_id ?? null } : null} />
           </div>
         </div>
       </header>
-      </Pin>
 
       <div className={`mx-auto flex w-full flex-auto ${frame}`}>
-        <Pin name="ws-nav">
         <nav aria-label={t("Workspace")} className={`box-border hidden w-[232px] flex-none flex-col gap-0.5 border-r border-[#DADDE3] bg-white px-3 py-5 md:flex ${edge}`}>
           <NavItem t={t} href="/workspace" icon={Icon.home} label="Home" active={active === "home"} />
-          <NavItem t={t} href="/workspace/submissions" icon={Icon.paper} label="My submissions" active={active === "submissions"} badge={ctx ? count(ctx.submissionCount) : null} />
+          <NavItem t={t} href="/workspace/submissions" icon={Icon.paper} label="My submissions" active={active === "submissions"} badge={<Count id="subs" value={ctx ? ctx.submissionCount : undefined} className={COUNT} />} />
           <NavItem t={t} href="/reviews" icon={Icon.pen} label="Reviews" active={active === "reviews"} />
           <NavItem t={t} href="/chair" icon={Icon.cal} label="Sessions I chair" active={active === "sessions"} />
           <NavItem t={t} href="/venues" icon={Icon.globe} label="Browse venues" />
-          <NavItem t={t} href="/inbox" icon={Icon.mail} label="Inbox" active={active === "inbox"} badge={ctx?.unread ? count(ctx.unread) : null} />
+          <NavItem t={t} href="/inbox" icon={Icon.mail} label="Inbox" active={active === "inbox"} badge={<Count id="unread-nav" value={ctx ? ctx.unread : undefined} className={COUNT} />} />
 
+          <Block id="venues" ready={!!ctx}>
           {ctx?.venues.length ? (
             <>
               <div className="mx-3 mb-2 mt-4 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Your venues")}</div>
@@ -112,7 +109,9 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
               ))}
             </>
           ) : null}
+          </Block>
 
+          <Block id="org" ready={!!ctx || !!event}>
           {event ?? (ctx?.organizerOf ? { slug: ctx.organizerOf.slug, name: ctx.organizerOf.shortName ?? ctx.organizerOf.name, roleLabel: ctx.organizerOf.roles.includes("owner") ? "Owner" : "Chair" } : null) ? (() => {
             const ev = (event ?? { slug: ctx!.organizerOf!.slug, name: ctx!.organizerOf!.shortName ?? ctx!.organizerOf!.name, roleLabel: ctx!.organizerOf!.roles.includes("owner") ? "Owner" : "Chair" })!;
             return (
@@ -133,6 +132,7 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
               </>
             );
           })() : null}
+          </Block>
 
           <div className="mt-auto flex flex-col gap-0.5 border-t border-[#DADDE3] pt-4">
             <Link href="/settings/profile" className="flex h-9 items-center rounded-[6px] px-3 text-[14px] text-[#4A5263] no-underline hover:bg-[#F5F6F3]">{t("Settings")}</Link>
@@ -140,7 +140,6 @@ export async function WorkspaceShell({ ctx, active, children, event }: { ctx: Wo
             <CookieSettingsLink className="flex h-9 items-center rounded-[6px] px-3 text-left text-[14px] text-[#4A5263] hover:bg-[#F5F6F3] hover:no-underline" />
           </div>
         </nav>
-        </Pin>
         <main className="box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10">{children}</main>
         {ctx ? <InstallPrompt /> : null}
       </div>

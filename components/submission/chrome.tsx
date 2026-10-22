@@ -1,7 +1,7 @@
 "use client";
 
 import { DeleteDraftButton } from "@/components/submission/delete-draft";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { ReactNode } from "react";
 import { DeadlinePill } from "@/components/submission/live";
 import { LanguageSelect } from "@/components/i18n/language-select";

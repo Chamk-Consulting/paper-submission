@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useT } from "@/lib/i18n/client";

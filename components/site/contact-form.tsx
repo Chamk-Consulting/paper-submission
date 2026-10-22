@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { sendContact, type ContactState } from "@/lib/site/actions";

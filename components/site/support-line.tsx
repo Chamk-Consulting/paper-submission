@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { supportAddress } from "@/lib/config/site";
 import { getT } from "@/lib/i18n/server";
 

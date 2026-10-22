@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { ViewTransition, startTransition, useCallback, useEffect, useMemo, useState, type SetStateAction } from "react";
 import { VT } from "@/lib/motion";
 import { PublicFooter, PublicHeader } from "@/components/venues/public-header";

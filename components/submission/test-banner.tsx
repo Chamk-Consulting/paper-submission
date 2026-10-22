@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 
 /** EM13 — shown on every screen of a test paper so nobody mistakes it for a real submission. */

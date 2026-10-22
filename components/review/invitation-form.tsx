@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { respondInvitation, type ActionState } from "@/lib/review/actions";

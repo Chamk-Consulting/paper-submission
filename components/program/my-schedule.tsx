@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { useSchedule } from "@/components/program/program-board";
 import { dayKey, fmtDay, fmtTime, overlaps } from "@/lib/program/time";

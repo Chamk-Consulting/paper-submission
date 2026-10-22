@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { redirect } from "next/navigation";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -35,7 +35,7 @@ const DESC: Record<string, string> = {
 function roleHref(slug: string, role: string, paperId?: string) {
   if (role === "associate_editor") return `/manage/${slug}/papers`;
   if (role === "reviewer") return "/reviews";
-  if (role === "author") return paperId ? `/submissions/${paperId}` : "/submissions";
+  if (role === "author") return paperId ? `/submissions/${paperId}` : "/workspace/submissions";
   if (role === "session_chair") return "/chair";
   return `/manage/${slug}`;
 }

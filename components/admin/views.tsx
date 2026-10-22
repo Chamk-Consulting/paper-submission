@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { ReactNode } from "react";
 import type { T } from "@/lib/i18n/translate";
 import { ui } from "@/components/manage/ui";

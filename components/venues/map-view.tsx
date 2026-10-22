@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useMemo, useState } from "react";
 import type { Row } from "@/components/venues/directory";
 import { LAND } from "@/lib/venues/land";

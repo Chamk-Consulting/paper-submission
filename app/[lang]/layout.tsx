@@ -11,6 +11,7 @@ import { site } from "@/lib/config/site";
 import { LOCALES, isLocale } from "@/lib/i18n/config";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale, getT } from "@/lib/i18n/server";
+import { DICTS } from "@/lib/i18n/translate";
 import { Suspense } from "react";
 import { NavProgress } from "@/components/motion/nav-progress";
 import { PwaLayer } from "@/components/pwa/pwa-layer";
@@ -55,7 +56,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     <html lang={locale}>
       <body className="min-h-dvh bg-[#F5F6F3] antialiased">
         <Suspense fallback={null}><NavProgress /></Suspense>
-        <I18nProvider locale={locale}>
+        <I18nProvider locale={locale} dict={DICTS[locale]}>
           {children}
           <PwaLayer />
           <CookieConsent />

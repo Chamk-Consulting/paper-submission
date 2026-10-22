@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { PublicHeader } from "@/components/venues/public-header";
 import { Reveal } from "@/components/motion/reveal";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { ComponentProps, ReactNode } from "react";
 
 export function Brand({ light = false }: { light?: boolean }) {

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useMemo, useState } from "react";
 import type { Check, MyPaper, Stage } from "@/lib/workspace/data";
 import { useT } from "@/lib/i18n/client";

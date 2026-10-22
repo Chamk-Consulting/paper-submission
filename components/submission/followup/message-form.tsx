@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState } from "react";
 import { messageChairs } from "@/lib/submission/message-actions";
 import type { ActionState } from "@/lib/submission/actions";

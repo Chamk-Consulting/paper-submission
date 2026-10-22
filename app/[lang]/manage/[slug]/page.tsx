@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { requireEvent, SETUP_GROUPS, groupStatus } from "@/lib/manage/data";
 import { ManagePage } from "@/components/manage/chrome";

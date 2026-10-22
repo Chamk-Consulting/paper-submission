@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { LanguageSelect } from "@/components/i18n/language-select";
-import { Pin } from "@/components/motion/pin";
 import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 
 /** White public header of canvas PV01/PV02. */
@@ -13,7 +12,6 @@ export function PublicHeader({ signedIn, active = "venues" }: { signedIn: boolea
     <Link href={href} aria-current={on ? "page" : undefined} className={`border-b-2 py-5 no-underline ${on ? "border-[#F2A93B] text-[#121826]" : "border-transparent text-[#4A5263] hover:text-[#121826]"}`}>{label}</Link>
   );
   return (
-    <Pin name="public-header">
     <header className="flex-none border-b border-[#DADDE3] bg-white">
       <div className="mx-auto flex min-h-16 max-w-[1280px] flex-wrap items-center justify-between gap-x-5 px-5 sm:px-8">
         <div className="flex items-center gap-8">
@@ -42,7 +40,6 @@ export function PublicHeader({ signedIn, active = "venues" }: { signedIn: boolea
         </div>
       </div>
     </header>
-    </Pin>
   );
 }
 

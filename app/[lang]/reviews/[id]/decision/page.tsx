@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { WorkspaceShell } from "@/components/workspace/shell";
 import { Reveal } from "@/components/motion/reveal";

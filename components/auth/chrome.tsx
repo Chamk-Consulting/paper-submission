@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { LanguageSelect } from "@/components/i18n/language-select";
 import { useT } from "@/lib/i18n/client";
 import { Logo } from "@/components/auth/logo";

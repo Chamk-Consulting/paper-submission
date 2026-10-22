@@ -51,9 +51,10 @@ export default async function proxy(request: NextRequest) {
       },
     },
   });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims checks the session token locally (signing keys) and refreshes it when it expires; it only calls
+  // Supabase Auth when it has to. getUser() here was a network round trip on every click and every prefetch.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const user = claimsData?.claims?.sub ? { id: claimsData.claims.sub } : null;
 
   const prefix = explicit ? `/${explicit}` : "";
   if (!user && PROTECTED_PREFIXES.some((p) => bare === p || bare.startsWith(`${p}/`))) {

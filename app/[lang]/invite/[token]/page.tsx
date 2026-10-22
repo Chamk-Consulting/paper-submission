@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { getLocale, getT } from "@/lib/i18n/server";
 import { INTL } from "@/lib/i18n/config";
 import { createClient } from "@/lib/supabase/server";

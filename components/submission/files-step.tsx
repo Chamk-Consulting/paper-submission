@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";

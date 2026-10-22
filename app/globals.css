@@ -80,14 +80,10 @@ html[data-nav-dir="back"] { --step-x: -28px; }
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 
 /* fade-through: the old content is mostly gone before the new one shows, so text never double-exposes */
-::view-transition-old(.page-out) { animation: var(--dur-out) var(--ease-exit) both vt-out, var(--dur-out) var(--ease-exit) both vt-sink; }
-::view-transition-new(.page-in) { animation: var(--dur-base) var(--ease-standard) var(--dur-gap) both vt-in, var(--dur-slow) var(--ease-emphasized) var(--dur-gap) both vt-rise; }
 
 ::view-transition-old(.step-out) { animation: var(--dur-out) var(--ease-exit) both vt-out, var(--dur-out) var(--ease-exit) both vt-to-side; }
 ::view-transition-new(.step-in) { animation: var(--dur-base) var(--ease-standard) var(--dur-gap) both vt-in, var(--dur-slow) var(--ease-emphasized) var(--dur-gap) both vt-from-side; }
 
-::view-transition-old(.skeleton-out) { animation: var(--dur-fast) var(--ease-exit) both vt-out; }
-::view-transition-new(.content-in) { animation: var(--dur-base) var(--ease-standard) both vt-in; }
 
 /* persistent chrome: same place before and after, so the morph is a quiet crossfade */
 /* stacked above the page layers: a page snapshot carries its own background, which would cover the chrome */
@@ -140,11 +136,18 @@ html.lang-leaving body { opacity: 0.55; transition: opacity var(--dur-base) var(
 .sk { background-color: #E9EBE6; background-image: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.65) 50%, transparent 100%); background-repeat: no-repeat; }
 .sk-dark { background-color: #1B2C5E; background-image: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.08) 50%, transparent 100%); background-repeat: no-repeat; }
 
+/* Reveal: skeleton bars stay invisible for the first 250 ms, so pages that load fast never flash grey.
+   The wrapper takes no box (display: contents), so layouts are unchanged. */
+@keyframes sk-wait { from { opacity: 0; } to { opacity: 1; } }
+.reveal-wait { display: contents; }
+.reveal-wait .sk, .reveal-wait .sk-dark { animation: sk-wait 150ms linear 250ms both, sk-shimmer 1.6s var(--ease-standard) 400ms infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*), ::view-transition-new(*) { animation-name: vt-out !important; animation-duration: var(--dur-fast) !important; }
   ::view-transition-new(*) { animation-name: vt-in !important; }
   ::view-transition-group(*) { animation: none !important; }
   .sk, .sk-dark { animation: none; background-image: none; }
+  .reveal-wait .sk, .reveal-wait .sk-dark { animation: sk-wait 1ms linear 250ms both; }
   .nav-progress[data-state] { transition: opacity var(--dur-fast) !important; }
   button:not(:disabled):active, a[class*="rounded"]:active { transform: none; }
 }

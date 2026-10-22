@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth/actions";
 import { useT } from "@/lib/i18n/client";

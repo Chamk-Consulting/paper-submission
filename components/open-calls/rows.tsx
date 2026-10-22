@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useClock } from "@/components/venues/use-clock";
 import { useT } from "@/lib/i18n/client";
 import { DAY, cityOf, countdown, fmtLocal } from "@/lib/venues/time";

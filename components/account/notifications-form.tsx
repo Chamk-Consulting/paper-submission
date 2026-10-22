@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useActionState, useMemo, useSyncExternalStore } from "react";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { LOCALES, LOCALE_NAMES } from "@/lib/i18n/config";

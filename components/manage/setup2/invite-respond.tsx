@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { ui } from "@/components/manage/ui";
 import { respondCommitteeInvitation } from "@/lib/manage/setup2-actions";

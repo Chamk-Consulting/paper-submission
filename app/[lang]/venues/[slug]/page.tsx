@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicFooter } from "@/components/venues/public-header";

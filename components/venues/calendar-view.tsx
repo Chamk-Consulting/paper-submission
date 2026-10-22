@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Row } from "@/components/venues/directory";
 import { useFollows } from "@/components/venues/use-clock";

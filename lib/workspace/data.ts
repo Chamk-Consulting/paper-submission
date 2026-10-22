@@ -1,3 +1,4 @@
+import { cache } from "react";
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getMe, type Me } from "@/lib/auth/me";
@@ -18,7 +19,16 @@ const COLORS = ["#2F5FD0", "#A8600F", "#18744F", "#6B4FBF", "#B3261E"];
 export const venueColor = (i: number) => COLORS[i % COLORS.length];
 
 /** Everything the workspace shell needs. RLS limits every read to the signed-in person. */
-export async function getWorkspaceCtx(): Promise<WorkspaceCtx | null> {
+/** Header badge: one number. Falls back to counting the inbox on a database without my_unread_count. */
+async function unreadCount(supabase: Awaited<ReturnType<typeof createClient>>): Promise<number> {
+  const { data, error } = await supabase.rpc("my_unread_count");
+  if (!error) return Number(data ?? 0);
+  const { data: rows } = await supabase.rpc("my_inbox");
+  return Array.isArray(rows) ? (rows as { unread?: boolean; archived?: boolean }[]).filter((r) => r.unread && !r.archived).length : 0;
+}
+
+/** Once per request: the shell, the page and its parts all ask for it. */
+export const getWorkspaceCtx = cache(async function getWorkspaceCtx(): Promise<WorkspaceCtx | null> {
   const me = await getMe();
   if (!me) return null;
   const supabase = await createClient();
@@ -32,7 +42,7 @@ export async function getWorkspaceCtx(): Promise<WorkspaceCtx | null> {
       ? supabase.from("submission_authors").select("submission_id", { count: "exact", head: true }).eq("person_id", pid)
       : Promise.resolve({ count: 0 }),
     // tolerate a database without the inbox tables yet
-    pid ? Promise.resolve(supabase.rpc("my_inbox")).then((r) => r, () => ({ data: null })) : Promise.resolve({ data: null }),
+    pid ? unreadCount(supabase) : Promise.resolve(0),
   ]);
 
   const byVenue = new Map<string, VenueLink>();
@@ -56,9 +66,9 @@ export async function getWorkspaceCtx(): Promise<WorkspaceCtx | null> {
     organizerOf: venues.find((v) => v.roles.some((r) => ["owner", "chair", "program_chair", "deputy_chair", "ceb_chair", "publication_chair", "registration_chair", "staff"].includes(r))) ?? null,
     submissionCount: ("count" in subs ? subs.count : 0) ?? 0,
     aeRoles: venues.filter((v) => v.roles.includes("associate_editor")).length,
-    unread: Array.isArray(inbox.data) ? (inbox.data as { unread?: boolean; archived?: boolean }[]).filter((r) => r.unread && !r.archived).length : 0,
+    unread: inbox,
   };
-}
+});
 
 export type Stage = "draft" | "submitted" | "review" | "decision" | "revise" | "final" | "done" | "rejected" | "withdrawn";
 export type Check = "ok" | "need" | "no";
