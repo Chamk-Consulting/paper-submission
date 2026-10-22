@@ -249,7 +249,7 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
         </form>
 
         <div className="ml-auto flex flex-none items-center gap-2.5 sm:gap-3">
-          <LanguageSelect id="hdr-lang" className="hidden border-[#4A5F99]! bg-[#17285A]! text-[#F5F6F3]! lg:block [&>option]:bg-white [&>option]:text-[#121826]" />
+          <LanguageSelect id="hdr-lang" tone="dark" className="hidden lg:inline-flex" />
           <span className="auth-out flex items-center gap-3">
             <Link href={`/sign-in?next=${encodeURIComponent(p === "/" ? "/workspace" : p)}`} className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline">{t("Sign in")}</Link>
             <Link href="/manage/new" className="hidden sm:inline-flex h-9 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Host a conference")}</Link>

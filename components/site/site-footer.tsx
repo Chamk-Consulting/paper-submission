@@ -3,7 +3,7 @@
 import Link from "@/components/site/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ArrowUp, ChevronDown, Globe } from "lucide-react";
+import { ArrowUp, ChevronDown } from "lucide-react";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { INTL } from "@/lib/i18n/config";
 import { CookieSettingsLink } from "@/components/consent/cookie-consent";
@@ -13,8 +13,7 @@ import { barePath } from "@/lib/site/chrome-mode";
 
 /*
  * The one public footer (review 22 Oct): full on marketing/help/legal pages, a slim bar with "More" on venue and
- * program pages, minimal on error-type pages. Live system status, knows whether you're signed in, and on a venue
- * or program page shows that venue's next deadline in your own time zone. Not used on sign-in pages, the
+ * program pages, minimal on error-type pages. Live system status, knows whether you're signed in. Not used on sign-in pages, the
  * workspace, the submission wizard or admin.
  */
 
@@ -62,42 +61,9 @@ function StatusPill({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/* ------------------------------------------------------------------ venue strip */
-type Strip = { slug: string; name: string; acr: string; label: string | null; iso: string | null; aoe: string | null };
 const noop = () => () => {};
 function useTimeZone(): string | null {
   return useSyncExternalStore(noop, () => Intl.DateTimeFormat().resolvedOptions().timeZone, () => null);
-}
-
-function VenueStrip({ slug }: { slug: string }) {
-  const t = useT();
-  const intl = INTL[useLocale()];
-  const tz = useTimeZone();
-  const [v, setV] = useState<Strip | null>(null);
-  useEffect(() => {
-    let on = true;
-    fetch(`/api/venue-strip/${encodeURIComponent(slug)}`).then((r) => (r.ok ? r.json() : null)).then((d) => on && setV(d)).catch(() => {});
-    return () => { on = false; };
-  }, [slug]);
-  if (!v) return null;
-  const local = v.iso ? new Date(v.iso).toLocaleString(intl, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
-  return (
-    <div className="border-b border-[#24335C] bg-[#13224B]">
-      <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-3.5 text-[13px] sm:px-8">
-        <span className="min-w-0">
-          <span className="font-semibold text-[#F5F6F3]">{v.acr || v.name}</span>
-          {local ? (
-            <span className="text-[#B9C3DA]"> · {v.label ? `${t(v.label)}: ` : `${t("Next deadline")}: `}<span className="text-[#F2A93B]">{local}</span>{tz ? ` (${tz})` : ""} · {v.aoe}</span>
-          ) : <span className="text-[#B9C3DA]"> · {t("No upcoming deadline listed")}</span>}
-        </span>
-        <span className="flex flex-wrap gap-x-4 gap-y-1">
-          <Link href={`/venues/${v.slug}`} className={link}>{t("Venue page")}</Link>
-          {v.iso ? <Link href={`/submit/${v.slug}`} className={link}>{t("Submit a paper")}</Link> : null}
-          <Link href={`/program/${v.slug}`} className={link}>{t("Program")}</Link>
-        </span>
-      </div>
-    </div>
-  );
 }
 
 /* ------------------------------------------------------------------ pieces */
@@ -167,20 +133,10 @@ function BottomBar() {
     <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-[#24335C] pt-5 text-[12px] text-[#8F9CC0]">
       <span>© {year} Plenary · {t("Data hosted in the EU (Frankfurt) · GDPR")}</span>
       <span className="flex flex-wrap items-center gap-3">
-        <FooterLanguage />
+        <LanguageSelect id="footer-lang" tone="dark" />
         <BackToTop />
       </span>
     </div>
-  );
-}
-
-/** Language picker on navy: white text, clear border, and a readable (white) option list. */
-function FooterLanguage() {
-  return (
-    <span className="inline-flex h-9 items-center gap-1.5 rounded-[4px] border border-[#4A5F99] bg-[#17285A] pl-2.5 text-[#F5F6F3] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#F2A93B]">
-      <Globe aria-hidden size={15} className="text-[#F2A93B]" />
-      <LanguageSelect id="footer-lang" unstyled className="h-8 cursor-pointer border-0 bg-transparent pr-1.5 text-[13px] font-medium text-[#F5F6F3] outline-none [&>option]:bg-white [&>option]:text-[#121826]" />
-    </span>
   );
 }
 
@@ -208,7 +164,7 @@ function writeMore(v: boolean) {
 }
 function subscribeMore(f: () => void) { moreSubs.add(f); return () => { moreSubs.delete(f); }; }
 
-export function SiteFooter({ size = "full", venue }: { size?: FooterSize; venue?: string | null }) {
+export function SiteFooter({ size = "full" }: { size?: FooterSize }) {
   const t = useT();
   const tz = useTimeZone();
   const more = useSyncExternalStore(subscribeMore, readMore, () => false);
@@ -236,7 +192,6 @@ export function SiteFooter({ size = "full", venue }: { size?: FooterSize; venue?
   if (size === "compact") {
     return (
       <footer className={shell}>
-        {venue ? <VenueStrip slug={venue} /> : null}
         <div className={`${inner} flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4 text-[13px]`}>
           <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <span className="font-serif text-[20px] leading-none text-[#F5F6F3]">Plenary</span>
@@ -244,7 +199,7 @@ export function SiteFooter({ size = "full", venue }: { size?: FooterSize; venue?
             {tz ? <span className="text-[12px] text-[#8F9CC0]">{t("Times shown in your time zone ({tz})", { tz })}</span> : null}
           </span>
           <span className="flex flex-wrap items-center gap-3">
-            <FooterLanguage />
+            <LanguageSelect id="footer-lang" tone="dark" />
             <button type="button" onClick={toggle} aria-expanded={more} aria-controls="footer-more"
               className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[#2B3D70] bg-transparent px-2.5 text-[12px] text-[#D6DCEA] hover:border-[#4A5F99]">
               {more ? t("Less") : t("More")}<ChevronDown aria-hidden size={14} className={more ? "rotate-180" : ""} />
@@ -261,7 +216,6 @@ export function SiteFooter({ size = "full", venue }: { size?: FooterSize; venue?
 
   return (
     <footer className={shell}>
-      {venue ? <VenueStrip slug={venue} /> : null}
       <div className={`${inner} pb-8 pt-12`}>
         <Columns />
         <BottomBar />
@@ -273,17 +227,11 @@ export function SiteFooter({ size = "full", venue }: { size?: FooterSize; venue?
 /* ------------------------------------------------------------------ which footer for which page */
 const NONE = [/^\/submissions(\/|$)/, /^\/submit(\/|$)/, /^\/admin(\/|$)/];
 const MINIMAL = [/^\/expired$/, /^\/no-access$/, /^\/unsubscribe\//, /^\/invite\//];
-const EVENT = [/^\/venues(\/|$)/, /^\/program\//];
 
-export function footerFor(p: string): { size: FooterSize | null; venue: string | null } {
-  if (NONE.some((r) => r.test(p))) return { size: null, venue: null };
-  if (MINIMAL.some((r) => r.test(p))) return { size: "minimal", venue: null };
-  // Event pages (venues, programs) get the same full footer, with the event's deadline strip on top.
-  if (EVENT.some((r) => r.test(p))) {
-    const m = p.match(/^\/(?:venues|program)\/([a-z0-9-]+)/);
-    return { size: "full", venue: m ? m[1] : null };
-  }
-  return { size: "full", venue: null };
+export function footerFor(p: string): FooterSize | null {
+  if (NONE.some((r) => r.test(p))) return null;
+  if (MINIMAL.some((r) => r.test(p))) return "minimal";
+  return "full"; // event pages (venues, programs) included: the same footer as every other page
 }
 
 /** Used by the public layout: picks the footer from the address. */
@@ -293,6 +241,6 @@ export function SiteFooterLive() {
   // clock; rendering it on the server too caused hydration mismatches on dynamic pages.
   const mounted = useSyncExternalStore(noop, () => true, () => false);
   if (!mounted) return null;
-  const f = footerFor(p);
-  return f.size ? <SiteFooter size={f.size} venue={f.venue} /> : null;
+  const size = footerFor(p);
+  return size ? <SiteFooter size={size} /> : null;
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
+import { ReadingPage } from "@/components/site/reading-page";
 import { site } from "@/lib/config/site";
-import { LiveHeader } from "@/components/venues/venue-live";
 import { ConsentStatus } from "@/components/consent/consent-status";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -47,29 +47,25 @@ export default async function CookiePolicy() {
     </div>
   );
   return (
-    <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.6] text-[#121826]">
-      <LiveHeader />
-      <main className="mx-auto box-border w-full max-w-[880px] flex-auto px-5 pb-16 pt-10 sm:px-8">
-        <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("Legal")}</p>
-        <h1 className="mt-2 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("Cookie policy")}</h1>
-        <p className="mt-3 max-w-[64ch] text-[#4A5263]">{t("Plenary stores as little as possible on your device. Strictly necessary cookies keep the service working and secure; everything else waits for your OK. We use no advertising, analytics or third-party tracking cookies.")}</p>
+    <ReadingPage kicker={t("Legal")} title={t("Cookie policy")} current="/legal/cookies"
+      lead={t("Plenary stores as little as possible on your device. Strictly necessary cookies keep the service working and secure; everything else waits for your OK. We use no advertising, analytics or third-party tracking cookies.")}
+      toc={[["necessary", t("Strictly necessary")], ["preferences", t("Preferences")], ["not-used", t("What we don’t use")], ["rights", t("Your rights")]]}>
         <ConsentStatus />
 
-        <h2 className="mt-10 font-serif text-[26px] font-normal">{t("Strictly necessary")}</h2>
+        <h2 id="necessary" className="mt-10 scroll-mt-24 font-serif text-[26px] font-normal">{t("Strictly necessary")}</h2>
         <p className="mt-1 max-w-[64ch] text-[#4A5263]">{t("Always on: the service can’t work without them, so the law doesn’t require consent. We list them so you know exactly what they do.")}</p>
         {table(necessary)}
 
-        <h2 className="mt-10 font-serif text-[26px] font-normal">{t("Preferences")}</h2>
+        <h2 id="preferences" className="mt-10 scroll-mt-24 font-serif text-[26px] font-normal">{t("Preferences")}</h2>
         <p className="mt-1 max-w-[64ch] text-[#4A5263]">{t("Only with your consent. Without it, Plenary still works — it just forgets your language when you close the browser.")}</p>
         {table(preferences)}
 
-        <h2 className="mt-10 font-serif text-[26px] font-normal">{t("What we don’t use")}</h2>
+        <h2 id="not-used" className="mt-10 scroll-mt-24 font-serif text-[26px] font-normal">{t("What we don’t use")}</h2>
         <p className="mt-1 max-w-[64ch] text-[#4A5263]">{t("No advertising cookies, no analytics or tracking cookies, no social-media pixels. If that ever changes, we will add a category here and ask you first.")}</p>
 
-        <h2 className="mt-10 font-serif text-[26px] font-normal">{t("Your rights")}</h2>
+        <h2 id="rights" className="mt-10 scroll-mt-24 font-serif text-[26px] font-normal">{t("Your rights")}</h2>
         <p className="mt-1 max-w-[64ch] text-[#4A5263]">{t("You can change or withdraw your choice at any time with “Cookie settings” at the bottom of every page, or delete cookies in your browser settings.")}{" "}<Link href="/account-help" className="text-[#2F5FD0]">{t("Questions? Visit the Help centre.")}</Link></p>
         <p className="mt-6 font-mono text-[12px] text-[#4A5263]">{t("Last updated: {date}", { date: "18 October 2026" })} · {site.legalName}</p>
-      </main>
-    </div>
+    </ReadingPage>
   );
 }

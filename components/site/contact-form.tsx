@@ -72,7 +72,7 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
         </div>
       </section>
 
-      <div id="panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mx-auto box-border flex w-full max-w-[1280px] flex-auto flex-wrap items-start gap-7 px-5 pb-16 pt-7 sm:px-8">
+      <div id="panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mx-auto box-border flex w-full max-w-[1280px] flex-auto flex-wrap items-start justify-between gap-7 px-5 pb-16 pt-7 sm:px-8">
         {tab === "support" ? (
           <>
             <div className="flex min-w-0 max-w-[760px] flex-[999_1_560px] flex-col gap-4">
@@ -156,7 +156,7 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
               </form>
             </div>
 
-            <aside aria-label={t("Before you write")} className="flex max-w-[380px] flex-[1_1_300px] flex-col gap-3.5">
+            <aside aria-label={t("Before you write")} className="flex w-full flex-col gap-3.5 lg:w-[320px] lg:flex-none">
               <section className="rounded-[8px] border border-[#DADDE3] bg-white p-[18px]">
                 <p className="m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("Quick answers")}</p>
                 <ul className="m-0 mt-2.5 flex list-none flex-col p-0">
@@ -230,7 +230,7 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
               </form>
             </div>
 
-            <aside aria-label={t("What happens next")} className="flex max-w-[380px] flex-[1_1_300px] flex-col gap-3.5">
+            <aside aria-label={t("What happens next")} className="flex w-full flex-col gap-3.5 lg:w-[320px] lg:flex-none">
               <section className="rounded-[8px] border border-[#DADDE3] bg-white p-5">
                 <p className="m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("What happens next")}</p>
                 <ol className="m-0 mt-3.5 flex list-none flex-col gap-3.5 p-0">

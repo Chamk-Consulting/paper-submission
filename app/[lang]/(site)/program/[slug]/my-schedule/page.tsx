@@ -40,7 +40,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
           <Link href="/settings/calendar" className={btn}>{t("Sync to calendar")}</Link>
           <PrintButton label={t("Print")} className={btn} />
         </>} />
-      <main className="mx-auto box-border w-full max-w-[880px] flex-auto px-4 pb-16 pt-6 sm:px-8">
+      <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-16 pt-6 sm:px-8">
         <h1 className="m-0 mb-4 hidden font-serif text-[28px] font-normal print:block">{t("My schedule")} · {acr}</h1>
         <MySchedule sessions={sessions} slug={venue.slug} tz={venue.timezone} />
       </main>

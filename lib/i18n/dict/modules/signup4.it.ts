@@ -106,4 +106,7 @@ export const signup4_it: Record<string, string> = {
   "No upcoming deadline listed": "Nessuna scadenza in programma",
   "Support": "Assistenza",
   "Times shown in your time zone ({tz})": "Orari mostrati nel tuo fuso orario ({tz})",
+  "Need help?": "Serve aiuto?",
+  "Write to": "Scrivi a",
+  "or use the contact form — a person replies within 2 working days.": "oppure usa il modulo di contatto: una persona risponde entro 2 giorni lavorativi.",
 };

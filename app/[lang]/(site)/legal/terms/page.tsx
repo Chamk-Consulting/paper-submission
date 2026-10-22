@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { site } from "@/lib/config/site";
 import { getT } from "@/lib/i18n/server";
-import { SupportLine } from "@/components/site/support-line";
+import { ReadingPage } from "@/components/site/reading-page";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -11,11 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page() {
   const t = await getT();
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="mt-6 font-serif text-4xl text-navy">{t("Terms of use")}</h1>
-      {/* TODO(legal): final text reviewed by counsel. */}
-      <p className="mt-4 text-muted">{t("Draft — operated by {name}. Final text will be published before launch.", { name: site.legalName })}</p>
-      <SupportLine />
-    </main>
+    <ReadingPage kicker={t("Legal")} title={t("Terms of use")} current="/legal/terms">
+        {/* TODO(legal): final text reviewed by counsel. */}
+        <p className="mt-4 text-muted">{t("Draft — operated by {name}. Final text will be published before launch.", { name: site.legalName })}</p>
+    </ReadingPage>
   );
 }
