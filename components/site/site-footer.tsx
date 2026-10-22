@@ -3,7 +3,7 @@
 import Link from "@/components/site/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ArrowUp, ChevronDown } from "lucide-react";
+import { ArrowUp, ChevronDown, Globe } from "lucide-react";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { INTL } from "@/lib/i18n/config";
 import { CookieSettingsLink } from "@/components/consent/cookie-consent";
@@ -167,10 +167,20 @@ function BottomBar() {
     <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-[#24335C] pt-5 text-[12px] text-[#8F9CC0]">
       <span>© {year} Plenary · {t("Data hosted in the EU (Frankfurt) · GDPR")}</span>
       <span className="flex flex-wrap items-center gap-3">
-        <LanguageSelect id="footer-lang" className="h-8 border-[#2B3D70] bg-[#0E1B3D] text-[#D6DCEA]" />
+        <FooterLanguage />
         <BackToTop />
       </span>
     </div>
+  );
+}
+
+/** Language picker on navy: white text, clear border, and a readable (white) option list. */
+function FooterLanguage() {
+  return (
+    <span className="inline-flex h-9 items-center gap-1.5 rounded-[4px] border border-[#4A5F99] bg-[#17285A] pl-2.5 text-[#F5F6F3] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#F2A93B]">
+      <Globe aria-hidden size={15} className="text-[#F2A93B]" />
+      <LanguageSelect id="footer-lang" unstyled className="h-8 cursor-pointer border-0 bg-transparent pr-1.5 text-[13px] font-medium text-[#F5F6F3] outline-none [&>option]:bg-white [&>option]:text-[#121826]" />
+    </span>
   );
 }
 
@@ -178,7 +188,7 @@ function BackToTop() {
   const t = useT();
   return (
     <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[#2B3D70] bg-transparent px-2.5 text-[12px] text-[#D6DCEA] hover:border-[#4A5F99]">
+      className="inline-flex h-9 items-center gap-1.5 rounded-[4px] border border-[#4A5F99] bg-transparent px-2.5 text-[13px] text-[#F5F6F3] hover:border-[#8F9CC0]">
       <ArrowUp aria-hidden size={14} />{t("Back to top")}
     </button>
   );
@@ -234,7 +244,7 @@ export function SiteFooter({ size = "full", venue }: { size?: FooterSize; venue?
             {tz ? <span className="text-[12px] text-[#8F9CC0]">{t("Times shown in your time zone ({tz})", { tz })}</span> : null}
           </span>
           <span className="flex flex-wrap items-center gap-3">
-            <LanguageSelect id="footer-lang" className="h-8 border-[#2B3D70] bg-[#0E1B3D] text-[#D6DCEA]" />
+            <FooterLanguage />
             <button type="button" onClick={toggle} aria-expanded={more} aria-controls="footer-more"
               className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-[#2B3D70] bg-transparent px-2.5 text-[12px] text-[#D6DCEA] hover:border-[#4A5F99]">
               {more ? t("Less") : t("More")}<ChevronDown aria-hidden size={14} className={more ? "rotate-180" : ""} />
@@ -263,14 +273,15 @@ export function SiteFooter({ size = "full", venue }: { size?: FooterSize; venue?
 /* ------------------------------------------------------------------ which footer for which page */
 const NONE = [/^\/submissions(\/|$)/, /^\/submit(\/|$)/, /^\/admin(\/|$)/];
 const MINIMAL = [/^\/expired$/, /^\/no-access$/, /^\/unsubscribe\//, /^\/invite\//];
-const COMPACT = [/^\/venues(\/|$)/, /^\/program\//];
+const EVENT = [/^\/venues(\/|$)/, /^\/program\//];
 
 export function footerFor(p: string): { size: FooterSize | null; venue: string | null } {
   if (NONE.some((r) => r.test(p))) return { size: null, venue: null };
   if (MINIMAL.some((r) => r.test(p))) return { size: "minimal", venue: null };
-  if (COMPACT.some((r) => r.test(p))) {
+  // Event pages (venues, programs) get the same full footer, with the event's deadline strip on top.
+  if (EVENT.some((r) => r.test(p))) {
     const m = p.match(/^\/(?:venues|program)\/([a-z0-9-]+)/);
-    return { size: "compact", venue: m ? m[1] : null };
+    return { size: "full", venue: m ? m[1] : null };
   }
   return { size: "full", venue: null };
 }

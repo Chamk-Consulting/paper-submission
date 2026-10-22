@@ -5,7 +5,7 @@ import { setLanguageCookie } from "@/lib/consent-client";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 /** Language picker used in every header. Saves the choice (for a year with "preferences" consent, else for the session) and reloads the page in that language. */
-export function LanguageSelect({ id = "lang-select", className = "" }: { id?: string; className?: string }) {
+export function LanguageSelect({ id = "lang-select", className = "", unstyled = false }: { id?: string; className?: string; unstyled?: boolean }) {
   const locale = useLocale();
   const t = useT();
   function change(next: Locale) {
@@ -21,7 +21,7 @@ export function LanguageSelect({ id = "lang-select", className = "" }: { id?: st
   return (
     <>
       <label htmlFor={id} className="sr-only">{t("Language")}</label>
-      <select id={id} value={locale} onChange={(e) => change(e.target.value as Locale)} className={`h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-2 text-[14px] text-[#121826] ${className}`}>
+      <select id={id} value={locale} onChange={(e) => change(e.target.value as Locale)} className={unstyled ? className : `h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-2 text-[14px] text-[#121826] ${className}`}>
         {LOCALES.map((l) => <option key={l} value={l} lang={l}>{LOCALE_NAMES[l]}</option>)}
       </select>
     </>
