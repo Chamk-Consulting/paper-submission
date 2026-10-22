@@ -103,7 +103,7 @@ export async function saveNewPassword(_: NewPasswordState, formData: FormData): 
   if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
   if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
 
-  const { error } = await supabase.auth.updateUser({ password });
+  const { error } = await supabase.auth.updateUser({ password, data: { password_set_at: new Date().toISOString(), secured_for: data.user.email_confirmed_at ?? null } });
   if (error) {
     const same = /different from the old|same_password/i.test(error.message + (error.code ?? ""));
     const weak = /weak|pwned|leaked/i.test(error.message + (error.code ?? ""));

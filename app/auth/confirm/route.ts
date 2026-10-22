@@ -5,7 +5,8 @@ import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { safeNext } from "@/lib/config/site";
 import { markRecovery } from "@/lib/auth/recovery-cookie";
 import { refuseIfLocked } from "@/lib/auth/lock-check";
-import { needsTwoStep, twoStepHref } from "@/lib/auth/mfa";
+import { makeT } from "@/lib/i18n/translate";
+import { LOCALE_COOKIE, isLocale, negotiate, type Locale } from "@/lib/i18n/config";
 
 // Handles every email link: sign-up confirmation, password recovery, magic link, email change.
 // Links look like /auth/confirm?token_hash=…&type=<signup|recovery|magiclink|email|email_change|invite>&next=…
@@ -18,8 +19,11 @@ import { needsTwoStep, twoStepHref } from "@/lib/auth/mfa";
 
 const TYPES = new Set(["signup", "invite", "magiclink", "recovery", "email_change", "email"]);
 
+/** Recovery goes to the new-password screen; everything else through /auth/continue, which opens any unfinished step. */
 function destFor(type: string, next: string) {
-  return type === "recovery" ? "/reset-password" : type === "signup" ? "/create-account/profile" : next;
+  if (type === "recovery") return "/reset-password";
+  if (next.startsWith("/auth/continue")) return next;
+  return `/auth/continue?next=${encodeURIComponent(type === "signup" && next === "/workspace" ? "/welcome" : next)}`;
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -33,11 +37,13 @@ const COPY: Record<string, { kicker: string; title: string; lead: string; button
   email_change: { kicker: "Change email", title: "Confirm your new email", lead: "Confirm this change to your Plenary account email.", button: "Confirm the change" },
 };
 
-function page(tokenHash: string, type: string, next: string) {
-  const c = COPY[type] ?? COPY.email;
+function page(tokenHash: string, type: string, next: string, locale: Locale) {
+  const raw = COPY[type] ?? COPY.email;
+  const t = makeT(locale);
+  const c = { kicker: t(raw.kicker), title: t(raw.title), lead: t(raw.lead), button: t(raw.button) };
   const sans = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
   const mono = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  const html = `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><meta name="referrer" content="same-origin"><title>${esc(c.title)} · Plenary</title></head>
 <body style="margin:0;min-height:100vh;background:#EEF0EC;font:16px/1.55 ${sans};color:#121826">
 <main style="max-width:480px;margin:0 auto;padding:56px 16px">
@@ -50,7 +56,7 @@ function page(tokenHash: string, type: string, next: string) {
 <input type="hidden" name="token_hash" value="${esc(tokenHash)}"><input type="hidden" name="type" value="${esc(type)}"><input type="hidden" name="next" value="${esc(next)}">
 <button type="submit" style="width:100%;height:48px;border:0;border-radius:4px;background:#F2A93B;color:#0E1B3D;font:700 16px/1 ${sans};cursor:pointer">${esc(c.button)}</button>
 </form>
-<p style="margin:16px 0 0;font-size:13px;color:#4A5263">This extra step stops email security scanners from using your one-time link before you do.</p>
+<p style="margin:16px 0 0;font-size:13px;color:#4A5263">${esc(t("This extra step stops email security scanners from using your one-time link before you do."))}</p>
 </div></main></body></html>`;
   return new NextResponse(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex" } });
 }
@@ -69,7 +75,8 @@ export async function GET(request: NextRequest) {
       const { data } = await supabase.auth.getUser();
       if (data.user) return NextResponse.redirect(new URL(destFor(type, next), origin));
     }
-    return page(tokenHash, type, next);
+    const pref = request.cookies.get(LOCALE_COOKIE)?.value;
+    return page(tokenHash, type, next, isLocale(pref) ? pref : negotiate(request.headers.get("accept-language")));
   }
 
   if (code) {
@@ -79,11 +86,10 @@ export async function GET(request: NextRequest) {
     if (!error) {
       if (await refuseIfLocked(supabase)) return NextResponse.redirect(new URL("/auth-error?reason=locked", origin));
       await recordSignIn(supabase, "email_link");
-      if (await needsTwoStep(supabase)) return NextResponse.redirect(new URL(twoStepHref(next), origin));
-      return NextResponse.redirect(new URL(next, origin));
+      return NextResponse.redirect(new URL(destFor("email", next), origin));
     }
     const { data } = await supabase.auth.getUser();
-    if (data.user) return NextResponse.redirect(new URL(next, origin));
+    if (data.user) return NextResponse.redirect(new URL(destFor("email", next), origin));
   }
 
   return NextResponse.redirect(new URL("/auth-error?reason=link", origin));
@@ -107,11 +113,11 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ type: type as EmailOtpType, token_hash: tokenHash });
+  if (error?.code === "user_banned") return NextResponse.redirect(new URL("/auth-error?reason=locked", origin), 303);
   if (!error) {
     if (await refuseIfLocked(supabase)) return NextResponse.redirect(new URL("/auth-error?reason=locked", origin), 303);
     if (type === "recovery" && data.user) await markRecovery(data.user.id);
     if (type === "magiclink" || type === "email") await recordSignIn(supabase, "email_link");
-    if (type !== "recovery" && (await needsTwoStep(supabase))) return NextResponse.redirect(new URL(twoStepHref(destFor(type, next)), origin), 303);
     return NextResponse.redirect(new URL(destFor(type, next), origin), 303);
   }
 

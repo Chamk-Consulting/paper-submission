@@ -7,6 +7,9 @@ import { createClient } from "@/lib/supabase/server";
 import { hashToken, newToken } from "@/lib/tokens";
 import { sendEmail } from "@/lib/email/send";
 import { MERGE_COOKIE } from "@/lib/account-help/constants";
+import { headers } from "next/headers";
+import { turnstileOk } from "@/lib/site/turnstile";
+import { overLimit } from "@/lib/auth/attempts";
 
 /* AH02 account help: lost email, merge two accounts, claim a paper. Messages are English keys; the forms translate them. */
 
@@ -30,7 +33,11 @@ export async function submitLostEmail(_: HelpState, fd: FormData): Promise<HelpS
   }).safeParse(Object.fromEntries(fd));
   if (!p.success) return { error: p.error.issues[0]?.message ?? GENERIC };
   if (p.data.oldEmail && !z.string().email().safeParse(p.data.oldEmail).success) return { error: "The old email doesn’t look right." };
+  // Plan A4: robot check and a per-connection limit, so this form can't be used to send mail to strangers in bulk.
+  const h = await headers();
+  if (!(await turnstileOk(fd, (h.get("x-forwarded-for") ?? "").split(",")[0].trim()))) return { error: "Please confirm you're not a robot, then try again." };
   const supabase = await createClient();
+  if (await overLimit(supabase, "lost_email", 3)) return { error: "Too many requests from this address — try again in an hour." };
   const { data, error } = await supabase.rpc("submit_account_help", {
     p_name: p.data.name, p_plenary_id: p.data.plenaryId || null, p_old_email: p.data.oldEmail || null,
     p_new_email: p.data.newEmail, p_proof: p.data.proof, p_note: p.data.note || null,
@@ -39,8 +46,9 @@ export async function submitLostEmail(_: HelpState, fd: FormData): Promise<HelpS
   const ref = data as string;
   await sendEmail({
     to: p.data.newEmail,
-    subject: `We received your account request [${ref}]`,
-    text: `Hello ${p.data.name.split(" ")[0]},\n\nWe received your request to move your Plenary account to this address. A person at Plenary checks it within 2 working days and writes back here.\n\nReference: ${ref}\n\nIf you didn't ask for this, ignore this email.`,
+    // Fixed wording only: nothing typed into the form (name, note) is copied into the email, and it has no links.
+    subject: `We received your account request [${String(ref).replace(/[^A-Za-z0-9-]/g, "").slice(0, 20)}]`,
+    text: `Hello,\n\nWe received a request to move a Plenary account to this address. A person at Plenary checks it within 2 working days and writes back here.\n\nReference: ${String(ref).replace(/[^A-Za-z0-9-]/g, "").slice(0, 20)}\n\nIf you didn't ask for this, ignore this email — nothing changes without our check.`,
   });
   return { ref, at: Date.now() };
 }

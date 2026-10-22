@@ -18,7 +18,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ email?: string 
   return (
     <AuthCard
       title={t("Check your email")}
-      lead={<>{t("We sent a confirmation link")}{email ? <> {t("to")} <strong className="text-ink">{email}</strong></> : null}. {t("It expires in 1 hour.")}</>}
+      lead={<>{t("We sent a confirmation link")}{email ? <> {t("to")} <strong className="text-ink">{email}</strong></> : null}. {t("It expires in 15 minutes.")}</>}
       footer={<Link href="/sign-in" className="text-navy underline">{t("Back to sign in")}</Link>}
     >
       <ul className="list-disc space-y-1 pl-5 text-sm text-muted">

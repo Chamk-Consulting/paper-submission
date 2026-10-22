@@ -7,7 +7,10 @@ import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 // private areas. Real permission checks live in server actions and RLS.
 const PROTECTED_PREFIXES = ["/workspace", "/submissions", "/submit", "/manage", "/reviews", "/settings", "/inbox", "/chair", "/search", "/admin"];
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/create-account"];
-const TWO_STEP_GUARDED = [...PROTECTED_PREFIXES, "/create-account/profile", "/welcome"];
+const TWO_STEP_GUARDED = [...PROTECTED_PREFIXES, "/create-account/password", "/create-account/profile", "/welcome"];
+// Registration gate (plan B7): an account with an unfinished step (password or profile, kept in the session token as
+// user_metadata.onb by /auth/continue) is sent to that step first, then back to the page it asked for.
+const ONBOARDING_GUARDED = [...PROTECTED_PREFIXES, "/welcome"];
 // Route handlers live outside app/[lang] and are never rewritten.
 const NO_LOCALE = [/^\/(?:robots\.txt|sitemap\.xml)$/, /^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
 
@@ -71,6 +74,16 @@ export default async function proxy(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = `${prefix}/sign-in/two-step`;
       url.search = `?next=${encodeURIComponent(bare + search)}`;
+      return NextResponse.redirect(url);
+    }
+  }
+  const onb = (claimsData?.claims?.user_metadata as { onb?: unknown } | undefined)?.onb;
+  if (user && (onb === "password" || onb === "profile")) {
+    const guarded = [...ONBOARDING_GUARDED, ...(onb === "password" ? ["/create-account/profile"] : [])];
+    if (guarded.some((p) => bare === p || bare.startsWith(`${p}/`))) {
+      const url = request.nextUrl.clone();
+      url.pathname = `${prefix}/create-account/${onb}`;
+      url.search = `?next=${encodeURIComponent(bare === "/welcome" ? "/welcome" : bare + search)}`;
       return NextResponse.redirect(url);
     }
   }

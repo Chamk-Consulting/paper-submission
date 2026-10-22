@@ -7,12 +7,13 @@ import { NavyAside, SetupSteps, ShieldNote, SplitLayout, ui } from "@/components
 import { OtpVerify } from "@/components/auth/otp-verify";
 import { safeNext, senderDomain, site } from "@/lib/config/site";
 import { AuthAsideSkeleton, AuthFormSkeleton } from "@/components/skeletons";
+import { signupSteps } from "@/components/auth/signup-steps";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return { title: t("Confirm your email") };
 }
-type Search = { email?: string; name?: string; next?: string; venue?: string; wait?: string };
+type Search = { email?: string; name?: string; next?: string; venue?: string; wait?: string; reason?: string };
 
 function back(s: Search) {
   const q = new URLSearchParams();
@@ -27,18 +28,22 @@ async function Left({ searchParams }: { searchParams: Promise<Search> }) {
   const email = (s.email ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) redirect("/create-account");
   const t = await getT();
-  const after = `/create-account/profile${s.next ? `?next=${encodeURIComponent(safeNext(s.next))}` : ""}`;
+  const next = s.next ? safeNext(s.next) : undefined;
+  const after = `/auth/continue?next=${encodeURIComponent(next ?? "/welcome")}`;
   return (
     <>
       <Link href={back(s)} className="text-[14px] text-[#2F5FD0] no-underline">← {t("Back")}</Link>
-      <p className={`mt-4 ${ui.kicker}`}>{t("Step 2 of 3")}</p>
+      <p className={`mt-4 ${ui.kicker}`}>{t("Step 2 of 4")}</p>
       <h1 className={`mt-1.5 ${ui.h1}`}>{t("Confirm your email")}</h1>
       <p className={`mt-2.5 ${ui.muted}`}>
         {t("We sent a code and a link to")} <strong className="text-[#121826]">{email}</strong>{" "}
         <Link href={back(s)} className={`text-[14px] ${ui.link}`}>{t("Change")}</Link>
       </p>
+      {s.reason === "unconfirmed" ? (
+        <p role="status" className="mt-4 rounded-[6px] border border-[#BCCDF3] bg-[#F3F6FD] px-3.5 py-2.5 text-[14px] text-[#121826]">{t("Your account isn't confirmed yet, so we can't sign you in with a password. We've emailed you a new code — enter it below to finish.")}</p>
+      ) : null}
       {s.wait ? <p role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">{t("A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute.")}</p> : null}
-      <OtpVerify email={email} onSuccessHref={after} changeHref={back(s)} senderDomain={senderDomain()} />
+      <OtpVerify email={email} onSuccessHref={after} changeHref={back(s)} senderDomain={senderDomain()} next={next} />
     </>
   );
 }
@@ -50,14 +55,7 @@ async function Aside({ searchParams }: { searchParams: Promise<Search> }) {
   const t = await getT();
   return (
     <NavyAside label={t("Account set-up progress")} kicker={t("Creating your account")} title={first ? t("Nearly done, {name}.", { name: first }) : t("Nearly done.")}>
-      <SetupSteps
-        doneLabel={t("Done")}
-        steps={[
-          { title: t("Your name, email and password"), text: [full, s.email].filter(Boolean).join(" · "), state: "done" },
-          { title: t("Confirm your email"), text: t("Code sent · expires in 15 minutes."), state: "current" },
-          { title: t("Your research profile"), text: t("Affiliation and ORCID — then you get your Plenary ID and go back to where you started."), state: "next" },
-        ]}
-      />
+      <SetupSteps doneLabel={t("Done")} steps={signupSteps(t, 2, { 1: [full, s.email].filter(Boolean).join(" · ") || undefined, 2: t("Code sent · expires in 15 minutes.") })} />
       <ShieldNote><strong className="text-[#F5F6F3]">{t("Plenary staff will never ask for this code.")}</strong> {t("Only enter it on {host}. Didn't sign up? Ignore the email — no account is created without it.", { host: new URL(site.url).host })}</ShieldNote>
     </NavyAside>
   );

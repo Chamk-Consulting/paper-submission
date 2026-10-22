@@ -6,7 +6,6 @@ import { readMyPerson } from "@/lib/auth/my-person";
 export type Me = {
   userId: string;
   email: string;
-  confirmedAt: string | null;
   person: {
     id: string;
     given_name: string;
@@ -31,7 +30,7 @@ export const getMe = cache(async function getMe(): Promise<Me | null> {
   const [{ data: claimsData }, early] = await Promise.all([supabase.auth.getClaims(), supabase.rpc("my_person")]);
   const claims = claimsData?.claims;
   if (!claims?.sub) return null;
-  const auth = { user: { id: claims.sub, email: typeof claims.email === "string" ? claims.email : "", email_confirmed_at: null as string | null } };
+  const auth = { user: { id: claims.sub, email: typeof claims.email === "string" ? claims.email : "" } };
   const person = (!early.error ? early.data : await readMyPerson(supabase, auth.user.id)) as Me["person"];
   let affiliation: Me["affiliation"] = null;
   if (person) {
@@ -48,7 +47,6 @@ export const getMe = cache(async function getMe(): Promise<Me | null> {
   return {
     userId: auth.user.id,
     email: auth.user.email ?? "",
-    confirmedAt: auth.user.email_confirmed_at ?? null,
     person: (person as Me["person"]) ?? null,
     affiliation,
   };

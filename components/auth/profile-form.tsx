@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "@/components/site/link";
-import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { focusFirstError } from "@/components/auth/focus-error";
 import { saveProfile, searchOrganizations, type Org, type ProfileState } from "@/lib/auth/onboarding-actions";
 import { OrcidIcon, ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
@@ -29,6 +29,8 @@ export function ProfileForm({
   next?: string;
 }) {
   const [state, action, pending] = useActionState(saveProfile, {} as ProfileState);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => { if (state.fieldErrors || state.message) focusFirstError(formRef.current); }, [state]);
   const [name, setName] = useState(defaultName);
   const [scripts, setScripts] = useState<{ k: ScriptKey; v: string }[]>(
     initialScripts.filter((s) => s.script in SCRIPTS).map((s) => ({ k: s.script as ScriptKey, v: s.name })),
@@ -40,7 +42,6 @@ export function ProfileForm({
   const [searching, startSearch] = useTransition();
   const [dept, setDept] = useState("");
   const [country, setCountry] = useState(initialCountry);
-  const [alt, setAlt] = useState(false);
   const [tried, setTried] = useState(false);
   const [orcidSoon, setOrcidSoon] = useState(false);
   const t = useT();
@@ -66,7 +67,7 @@ export function ProfileForm({
   }
 
   return (
-    <form action={action} noValidate onSubmit={() => setTried(true)}>
+    <form ref={formRef} action={action} noValidate onSubmit={() => { setTried(true); focusFirstError(formRef.current); }}>
       <input type="hidden" name="next" value={next ?? ""} />
       <input type="hidden" name="scripts" value={scriptsJson} />
       <input type="hidden" name="institution" value={aff?.name ?? ""} />
@@ -171,23 +172,17 @@ export function ProfileForm({
         </div>
       </div>
 
-      <div className="mt-4">
-        {!alt ? (
-          <>
-            <button type="button" onClick={() => setAlt(true)} className="min-h-6 border-0 bg-transparent p-0 text-[14px] text-[#2F5FD0]">+ {t("Add another email you publish with")}</button>
-            <p className={`mt-0.5 text-[13px] ${ui.muted}`}>{t("So co-author invitations sent to old addresses still reach you.")}</p>
-          </>
-        ) : (
-          <>
-            <label htmlFor="pr8-alt" className={`block ${ui.label}`}>{t("Other email")} <span className={`font-normal ${ui.muted}`}>({t("optional · we'll confirm it later")})</span></label>
-            <input id="pr8-alt" name="otherEmail" type="email" placeholder="old.address@previous-lab.org" className={`mt-1.5 w-full ${ui.input}`} />
-            {fe?.otherEmail ? <span className={ui.error}>{t(fe.otherEmail[0])}</span> : null}
-          </>
-        )}
-      </div>
+      <details className="mt-4 rounded-[6px] border border-[#DADDE3] bg-white px-3.5 py-3 text-[14px]">
+        <summary className="cursor-pointer font-semibold">{t("Add more (optional)")}</summary>
+        <p className={`mb-1 mt-2 ${ui.muted}`}>{t("These help but aren't needed now. You can add them any time after this step:")}</p>
+        <ul className={`m-0 flex flex-col gap-1.5 pl-[18px] ${ui.muted}`}>
+          <li>{t("Other emails you publish with — in Settings › Emails, confirmed with a code so invitations to old addresses reach you.")}</li>
+          <li>{t("ORCID, research keywords and names in other scripts — in Settings › Profile.")}</li>
+        </ul>
+      </details>
 
       <button type="submit" disabled={pending} className={`mt-[22px] h-12 ${ui.primary}`}>{pending ? t("Saving…") : t("Finish and get my Plenary ID")}</button>
-      <p className={`mt-3 text-center text-[13px] ${ui.muted}`}><Link href="/workspace" className="text-[#4A5263]">{t("Finish later")}</Link> — {t("you'll need it before you submit.")}</p>
+      <p className={`mt-3 text-center text-[13px] ${ui.muted}`}>{t("Last step — takes about a minute. You can change it any time.")}</p>
     </form>
   );
 }

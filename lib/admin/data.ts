@@ -56,3 +56,6 @@ export const loadVenues = () => rpc<AdminVenue>("admin_venues");
 export const findPeople = (q: string) => (q.trim().length >= 3 ? rpc<AdminPerson>("admin_find_person", { p_query: q.trim() }) : Promise.resolve([]));
 export const loadMaintenance = () => rpc<MaintenanceWindow>("admin_maintenance");
 export const loadAudit = (limit = 20) => rpc<AuditRow>("admin_audit_recent", { p_limit: limit });
+export type FunnelRow = { step: string; n: number };
+/** Plan E1: sign-up steps reached in the last `days` days (counts only). */
+export const loadSignupFunnel = (days = 30) => rpc<FunnelRow>("admin_signup_funnel", { p_days: days });

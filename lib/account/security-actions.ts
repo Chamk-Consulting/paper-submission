@@ -218,3 +218,32 @@ export async function verifyTwoStep(_: SecState, fd: FormData): Promise<SecState
   }
   return { error: "That code doesn’t match. Use the newest code from your app." };
 }
+
+/* ---------------------------------------------------------------- pending sign-in email change (plan C3) */
+/** The new address waiting for confirmation, if any. */
+export async function pendingEmailChange(): Promise<string | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("my_pending_email");
+  if (!error) return (data as string | null) || null;
+  const { data: u } = await supabase.auth.getUser();
+  return (u.user as { new_email?: string } | null)?.new_email || null;
+}
+
+export async function resendEmailChange(): Promise<SecState> {
+  const c = await me();
+  if (!c) return { error: "Sign in again to continue." };
+  const pending = await pendingEmailChange();
+  if (!pending) return { ok: true };
+  const { error } = await c.supabase.auth.resend({ type: "email_change", email: pending, options: { emailRedirectTo: absoluteUrl("/auth/confirm?next=/settings/security") } });
+  if (error) return { error: error.status === 429 || /rate|seconds/i.test(error.message) ? "Please wait a minute before asking again." : GENERIC };
+  return { ok: true, info: "Sent again. Confirm from both inboxes." };
+}
+
+export async function cancelEmailChange(): Promise<SecState> {
+  const c = await me();
+  if (!c) return { error: "Sign in again to continue." };
+  const { error } = await c.supabase.rpc("cancel_my_email_change");
+  if (error) return { error: error.code === "PGRST202" ? "Cancelling isn’t switched on yet (database update pending)." : GENERIC };
+  refresh();
+  return { ok: true, info: "Email change cancelled. You keep signing in with your current email." };
+}

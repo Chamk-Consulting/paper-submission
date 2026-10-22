@@ -11,6 +11,8 @@ import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { getSecurity } from "@/lib/account/data";
 import { getSecurityPlus } from "@/lib/account/security-data";
 import { getT } from "@/lib/i18n/server";
+import { pendingEmailChange } from "@/lib/account/security-actions";
+import { PendingEmailBanner } from "@/components/account/pending-email-banner";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -18,11 +20,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function Inner() {
-  const [ctx, sec, h, plus] = await Promise.all([getWorkspaceCtx(), getSecurity(), headers(), getSecurityPlus()]);
+  const [ctx, sec, h, plus, pendingEmail] = await Promise.all([getWorkspaceCtx(), getSecurity(), headers(), getSecurityPlus(), pendingEmailChange()]);
   if (!ctx || !sec || !plus) redirect("/sign-in?next=/settings/security");
   return (
     <WorkspaceShell ctx={ctx} active="m:settings">
       <SettingsFrame active="security">
+        {pendingEmail ? <PendingEmailBanner email={pendingEmail} /> : null}
         <SecurityPanel email={sec.email} device={deviceName(h.get("user-agent"))} providers={sec.providers} events={sec.events} plus={plus} />
       </SettingsFrame>
     </WorkspaceShell>

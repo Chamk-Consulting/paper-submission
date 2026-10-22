@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "@/components/site/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { focusFirstError } from "@/components/auth/focus-error";
 import { startSignup, type StartState } from "@/lib/auth/onboarding-actions";
 import { OrcidIcon, ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
@@ -26,7 +27,11 @@ function checkEmail(v: string, tried: boolean): EmailCheck {
   return { border: "2px solid #2F5FD0", chip: "EMAIL", chipBg: "#E6EDFC", chipInk: "#1F47A8", hint: "Personal email works too. You can add a university one later.", hintInk: "#4A5263" };
 }
 
-export function CreateAccountForm({ next, venue }: { next?: string; venue?: string }) {
+/**
+ * Step 1 of 4: name, email and terms. The password is chosen after the email code (step 3), unless the
+ * rollback switch (SIGNUP_PASSWORD_FIRST=1) asks for the old order, where it is chosen here.
+ */
+export function CreateAccountForm({ next, venue, withPassword = false }: { next?: string; venue?: string; withPassword?: boolean }) {
   const [state, action, pending] = useActionState(startSignup, {} as StartState);
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
@@ -35,7 +40,10 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
   const [tried, setTried] = useState(false);
   const [orcidSoon, setOrcidSoon] = useState(false);
   const [pwOk, setPwOk] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const t = useT();
+  // server answered with field errors: focus the first one (plan D3)
+  useEffect(() => { if (state.fieldErrors || state.message) focusFirstError(formRef.current?.parentElement); }, [state]);
 
   const e = checkEmail(email, tried);
   const fe = state.fieldErrors;
@@ -53,13 +61,13 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
         <span role="tab" aria-selected className="flex h-[38px] flex-1 items-center justify-center rounded-[4px] bg-white text-[14px] font-semibold text-[#121826] shadow-[0_1px_2px_rgba(18,24,38,.12)]">{t("Create account")}</span>
       </div>
 
-      <p className={`mt-[26px] ${ui.kicker}`}>{t("Step 1 of 3")}</p>
+      <p className={`mt-[26px] ${ui.kicker}`}>{t("Step 1 of 4")}</p>
       <h1 className={`mt-1.5 ${ui.h1}`}>{t("Create your account")}</h1>
       <p className={`mt-2 ${ui.muted}`}>{t("Free for authors and reviewers. Takes about a minute.")}</p>
 
       <p className="mt-1.5 text-[13px] text-[#4A5263]"><span aria-hidden className="text-[#B3261E]">*</span> {t("Required field")}</p>
       {state.exists ? <ExistingAccount email={state.exists.email} next={next} /> : null}
-      {state.message ? <div role="alert" className="mt-4 rounded-[6px] border border-[#F0C2BE] bg-[#FDF0EF] px-3.5 py-3 text-[14px] text-[#7A1C15]">{t(state.message)}</div> : null}
+      {state.message ? <div role="alert" data-form-error className="mt-4 rounded-[6px] border border-[#F0C2BE] bg-[#FDF0EF] px-3.5 py-3 text-[14px] text-[#7A1C15]">{t(state.message)}</div> : null}
       {orcidSoon ? <div role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">{t("ORCID sign-up is coming soon. Use your email for now.")}</div> : null}
 
       {/* TODO(auth): ORCID via Supabase custom OIDC provider. */}
@@ -69,10 +77,13 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
         <span className="h-px flex-auto bg-[#DADDE3]" />{t("or use your email")}<span className="h-px flex-auto bg-[#DADDE3]" />
       </div>
 
-      <form action={action} noValidate onSubmit={(ev) => {
+      <form ref={formRef} action={action} noValidate onSubmit={(ev) => {
         setTried(true);
         // stay on the page (keeping everything typed) until the basics are right; the server checks again
-        if (!first.trim() || !last.trim() || !agree || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()) || !pwOk) ev.preventDefault();
+        if (!first.trim() || !last.trim() || !agree || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()) || (withPassword && !pwOk)) {
+          ev.preventDefault();
+          focusFirstError(formRef.current);
+        }
       }}>
         <input type="hidden" name="next" value={next ?? ""} />
         <input type="hidden" name="venue" value={venue ?? ""} />
@@ -99,7 +110,7 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
           <span id="pr6-email-hint" className="text-[13px]" style={{ color: emailErr ? "#B3261E" : e.hintInk }}>{t(emailErr ?? e.hint)}</span>
         </div>
 
-        <PasswordFields email={email} tried={tried} serverErrors={{ password: fe?.password, confirm: fe?.confirm }} idPrefix="pr6" onValid={setPwOk} />
+        {withPassword ? <PasswordFields email={email} tried={tried} serverErrors={{ password: fe?.password, confirm: fe?.confirm }} idPrefix="pr6" onValid={setPwOk} /> : null}
 
         <label className="mt-4 flex items-start gap-2.5 text-[14px]">
           <input type="checkbox" name="consent" aria-required="true" checked={agree} onChange={(ev) => setAgree(ev.target.checked)} aria-invalid={agreeErr || undefined} className="mt-0.5 size-[18px] flex-none accent-[#0E1B3D]" />
@@ -109,9 +120,9 @@ export function CreateAccountForm({ next, venue }: { next?: string; venue?: stri
         {agreeErr ? <p className={`ml-7 mt-1.5 ${ui.error}`}>{t("Please agree to continue.")}</p> : null}
 
         <Turnstile />
-        <button type="submit" disabled={pending} className={`mt-[18px] ${ui.primary}`}>{pending ? t("Creating your account…") : t("Create account")}</button>
+        <button type="submit" disabled={pending} className={`mt-[18px] ${ui.primary}`}>{pending ? t("Sending your code…") : withPassword ? t("Create account") : t("Continue")}</button>
       </form>
-      <p className={`mt-3 text-[13px] ${ui.muted}`}>{t("Next, we'll email you a code to confirm your address.")}</p>
+      <p className={`mt-3 text-[13px] ${ui.muted}`}>{withPassword ? t("Next, we'll email you a code to confirm your address.") : t("Next, we'll email you a code. After it, you choose your password.")}</p>
       <p className={`mt-[22px] text-[14px] ${ui.muted}`}>{t("Used PaperCept before?")} <Link href="/contact?topic=import" className={ui.link}>{t("Bring your history")}</Link> {t("after you sign up.")}</p>
     </>
   );

@@ -61,7 +61,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
           <ul className="m-0 flex max-w-[560px] list-none flex-col gap-2 p-0">
             {[
               { href: "/contact?topic=import", label: "Bring your PaperCept history", s: "Past papers and reviews, from your society’s export or ORCID." },
-              { href: "/settings/profile", label: "Add your research keywords", s: "So editors invite you to review papers you know." },
+              { href: "/settings/profile", label: "Make your profile complete", s: "ORCID, research keywords, other emails — optional, any time." },
               { href: "/workspace", label: "Look around My workspace", s: "Submissions, reviews and messages, all in one list." },
             ].map((x) => (
               <li key={x.label}>
@@ -76,7 +76,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
       }
     >
       <div className="inline-flex items-center gap-2 rounded-full border border-[#B9E0CB] bg-[#E1F3EA] px-2.5 py-1 font-mono text-[11px] font-medium tracking-[0.06em] text-[#14603F]">
-        <span aria-hidden>✓</span>{t("ACCOUNT READY · 3 OF 3")}
+        <span aria-hidden>✓</span>{t("ACCOUNT READY · 4 OF 4")}
       </div>
       <h1 className={`mt-3.5 ${ui.h1}`}>{t("Welcome to Plenary")}</h1>
       <p className={`mt-2 ${ui.muted}`}>{t("This is your Plenary ID. Share it with co-authors and chairs so they can find you.")}</p>

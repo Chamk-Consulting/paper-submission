@@ -8,6 +8,8 @@ import { suggestFromEmailDomain } from "@/lib/auth/onboarding-actions";
 import { countryOptions } from "@/lib/countries";
 import { Reveal } from "@/components/motion/reveal";
 import { AuthSkeleton } from "@/components/skeletons";
+import { signupSteps } from "@/components/auth/signup-steps";
+import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -19,8 +21,11 @@ const time = (iso: string | null, intl: string) => (iso ? new Date(iso).toLocale
 
 async function Content({ searchParams }: { searchParams: Promise<Search> }) {
   const { next } = await searchParams;
-  const me = await getMe();
+  const [me, supabase] = await Promise.all([getMe(), createClient()]);
   if (!me) redirect("/sign-in?next=/create-account/profile");
+  // the confirmation time isn't in the session token; one Auth read for the panel
+  const { data: au } = await supabase.auth.getUser();
+  const confirmedAt = au.user?.email_confirmed_at ?? null;
   const t = await getT();
   const p = me.person;
   const fullName = p ? (p.paper_name || p.display_name || "").trim() : "";
@@ -33,14 +38,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
       width={440}
       aside={
         <NavyAside label={t("Account set-up progress")} kicker={t("Creating your account")} title={first ? t("Last step, {name}.", { name: first }) : t("Last step.")}>
-          <SetupSteps
-            doneLabel={t("Done")}
-            steps={[
-              { title: t("Your name and email"), text: [p?.display_name, me.email].filter(Boolean).join(" · "), state: "done" },
-              { title: t("Confirm your email"), text: me.confirmedAt ? t("Confirmed {time}.", { time: time(me.confirmedAt, t.intl) }) : t("Confirmed."), state: "done" },
-              { title: t("Your research profile"), text: t("Name on papers and affiliation — then you get your Plenary ID and go back to where you started."), state: "current" },
-            ]}
-          />
+          <SetupSteps doneLabel={t("Done")} steps={signupSteps(t, 4, { 1: [p?.display_name, me.email].filter(Boolean).join(" · "), 2: confirmedAt ? t("Confirmed {time}.", { time: time(confirmedAt, t.intl) }) : t("Confirmed."), 3: t("Saved."), 4: t("Name on papers and affiliation — then you get your Plenary ID and go back to where you started.") })} />
           <ShieldNote><strong className="text-[#F5F6F3]">{t("Your email is never shown to other users.")}</strong> {t("Chairs and co-authors see your name and affiliation. During blind review, reviewers see none of it.")}</ShieldNote>
         </NavyAside>
       }
@@ -48,11 +46,11 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
       <div className="flex items-center gap-2 rounded-[6px] border border-[#B9E0CB] bg-[#E1F3EA] px-3 py-2 text-[14px] text-[#14603F]">
         <span aria-hidden className="font-semibold">✓</span><span><strong>{t("Email confirmed.")}</strong> {me.email}</span>
       </div>
-      <p className={`mt-[22px] ${ui.kicker}`}>{t("Step 3 of 3")}</p>
+      <p className={`mt-[22px] ${ui.kicker}`}>{t("Step 4 of 4")}</p>
       <h1 className={`mt-1.5 ${ui.h1}`}>{t("Your research profile")}</h1>
       <p className={`mt-2 ${ui.muted}`}>{t("This is how chairs and co-authors will find you. You can change it any time.")}</p>
       {!p ? (
-        <p role="alert" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">{t("We're still setting up your account record. Refresh in a moment.")}</p>
+        <p role="alert" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">{t("We're still setting up your account record.")} <a href="/auth/continue?next=/create-account/profile" className={ui.link}>{t("Try again")}</a></p>
       ) : null}
       <ProfileForm
         defaultName={fullName}

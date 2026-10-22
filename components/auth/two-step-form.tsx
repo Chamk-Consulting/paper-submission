@@ -12,7 +12,7 @@ export function TwoStepForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState<SecState, FormData>(verifyTwoStep, {});
   useEffect(() => {
     // Full navigation so the upgraded session cookie is sent with the next request.
-    if (state.ok) window.location.assign(next);
+    if (state.ok) window.location.assign(`/auth/continue?next=${encodeURIComponent(next)}`);
   }, [state.ok, next]);
   return (
     <>

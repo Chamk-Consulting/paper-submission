@@ -3,14 +3,14 @@
 import Link from "@/components/site/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { resendSignupCode, verifySignupCode } from "@/lib/auth/onboarding-actions";
+import { resendSignupCode, signupStatus, verifySignupCode } from "@/lib/auth/onboarding-actions";
 import { resendResetCode, verifyResetCode } from "@/lib/auth/reset-actions";
 import { ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
 import { EMAIL_CODE_LENGTH, EMAIL_CODE_MIN } from "@/lib/auth/code-length";
 
 type Mode = "wait" | "sent" | "wrong" | "ok" | "expired" | "locked";
-const EXPIRES = 15 * 60; // TODO(auth): set Supabase Auth "Email OTP expiration" to 900s so this matches.
+const EXPIRES = 15 * 60; // matches Supabase Auth "Email OTP expiration" = 900 s (plan D1)
 const WAITS = [60, 60, 120, 120, 120, 120]; // Supabase allows a new email to the same address after 60 s
 const MAX_RESENDS = 5;
 const MAX_TRIES = 5;
@@ -26,6 +26,8 @@ type Props = {
   kind?: "signup" | "recovery";
   /** Domain the emails come from (lib/config/site senderDomain()). */
   senderDomain?: string;
+  /** Sign-up: where the person was heading (carried through every step). */
+  next?: string;
 };
 
 const COPY = {
@@ -44,9 +46,9 @@ const COPY = {
 };
 
 /** Canvas PR07 / PR10b: code boxes (as many as the emailed code has) with paste, resend timer, wrong/expired/locked states. */
-export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", senderDomain = "[sender domain]" }: Props) {
+export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", senderDomain = "[sender domain]", next }: Props) {
   const copy = COPY[kind];
-  const verify = kind === "recovery" ? verifyResetCode : verifySignupCode;
+  const verify = (e: string, c: string) => (kind === "recovery" ? verifyResetCode(e, c) : verifySignupCode(e, c, next));
   const resendCode = kind === "recovery" ? resendResetCode : resendSignupCode;
   const router = useRouter();
   // box count follows the emailed code; a pasted/autofilled code of another length (6–10) re-sizes the boxes
@@ -61,6 +63,8 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
   const [lock, setLock] = useState(0);
   const [sentAt, setSentAt] = useState("");
   const [note, setNote] = useState("");
+  const [back, setBack] = useState(false);
+  const [elsewhere, setElsewhere] = useState(false);
   const [pending, startTransition] = useTransition();
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const t = useT();
@@ -75,6 +79,22 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
     return () => clearInterval(id);
   }, []);
 
+  // C2: confirmed with the link on another device? Check every 5 s and when this tab comes back into view.
+  useEffect(() => {
+    if (kind !== "signup" || elsewhere || mode === "ok") return;
+    let stop = false;
+    const check = async () => {
+      if (stop || document.visibilityState === "hidden") return;
+      const r = await signupStatus(email).catch(() => ({ confirmed: false }));
+      if (!stop && r.confirmed) setElsewhere(true);
+    };
+    const id = setInterval(check, 5000);
+    const onFocus = () => { void check(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => { stop = true; clearInterval(id); window.removeEventListener("focus", onFocus); document.removeEventListener("visibilitychange", onFocus); };
+  }, [kind, email, elsewhere, mode]);
+
   const locked = mode === "locked" && lock > 0;
   const expired = !locked && mode !== "ok" && exp === 0;
   const limit = resends >= MAX_RESENDS;
@@ -87,7 +107,10 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
       const r = await verify(email, code);
       if (r.ok) {
         setMode("ok");
-        router.replace(onSuccessHref);
+        const dest: string = ("href" in r && typeof r.href === "string" && r.href) || onSuccessHref;
+        // An existing account that used "Create account": it is simply signed in (plan B3).
+        if ("returning" in r && r.returning) { setBack(true); setTimeout(() => router.replace(dest), 1400); return; }
+        router.replace(dest);
         return;
       }
       if (r.reason === "locked" || tries - 1 <= 0) {
@@ -120,11 +143,18 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
   let msgInk = "#4A5263";
   if (mode === "sent") { msg = t("New code sent to {email} at {sentAt}. Older codes no longer work · expires in {time}.", { email, sentAt, time: mmss(exp) }); msgInk = "#14603F"; }
   if (mode === "wrong") { msg = tries === 1 ? t("That code doesn’t match. 1 try left — use the code from the latest email.") : t("That code doesn’t match. {n} tries left — use the code from the latest email.", { n: tries }); msgInk = "#B3261E"; }
-  if (mode === "ok") { msg = `✓ ${t("Code accepted.")}`; msgInk = "#14603F"; }
+  if (mode === "ok") { msg = back ? `✓ ${t("Welcome back — you already had a Plenary account, so you're now signed in.")}` : `✓ ${t("Code accepted.")}`; msgInk = "#14603F"; }
   const firstEmpty = digits.indexOf("");
 
   return (
     <>
+      {elsewhere && mode !== "ok" ? (
+        <div role="status" className="mt-4 rounded-[6px] border border-[#B9E0CB] bg-[#E1F3EA] px-3.5 py-3 text-[14px] text-[#14603F]">
+          <p className="m-0 font-semibold">{t("Your email was confirmed on another device.")}</p>
+          <p className="m-0 mt-1 text-[#1F4E37]">{t("To continue on this device, we’ll email you a sign-in code. Enter it below.")}</p>
+          <button type="button" onClick={() => resend(true)} disabled={pending || mode === "sent"} className={`mt-2.5 h-10 ${ui.primary}`}>{mode === "sent" ? t("Code sent") : t("Email me a sign-in code")}</button>
+        </div>
+      ) : null}
       {!locked && !expired ? (
         <fieldset className="m-0 mt-4 border-0 p-0">
           <legend className="mb-2 text-[14px] font-medium">{t("Code from the email")}</legend>

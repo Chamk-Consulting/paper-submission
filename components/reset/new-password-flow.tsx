@@ -58,7 +58,7 @@ export function NewPasswordFlow({ email, acceptedAt }: { email: string; accepted
           {t("Your new password works now.")}{" "}
           {state.signedOutOthers ? t("We've signed you out on your other devices and sent a confirmation to {email}.", { email: masked }) : t("We've sent a confirmation to {email}.", { email: masked })}
         </p>
-        <Link href="/workspace" className={`mt-[22px] h-12 ${ui.primary}`}>{t("Continue to My workspace")}</Link>
+        <a href="/auth/continue?next=%2Fworkspace" className={`mt-[22px] h-12 ${ui.primary}`}>{t("Continue to My workspace")}</a>
         <div className="mt-[18px] rounded-[6px] border border-[#DADDE3] bg-white p-4">
           <div className="font-semibold">{t("Skip passwords next time?")}</div>
           <p className={`mt-1 text-[14px] ${ui.muted}`}>{t("Add a passkey and sign in with your fingerprint, face or device PIN.")}</p>

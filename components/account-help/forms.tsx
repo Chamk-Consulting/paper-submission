@@ -4,6 +4,7 @@ import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { ui } from "@/components/manage/ui";
+import { Turnstile } from "@/components/site/turnstile";
 import { findPaper, requestClaim, respondClaim, submitLostEmail, type FindState, type HelpState } from "@/lib/account-help/actions";
 
 const card = "rounded-[8px] border border-[#DADDE3] bg-white px-6 py-5";
@@ -56,6 +57,7 @@ export function LostEmailForm({ name, email }: { name: string; email: string }) 
       </fieldset>
       <label className={`${ui.label} mt-4`}>{t("Anything else we should know (optional)")}<textarea name="note" rows={3} maxLength={2000} className={ui.textarea} /></label>
       {s.error ? <p role="alert" className={`${ui.bad} mt-4`}>{t(s.error)}</p> : null}
+      <Turnstile />
       <div className="mt-[18px]"><button type="submit" disabled={pending} className={ui.primary}>{pending ? t("Sending…") : t("Send request")}</button></div>
     </form>
   );
