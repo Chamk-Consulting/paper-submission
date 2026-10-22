@@ -95,7 +95,7 @@ function Toolbar<S extends string>({ id, q, setQ, sort, setSort, sorts, shown, t
         </label>
       </div>
       <p aria-live="polite" className="m-0 text-[13px] text-[#4A5263]">
-        {active ? t("Showing {n} of {total}", { n: shown, total }) : t("{n} events", { n: total })}
+        {active ? t("Showing {n} of {total}", { n: shown, total }) : (total === 1 ? t("1 event") : t("{n} events", { n: total }))}
         {active ? <> · <button type="button" onClick={onClear} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-[#2F5FD0] underline">{t("Clear")}</button></> : null}
       </p>
     </div>

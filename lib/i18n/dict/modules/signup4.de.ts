@@ -305,4 +305,5 @@ export const signup4_de: Record<string, string> = {
   "Needs action": "Handlungsbedarf",
   "Deadline within 30 days": "Frist innerhalb von 30 Tagen",
   "Online or hybrid": "Online oder hybrid",
+  "1 event": "1 Veranstaltung",
 };
