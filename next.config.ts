@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  // Going back to a page seen in the last 30 s reuses it in the browser (instant back/forward between
+  // workspace pages). Every save calls revalidatePath, which clears this cache, so edits always show.
+  experimental: { staleTimes: { dynamic: 30 } },
   async headers() {
     // Baseline security headers on every response. The CSP covers framing, plugins, base-tag and form-target
     // hijacking; a script allow-list needs per-request nonces and is a later step.
