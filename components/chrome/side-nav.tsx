@@ -61,6 +61,8 @@ const listen = (f: () => void) => { subs.add(f); window.addEventListener("storag
 function read(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
 function write(key: string, v: string) { try { localStorage.setItem(key, v); } catch { /* storage blocked */ } subs.forEach((f) => f()); }
 
+const listenResize = (f: () => void) => { const off = listen(f); window.addEventListener("resize", f); return () => { off(); window.removeEventListener("resize", f); }; };
+
 const OPEN_KEY = "plenary.sideGroups";
 const RAIL_KEY = "plenary.sideRail";
 function useOpenMap(): Record<string, boolean> {
@@ -273,6 +275,8 @@ export function SideMenu({ p, s }: { p: string; s: Summary | null }) {
     const isRail = rail === "rail" || (rail === "auto" && !wide);
     write(RAIL_KEY, isRail ? "full" : "rail");
   }
+  // For the button's name only; the look itself comes from CSS, so there's no flash before this runs.
+  const isRailNow = useSyncExternalStore(listenResize, () => rail === "rail" || (rail === "auto" && !window.matchMedia("(min-width: 1024px)").matches), () => false);
   const help = <CircleHelp {...I} />;
   return (
     <nav aria-label={t("Workspace")} data-rail={rail}
@@ -282,20 +286,21 @@ export function SideMenu({ p, s }: { p: string; s: Summary | null }) {
       </div>
       <div className="min-h-0 flex-auto overflow-y-auto overscroll-contain px-3 pb-4 rail:px-2">
         <NavList p={p} s={s} part="middle" />
+        <div className="mt-3 border-t border-[#EEF0EC] pt-3 rail:flex rail:justify-center">
+          <SettingsFold p={p} />
+        </div>
       </div>
-      <div className="flex flex-none flex-col gap-0.5 border-t border-[#DADDE3] px-3 py-3 rail:items-center rail:px-2">
-        <SettingsFold p={p} />
-        <Link href="/help" className={`${rowBase} h-9 text-[#4A5263] hover:bg-[#F5F6F3] rail:hidden`}>{help}{t("Help & guides")}</Link>
-        <div className="hidden rail:block"><RailLink href="/help" label={t("Help & guides")} icon={help} /></div>
-        <CookieSettingsLink className={`${rowBase} h-9 w-full text-start text-[#4A5263] hover:bg-[#F5F6F3] hover:no-underline rail:hidden`} />
-        <button type="button" onClick={toggle} aria-label={t("Collapse menu")} title={t("Collapse menu")}
-          className={`${rowBase} mt-1 h-9 w-full cursor-pointer border-0 bg-transparent text-[#4A5263] hover:bg-[#F5F6F3] rail:hidden`}>
-          <PanelLeftClose {...I} className="rtl:-scale-x-100" />{t("Collapse menu")}
-        </button>
-        <button type="button" onClick={toggle} aria-label={t("Expand menu")} title={t("Expand menu")}
-          className="mx-auto mt-1 hidden size-10 cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#F5F6F3] rail:flex">
-          <PanelLeftOpen {...I} className="rtl:-scale-x-100" />
-        </button>
+      <div className="flex flex-none flex-col gap-0.5 border-t border-[#DADDE3] px-3 py-2.5 rail:items-center rail:px-2">
+        <div className="flex items-center gap-1 rail:flex-col">
+          <Link href="/help" className={`${rowBase} h-9 min-w-0 flex-auto text-[#4A5263] hover:bg-[#F5F6F3] rail:hidden`}>{help}<span className="truncate">{t("Help & guides")}</span></Link>
+          <div className="hidden rail:block"><RailLink href="/help" label={t("Help & guides")} icon={help} /></div>
+          <button type="button" onClick={toggle} aria-label={t(isRailNow ? "Expand menu" : "Collapse menu")} title={t(isRailNow ? "Expand menu" : "Collapse menu")}
+            className="flex size-9 flex-none cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#F5F6F3] rail:size-10">
+            <PanelLeftClose {...I} className="rtl:-scale-x-100 rail:hidden" />
+            <PanelLeftOpen {...I} className="hidden rtl:-scale-x-100 rail:block" />
+          </button>
+        </div>
+        <CookieSettingsLink className={`${rowBase} h-8 w-full text-start text-[13px] text-[#4A5263] hover:bg-[#F5F6F3] hover:no-underline rail:hidden`} />
       </div>
     </nav>
   );
