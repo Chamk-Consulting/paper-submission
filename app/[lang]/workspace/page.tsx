@@ -1,4 +1,5 @@
 import Link from "@/components/site/link";
+import { getMe } from "@/lib/auth/me";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { WorkspaceShell } from "@/components/workspace/shell";
@@ -33,16 +34,17 @@ function profileScore(me: NonNullable<Awaited<ReturnType<typeof getWorkspaceCtx>
 }
 
 async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
-  const ctx = await getWorkspaceCtx();
-  if (!ctx) redirect("/sign-in?next=/workspace");
-  const t = await getT();
-  const { notice } = await searchParams;
-  const pid = ctx.me.person?.id;
-  const [{ papers }, reviews, coauthor, sessions, inbox, topics, dir] = await Promise.all([
-    getMyPapers(pid), getMyReviews(), getMyCoauthorRequests(), getMyChairedSessions(), getMyInbox(4), pid ? getMyTopics(pid) : Promise.resolve([]), getDirectory(),
+  // one round of queries: the shell summary, the page data and the deadline dates all start together
+  const pidP = getMe().then((m) => m?.person?.id);
+  const papersP = pidP.then(getMyPapers);
+  const [ctx, t, { notice }, { papers }, reviews, coauthor, sessions, inbox, topics, dir, now, dates] = await Promise.all([
+    getWorkspaceCtx(), getT(), searchParams,
+    papersP, getMyReviews(), getMyCoauthorRequests(), getMyChairedSessions(), getMyInbox(4),
+    pidP.then((pid) => (pid ? getMyTopics(pid) : [])), getDirectory(), requestNow(),
+    papersP.then(({ papers: ps }) => getVenueDates([...new Set(ps.map((p) => p.venue.id))])),
   ]);
-  const now = await requestNow();
-  const dates = await getVenueDates([...new Set(papers.map((p) => p.venue.id))]);
+  if (!ctx) redirect("/sign-in?next=/workspace");
+  const pid = ctx.me.person?.id;
   const items = buildDueItems({ papers, reviews, coauthor, sessions, dates, now });
   const soon = items.filter((i) => i.at && Date.parse(i.at) - now <= 14 * 864e5);
   const nRev = soon.filter((i) => i.tag === "REVIEW" || i.tag === "INVITATION").length;

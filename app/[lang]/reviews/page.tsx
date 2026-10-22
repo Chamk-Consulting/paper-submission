@@ -1,4 +1,5 @@
 import Link from "@/components/site/link";
+import { getMe } from "@/lib/auth/me";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { WorkspaceShell } from "@/components/workspace/shell";
@@ -20,9 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function Inner() {
-  const ctx = await getWorkspaceCtx();
+  // everything starts together; the shell summary no longer holds up the page's own queries
+  const [ctx, reviews, overview, avail, t] = await Promise.all([
+    getWorkspaceCtx(), getMyReviews(), getOverview(), getMe().then((m) => getAvailability(m?.person?.id)), getT(),
+  ]);
   if (!ctx) redirect("/sign-in?next=/reviews");
-  const [reviews, overview, avail, t] = await Promise.all([getMyReviews(), getOverview(), getAvailability(ctx.me.person?.id), getT()]);
   const now = nowMs();
   const certs = certificateVenues(reviews);
 

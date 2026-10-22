@@ -1,4 +1,5 @@
 import Link from "@/components/site/link";
+import { getMe } from "@/lib/auth/me";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { WorkspaceShell } from "@/components/workspace/shell";
@@ -20,11 +21,11 @@ const card = "rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5";
 const kicker = "m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]";
 
 async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const ctx = await getWorkspaceCtx();
-  if (!ctx) redirect("/sign-in?next=/workspace/submissions");
-  const [{ ready, papers }, { q }, reviews, follows, inbox] = await Promise.all([
-    getMyPapers(ctx.me.person?.id), searchParams, getMyReviews(), getFollowedDeadlines(ctx.me.person?.id), getMyInbox(3),
+  const pid = getMe().then((m) => m?.person?.id);
+  const [ctx, { ready, papers }, { q }, reviews, follows, inbox] = await Promise.all([
+    getWorkspaceCtx(), pid.then(getMyPapers), searchParams, getMyReviews(), pid.then(getFollowedDeadlines), getMyInbox(3),
   ]);
+  if (!ctx) redirect("/sign-in?next=/workspace/submissions");
   const due = reviews.filter((r) => r.status === "accepted" || r.status === "invited").length;
   const t = await getT();
 

@@ -27,8 +27,11 @@ export type Me = {
 export const getMe = cache(async function getMe(): Promise<Me | null> {
   const supabase = await createClient();
   // the profile read and the sign-in check go out together (my_person works from the session token)
-  const [{ data: auth }, early] = await Promise.all([supabase.auth.getUser(), supabase.rpc("my_person")]);
-  if (!auth.user) return null;
+  // getClaims verifies the session token locally (no Auth round trip); the profile read goes out at the same time
+  const [{ data: claimsData }, early] = await Promise.all([supabase.auth.getClaims(), supabase.rpc("my_person")]);
+  const claims = claimsData?.claims;
+  if (!claims?.sub) return null;
+  const auth = { user: { id: claims.sub, email: typeof claims.email === "string" ? claims.email : "", email_confirmed_at: null as string | null } };
   const person = (!early.error ? early.data : await readMyPerson(supabase, auth.user.id)) as Me["person"];
   let affiliation: Me["affiliation"] = null;
   if (person) {
