@@ -306,4 +306,11 @@ export const signup4_it: Record<string, string> = {
   "Deadline within 30 days": "Scadenza entro 30 giorni",
   "Online or hybrid": "Online o ibrido",
   "1 event": "1 evento",
+  "Reviews to write": "Revisioni da scrivere",
+  "Organizing": "Organizzazione",
+  "Running the event": "Gestione dell’evento",
+  "People & email": "Persone ed email",
+  "Email center": "Centro email",
+  "Dashboard": "Dashboard",
+  "Your roles at each event, and the conflicts organisers see for you:": "I tuoi ruoli in ogni evento e i conflitti che vedono gli organizzatori:",
 };

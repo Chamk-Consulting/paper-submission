@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import Link from "@/components/site/link";
 import { useActionState, useMemo, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { saveReviewing, type AccountState } from "@/lib/account/actions";
@@ -118,6 +119,10 @@ export function ReviewingForm({ p, suggestions }: { p: Profile; suggestions: { g
       <BusySection initial={{ availability: p.availability, available_from: p.available_from }} onChange={onChange} />
     </form>
       <Conflicts items={p.conflicts} />
+      <p className="m-0 -mt-2 text-[13px] text-[#4A5263]">
+        {t("Your roles at each event, and the conflicts organisers see for you:")}{" "}
+        <Link href="/manage/roles" className="font-semibold text-[#2F5FD0]">{t("My roles & conflicts")}</Link>
+      </p>
       <ManualSaveBar form="rv" pending={pending} dirty={dirty} error={state.error ?? Object.values(state.fieldErrors ?? {})[0]} savedAt={state.savedAt}
         note="Conflicts are saved as you add or remove them." />
     </>

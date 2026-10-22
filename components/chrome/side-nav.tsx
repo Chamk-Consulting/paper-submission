@@ -3,16 +3,15 @@
 import {
   Award, Bell, BookOpen, BookOpenCheck, Briefcase, CalendarClock, CalendarCog, CalendarRange,
   ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, FileCheck,
-  FileStack, FileText, Files, Filter, Gauge, Gavel, History, House, IdCard, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
+  FileStack, FileText, Files, Filter, Gavel, History, House, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
   Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
-  CalendarDays, CircleUserRound, Search, Send, Settings, Settings2, ShieldAlert, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
+  CalendarDays, CircleUserRound, Search, Send, Settings, Settings2, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
   UsersRound, X, Check, Star,
 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
-import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 import { ORGANIZER_NAV, OWNER_ONLY } from "@/lib/site/organizer-nav";
 import { manageSlug } from "@/lib/site/chrome-mode";
 import type { Summary, VenueRef } from "@/components/chrome/summary";
@@ -42,13 +41,12 @@ export const isOn = (p: string, href: string) => { const h = href.split("#")[0];
 
 /** Organiser groups: [key, label, icon, default page, [organiser key, icon]…]. */
 const ORG_GROUPS: [string, string, typeof House, string, [string, typeof House][]][] = [
-  ["overview", "Overview", LayoutDashboard, "dashboard", [["dashboard", Gauge]]],
   ["submissions", "Submissions", FileStack, "papers", [["papers", Files], ["similarity", ScanSearch]]],
-  ["reviewing", "Reviewing", ClipboardCheck, "reviews", [["assignment", UserPlus], ["reviews", ChartNoAxesColumn], ["decisions", Gavel], ["awards", Award]]],
-  ["after", "After acceptance", BookOpenCheck, "finals", [["finals", FileCheck], ["proceedings", BookOpen]]],
-  ["event", "Event", CalendarRange, "program", [["program", CalendarCog], ["registrations", Ticket], ["live", Radio], ["checkin", QrCode]]],
-  ["team", "Team & email", Users, "people", [["people", Contact], ["committee", UsersRound], ["email", Send]]],
-  ["settings", "Event settings", Settings2, "setup", [["setup", SlidersHorizontal], ["billing", CreditCard], ["roles", ShieldAlert], ["audit", History]]],
+  ["reviewing", "Reviewing", ClipboardCheck, "reviews", [["assignment", UserPlus], ["reviews", ChartNoAxesColumn], ["decisions", Gavel]]],
+  ["after", "After acceptance", BookOpenCheck, "finals", [["awards", Award], ["finals", FileCheck], ["proceedings", BookOpen]]],
+  ["event", "Running the event", CalendarRange, "program", [["program", CalendarCog], ["registrations", Ticket], ["checkin", QrCode], ["live", Radio]]],
+  ["team", "People & email", Users, "people", [["people", Contact], ["committee", UsersRound], ["email", Send]]],
+  ["settings", "Event settings", Settings2, "setup", [["setup", SlidersHorizontal], ["billing", CreditCard], ["audit", History]]],
 ];
 /** Account: who you are and how you get in. Settings: how Plenary behaves for you. */
 const ACCOUNT_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
@@ -85,10 +83,14 @@ function useOrganizer(p: string, s: Summary | null) {
   }]));
   // longest matching link wins (Setup vs Setup › Committee)
   const onKey = [...nav.entries()].filter(([, i]) => isOn(p, i.href)).sort((a, b) => b[1].href.length - a[1].href.length)[0]?.[0] ?? null;
-  const groups: Group[] = ORG_GROUPS.map(([gk, gl, gi, def, items]) => ({
+  // The dashboard is one page, so a plain row (not a group of one) above the groups.
+  const dash = nav.get("dashboard");
+  const dashRow: MenuNode[] = dash ? [{ kind: "leaf", key: "org:dashboard", label: "Dashboard", icon: ic(LayoutDashboard), href: dash.href, on: onKey === "dashboard" }] : [];
+  const grouped: Group[] = ORG_GROUPS.map(([gk, gl, gi, def, items]) => ({
     kind: "group" as const, key: `org:${gk}`, label: gl, icon: ic(gi), def,
     items: items.filter(([k]) => nav.has(k)).map(([k, icon]) => ({ kind: "leaf" as const, key: k, label: nav.get(k)!.label, icon: ic(icon), href: nav.get(k)!.href, on: onKey === k })),
   })).filter((g) => g.items.length);
+  const groups: MenuNode[] = [...dashRow, ...grouped];
   return { slug, name, roleLabel, groups, events };
 }
 
@@ -100,10 +102,9 @@ function useMiddle(p: string, s: Summary | null) {
     kind: "group", key: "work", label: "My work", icon: ic(Briefcase), def: "subs",
     items: [
       { kind: "leaf", key: "subs", label: "My submissions", icon: ic(FileText), href: "/workspace/submissions", count: s?.submissionCount, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
-      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "Reviews", icon: ic(PenLine), href: "/reviews", on: p.startsWith("/reviews") }] : []),
+      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "Reviews to write", icon: ic(PenLine), href: "/reviews", on: p.startsWith("/reviews") }] : []),
       ...(sessionChair ? [{ kind: "leaf" as const, key: "chair", label: "Sessions I chair", icon: ic(Presentation), href: "/chair", on: p.startsWith("/chair") }] : []),
       { kind: "leaf", key: "schedule", label: "My schedule", icon: ic(CalendarClock), href: "/workspace/schedule", on: p.startsWith("/workspace/schedule") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
-      { kind: "leaf", key: "id", label: "My Plenary ID", icon: ic(IdCard), href: "/settings/profile#plenary-id", on: false },
     ],
   };
   const current = s?.currentEvents ?? [];
@@ -432,7 +433,7 @@ export function NavList({ p, s, onPick, tab }: { p: string; s: Summary | null; o
           {top.map(render)}
           <Sep />
           {tree.middle.map(render)}
-          {tree.org ? <><Sep label={t("Organizer")} /><EventSwitcher org={tree.org} p={p} t={t} />{tree.org.groups.map(render)}</> : null}
+          {tree.org ? <><Sep label={t("Organizing")} /><EventSwitcher org={tree.org} p={p} t={t} />{tree.org.groups.map(render)}</> : null}
           <Sep />
           {tree.after.map(render)}
           {render(helpGroup(p))}
@@ -451,7 +452,7 @@ function topLeaves(p: string, s: Summary | null): Leaf[] {
 
 function Sep({ label }: { label?: string }) {
   return label
-    ? <p className="m-0 mt-3 px-3 pb-1 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263] rail:hidden">{label}</p>
+    ? <p className="m-0 mt-3 px-3 pb-1 text-[12px] font-semibold text-[#4A5263] rail:hidden">{label}</p>
     : <div aria-hidden className="mx-2 my-2 border-t border-[#EEF0EC]" />;
 }
 
@@ -509,7 +510,7 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
             {tree.middle.map(both)}
             {tree.org ? (
               <>
-                <Sep label={t("Organizer")} />
+                <Sep label={t("Organizing")} />
                 <div aria-hidden className="mx-2 my-2 hidden w-8 border-t border-[#EEF0EC] rail:block" />
                 <div className="mb-1 rail:hidden"><EventSwitcher org={tree.org} p={p} t={t} /></div>
                 {tree.org.groups.map(both)}
@@ -530,7 +531,6 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
             <PanelLeftOpen {...I} className="hidden rtl:-scale-x-100 rail:block" />
           </button>
         </div>
-        <CookieSettingsLink className={`${rowBase} h-8 w-full text-start text-[13px] text-[#4A5263] hover:bg-[#F5F6F3] hover:no-underline rail:hidden`} />
       </div>
     </nav>
   );
