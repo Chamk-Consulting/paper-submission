@@ -3,6 +3,7 @@
  * set NEXT_PUBLIC_AUTH_CODE_LENGTH to the same value. The screens also accept any 6–10 digit code typed or pasted,
  * so a mismatch never blocks anyone.
  */
-const n = Number(process.env.NEXT_PUBLIC_AUTH_CODE_LENGTH ?? 8);
-export const EMAIL_CODE_LENGTH = Number.isInteger(n) && n >= 6 && n <= 10 ? n : 8;
+// Supabase's default (and this project's setting) is 6.
+const n = Number(process.env.NEXT_PUBLIC_AUTH_CODE_LENGTH ?? 6);
+export const EMAIL_CODE_LENGTH = Number.isInteger(n) && n >= 6 && n <= 10 ? n : 6;
 export const EMAIL_CODE_MIN = 6;
