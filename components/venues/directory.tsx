@@ -1,4 +1,5 @@
 "use client";
+import { Search } from "lucide-react";
 
 import Link from "@/components/site/link";
 import { ViewTransition, startTransition, useCallback, useEffect, useMemo, useState, type SetStateAction } from "react";
@@ -152,7 +153,7 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
             {current.length} {current.length === 1 ? t("conference, journal or award") : t("conferences, journals and awards")} · {t("deadlines in")} <strong className="text-[#F5F6F3]">{tz === "UTC" ? t("your time zone") : `${cityOf(tz)} (${tz})`}</strong>, {t("AoE alongside")}
           </p>
           <div role="search" className="mt-[22px] flex h-[52px] items-center gap-2.5 rounded-[6px] bg-white px-3.5">
-            <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden fill="none" stroke="#4A5263" strokeWidth="1.5"><circle cx="7" cy="7" r="5" /><path d="M11 11l3.5 3.5" /></svg>
+            <Search size={18} strokeWidth={1.75} color="#4A5263" className="flex-none" aria-hidden />
             <label htmlFor="v-q" className="sr-only">{t("Search venues")}</label>
             <input id="v-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Acronym, name, topic, society or city — e.g. CDC 2027, robotics, IFAC")}
               className="h-[50px] min-w-0 flex-auto border-0 bg-transparent text-[16px] text-[#121826] outline-none" />

@@ -1,3 +1,4 @@
+import { Bus, Car, Footprints, MapPin, Plane, TrainFront } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
 import type { Direction, Fee, VenuePublic } from "@/lib/venues/polish-types";
 import { CopyAddress, Gallery } from "@/components/venues/venue-client";
@@ -18,15 +19,8 @@ function money(n: number | null, currency: string, intl: string) {
 const MODE: Record<Direction["mode"], string> = { train: "Train", plane: "Plane", bus: "Bus", car: "Car", walk: "On foot", other: "Other" };
 
 function ModeIcon({ mode }: { mode: Direction["mode"] }) {
-  const p: Record<Direction["mode"], string> = {
-    train: "M5 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM3 8h12M6 14l-2 3M12 14l2 3",
-    plane: "M2 10l14-6-4 12-3-5-7-1zM9 11l3-3",
-    bus: "M4 2h10a1 1 0 0 1 1 1v11H3V3a1 1 0 0 1 1-1zM3 9h12M5 14v2M13 14v2",
-    car: "M3 11l2-5h8l2 5v4H3zM3 11h12M6 15v1M12 15v1",
-    walk: "M9 3a1 1 0 1 0 0-.01M8 6l-2 4 3 1 1 5M8 6l3 2 2 1M7 13l-2 3",
-    other: "M9 2a6 6 0 0 1 6 6c0 4-6 9-6 9S3 12 3 8a6 6 0 0 1 6-6zM9 6v3",
-  };
-  return <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={p[mode]} /></svg>;
+  const Icon = { train: TrainFront, plane: Plane, bus: Bus, car: Car, walk: Footprints, other: MapPin }[mode] ?? MapPin;
+  return <Icon size={18} strokeWidth={1.75} aria-hidden />;
 }
 
 export async function AttendingSection({ pub, acr }: { pub: VenuePublic; acr: string }) {

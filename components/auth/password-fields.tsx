@@ -1,4 +1,5 @@
 "use client";
+import { Eye, EyeOff } from "lucide-react";
 
 import { useState } from "react";
 import { scorePassword } from "@/lib/auth/password-rules";
@@ -9,14 +10,11 @@ import { FieldLabel } from "@/components/auth/field-label";
 const COLORS = ["#DADDE3", "#B3261E", "#A8600F", "#2F5FD0", "#18744F"];
 const LABELS = ["—", "Too weak", "Could be stronger", "Good", "Strong"];
 
-function Eye({ shown, onToggle, label }: { shown: boolean; onToggle: () => void; label: string }) {
+function EyeToggle({ shown, onToggle, label }: { shown: boolean; onToggle: () => void; label: string }) {
   return (
     <button type="button" onClick={onToggle} aria-label={label} aria-pressed={shown} title={label}
       className="flex w-[48px] flex-none items-center justify-center border-0 border-l border-[#B7BDC9] bg-[#F2F3F0] text-[#4A5263] hover:text-[#121826]">
-      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.6">
-        <path d="M1.5 10S4.5 4 10 4s8.5 6 8.5 6-3 6-8.5 6S1.5 10 1.5 10z" /><circle cx="10" cy="10" r="2.6" />
-        {shown ? null : <path d="M3 17L17 3" />}
-      </svg>
+      {shown ? <EyeOff size={18} strokeWidth={1.75} aria-hidden /> : <Eye size={18} strokeWidth={1.75} aria-hidden />}
     </button>
   );
 }
@@ -55,7 +53,7 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
             aria-describedby={`${idPrefix}-rules${serverErrors?.password ? ` ${idPrefix}-err` : ""}`} aria-invalid={pwBad || undefined}
             className="box-border h-[46px] min-w-0 flex-auto border-0 bg-transparent px-3.5 text-[16px] text-[#121826] outline-none"
           />
-          <Eye shown={show} onToggle={() => setShow((v) => !v)} label={show ? t("Hide password") : t("Show password")} />
+          <EyeToggle shown={show} onToggle={() => setShow((v) => !v)} label={show ? t("Hide password") : t("Show password")} />
         </div>
         <div aria-hidden className="mt-1 grid grid-cols-4 gap-1">
           {[1, 2, 3, 4].map((i) => <span key={i} className="h-1 rounded-sm" style={{ background: r.sc >= i ? COLORS[r.sc] : "#DADDE3" }} />)}
@@ -83,7 +81,7 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
             aria-describedby={`${idPrefix}-match`}
             className="box-border h-[46px] min-w-0 flex-auto border-0 bg-transparent px-3.5 text-[16px] text-[#121826] outline-none"
           />
-          <Eye shown={show2} onToggle={() => setShow2((v) => !v)} label={show2 ? t("Hide password") : t("Show password")} />
+          <EyeToggle shown={show2} onToggle={() => setShow2((v) => !v)} label={show2 ? t("Hide password") : t("Show password")} />
         </div>
         <span id={`${idPrefix}-match`} aria-live="polite" className="min-h-[18px] text-[13px]">
           {confirmBad ? <span className="text-[#B3261E]">{t(serverErrors?.confirm?.[0] ?? "The two passwords don't match yet.")}</span> : matchOk ? <span className="text-[#14603F]">✓ {t("Passwords match.")}</span> : null}

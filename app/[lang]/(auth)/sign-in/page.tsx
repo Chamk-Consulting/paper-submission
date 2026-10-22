@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -25,7 +26,7 @@ async function VenueBanner({ searchParams }: { searchParams: Promise<Search> }) 
   if (!v) return null;
   return (
     <div className="mt-7 flex items-start gap-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">
-      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#8A5A0B" strokeWidth="1.5" className="mt-px flex-none"><circle cx="9" cy="9" r="7" /><path d="M9 5v4l2.5 1.5" /></svg>
+      <Clock size={18} strokeWidth={1.75} color="#8A5A0B" className="mt-px flex-none" aria-hidden />
       <span>
         {t("You're signing in to submit to")} <strong>{v.name}</strong>. {t("We'll bring you straight back to your submission.")}
         {v.iso && v.aoe ? (

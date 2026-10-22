@@ -1,4 +1,5 @@
 "use client";
+import { Globe, KeyRound, Landmark, Mail } from "lucide-react";
 
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
@@ -54,21 +55,13 @@ function Banner({ tone = "bad", children }: { tone?: "bad" | "info"; children: R
   );
 }
 
-const KeyIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><circle cx="6" cy="9" r="3.5" /><path d="M9.5 9H16M13.5 9v3M16 9v2" /></svg>
-);
-const MailIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><rect x="2" y="4" width="14" height="10" rx="1.5" /><path d="M2.5 5l6.5 5 6.5-5" /></svg>
-);
+const KeyIcon = () => <KeyRound size={16} strokeWidth={1.75} aria-hidden />;
+const MailIcon = () => <Mail size={16} strokeWidth={1.75} aria-hidden />;
 const OrcidIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden><circle cx="9" cy="9" r="8.5" fill="#A6CE39" /><text x="9" y="12.5" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="9" fontWeight="700" fill="#FFFFFF">iD</text></svg>
 );
-const InstitutionIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><path d="M2 7l7-4 7 4M3.5 7.5v6M7 7.5v6M11 7.5v6M14.5 7.5v6M2 15.5h14" /></svg>
-);
-const GoogleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><path d="M15 9a6 6 0 1 1-1.8-4.3M15 3.5V7h-3.5" /></svg>
-);
+const InstitutionIcon = () => <Landmark size={18} strokeWidth={1.75} aria-hidden />;
+const GoogleIcon = () => <Globe size={18} strokeWidth={1.75} aria-hidden />;
 
 export function SignInPanel({ next, senderDomain = "[sender domain]", initialIdentifier = "" }: { next?: string; senderDomain?: string; initialIdentifier?: string }) {
   const tab = "signin" as const;

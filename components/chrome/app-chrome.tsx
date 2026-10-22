@@ -1,4 +1,5 @@
 "use client";
+import { CalendarDays, FileText, Globe, House, Mail, Menu, PenLine, Plus, Search, X } from "lucide-react";
 
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
@@ -25,14 +26,13 @@ const VENUE_COLORS = ["#2F5FD0", "#A8600F", "#18744F", "#6B4FBF", "#B3261E"];
 
 type Item = { key: string; href: string; label: string; icon: ReactNode; badge?: "subs" | "unread" };
 const ICON = {
-  home: <path d="M2 7l6-5 6 5v7H2z" />,
-  paper: <><path d="M4 1.5h5.5L13 5v9.5H4z" /><path d="M9 1.5V5h4" /></>,
-  pen: <path d="M2 13.5l1-3.5 7.5-7.5 2.5 2.5L5.5 12.5z" />,
-  cal: <><rect x="2" y="3" width="12" height="11" rx="1.5" /><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" /></>,
-  globe: <><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></>,
-  mail: <><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" /><path d="M2 4.5l6 4.5 6-4.5" /></>,
-};
-const APP_NAV: Item[] = [
+  home: <House size={16} strokeWidth={1.75} aria-hidden />,
+  paper: <FileText size={16} strokeWidth={1.75} aria-hidden />,
+  pen: <PenLine size={16} strokeWidth={1.75} aria-hidden />,
+  cal: <CalendarDays size={16} strokeWidth={1.75} aria-hidden />,
+  globe: <Globe size={16} strokeWidth={1.75} aria-hidden />,
+  mail: <Mail size={16} strokeWidth={1.75} aria-hidden />,
+};const APP_NAV: Item[] = [
   { key: "home", href: "/workspace", label: "Home", icon: ICON.home },
   { key: "submissions", href: "/workspace/submissions", label: "My submissions", icon: ICON.paper, badge: "subs" },
   { key: "reviews", href: "/reviews", label: "Reviews", icon: ICON.pen },
@@ -101,7 +101,7 @@ function NavList({ p, s, onPick }: { p: string; s: Summary | null; onPick?: () =
       {APP_NAV.map((i) => (
         <Link key={i.key} href={i.href} prefetch={null} onClick={onPick} aria-current={key === i.key ? "page" : undefined} className={row(key === i.key)}>
           <span className="flex items-center gap-2.5">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.5">{i.icon}</svg>
+            {i.icon}
             {t(i.label)}
           </span>
           <Count n={i.badge === "subs" ? s?.submissionCount : i.badge === "unread" ? s?.unread : undefined} />
@@ -185,7 +185,7 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
         <div className="flex h-[60px] flex-none items-center justify-between px-4" style={{ background: NAVY }}>
           <span className="flex items-center gap-2.5"><Logo /></span>
           <button type="button" onClick={onClose} aria-label={t("Close menu")} className="flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E] bg-transparent text-[#F5F6F3]">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 3l10 10M13 3L3 13" /></svg>
+            <X size={16} strokeWidth={2} aria-hidden />
           </button>
         </div>
         <div className="auth-in flex flex-col gap-0.5 px-3 py-4">
@@ -243,7 +243,7 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
         ) : null}
 
         <form role="search" action="/search" className="auth-in hidden h-[38px] max-w-[520px] flex-[1_1_280px] items-center gap-2 rounded-[6px] border border-[#2A3C6E] bg-[#17285A] pl-3 pr-1.5 md:flex">
-          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden fill="none" stroke="#B9C3DA" strokeWidth="1.5"><circle cx="7" cy="7" r="5" /><path d="M11 11l3.5 3.5" /></svg>
+          <Search size={16} strokeWidth={1.75} color="#B9C3DA" aria-hidden />
           <label htmlFor="hdr-search" className="sr-only">{t("Search")}</label>
           <input id="hdr-search" name="q" type="search" placeholder={t("Search papers, venues, people")} className="h-9 min-w-0 flex-auto border-0 bg-transparent text-[14px] text-[#F5F6F3] outline-none placeholder:text-[#8F9BBA]" />
         </form>
@@ -256,11 +256,11 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
           </span>
           <span className="auth-in flex items-center gap-2.5 sm:gap-3">
             <Link href="/venues" className="hidden h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] lg:flex">
-              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden fill="none" stroke="#0E1B3D" strokeWidth="1.8"><path d="M7 2v10M2 7h10" /></svg>{t("New submission")}
+              <Plus size={15} strokeWidth={2.25} aria-hidden />{t("New submission")}
             </Link>
             <Link href="/inbox" prefetch={null} aria-label={s?.unread ? `${t("Inbox")} · ${s.unread} ${t("unread")}` : t("Inbox")} title={t("Inbox")}
               className="relative box-border flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E] no-underline hover:bg-[#17285A]">
-              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#F5F6F3" strokeWidth="1.5"><rect x="2" y="4" width="14" height="10" rx="1.5" /><path d="M2.5 5l6.5 5 6.5-5" /></svg>
+              <Mail size={18} strokeWidth={1.75} aria-hidden />
               <Count n={s?.unread} dark />
             </Link>
             <span className="hidden sm:block">
@@ -268,7 +268,7 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
             </span>
           </span>
           <button type="button" onClick={onMenu} aria-label={t("Menu")} className="flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E] bg-transparent text-[#F5F6F3] lg:hidden">
-            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M2.5 5h13M2.5 9h13M2.5 13h13" /></svg>
+            <Menu size={18} strokeWidth={1.75} aria-hidden />
           </button>
         </div>
       </div>

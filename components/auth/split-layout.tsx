@@ -1,3 +1,4 @@
+import { Clock, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
 /* Shared shell of canvas PR02–PR09: paper form column + navy aside. */
@@ -59,7 +60,7 @@ export function SetupSteps({ steps, doneLabel = "Done" }: { steps: { title: stri
 export function ShieldNote({ children }: { children: ReactNode }) {
   return (
     <div className="mt-9 flex max-w-[520px] items-start gap-3 rounded-[8px] border border-[#24335C] px-[18px] py-4 text-[14px] text-[#D6DCEA]">
-      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#F2A93B" strokeWidth="1.5" className="mt-0.5 flex-none"><path d="M9 2l6 2.5v4.2c0 3.6-2.6 6.2-6 7.3-3.4-1.1-6-3.7-6-7.3V4.5z" /></svg>
+      <ShieldCheck size={18} strokeWidth={1.75} color="#F2A93B" className="mt-0.5 flex-none" aria-hidden />
       <span>{children}</span>
     </div>
   );
@@ -68,7 +69,7 @@ export function ShieldNote({ children }: { children: ReactNode }) {
 export function VenueBannerBox({ children }: { children: ReactNode }) {
   return (
     <div className="mt-7 flex items-start gap-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">
-      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#8A5A0B" strokeWidth="1.5" className="mt-px flex-none"><circle cx="9" cy="9" r="7" /><path d="M9 5v4l2.5 1.5" /></svg>
+      <Clock size={18} strokeWidth={1.75} color="#8A5A0B" className="mt-px flex-none" aria-hidden />
       <span>{children}</span>
     </div>
   );

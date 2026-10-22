@@ -1,3 +1,4 @@
+import { Search } from "lucide-react";
 import { Bar, Card, Line, Skeleton } from "@/components/skeletons/parts";
 import { WorkspaceShell } from "@/components/workspace/shell";
 import { PublicHeader } from "@/components/venues/public-header";
@@ -81,7 +82,7 @@ export async function DirectorySkeleton() {
             <h1 className="mt-2 font-serif text-[36px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[48px]">{t("Find your next call for papers")}</h1>
             <Line dark size={16} w="min(520px, 90%)" className="mt-2" />
             <div className="mt-[22px] flex h-[52px] items-center gap-2.5 rounded-[6px] bg-white px-3.5 text-[16px] text-[#9AA3B5]">
-              <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden fill="none" stroke="#4A5263" strokeWidth="1.5"><circle cx="7" cy="7" r="5" /><path d="M11 11l3.5 3.5" /></svg>
+              <Search size={18} strokeWidth={1.75} color="#4A5263" className="flex-none" aria-hidden />
               <span className="truncate">{t("Acronym, name, topic, society or city — e.g. CDC 2027, robotics, IFAC")}</span>
             </div>
             <div className="mt-3.5 flex flex-wrap gap-2">

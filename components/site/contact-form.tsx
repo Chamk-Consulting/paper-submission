@@ -1,4 +1,5 @@
 "use client";
+import { ArrowRight, Info, Upload } from "lucide-react";
 
 import { Turnstile } from "@/components/site/turnstile";
 import Link from "@/components/site/link";
@@ -29,7 +30,7 @@ function Err({ list }: { list?: string[] }) {
   return list?.[0] ? <span className="text-[13px] font-normal text-[#B3261E]">{t(list[0])}</span> : null;
 }
 
-const Arrow = ({ c }: { c: string }) => <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden fill="none" stroke={c} strokeWidth="1.8"><path d="M3 8h10M9 4l4 4-4 4" /></svg>;
+const Arrow = ({ c }: { c: string }) => <ArrowRight size={16} strokeWidth={2} color={c} aria-hidden />;
 
 export function ContactPage({ initialTab, email, signedIn }: { initialTab: "support" | "sales"; email: string; signedIn: boolean }) {
   const t = useT();
@@ -76,7 +77,7 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
           <>
             <div className="flex min-w-0 max-w-[760px] flex-[999_1_560px] flex-col gap-4">
               <div className="flex items-start gap-3 rounded-[8px] bg-[#E6EDFC] px-4 py-3.5 text-[14px] text-[#1F2E5C]">
-                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="none" stroke="#1F47A8" strokeWidth="1.5" className="mt-px flex-none"><circle cx="9" cy="9" r="7.25" /><path d="M9 8v5M9 5.2v.1" /></svg>
+                <Info size={18} strokeWidth={1.75} color="#1F47A8" className="mt-px flex-none" aria-hidden />
                 <span><strong>{t("About a paper’s review, deadline or decision?")}</strong> {t("The venue’s chairs decide those, not Plenary. Message them from the paper’s page in")} <Link href="/workspace/submissions" className="text-[#1F47A8]">{t("My submissions")}</Link>.</span>
               </div>
 
@@ -124,7 +125,7 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
                   <span className="text-[14px] font-medium">{t("Screenshot or file")} <span className="font-normal text-[#4A5263]">{t("(optional)")}</span></span>
                   <label className="relative flex cursor-pointer items-center gap-3.5 rounded-[8px] border-[1.5px] border-dashed border-[#B7BDC9] bg-[#F7F8F6] p-[18px]"
                     onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); pickFiles(e.dataTransfer.files); }}>
-                    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden fill="none" stroke="#4A5263" strokeWidth="1.5"><path d="M14 18V5M8.5 10.5 14 5l5.5 5.5" /><path d="M5 18v4.5h18V18" /></svg>
+                    <Upload size={26} strokeWidth={1.5} color="#4A5263" aria-hidden />
                     <span className="text-[14px]"><span className="font-semibold text-[#2F5FD0]">{t("Choose a file")}</span> {t("or drop it here")}<span className="block text-[13px] text-[#4A5263]">{t("PNG, JPG or PDF · up to 900 KB in total · 3 files at most")}</span></span>
                     <input type="file" multiple accept="image/png,image/jpeg,application/pdf" onChange={(e) => { pickFiles(e.target.files); e.target.value = ""; }} className="absolute size-px overflow-hidden [clip:rect(0_0_0_0)]" />
                   </label>

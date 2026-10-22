@@ -1,4 +1,5 @@
 "use client";
+import { Check } from "lucide-react";
 
 import Link from "@/components/site/link";
 import { useState } from "react";
@@ -58,7 +59,7 @@ export function PricingPlans() {
               </p>
               <ul className="m-0 mt-4 flex flex-auto list-none flex-col gap-2 p-0 text-[14px]">
                 {p.features.map((f) => (
-                  <li key={f} className="flex gap-2"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden fill="none" stroke="#18744F" strokeWidth="2" className="mt-0.5 flex-none"><path d="M3.5 8.5l3 3 6-7" /></svg>{t(f)}</li>
+                  <li key={f} className="flex gap-2"><Check size={16} strokeWidth={2.25} color="#18744F" className="mt-0.5 flex-none" aria-hidden />{t(f)}</li>
                 ))}
               </ul>
               <Link href={p.href} className={`mt-6 inline-flex h-11 items-center justify-center rounded-[4px] text-[15px] font-semibold no-underline ${p.featured ? "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]" : "border border-[#B7BDC9] bg-white text-[#121826] hover:bg-[#F7F8F6]"}`}>{t(p.cta)}</Link>

@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
@@ -30,7 +31,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ ref?: string }>
     <main className="mx-auto box-border flex w-full max-w-[1280px] flex-auto flex-wrap items-start gap-7 px-5 pb-[72px] pt-14 sm:px-8">
       <section className="min-w-0 max-w-[720px] flex-[999_1_560px] rounded-[8px] border border-[#DADDE3] bg-white p-6 sm:p-9">
         <span aria-hidden className="flex size-12 items-center justify-center rounded-full bg-[#E1F3EA]">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#14603F" strokeWidth="2"><path d="M5 11.5l4 4 8-9" /></svg>
+          <Check size={22} strokeWidth={2.25} color="#14603F" aria-hidden />
         </span>
         <p className="mb-0 mt-[22px] font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#14603F]">{t("Message sent")}</p>
         <h1 className="mt-2 font-serif text-[36px] font-[350] leading-[1.08] tracking-[-0.015em] sm:text-[42px]">{t("Thanks — we have it.")}</h1>

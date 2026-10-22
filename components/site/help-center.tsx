@@ -1,4 +1,5 @@
 "use client";
+import { Search } from "lucide-react";
 
 import Link from "@/components/site/link";
 import { useMemo, useState } from "react";
@@ -63,7 +64,7 @@ export function HelpCenter({ initialQuery = "", signedIn }: { initialQuery?: str
       <h1 className="m-0 font-serif text-[36px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[40px]">{t("Help & guides")}</h1>
       <p className="mt-1.5 text-[#4A5263]">{t("Answers for authors, reviewers, editors and organizers.")}</p>
       <div role="search" className="mt-5 flex h-[50px] max-w-[720px] items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#0E1B3D]">
-        <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden fill="none" stroke="#4A5263" strokeWidth="1.5"><circle cx="7" cy="7" r="5" /><path d="M11 11l3.5 3.5" /></svg>
+        <Search size={18} strokeWidth={1.75} color="#4A5263" className="flex-none" aria-hidden />
         <label htmlFor="help-q" className="sr-only">{t("Search help")}</label>
         <input id="help-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("What do you need help with?")} className="h-full min-w-0 flex-auto border-0 bg-transparent text-[16px] outline-none" />
       </div>

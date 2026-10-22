@@ -1,4 +1,5 @@
 "use client";
+import { Info } from "lucide-react";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n/client";
@@ -31,8 +32,8 @@ export function FieldLabel({ htmlFor, children, required = false, info }: { html
       {info ? (
         <span ref={box} className="relative inline-flex">
           <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-controls={tipId} aria-label={t("More about this field")}
-            className="flex size-[15px] items-center justify-center rounded-full border border-[#B7BDC9] bg-white p-0 font-serif text-[10px] font-semibold italic leading-none text-[#4A5263] hover:border-[#2F5FD0] hover:text-[#2F5FD0]">
-            i
+            className="flex size-4 items-center justify-center rounded-full border-0 bg-transparent p-0 text-[#6B7385] hover:text-[#2F5FD0]">
+            <Info size={14} strokeWidth={2} aria-hidden />
           </button>
           {open ? (
             <span id={tipId} role="tooltip" className="absolute left-0 top-[21px] z-20 w-[250px] rounded-[6px] border border-[#DADDE3] bg-white px-3 py-2.5 text-[13px] font-normal leading-[1.45] text-[#121826] shadow-[0_8px_24px_rgba(18,24,38,.14)]">
