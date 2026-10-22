@@ -173,7 +173,7 @@ const patchMap = (key: string, patch: Record<string, string | boolean>) => {
 
 const OPEN_KEY = "plenary.sideGroups";
 /** Groups open the first time; the rest stay folded until used. */
-const OPEN_BY_DEFAULT = new Set(["work", "events"]);
+const OPEN_BY_DEFAULT = new Set(["work", "events", "mine"]);
 const LAST_KEY = "plenary.sideLast";
 const RAIL_KEY = "plenary.sideRail";
 const ORG_KEY = "plenary.orgEvent";
