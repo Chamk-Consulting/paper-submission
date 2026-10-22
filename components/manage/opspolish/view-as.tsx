@@ -67,7 +67,7 @@ export function ViewAs({ slug, label, snap, back, nowIso }: { slug: string; labe
 
   return (
     <div className="flex flex-col gap-4">
-      <section role="region" aria-label={t("View as")} className="sticky top-2 z-10 flex flex-wrap items-center gap-3 rounded-[8px] border border-[#F2A93B] bg-[#FFF8EC] px-4 py-3 shadow-[0_4px_16px_rgba(18,24,38,.08)]">
+      <section role="region" aria-label={t("View as")} className="sticky top-[68px] z-10 flex flex-wrap items-center gap-3 rounded-[8px] border border-[#F2A93B] bg-[#FFF8EC] px-4 py-3 shadow-[0_4px_16px_rgba(18,24,38,.08)]">
         <span aria-hidden className="flex size-9 flex-none items-center justify-center rounded-full bg-[#0E1B3D] text-[15px] text-[#F2A93B]">👁</span>
         <div className="min-w-0 flex-auto">
           <p className="m-0 text-[15px]"><strong>{t("Viewing as {name}", { name: snap.person.name })}</strong> · {label}</p>

@@ -3,13 +3,16 @@
 import Link from "@/components/site/link";
 import { useEffect } from "react";
 import { useT } from "@/lib/i18n/client";
+import { SiteHeader } from "@/components/chrome/app-chrome";
 
 /** ER01 — unexpected error inside a page. */
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const t = useT();
   useEffect(() => { console.error(error); }, [error]);
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-[#F5F6F3] px-5 py-12 text-[15px] leading-[1.5] text-[#121826]">
+    <>
+    <SiteHeader />
+    <main className="flex min-h-[calc(100dvh-60px)] items-center justify-center bg-[#F5F6F3] px-5 py-12 text-[15px] leading-[1.5] text-[#121826]">
       <section className="w-full max-w-[640px] rounded-[12px] border border-[#DADDE3] bg-white px-6 py-11 text-center sm:px-10">
         <div aria-hidden className="mx-auto flex size-[72px] items-center justify-center rounded-full bg-[#FDECEA] font-serif text-[32px] text-[#B3261E]">!</div>
         <p className="mb-0 mt-[18px] font-mono text-[12px] tracking-[0.06em] text-[#4A5263]">{t("SOMETHING WENT WRONG")}</p>
@@ -23,5 +26,6 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         {error.digest ? <p className="mb-0 mt-[18px] font-mono text-[12px] text-[#4A5263]">{t("Reference")}: {error.digest}</p> : null}
       </section>
     </main>
+    </>
   );
 }

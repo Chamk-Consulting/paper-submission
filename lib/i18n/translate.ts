@@ -59,6 +59,9 @@ import { admin_de } from "@/lib/i18n/dict/modules/admin.de";
 import { attend_fr } from "@/lib/i18n/dict/modules/attend.fr";
 import { attend_it } from "@/lib/i18n/dict/modules/attend.it";
 import { attend_de } from "@/lib/i18n/dict/modules/attend.de";
+import { chrome_fr } from "@/lib/i18n/dict/modules/chrome.fr";
+import { chrome_it } from "@/lib/i18n/dict/modules/chrome.it";
+import { chrome_de } from "@/lib/i18n/dict/modules/chrome.de";
 
 
 
@@ -70,9 +73,9 @@ export type { Dict } from "@/lib/i18n/t-core";
 import type { Dict } from "@/lib/i18n/t-core";
 export const DICTS: Record<Locale, Dict> = {
   en: {},
-  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr, ...reviewpolish_fr, ...data_fr, ...venuepolish_fr, ...authpolish_fr, ...orgtools_fr, ...admin_fr, ...attend_fr, ...opspolish_fr, ...identity_fr, ...signin2_fr },
-  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it, ...reviewpolish_it, ...data_it, ...venuepolish_it, ...authpolish_it, ...orgtools_it, ...admin_it, ...attend_it, ...opspolish_it, ...identity_it, ...signin2_it },
-  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de, ...reviewpolish_de, ...data_de, ...venuepolish_de, ...authpolish_de, ...orgtools_de, ...admin_de, ...attend_de, ...opspolish_de, ...identity_de, ...signin2_de },
+  fr: { ...fr, ...manage_fr, ...review_fr, ...author_fr, ...account_fr, ...public_fr, ...program_fr, ...committee_fr, ...ops_fr, ...event_fr, ...reviewpolish_fr, ...data_fr, ...venuepolish_fr, ...authpolish_fr, ...orgtools_fr, ...admin_fr, ...attend_fr, ...opspolish_fr, ...identity_fr, ...signin2_fr, ...chrome_fr },
+  it: { ...it, ...manage_it, ...review_it, ...author_it, ...account_it, ...public_it, ...program_it, ...committee_it, ...ops_it, ...event_it, ...reviewpolish_it, ...data_it, ...venuepolish_it, ...authpolish_it, ...orgtools_it, ...admin_it, ...attend_it, ...opspolish_it, ...identity_it, ...signin2_it, ...chrome_it },
+  de: { ...de, ...manage_de, ...review_de, ...author_de, ...account_de, ...public_de, ...program_de, ...committee_de, ...ops_de, ...event_de, ...reviewpolish_de, ...data_de, ...venuepolish_de, ...authpolish_de, ...orgtools_de, ...admin_de, ...attend_de, ...opspolish_de, ...identity_de, ...signin2_de, ...chrome_de },
 };
 export type { Vars, T } from "@/lib/i18n/t-core";
 import { makeTFrom, type T } from "@/lib/i18n/t-core";

@@ -4,7 +4,6 @@ import { DeleteDraftButton } from "@/components/submission/delete-draft";
 import Link from "@/components/site/link";
 import type { ReactNode } from "react";
 import { DeadlinePill } from "@/components/submission/live";
-import { LanguageSelect } from "@/components/i18n/language-select";
 import { useT } from "@/lib/i18n/client";
 import { Pin } from "@/components/motion/pin";
 import { STEPS, type StepKey } from "@/lib/submission/steps";
@@ -12,35 +11,13 @@ import type { WizardVenue } from "@/lib/submission/data";
 
 /* Text-bearing frame pieces of canvas SB01–SB08 (client: translated with useT). */
 
-export function WizardHeader({ initials, right }: { initials: string; right?: ReactNode }) {
-  const t = useT();
+/** The site header is shared (root layout). Wizards keep a slim strip for their save status, if any. */
+export function WizardHeader({ right }: { initials: string; right?: ReactNode }) {
+  if (!right) return null;
   return (
-    <Pin name="wz-header">
-    <header className="border-b border-[#DADDE3] bg-white">
-      <div className="mx-auto box-border flex min-h-[60px] w-full max-w-[1280px] items-center justify-between gap-4 px-5 sm:px-8">
-        <div className="flex items-center gap-7">
-          <Link href="/workspace" className="flex items-center gap-2.5 text-[#121826] no-underline">
-            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#121826" strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
-            <span className="font-serif text-[22px]">Plenary</span>
-          </Link>
-          <nav aria-label={t("Primary")} className="hidden gap-5 text-[14px] font-medium sm:flex">
-            <Link href="/workspace" className="border-b-2 border-[#0E1B3D] py-[18px] text-[#121826] no-underline">{t("My workspace")}</Link>
-            <Link href="/venues" className="border-b-2 border-transparent py-[18px] text-[#4A5263] no-underline hover:text-[#121826]">{t("Venues")}</Link>
-            <Link href="/account-help" className="border-b-2 border-transparent py-[18px] text-[#4A5263] no-underline hover:text-[#121826]">{t("Help")}</Link>
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          <LanguageSelect id="wz-lang" className="hidden sm:block" />
-          {right}
-          {initials ? (
-            <span aria-label={t("Your account")} className="flex size-8 items-center justify-center rounded-full bg-[#E6EDFC] text-[13px] font-semibold text-[#1F47A8]">{initials}</span>
-          ) : (
-            <span aria-hidden className="sk block size-8 rounded-full!" />
-          )}
-        </div>
-      </div>
-    </header>
-    </Pin>
+    <div className="border-b border-[#DADDE3] bg-white">
+      <div className="mx-auto box-border flex min-h-10 w-full max-w-[1280px] items-center justify-end gap-4 px-5 text-[14px] sm:px-8">{right}</div>
+    </div>
   );
 }
 

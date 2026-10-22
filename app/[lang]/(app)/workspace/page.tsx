@@ -44,7 +44,6 @@ async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string
     papersP.then(({ papers: ps }) => getVenueDates([...new Set(ps.map((p) => p.venue.id))])),
   ]);
   if (!ctx) redirect("/sign-in?next=/workspace");
-  const pid = ctx.me.person?.id;
   const items = buildDueItems({ papers, reviews, coauthor, sessions, dates, now });
   const soon = items.filter((i) => i.at && Date.parse(i.at) - now <= 14 * 864e5);
   const nRev = soon.filter((i) => i.tag === "REVIEW" || i.tag === "INVITATION").length;

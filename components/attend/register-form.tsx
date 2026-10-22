@@ -150,7 +150,7 @@ export function RegisterForm({ slug, venueId, opts, cardReady }: { slug: string;
         </section>
       </div>
 
-      <aside className="flex w-full flex-col gap-4 lg:sticky lg:top-4 lg:w-auto lg:flex-[1_1_300px]">
+      <aside className="flex w-full flex-col gap-4 lg:sticky lg:top-[76px] lg:w-auto lg:flex-[1_1_300px]">
         <section className={card}>
           <p className={kicker}>{t("Order summary")}</p>
           <div className="mt-2.5 flex flex-col gap-1.5 text-[14px]">

@@ -169,3 +169,15 @@ html.lang-leaving body { opacity: 0.55; transition: opacity var(--dur-base) var(
 @media (prefers-reduced-motion: reduce) {
   .consent-in, .toast-in, .consent-dialog[open] { animation: vt-in var(--dur-fast) linear both; }
 }
+
+/* ------------------------------------------------------------------ shared site header (components/chrome/app-chrome.tsx) */
+/* <html data-auth="in|out"> is set from the session cookie before the first paint; both header variants are in the HTML. */
+html:not([data-auth="in"]) .auth-in { display: none !important; }
+html[data-auth="in"] .auth-out { display: none !important; }
+/* Pages written as full-screen columns sit under the 60 px header: keep them exactly one screen tall. */
+.chrome-body .min-h-dvh { min-height: calc(100dvh - 60px); }
+/* in-page anchors land below the sticky header */
+html { scroll-padding-top: 72px; }
+/* header lines up with the app frame: 1440 px, or 1600 px on organiser pages */
+.hdr-app { max-width: 1440px; }
+body:has([data-wide-frame]) .hdr-app { max-width: 1600px; }

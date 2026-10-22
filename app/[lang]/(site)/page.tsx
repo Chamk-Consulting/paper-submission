@@ -1,10 +1,8 @@
 import Link from "@/components/site/link";
-import { LandingAccount } from "@/components/site/landing-account";
 import type { Metadata } from "next";
 import { OpenCallsStrip } from "@/components/landing/open-calls-strip";
 import { site } from "@/lib/config/site";
 import { getT } from "@/lib/i18n/server";
-import { LanguageSelect } from "@/components/i18n/language-select";
 import { Reveal } from "@/components/motion/reveal";
 import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 
@@ -55,15 +53,6 @@ const PRINCIPLES = [
   ["04", "Every action logged", "An audit trail chairs can show their society after each decision."],
 ];
 
-function Logo({ light }: { light?: boolean }) {
-  const c = light ? "#F5F6F3" : "#121826";
-  return (
-    <Link href="/" className="flex items-center gap-2.5 no-underline" style={{ color: c }}>
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke={c} strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
-      <span className="font-serif text-[24px]">Plenary</span>
-    </Link>
-  );
-}
 
 /** Canvas PR01-Landing. */
 export default async function Landing() {
@@ -72,24 +61,7 @@ export default async function Landing() {
     <div className="bg-[#F5F6F3] text-[16px] leading-[1.6] text-[#121826]">
       {/* Hero band */}
       <section id="top" className="bg-[#0E1B3D] text-[#F5F6F3]">
-        <header className="border-b border-[#24335C]">
-          <div className={`${wrap} flex min-h-16 flex-wrap items-center justify-between gap-4 py-2`}>
-            <Logo light />
-            <nav aria-label={t("Primary")} className="hidden flex-wrap gap-x-5 gap-y-1 text-[14px] font-medium lg:flex">
-              <Link href="/venues" className="text-[#D6DCEA] no-underline hover:text-white">{t("Venues")}</Link>
-              <a href="#roles" className="text-[#D6DCEA] no-underline hover:text-white">{t("Authors & reviewers")}</a>
-              <Link href="/organizers" className="text-[#D6DCEA] no-underline hover:text-white">{t("For organizers")}</Link>
-              <a href="#compare" className="text-[#D6DCEA] no-underline hover:text-white">{t("Why switch")}</a>
-              <Link href="/pricing" className="text-[#D6DCEA] no-underline hover:text-white">{t("Pricing")}</Link>
-              <Link href="/contact" className="text-[#D6DCEA] no-underline hover:text-white">{t("Contact")}</Link>
-            </nav>
-            <div className="flex items-center gap-2">
-              <LanguageSelect id="landing-lang" className="hidden border-[#2A3C6E]! bg-[#17285A]! text-[#F5F6F3]! sm:block" />
-              <LandingAccount className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline" />
-              <Link href="/manage/new" className={`px-4 py-2.5 text-[14px] ${saffronBtn}`}>{t("Host a conference")}</Link>
-            </div>
-          </div>
-        </header>
+        <div className="border-t border-[#24335C]" />
 
         <div className={`${wrap} pb-20 pt-[88px]`}>
           <p className="m-0 mb-6 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Submission · Review · Program · Proceedings")}</p>

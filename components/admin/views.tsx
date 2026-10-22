@@ -25,18 +25,14 @@ export function AdminShell({ t, name, tab, overview, children }: { t: TT; name: 
     ["support", "Support inbox", overview.support_new], ["venues", "Venue approvals", overview.venues_pending], ["people", "Find a person", null], ["status", "System status", null],
   ];
   return (
-    <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
-      <header className="bg-[#121826] text-[#F5F6F3]">
-        <div className="mx-auto box-border flex min-h-[60px] w-full max-w-[1440px] flex-wrap items-center gap-4 px-6 py-2">
-          <Link href="/admin" className="flex items-center gap-2.5 text-[#F5F6F3] no-underline">
-            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden fill="none" stroke="#F5F6F3" strokeWidth="1.5"><circle cx="11" cy="11" r="9.25" /><path d="M4 11h14M11 2v18" /><circle cx="11" cy="11" r="2.5" fill="#F2A93B" stroke="none" /></svg>
-            <span className="font-serif text-[22px]">Plenary</span>
-          </Link>
+    <div className="flex min-h-[calc(100dvh-60px)] flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
+      <div className="border-b border-[#DADDE3] bg-white">
+        <div className="mx-auto box-border flex min-h-11 w-full max-w-[1440px] flex-wrap items-center gap-3 px-6 py-1.5">
           <span className="rounded-[3px] bg-[#B3261E] px-2 py-0.5 font-mono text-[11px] tracking-[0.06em] text-white">{t("PLATFORM ADMIN")}</span>
-          <span className="ml-auto text-[14px] text-[#B9C3DA]">{t("Signed in as {name}", { name })}</span>
-          <Link href="/workspace" className="text-[14px] text-[#F5F6F3]">{t("Leave admin")}</Link>
+          <span className="ml-auto text-[14px] text-[#4A5263]">{t("Signed in as {name}", { name })}</span>
+          <Link href="/workspace" className="text-[14px] font-semibold text-[#1F47A8]">{t("Leave admin")}</Link>
         </div>
-      </header>
+      </div>
       <div className="mx-auto flex w-full max-w-[1440px] flex-auto flex-wrap">
         <nav aria-label={t("Admin")} className="box-border flex w-full flex-col gap-0.5 border-b border-[#DADDE3] bg-white px-3 py-4 md:w-[220px] md:flex-none md:border-b-0 md:border-r min-[1441px]:border-l">
           {nav.map(([k, label, n]) => (

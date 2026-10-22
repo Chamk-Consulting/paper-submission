@@ -18,6 +18,8 @@ import { PwaLayer } from "@/components/pwa/pwa-layer";
 import { CookieConsent } from "@/components/consent/cookie-consent";
 import { RememberAccount } from "@/components/auth/remember-account";
 
+const AUTH_FLAG = `try{document.documentElement.dataset.auth=/(?:^|;\\s*)sb-[a-z0-9]+-auth-token(?:\\.0)?=/.test(document.cookie)?"in":"out"}catch(e){}`;
+
 export function generateStaticParams() {
   return LOCALES.map((lang) => ({ lang }));
 }
@@ -53,7 +55,11 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   if (!isLocale(lang)) notFound();
   const locale = await getLocale();
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        {/* Before the first paint: signed-in or not, from the session cookie, so the shared header shows the right side at once. */}
+        <script dangerouslySetInnerHTML={{ __html: AUTH_FLAG }} />
+      </head>
       <body className="min-h-dvh bg-[#F5F6F3] antialiased">
         <Suspense fallback={null}><NavProgress /></Suspense>
         <I18nProvider locale={locale} dict={DICTS[locale]}>

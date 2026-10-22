@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/lib/auth/actions";
 import { useT } from "@/lib/i18n/client";
 import { InstallMenuItem } from "@/components/pwa/install-prompt";
+import { clearSummary } from "@/components/chrome/summary";
 
-export function AccountMenu({ name, initials, plenaryId }: { name: string; initials: string; plenaryId: string | null }) {
+export function AccountMenu({ name, initials, plenaryId, isAdmin = false }: { name: string; initials: string; plenaryId: string | null; isAdmin?: boolean }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -41,8 +42,9 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
           <Link role="menuitem" href="/settings/notifications" className={item}>{t("Notifications")}</Link>
           <Link role="menuitem" href="/settings/calendar" className={item}>{t("Calendar feed")}</Link>
           <Link role="menuitem" href="/settings/privacy" className={item}>{t("Privacy & data")}</Link>
+          {isAdmin ? <Link role="menuitem" href="/admin" className={item}>{t("Platform admin")}</Link> : null}
           <InstallMenuItem className={`${item} w-full border-0 bg-transparent text-left`} />
-          <form action={signOut} className="border-t border-[#EEF0EC]">
+          <form action={signOut} onSubmit={() => clearSummary()} className="border-t border-[#EEF0EC]">
             <button role="menuitem" type="submit" className="block w-full border-0 bg-transparent px-3.5 py-[9px] text-left text-[14px] text-[#B3261E] hover:bg-[#FDECEA]">{t("Sign out")}</button>
           </form>
         </div>

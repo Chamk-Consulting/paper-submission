@@ -87,7 +87,7 @@ async function Venue({ params }: { params: Promise<Params> }) {
           ) : null}
         </div>
         </div>
-        <nav aria-label={t("On this page")} className="sticky top-0 z-10 border-y border-[#DADDE3] bg-white">
+        <nav aria-label={t("On this page")} className="sticky top-[60px] z-10 border-y border-[#DADDE3] bg-white">
           <div className="mx-auto flex max-w-[1280px] gap-6 overflow-x-auto px-5 text-[15px] sm:px-8">
             {nav.map(([id, label]) => <a key={id} href={`#${id}`} className="flex-none py-3.5 text-[#4A5263] no-underline hover:text-[#121826]">{t(label)}</a>)}
           </div>

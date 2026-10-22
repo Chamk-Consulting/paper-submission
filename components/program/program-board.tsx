@@ -168,7 +168,7 @@ export function ProgramBoard({ venue, sessions, signedIn, generatedAt }: { venue
           ) : null}
         </div>
 
-        <aside className="flex w-full flex-col gap-4 lg:sticky lg:top-4 lg:w-[290px] lg:flex-none">
+        <aside className="flex w-full flex-col gap-4 lg:sticky lg:top-[76px] lg:w-[290px] lg:flex-none">
           <section className="rounded-[8px] bg-[#0E1B3D] px-5 py-[18px] text-[#F5F6F3]">
             <p className="m-0 font-mono text-[11px] tracking-[0.06em] text-[#F2A93B]">{t("MY SCHEDULE")}</p>
             <div className="mt-1.5 font-serif text-[30px]">{t(sched.mine.length === 1 ? "{n} session" : "{n} sessions", { n: sched.mine.length })}</div>
