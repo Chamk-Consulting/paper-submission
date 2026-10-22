@@ -18,14 +18,14 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
   if (ctx) {
     return (
       <WorkspaceShell ctx={ctx} active="m:help">
-        <div className="max-w-[1040px]">{body}</div>
+        <div className="max-w-[1280px]">{body}</div>
       </WorkspaceShell>
     );
   }
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <SiteHeader />
-      <main className="mx-auto box-border w-full max-w-[1040px] flex-auto px-5 pb-14 pt-8 sm:px-8">{body}</main>
+      <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-14 pt-8 sm:px-8">{body}</main>
     </div>
   );
 }
@@ -33,7 +33,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
 /** HP01 — Help & guides (inside the workspace when signed in, public otherwise). */
 export default function Page(props: { searchParams: Promise<{ q?: string }> }) {
   return (
-    <Reveal fallback={<div className="min-h-dvh bg-[#F5F6F3] px-5 pt-[92px] sm:px-8"><div className="mx-auto max-w-[1040px]"><HelpSkeleton /></div></div>}>
+    <Reveal fallback={<div className="min-h-dvh bg-[#F5F6F3] px-5 pt-[92px] sm:px-8"><div className="mx-auto max-w-[1280px]"><HelpSkeleton /></div></div>}>
       <Inner {...props} />
     </Reveal>
   );
