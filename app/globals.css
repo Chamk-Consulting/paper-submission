@@ -16,6 +16,16 @@
    to fill the screen height, the workspace frame already does. */
 main.app-frame .min-h-dvh { min-height: 0; }
 
+/* Responsive safety nets (found by the workspace audit at 390/768/1024/1440):
+   - a grid column must be able to shrink below a wide table it holds (the table scrolls in its own box);
+   - a scroll box contains its absolutely placed children (e.g. sr-only table headings), so they can't widen the page;
+   - on touch screens, checkboxes and radio buttons get a finger-sized target. */
+main.app-frame .grid > * { min-width: 0; }
+:is(.overflow-x-auto, .overflow-auto):not(.sticky, .fixed, .absolute) { position: relative; }
+@media (pointer: coarse) {
+  main.app-frame input:is([type="checkbox"], [type="radio"]) { min-width: 22px; min-height: 22px; }
+}
+
 /* Plenary · Ink & Saffron */
 :root {
   --navy: #0e1b3d;

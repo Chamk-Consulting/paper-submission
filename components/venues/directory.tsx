@@ -266,12 +266,12 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
       </section>
       )}
 
-      <div className="mx-auto box-border flex w-full max-w-[1280px] flex-col items-start gap-8 px-5 pb-14 pt-7 sm:px-8 lg:flex-row">
+      <div className={`mx-auto box-border flex w-full max-w-[1280px] flex-col items-start gap-8 px-5 pb-14 pt-7 sm:px-8 ${ws ? "xl:flex-row" : "lg:flex-row"}`}>
         <button type="button" onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen} aria-controls="v-filters"
-          className="flex h-10 w-full items-center justify-between rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-semibold text-[#121826] lg:hidden">
+          className={`flex h-10 w-full items-center justify-between rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-semibold text-[#121826] ${ws ? "xl:hidden" : "lg:hidden"}`}>
           <span>{t("Filters")}{chips.length ? ` · ${chips.length}` : ""}</span><span aria-hidden>{filtersOpen ? "▴" : "▾"}</span>
         </button>
-        <aside id="v-filters" aria-label={t("Filters")} className={`${filtersOpen ? "flex" : "hidden"} -mt-4 w-full flex-col gap-[22px] lg:mt-0 lg:flex lg:w-[250px] lg:flex-none`}>
+        <aside id="v-filters" aria-label={t("Filters")} className={`${filtersOpen ? "flex" : "hidden"} -mt-4 w-full flex-col gap-[22px] ${ws ? "xl:mt-0 xl:flex xl:w-[250px] xl:flex-none" : "lg:mt-0 lg:flex lg:w-[250px] lg:flex-none"}`}>
           {follows.signedIn && !ws ? (
             <button type="button" role="switch" aria-checked={followOnly} onClick={() => setFollowOnly((v) => !v)} className="flex items-center justify-between gap-2.5 rounded-[8px] border border-[#DADDE3] bg-white px-3 py-2.5 text-[14px] font-semibold text-[#121826]">
               <span>{t("★ Following only")}</span>
@@ -320,7 +320,7 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
           ) : null}
         </aside>
 
-        <section aria-label={t("Results")} className="w-full min-w-0 flex-auto">
+        <section aria-label={t("Results")} className="@container w-full min-w-0 flex-auto">
           {ws && intent ? (
             <div role="status" className="mb-3.5 flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[#F1D29A] bg-[#FFF6E6] px-4 py-3 text-[14px] text-[#3B2A07]">
               <span><strong>{t("Choose where to submit.")}</strong> {t("Only events open for submission are shown; press Submit a paper on the one you want.")}</span>
@@ -395,8 +395,8 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
   const act = ws ? (intent && isOpenCall(v) ? { label: "Submit a paper", href: `/submit/${v.slug}` } : primaryAction(v.slug, mine, isOpenCall(v))) : null;
   const roles = mine ? roleChips(mine.roles) : [];
   return (
-    <article className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white p-4 sm:flex-row sm:items-start">
-      <Link href={href} aria-label={t("Open {venue}", { venue: v.acr })} className="relative block aspect-video w-full flex-none overflow-hidden rounded-[6px] bg-[#EEF0EC] no-underline sm:w-[200px]">
+    <article className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white p-4 @2xl:flex-row @2xl:items-start">
+      <Link href={href} aria-label={t("Open {venue}", { venue: v.acr })} className={`relative block w-full flex-none overflow-hidden rounded-[6px] bg-[#EEF0EC] no-underline @2xl:aspect-video @2xl:w-[200px] ${ws ? "aspect-[3/1]" : "aspect-video"}`}>
         <VenueCoverImage cover={v.cover} field={v.field} alt={t("Cover image of {venue}", { venue: v.acr })} />
         <span className="absolute left-2 top-2 rounded-[2px] bg-white/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.04em] text-[#121826]">{v.society ?? v.acr.slice(0, 10)}</span>
         {hasRealCover(v.cover) && v.cover?.credit ? <span className="absolute bottom-1.5 right-2 max-w-[90%] truncate text-[10px] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,.6)]">{v.cover.credit}</span> : null}
@@ -425,15 +425,15 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
           </div>
         ) : null}
       </div>
-      <div className="flex-none text-left sm:w-[220px] sm:text-right">
-        <div className="flex items-center gap-1.5 sm:justify-end">
+      <div className="flex-none text-left @2xl:w-[220px] @2xl:text-right">
+        <div className="flex items-center gap-1.5 @2xl:justify-end">
           {v.st.extended ? <span className="rounded-[2px] bg-[#E6EDFC] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em] text-[#1F47A8]">{t("EXTENDED")}</span> : null}
           <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: soon ? "#A8600F" : "#4A5263" }}>{soon ? t("Closes soon · {what}", { what: t(v.st.label).toLowerCase() }) : t(v.st.label)}</span>
         </div>
         <div className="mt-0.5 font-mono text-[22px] font-medium" style={{ color: soon ? "#A8600F" : v.st.state === "now" ? "#14603F" : "#121826" }}>{v.st.closes}</div>
         <div className="text-[12px] text-[#4A5263]">{v.st.aoe}</div>
         <div className="text-[12px] font-medium text-[#121826]">{v.st.local}</div>
-        <div className="mt-2.5 flex flex-wrap gap-1.5 whitespace-nowrap sm:justify-end">
+        <div className="mt-2.5 flex flex-wrap gap-1.5 whitespace-nowrap @2xl:justify-end">
           <button type="button" onClick={onFollow} aria-pressed={following} aria-label={following ? t("Unfollow {venue}", { venue: v.acr }) : t("Follow {venue}", { venue: v.acr })} className="h-[34px] rounded-[4px] px-2.5 text-[13px] font-semibold"
             style={{ color: following ? "#7A4508" : "#121826", background: following ? "#FFF6E6" : "#FFFFFF", border: `1px solid ${following ? "#F1D29A" : "#B7BDC9"}` }}>
             {following ? t("★ Following") : t("☆ Follow")}

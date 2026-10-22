@@ -49,13 +49,13 @@ async function Inner({ params }: P) {
         </section>
       ) : (
         <div className="mt-6 flex flex-wrap items-start gap-6">
-          <section className={`${card} flex-[1_1_420px]`}>
+          <section className={`${card} min-w-0 flex-[1_1_420px]`}>
             <p className={kicker}>{t("Badge preview")}</p>
             <div className="mt-4"><BadgeCard badge={badge} qr={await qrSvg(badgePayload(badge.id, badge.salt))} venue={venue.acr} dates={dates} t={t} /></div>
             <p className="mb-0 mt-3 max-w-[420px] text-[13px] text-[#4A5263]">{t("The QR holds only a check-in code, not personal data. Lost badge? Reprint it at the desk or show this page on your phone.")}</p>
             <div className="mt-3.5 flex flex-wrap items-center gap-2.5"><PrintBadge /><ReissueBadge slug={slug} id={badge.id} /></div>
           </section>
-          <section className={`${card} flex-[1_1_320px]`}>
+          <section className={`${card} min-w-0 flex-[1_1_320px]`}>
             <p className={kicker}>{t("At the desk")}</p>
             <dl className="mb-0 mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-[14px]">
               <dt className="text-[#4A5263]">{t("Registration")}</dt><dd className="m-0 font-mono">{badge.number}</dd>
