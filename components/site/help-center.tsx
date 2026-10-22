@@ -65,25 +65,25 @@ export function HelpCenter({ initialQuery = "", signedIn, hero = false }: { init
   return (
     <>
       {hero ? (
-        <PageHero kicker={t("Help")} title={t("Help & guides")} lead={t("Answers for authors, reviewers, editors and organizers.")}
+        <PageHero tone="navy" kicker={t("Help")} title={t("Help & guides")} lead={t("Answers for authors, reviewers, editors and organizers.")}
           actions={<>
-      <div role="search" className="flex h-[50px] max-w-[720px] items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#0E1B3D]">
+      <div role="search" className="flex h-[50px] max-w-[720px] items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#F2A93B] focus-within:outline-2 focus-within:outline-[#F2A93B]">
         <Search size={18} strokeWidth={1.75} color="#4A5263" className="flex-none" aria-hidden />
         <label htmlFor="help-q" className="sr-only">{t("Search help")}</label>
-        <input id="help-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("What do you need help with?")} className="h-full min-w-0 flex-auto border-0 bg-transparent text-[16px] outline-none" />
+        <input id="help-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("What do you need help with?")} className="h-full min-w-0 flex-auto border-0 bg-transparent text-[16px] text-[#121826] outline-none placeholder:text-[#6B7385]" />
       </div>
-      <p className="mt-2.5 text-[13px] text-[#4A5263]" aria-live="polite">
+      <p className="mt-2.5 text-[13px] text-[#D6DCEA]" aria-live="polite">
         {needle ? t(n === 1 ? "{n} result for “{q}”" : "{n} results for “{q}”", { n, q: q.trim() }) : (
           <>{t("Popular:")}{" "}
             {(["copyright", "extra pages", "passkeys", "conflicts"] as const).map((w, i) => (
-              <span key={w}>{i ? " · " : ""}<button type="button" onClick={() => setQ(t(w))} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#2F5FD0] underline">{t(w)}</button></span>
+              <span key={w}>{i ? " · " : ""}<button type="button" onClick={() => setQ(t(w))} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#F2A93B] underline hover:text-white">{t(w)}</button></span>
             ))}
           </>
         )}
       </p>
 
             <nav aria-label={t("Quick links")} className="mt-5 flex flex-wrap gap-2">
-              {QUICK.map(([href, label]) => <Link key={href} href={href} className="inline-flex h-9 items-center rounded-full border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]">{t(label)}</Link>)}
+              {QUICK.map(([href, label]) => <Link key={href} href={href} className="inline-flex h-9 items-center rounded-full border border-[#4A5F99] bg-[#17285A] px-3.5 text-[14px] font-medium text-[#F5F6F3] no-underline hover:border-[#8F9CC0] hover:bg-[#1F3270]">{t(label)}</Link>)}
             </nav>
           </>} />
       ) : (

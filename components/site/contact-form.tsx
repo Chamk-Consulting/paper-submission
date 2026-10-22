@@ -57,12 +57,12 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
     for (const f of files) fd.append("files", f);
     action(fd);
   };
-  const tabCls = (on: boolean) => `h-[46px] cursor-pointer border-0 border-b-[3px] bg-transparent px-[18px] text-[15px] font-semibold ${on ? "border-[#F2A93B] text-[#121826]" : "border-transparent text-[#4A5263] hover:text-[#121826]"}`;
+  const tabCls = (on: boolean) => `h-[46px] cursor-pointer border-0 border-b-[3px] bg-transparent px-[18px] text-[15px] font-semibold ${on ? "border-[#F2A93B] text-white" : "border-transparent text-[#B9C2DA] hover:text-white"}`;
 
   return (
     <>
-      <PageHero
-        kicker={<><Link href="/help" className="text-[#4A5263] no-underline hover:underline">{t("Help & guides")}</Link> / {t("Contact")}</>}
+      <PageHero tone="navy"
+        kicker={<><Link href="/help" className="text-[#F2A93B] no-underline hover:underline">{t("Help & guides")}</Link> / {t("Contact")}</>}
         title={t("How can we help?")}
         lead={t("Write to the people who build Plenary. We reply within {time}, Monday to Friday, in {langs}.", { time: t(contact.replyTime), langs: t(contact.languages) })}
         tabs={
