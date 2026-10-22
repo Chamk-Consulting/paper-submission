@@ -68,12 +68,12 @@ export function AccountChooser({ accounts, onPick, onOther, onRemove }: {
               <span aria-hidden className="ml-auto text-[#4A5263]">→</span>
             </button>
             <button type="button" onClick={() => onRemove(a)} aria-label={t("Remove {name} from this device", { name: a.name })} title={t("Remove from this device")}
-              className="w-11 flex-none border-0 border-l border-[#EEF0EC] bg-transparent text-[18px] text-[#4A5263] hover:bg-[#FDECEA] hover:text-[#B3261E]">×</button>
+              className="w-11 flex-none border-0 border-l border-[#EEF0EC] bg-transparent text-[17px] text-[#4A5263] hover:bg-[#FDECEA] hover:text-[#B3261E]">×</button>
           </li>
         ))}
         <li>
           <button type="button" onClick={onOther} className="flex w-full items-center gap-3 rounded-[6px] border border-dashed border-[#B7BDC9] bg-transparent px-3.5 py-3 text-left text-[15px] font-medium text-[#121826] hover:bg-white">
-            <span aria-hidden className="flex size-10 flex-none items-center justify-center rounded-full bg-[#EEF0EC] text-[18px] text-[#4A5263]">+</span>
+            <span aria-hidden className="flex size-10 flex-none items-center justify-center rounded-full bg-[#EEF0EC] text-[17px] text-[#4A5263]">+</span>
             {t("Use another account")}
           </button>
         </li>

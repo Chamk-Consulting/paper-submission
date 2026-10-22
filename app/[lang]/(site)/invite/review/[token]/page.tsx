@@ -86,7 +86,7 @@ async function Inner({ params }: { params: Promise<{ token: string }> }) {
         </aside>
       </div>
       {/* TODO(comms): per-venue unsubscribe for review invitations. */}
-      <p className="mt-8 text-[13px]"><span aria-disabled title={t("Coming soon")} className="text-[#9AA3B5]">{t("Stop review invitations from this venue")}</span></p>
+      <p className="mt-8 text-[13px]"><span aria-disabled title={t("Coming soon")} className="text-[#6B7385]">{t("Stop review invitations from this venue")}</span></p>
     </Frame>
   );
 }

@@ -35,7 +35,7 @@ export function TitleLockForm({ id, title: t0, authors, locked }: { id: string; 
       <p className="mt-2 text-[13px] text-[#4A5263]">{t("To change the author list, message the program chair before you lock.")}</p>
       <div className="mt-4 rounded-[6px] bg-[#F7F8F6] px-4 py-3">
         <p className="m-0 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Preview · as in the program")}</p>
-        <p className="mt-1.5 font-serif text-[18px]">{title}</p>
+        <p className="mt-1.5 font-serif text-[17px]">{title}</p>
         <p className="m-0 text-[14px] text-[#4A5263]">{authors.map((a) => a.name).join(", ")}</p>
       </div>
       {locked ? (

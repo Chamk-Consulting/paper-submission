@@ -16,7 +16,7 @@ export function InvitationPaper({ inv, t, intl, now, long = false }: { inv: Invi
         <Tag tone="b">{t(BLIND[blind] ?? "DOUBLE-BLIND")}</Tag>
         {inv.paper_type || inv.pages ? <Tag tone="n">{[inv.paper_type?.toUpperCase(), inv.pages ? t("{n} PAGES", { n: inv.pages }) : null].filter(Boolean).join(" · ")}</Tag> : null}
       </div>
-      <h2 className="mb-0 mt-3 font-serif text-[24px] font-normal leading-[1.25]">{inv.title}</h2>
+      <h2 className="mb-0 mt-3 font-serif text-[22px] font-normal leading-[1.25]">{inv.title}</h2>
       <p className="mb-0 mt-1.5 text-[13px] text-[#4A5263]">
         {blind === "double" ? `${t("Authors are hidden.")} ` : ""}
         {inv.keywords?.length ? `${t("Keywords:")} ${inv.keywords.join(", ")}` : ""}

@@ -80,7 +80,7 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
           <>
             <section className={box}>
               <p className={kick}>{t("Decision deadline")}</p>
-              <div className="mt-1 font-serif text-[26px] leading-none">{form.dates.decisions ? fmtDayYear(form.dates.decisions, t.intl) : "—"}</div>
+              <div className="mt-1 font-serif text-[28px] leading-none">{form.dates.decisions ? fmtDayYear(form.dates.decisions, t.intl) : "—"}</div>
               <p className="mb-0 mt-1.5 text-[13px] text-[#4A5263]">{t("The editor can't extend past this date.")}</p>
             </section>
             <section className={box}>

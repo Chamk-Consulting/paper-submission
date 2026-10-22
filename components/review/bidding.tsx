@@ -57,11 +57,11 @@ export function Bidding({ papers, open, matches = {}, hasTopics = false }: {
       <section className="mt-5 flex flex-wrap items-center gap-6 rounded-[8px] border border-[#DADDE3] bg-white px-5 py-4">
         <div className="min-w-[220px] flex-auto">
           <div className="flex items-baseline justify-between text-[14px]"><span className="font-medium">{t("Your bids")}</span><span className="text-[13px] text-[#4A5263]">{t("aim for at least 30")}</span></div>
-          <div className="mt-1 font-serif text-[26px] leading-none">{vals.length} <span className="text-[16px] text-[#4A5263]">/ {TARGET}</span></div>
+          <div className="mt-1 font-serif text-[28px] leading-none">{vals.length} <span className="text-[16px] text-[#4A5263]">/ {TARGET}</span></div>
           <div className="mt-2 h-2 rounded-full bg-[#EEF0EC]"><div className="h-2 rounded-full bg-[#18744F]" style={{ width: `${Math.min(100, (vals.length / TARGET) * 100)}%` }} /></div>
         </div>
         {([["Eager", count("eager"), "#14603F"], ["Willing", count("willing"), "#1F47A8"], ["Conflicts", count("conflict"), "#B3261E"]] as const).map(([k, v, c]) => (
-          <div key={k} className="text-center"><div className="font-serif text-[26px] leading-none" style={{ color: c }}>{v}</div><div className="text-[12px] text-[#4A5263]">{t(k)}</div></div>
+          <div key={k} className="text-center"><div className="font-serif text-[28px] leading-none" style={{ color: c }}>{v}</div><div className="text-[12px] text-[#4A5263]">{t(k)}</div></div>
         ))}
       </section>
 

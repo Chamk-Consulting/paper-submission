@@ -92,10 +92,10 @@ async function Inner({ params, searchParams }: P) {
       <div className="flex flex-col gap-5">
         {!isToday ? <p className={`${ui.warn} m-0`}>{days.length ? t("The event is not running today — showing {day}.", { day: fmtDayLabel(day, INTL[locale]) }) : t("No sessions yet — build the program first.")}</p> : null}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className={ui.card}><p className={ui.kicker}>{t("Now")}</p><p className="m-0 mt-1 font-serif text-[30px]">{now.toLocaleTimeString(INTL[locale], { hour: "2-digit", minute: "2-digit", timeZone: tz })}</p><p className={`${ui.hint} m-0`}>{block ? `${fmt(block.starts_at)}–${fmt(block.ends_at)} · ${block.title}` : t("between sessions")}</p></div>
-          <div className={ui.card}><p className={ui.kicker}>{t("Checked in")}</p><p className="m-0 mt-1 font-serif text-[30px]">{checked ?? 0}</p><p className={`${ui.hint} m-0`}>{t("of {n} registered", { n: registered ?? 0 })}</p></div>
-          <div className={ui.card}><p className={ui.kicker}>{t("Talks today")}</p><p className="m-0 mt-1 font-serif text-[30px]">{talksToday.length}</p><p className={`${ui.hint} m-0`}>{t("{n} presented so far", { n: presented })}</p></div>
-          <div className={ui.card}><p className={ui.kicker}>{t("No-shows reported")}</p><p className="m-0 mt-1 font-serif text-[30px]">{reports.length}</p><p className={`${ui.hint} m-0`}>{t("final status after the event (H5)")}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("Now")}</p><p className="m-0 mt-1 font-serif text-[28px]">{now.toLocaleTimeString(INTL[locale], { hour: "2-digit", minute: "2-digit", timeZone: tz })}</p><p className={`${ui.hint} m-0`}>{block ? `${fmt(block.starts_at)}–${fmt(block.ends_at)} · ${block.title}` : t("between sessions")}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("Checked in")}</p><p className="m-0 mt-1 font-serif text-[28px]">{checked ?? 0}</p><p className={`${ui.hint} m-0`}>{t("of {n} registered", { n: registered ?? 0 })}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("Talks today")}</p><p className="m-0 mt-1 font-serif text-[28px]">{talksToday.length}</p><p className={`${ui.hint} m-0`}>{t("{n} presented so far", { n: presented })}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("No-shows reported")}</p><p className="m-0 mt-1 font-serif text-[28px]">{reports.length}</p><p className={`${ui.hint} m-0`}>{t("final status after the event (H5)")}</p></div>
         </div>
         <section>
           <h2 className={`${ui.h2} mb-3`}>{t("Rooms right now")}</h2>

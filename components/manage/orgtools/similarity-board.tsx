@@ -173,7 +173,7 @@ export function SimilarityBoard({ slug, rows, threshold, ignoreRefs, canEdit, pr
           {cur ? (
             <section className={ui.card}>
               <p className={ui.kicker}>{no4(cur.r.number)} · {t("report")}</p>
-              <h2 className="mt-1.5 text-[18px] font-semibold">{cur.r.title}</h2>
+              <h2 className="mt-1.5 text-[17px] font-semibold">{cur.r.title}</h2>
               {cur.v !== null ? (
                 <>
                   <p className="m-0 mt-1 font-mono text-[32px] font-semibold" style={{ color: bar(cur.v, cur.st) }}>{cur.v}%</p>

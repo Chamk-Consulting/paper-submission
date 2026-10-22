@@ -154,4 +154,5 @@ export const signup4_de: Record<string, string> = {
   "Registration {n}": "Registrierung {n}",
   "{n} drafts in progress": "{n} Entwürfe in Arbeit",
   "View drafts": "Entwürfe ansehen",
+  "{d}d {h}h": "{d} T {h} Std.",
 };

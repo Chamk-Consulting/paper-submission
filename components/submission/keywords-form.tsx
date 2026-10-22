@@ -31,7 +31,7 @@ export function KeywordsForm({ id, venueName, groups, initial, own }: { id: stri
           {picked.length === 0 ? <span className="px-1 text-[14px] text-[#4A5263]">{t("Nothing chosen yet.")}</span> : null}
           {picked.map((k, i) => (
             <span key={k} className="inline-flex h-9 items-center gap-2 rounded-full px-3 text-[15px]" style={{ background: i === 0 ? "#F2A93B" : "#FFFFFF", color: "#121826", border: i === 0 ? "none" : "1px solid #DADDE3" }}>
-              <span className="font-mono text-[10px] uppercase">{i === 0 ? t("Main") : i + 1}</span>
+              <span className="font-mono text-[11px] uppercase">{i === 0 ? t("Main") : i + 1}</span>
               <span className={i === 0 ? "font-semibold" : ""}>{t(k)}</span>
               {i > 0 ? <button type="button" onClick={() => makeMain(k)} aria-label={t("Make {k} the main keyword", { k: t(k) })} className="border-0 bg-transparent p-0 text-[14px]">★</button> : null}
               <button type="button" onClick={() => toggle(k)} aria-label={t("Remove {name}", { name: t(k) })} className="border-0 bg-transparent p-0 text-[14px] text-[#4A5263]">×</button>

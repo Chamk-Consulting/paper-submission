@@ -36,7 +36,7 @@ export default async function CookiePolicy() {
         <tbody>
           {rows.map((r) => (
             <tr key={r.name} className="border-t border-[#EEF0EC] align-top">
-              <td className="w-[30%] min-w-[210px] px-4 py-3 font-mono text-[12.5px] [overflow-wrap:anywhere]">{r.name}</td>
+              <td className="w-[30%] min-w-[210px] px-4 py-3 font-mono text-[12px] [overflow-wrap:anywhere]">{r.name}</td>
               <td className="px-4 py-3">{r.purpose}</td>
               <td className="px-4 py-3 text-[#4A5263]">{r.duration}</td>
               <td className="px-4 py-3 text-[#4A5263]">{r.who}</td>

@@ -75,9 +75,9 @@ export function LettersRelease({ slug, groups, undecided, undecidedByType, types
           <p className={ui.kicker}>{t("Released {d}", { d: shown.at ? new Date(shown.at).toLocaleString(t.intl, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "" })}</p>
           <h2 className={`${ui.h2} mt-1`}>{t("{n} decisions released", { n: shown.count.toLocaleString(t.intl) })}</h2>
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div><p className="m-0 text-[13px] text-[#4A5263]">{t("Emails delivered")}</p><p className="m-0 font-serif text-[26px]">{shown.delivered.toLocaleString(t.intl)}</p></div>
-            <div><p className="m-0 text-[13px] text-[#4A5263]">{t("Failed / bounced")}</p><p className="m-0 font-serif text-[26px]" style={{ color: shown.bounced ? "#B3261E" : "#121826" }}>{shown.bounced}</p></div>
-            <div><p className="m-0 text-[13px] text-[#4A5263]">{t("In Plenary inbox")}</p><p className="m-0 font-serif text-[26px]">{shown.inbox != null ? shown.inbox.toLocaleString(t.intl) : "100%"}</p></div>
+            <div><p className="m-0 text-[13px] text-[#4A5263]">{t("Emails delivered")}</p><p className="m-0 font-serif text-[28px]">{shown.delivered.toLocaleString(t.intl)}</p></div>
+            <div><p className="m-0 text-[13px] text-[#4A5263]">{t("Failed / bounced")}</p><p className="m-0 font-serif text-[28px]" style={{ color: shown.bounced ? "#B3261E" : "#121826" }}>{shown.bounced}</p></div>
+            <div><p className="m-0 text-[13px] text-[#4A5263]">{t("In Plenary inbox")}</p><p className="m-0 font-serif text-[28px]">{shown.inbox != null ? shown.inbox.toLocaleString(t.intl) : "100%"}</p></div>
           </div>
           {!emailOn ? <p className={`${ui.warn} mt-3`}>{t("Email sending isn’t configured, so letters went to Plenary inboxes only.")}</p> : null}
           <p className="m-0 mt-3 text-[13px] text-[#4A5263]">{t("Changing a decision now needs owner approval and sends a new letter explaining the change (F5). Final versions open for accepted papers.")}</p>

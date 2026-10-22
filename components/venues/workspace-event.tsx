@@ -1,7 +1,7 @@
 import { BadgeCheck, CalendarClock, CalendarPlus, CalendarRange, Gauge, Ticket, UserRound } from "lucide-react";
 import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
-import { CountdownCard, FollowButton } from "@/components/venues/venue-live";
+import { CountdownCard, DeadlineStrip, FollowButton } from "@/components/venues/venue-live";
 import { VenueCoverImage } from "@/components/venues/cover";
 import { FIELD_COLOR } from "@/lib/venues/types";
 import { fmtRange } from "@/lib/venues/time";
@@ -40,6 +40,8 @@ export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open
               <p className="m-0 mt-1 text-[17px] text-[#121826]">{v.name}</p>
               {tagline ? <p className="m-0 mt-0.5 text-[15px] italic text-[#4A5263]">{tagline}</p> : null}
               <p className="m-0 mt-1 text-[14px] text-[#4A5263]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t, v.kind === "journal"), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
+              {/* Below 1280 px the deadline is a one-line strip here instead of the tall card beside. */}
+              <div className="mt-3 xl:hidden"><DeadlineStrip dates={v.dates} generatedAt={generatedAt} /></div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link href={act.href} className={`${btn} ${act.label === "View event" ? "bg-[#0E1B3D] text-white" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>
                 {act.label === "Continue draft" && open ? <Link href={`/submit/${v.slug}`} className={ghost}>{t("New paper")}</Link> : null}
@@ -49,7 +51,7 @@ export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open
               </div>
             </div>
           </div>
-          <div className="flex-none xl:w-[380px]"><CountdownCard dates={v.dates} generatedAt={generatedAt} /></div>
+          <div className="hidden flex-none xl:block xl:w-[380px]"><CountdownCard dates={v.dates} generatedAt={generatedAt} /></div>
         </div>
       </div>
       <nav aria-label={t("On this page")} className="sticky top-[60px] z-10 mt-6 border-t border-[#DADDE3] bg-white">

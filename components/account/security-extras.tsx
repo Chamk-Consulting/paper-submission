@@ -19,7 +19,7 @@ const tagCls = "rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium trac
 const on = `${tagCls} bg-[#E1F3EA] text-[#14603F]`;
 const off = `${tagCls} bg-[#EEF0EC] text-[#4A5263]`;
 const row = "flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0EC] py-3";
-const codeInput = "box-border h-10 w-[150px] rounded-[4px] border border-[#B7BDC9] bg-white px-3 font-mono text-[18px] tracking-[0.25em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]";
+const codeInput = "box-border h-10 w-[150px] rounded-[4px] border border-[#B7BDC9] bg-white px-3 font-mono text-[17px] tracking-[0.25em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]";
 
 function Msg({ s }: { s: SecState | null | undefined }) {
   const t = useT();
@@ -34,7 +34,7 @@ export function SignInMethods({ email, plus, orcid }: { email: string; plus: Sec
   const t = useT();
   const verified = plus.factors.filter((f) => f.verified);
   const [setup, setSetup] = useState(false);
-  const soon = <span className={`${small} text-[#9AA3B5]!`} aria-disabled title={t("Coming soon")}>{t("Coming soon")}</span>;
+  const soon = <span className={`${small} text-[#6B7385]!`} aria-disabled title={t("Coming soon")}>{t("Coming soon")}</span>;
   return (
     <section className={sx.card}>
       <h2 className={sx.h2}>{t("Sign-in methods")}</h2>

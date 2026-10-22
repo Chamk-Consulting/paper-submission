@@ -50,10 +50,10 @@ export function Stepper({ name, label, hint, defaultValue, min, max, disabled, e
       <span className="min-w-0"><label htmlFor={`st-${name}`} className="block text-[15px] font-semibold">{label}</label>{hint ? <span className="block text-[13px] text-[#4A5263]">{hint}</span> : null}
         {error ? <span className="block text-[13px] text-[#B3261E]">{t(error)}</span> : null}</span>
       <span className="flex flex-none items-center gap-1.5">
-        <button type="button" aria-label={t("Less")} disabled={disabled || v <= min} onClick={() => setV((x) => clamp(x - 1))} className="size-9 rounded-[4px] border border-[#B7BDC9] bg-white text-[18px] disabled:opacity-40">−</button>
+        <button type="button" aria-label={t("Less")} disabled={disabled || v <= min} onClick={() => setV((x) => clamp(x - 1))} className="size-9 rounded-[4px] border border-[#B7BDC9] bg-white text-[17px] disabled:opacity-40">−</button>
         <input id={`st-${name}`} name={name} type="number" inputMode="numeric" min={min} max={max} value={v} disabled={disabled}
           onChange={(e) => setV(clamp(Number(e.target.value) || min))} className="h-9 w-14 rounded-[4px] border border-[#B7BDC9] bg-white text-center text-[15px] font-semibold [appearance:textfield]" />
-        <button type="button" aria-label={t("More")} disabled={disabled || v >= max} onClick={() => setV((x) => clamp(x + 1))} className="size-9 rounded-[4px] border border-[#B7BDC9] bg-white text-[18px] disabled:opacity-40">+</button>
+        <button type="button" aria-label={t("More")} disabled={disabled || v >= max} onClick={() => setV((x) => clamp(x + 1))} className="size-9 rounded-[4px] border border-[#B7BDC9] bg-white text-[17px] disabled:opacity-40">+</button>
       </span>
     </div>
   );
@@ -79,5 +79,5 @@ export function Rules({ rules, children }: { rules: [string, string][]; children
 
 export function LockTag() {
   const t = useT();
-  return <span title={t("Locks when submissions open (K3)")} className="ml-2 inline-flex items-center rounded-[3px] bg-[#EEF0EC] px-1.5 py-px align-middle font-mono text-[10px] font-medium uppercase tracking-[0.04em] text-[#4A5263]">{t("Locks at opening")}</span>;
+  return <span title={t("Locks when submissions open (K3)")} className="ml-2 inline-flex items-center rounded-[3px] bg-[#EEF0EC] px-1.5 py-px align-middle font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-[#4A5263]">{t("Locks at opening")}</span>;
 }

@@ -41,7 +41,7 @@ async function Inner() {
                 <li key={e.venueId} className="flex flex-wrap items-center justify-between gap-3 rounded-[8px] border border-[#DADDE3] bg-white px-5 py-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Link href={`/manage/${e.slug}`} className="text-[18px] font-semibold text-[#121826] no-underline hover:underline">{e.shortName ?? e.name}</Link>
+                      <Link href={`/manage/${e.slug}`} className="text-[17px] font-semibold text-[#121826] no-underline hover:underline">{e.shortName ?? e.name}</Link>
                       <span className={ui.tag} style={{ background: bg, color: fg }}>{t(label)}</span>
                     </div>
                     <div className="text-[14px] text-[#4A5263]">{e.name}</div>

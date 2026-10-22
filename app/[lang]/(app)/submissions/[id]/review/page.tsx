@@ -29,7 +29,7 @@ async function Inner({ params }: P) {
   const base = `/submissions/${id}`;
   const rows: [string, string, React.ReactNode][] = [
     [t("Venue & type"), "type", <span key="v"><strong>{venue.acr}</strong> · {t(sub.paperType)}{sub.track ? ` · ${t(sub.track)}` : ""}</span>],
-    [t("Title"), "details", <span key="t" className="font-serif text-[18px] leading-[1.3]">{sub.title}</span>],
+    [t("Title"), "details", <span key="t" className="font-serif text-[17px] leading-[1.3]">{sub.title}</span>],
     [t("Abstract"), "details", <span key="a" className="text-[#4A5263]">{(sub.abstract ?? "—").slice(0, 220)}{(sub.abstract?.length ?? 0) > 220 ? "…" : ""} <span className="font-mono text-[12px]">{t("{n} words", { n: words })}</span></span>],
     [t("Authors"), "authors", <ol key="au" className="m-0 list-none p-0">{authors.map((a) => <li key={a.personId}>{a.position}. {a.name}{a.corresponding ? <span className="text-[#4A5263]"> {t("(corresponding)")}</span> : null}{!a.hasAccount ? <span className="ml-1.5 font-mono text-[11px] text-[#7A4508]">{t("INVITE ON SUBMIT")}</span> : null}</li>)}</ol>],
     [t("Keywords"), "keywords", sub.keywords.length ? <span key="k">{sub.keywords.map((k, i) => <span key={k}>{i ? " · " : ""}{i === 0 ? <strong>{t(k)} {t("(main)")}</strong> : t(k)}</span>)}</span> : <span key="k0" className="text-[#B3261E]">{t("None yet")}</span>],
@@ -45,9 +45,9 @@ async function Inner({ params }: P) {
           <ul className="m-0 mt-2.5 flex list-none flex-col gap-1.5 p-0 text-[15px]">
             {missing.length ? missing.map((m) => <li key={m.key} className="text-[#B3261E]">× <Link href={`${base}/${m.key}`} className="text-[#B3261E] underline">{t(m.label)}</Link></li>) : (
               <>
-                <li><span className="text-[#18744F]">✓</span> {t("Required fields complete")}</li>
-                <li><span className="text-[#18744F]">✓</span> {t("PDF meets the template")}</li>
-                <li><span className="text-[#18744F]">✓</span> {t("Conflicts reviewed")}</li>
+                <li><span className="text-[#14603F]">✓</span> {t("Required fields complete")}</li>
+                <li><span className="text-[#14603F]">✓</span> {t("PDF meets the template")}</li>
+                <li><span className="text-[#14603F]">✓</span> {t("Conflicts reviewed")}</li>
               </>
             )}
             {invites ? <li className="text-[#7A4508]">! {t(invites === 1 ? "{n} co-author will be invited by email" : "{n} co-authors will be invited by email", { n: invites })}</li> : null}

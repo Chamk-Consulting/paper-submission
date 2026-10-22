@@ -57,7 +57,7 @@ async function Inner({ params }: P) {
               <tbody>
                 {((camps ?? []) as Camp[]).length === 0 ? <tr><td colSpan={6} className={`${ui.td} text-center text-[#4A5263]`}>{t("Nothing sent yet.")}</td></tr> : ((camps ?? []) as Camp[]).map((c) => (
                   <tr key={c.id}>
-                    <td className={ui.td}>{c.subject}{c.status === "scheduled" ? <span className={`${ui.tag} ml-2 bg-[#FFF6E6] text-[#7A5410]`}>{t("SCHEDULED")}</span> : null}{c.status === "sending" ? <span className={`${ui.tag} ml-2 bg-[#E6EDFC] text-[#1F47A8]`}>{t("SENDING")}</span> : null}{c.status === "failed" ? <><span className={`${ui.tag} ml-2 bg-[#FDECEA] text-[#B3261E]`}>{t("NOT SENT")}</span>{c.send_error ? <span className="mt-0.5 block text-[12px] text-[#B3261E]">{t(c.send_error)}</span> : null}</> : null}</td>
+                    <td className={ui.td}>{c.subject}{c.status === "scheduled" ? <span className={`${ui.tag} ml-2 bg-[#FFF6E6] text-[#7A4508]`}>{t("SCHEDULED")}</span> : null}{c.status === "sending" ? <span className={`${ui.tag} ml-2 bg-[#E6EDFC] text-[#1F47A8]`}>{t("SENDING")}</span> : null}{c.status === "failed" ? <><span className={`${ui.tag} ml-2 bg-[#FDECEA] text-[#B3261E]`}>{t("NOT SENT")}</span>{c.send_error ? <span className="mt-0.5 block text-[12px] text-[#B3261E]">{t(c.send_error)}</span> : null}</> : null}</td>
                     <td className={`${ui.td} text-[13px]`}>{[...c.roles, ...c.conditions].map((x) => t(AUDIENCE_LABEL[x] ?? x)).join(" · ")}</td>
                     <td className={`${ui.td} font-mono text-[13px]`}>{c.recipients}</td>
                     <td className={`${ui.td} font-mono text-[13px]`}>{c.status === "sent" ? c.delivered : "—"}</td>

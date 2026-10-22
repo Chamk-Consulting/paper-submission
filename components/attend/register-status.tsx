@@ -30,7 +30,7 @@ export function RegisterStatus({ slug, reg, justDone, cardReady, cardNote }: { s
       <div className="flex items-start gap-3.5">
         <span aria-hidden className={`flex size-10 flex-none items-center justify-center rounded-full font-bold ${paid ? "bg-[#E1F3EA] text-[#14603F]" : "bg-[#FBEFDD] text-[#7A4508]"}`}>{paid ? "✓" : "…"}</span>
         <div className="min-w-0">
-          <h2 className="m-0 font-serif text-[30px] font-normal leading-[1.15]">{paid ? (justDone ? t("You're registered") : t("Your registration")) : t("Registration reserved — payment pending")}</h2>
+          <h2 className="m-0 font-serif text-[28px] font-normal leading-[1.15]">{paid ? (justDone ? t("You're registered") : t("Your registration")) : t("Registration reserved — payment pending")}</h2>
           <p className="mb-0 mt-1 text-[#4A5263]">
             {t("Registration")} <strong className="font-mono text-[#121826]">{reg.number}</strong> · {t(reg.reg_type)} · {t("covers {list}", { list: reg.papers.length ? reg.papers.map(no).join(", ") : t("no papers") })}
           </p>

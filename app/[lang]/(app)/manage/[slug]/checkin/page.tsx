@@ -52,10 +52,10 @@ async function Inner({ params, searchParams }: P) {
       </>}>
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className={ui.card}><p className={ui.kicker}>{t("Registered")}</p><p className="m-0 mt-1 font-serif text-[30px]">{registered ?? 0}</p></div>
-          <div className={ui.card}><p className={ui.kicker}>{t("Checked in")}</p><p className="m-0 mt-1 font-serif text-[30px]">{checked ?? 0}</p></div>
-          <div className={ui.card}><p className={ui.kicker}>{t("Not paid yet")}</p><p className="m-0 mt-1 font-serif text-[30px]">{unpaid ?? 0}</p></div>
-          <div className={ui.card}><p className={ui.kicker}>{t("Still to arrive")}</p><p className="m-0 mt-1 font-serif text-[30px]">{Math.max(0, (registered ?? 0) - (checked ?? 0))}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("Registered")}</p><p className="m-0 mt-1 font-serif text-[28px]">{registered ?? 0}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("Checked in")}</p><p className="m-0 mt-1 font-serif text-[28px]">{checked ?? 0}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("Not paid yet")}</p><p className="m-0 mt-1 font-serif text-[28px]">{unpaid ?? 0}</p></div>
+          <div className={ui.card}><p className={ui.kicker}>{t("Still to arrive")}</p><p className="m-0 mt-1 font-serif text-[28px]">{Math.max(0, (registered ?? 0) - (checked ?? 0))}</p></div>
         </div>
         <div className="grid items-start gap-5 lg:grid-cols-2">
           <DeskScanner slug={slug} tz={ctx.venue.timezone || "UTC"} initialChecked={checked ?? 0} registered={registered ?? 0} />

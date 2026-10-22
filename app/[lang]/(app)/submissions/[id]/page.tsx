@@ -104,13 +104,13 @@ async function Inner({ params }: P) {
           <div className="min-w-0">
             {sub.isTest ? <TestBanner venueSlug={venue.slug} passed={!!sub.testSubmittedAt} /> : null}
             <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("My workspace")}</Link> / {venue.acr} / {no}</p>
-            <h1 className="mt-2 font-serif text-[26px] font-normal leading-[1.2] sm:text-[32px]">{sub.title}</h1>
+            <h1 className="mt-2 font-serif text-[28px] font-normal leading-[1.2] sm:text-[32px]">{sub.title}</h1>
             <p className="mt-1 text-[15px] text-[#4A5263]">{no} · {venue.acr} · {t(sub.paperType)}{me?.corresponding ? ` · ${t("you are the corresponding author")}` : ""}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {decision
               ? <Link href={`${base}/decision`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Decision & reviews")}</Link>
-              : <span title={t("Available after the decision")} className="inline-flex h-11 items-center rounded-[4px] border border-[#DADDE3] bg-white px-4 text-[15px] text-[#9AA3B5]">{t("Decision & reviews")}</span>}
+              : <span title={t("Available after the decision")} className="inline-flex h-11 items-center rounded-[4px] border border-[#DADDE3] bg-white px-4 text-[15px] text-[#6B7385]">{t("Decision & reviews")}</span>}
             {viewerFiles.length ? <OpenViewer id={id} files={viewerFiles} label={t("Open paper")} className="h-11 rounded-[4px] bg-[#0E1B3D] px-4 text-[15px] font-semibold text-white" /> : null}
           </div>
         </div>

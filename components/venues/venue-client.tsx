@@ -57,7 +57,7 @@ export function Gallery({ photos }: { photos: GalleryPhoto[] }) {
           <div className="flex flex-col">
             <div className="flex items-center justify-between gap-3 px-4 py-2.5">
               <span className="font-mono text-[12px] text-[#B9C3DA]">{(open ?? 0) + 1} / {photos.length}</span>
-              <button type="button" onClick={close} aria-label={t("Close")} className="size-9 rounded-[4px] border border-[#2A3C6E] bg-transparent text-[18px] text-[#F5F6F3]">×</button>
+              <button type="button" onClick={close} aria-label={t("Close")} className="size-9 rounded-[4px] border border-[#2A3C6E] bg-transparent text-[17px] text-[#F5F6F3]">×</button>
             </div>
             <div className="relative flex items-center justify-center bg-black">
               {/* eslint-disable-next-line @next/next/no-img-element -- full-size organizer photo */}

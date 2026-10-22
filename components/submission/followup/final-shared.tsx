@@ -46,7 +46,7 @@ export async function FinalChecklist({ f, current }: { f: FF; current: number })
       <ul className="m-0 mt-2.5 flex list-none flex-col gap-1.5 p-0 text-[15px]">
         {items.map((label, i) => {
           const ok = f.done[KEYS[i]];
-          return <li key={label} className="flex gap-2"><span aria-hidden className={ok ? "text-[#18744F]" : i === current ? "text-[#F2A93B]" : "text-[#B7BDC9]"}>{ok ? "✓" : i === current ? "●" : "○"}</span><span className={ok ? "" : i === current ? "font-semibold" : "text-[#4A5263]"}>{label}</span></li>;
+          return <li key={label} className="flex gap-2"><span aria-hidden className={ok ? "text-[#14603F]" : i === current ? "text-[#F2A93B]" : "text-[#6B7385]"}>{ok ? "✓" : i === current ? "●" : "○"}</span><span className={ok ? "" : i === current ? "font-semibold" : "text-[#4A5263]"}>{label}</span></li>;
         })}
       </ul>
     </section>

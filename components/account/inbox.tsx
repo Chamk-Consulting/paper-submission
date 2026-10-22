@@ -130,7 +130,7 @@ export function ThreadView({ row, messages }: { row: InboxRow; messages: ThreadM
             <button type="button" disabled={pending} onClick={() => run(() => archiveThread(row.thread_id, !row.archived), () => { router.push(`/inbox${qs}`); router.refresh(); })} className="border-0 bg-transparent p-0 text-[13px] text-[#2F5FD0] underline disabled:opacity-60">{row.archived ? t("Move to inbox") : t("Archive")}</button>
           </span>
         </div>
-        <h2 id="thread-subject" className="mb-0 mt-2 font-serif text-[26px] font-normal leading-tight">{row.subject}</h2>
+        <h2 id="thread-subject" className="mb-0 mt-2 font-serif text-[28px] font-normal leading-tight">{row.subject}</h2>
         {last ? <p className="mb-0 mt-1 text-[13px] text-[#4A5263]">{t("From")} <strong className="text-[#121826]">{other}</strong> · <span suppressHydrationWarning>{when.full(last.created_at)}</span></p> : null}
         {err ? <p role="alert" className="mb-0 mt-2 text-[13px] text-[#B3261E]">{t(err)}</p> : null}
       </div>

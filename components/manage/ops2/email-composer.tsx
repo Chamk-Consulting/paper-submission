@@ -66,7 +66,7 @@ function Composer({ slug, initialCount, onNew }: { slug: string; initialCount: n
         <p className={`${ui.kicker} mt-4`}>{t("Only if")}</p>
         <div className="mt-2 flex flex-wrap gap-2">{COND_CHIPS.map(([v, l]) => <Chip key={v} name="conds" value={v} label={t(l)} on={conds.includes(v)} toggle={() => toggle(conds, setConds, v)} />)}</div>
         <p className="m-0 mt-4 text-[15px]" aria-live="polite">
-          <strong className="font-serif text-[24px]">{roles.length ? t("{n} recipients", { n: count }) : "—"}</strong>{" "}
+          <strong className="font-serif text-[22px]">{roles.length ? t("{n} recipients", { n: count }) : "—"}</strong>{" "}
           <span className={ui.hint}>{counting ? t("counting…") : roles.length ? t("deduplicated — people with several roles get it once") : t("choose at least one role")}</span>
         </p>
       </section>

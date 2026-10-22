@@ -14,8 +14,8 @@ export type RoomNow = {
 };
 
 const roomStatus: Record<string, [string, string]> = {
-  on_time: ["ON TIME", "bg-[#E1F3EA] text-[#14603F]"], scheduled: ["ON TIME", "bg-[#E1F3EA] text-[#14603F]"], late: ["{n} MIN LATE", "bg-[#FFF6E6] text-[#7A5410]"],
-  break: ["BREAK", "bg-[#EEF0EC] text-[#4A5263]"], open: ["OPEN", "bg-[#E8EEFB] text-[#1F3F8F]"], done: ["DONE", "bg-[#EEF0EC] text-[#4A5263]"],
+  on_time: ["ON TIME", "bg-[#E1F3EA] text-[#14603F]"], scheduled: ["ON TIME", "bg-[#E1F3EA] text-[#14603F]"], late: ["{n} MIN LATE", "bg-[#FFF6E6] text-[#7A4508]"],
+  break: ["BREAK", "bg-[#EEF0EC] text-[#4A5263]"], open: ["OPEN", "bg-[#E8EEFB] text-[#1F47A8]"], done: ["DONE", "bg-[#EEF0EC] text-[#4A5263]"],
 };
 
 function StatusForm({ slug, r, onDone }: { slug: string; r: RoomNow; onDone: () => void }) {
@@ -57,7 +57,7 @@ export function RoomCards({ slug, rooms, canEdit }: { slug: string; rooms: RoomN
                 <p className="m-0 font-mono text-[11px] text-[#4A5263]">{r.next ? t("Next") : ""} {r.range}</p>
                 {r.nowTalk ? <p className="m-0 mt-1 text-[12px]"><span className="text-[#4A5263]">{t("Now:")}</span> {r.nowTalk}</p> : null}
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#EEF0EC]"><div className="h-full bg-[#0E1B3D]" style={{ width: `${Math.round(r.progress * 100)}%` }} /></div>
-                {r.note ? <p className="m-0 mt-1.5 text-[12px] text-[#7A5410]">{r.note}</p> : null}
+                {r.note ? <p className="m-0 mt-1.5 text-[12px] text-[#7A4508]">{r.note}</p> : null}
                 {canEdit ? (open === r.room ? <StatusForm slug={slug} r={r} onDone={() => setOpen(null)} /> : <button onClick={() => setOpen(r.room)} className="mt-2 cursor-pointer border-0 bg-transparent p-0 text-[12px] text-[#2F5FD0] underline">{t("Change status")}</button>) : null}
               </>
             ) : <p className="m-0 mt-1 text-[13px] text-[#4A5263]">{t("Nothing scheduled")}</p>}
@@ -104,7 +104,7 @@ export function CheckInDesk({ slug, q, rows }: { slug: string; q: string; rows: 
               <p className="m-0 font-medium">{r.full_name ?? "—"} <span className="font-mono text-[11px] text-[#4A5263]">{r.number}</span></p>
               <p className="m-0 text-[12px] text-[#4A5263]">{[r.reg_type, r.affiliation, r.email].filter(Boolean).join(" · ")}{r.paid ? "" : ` · ${t("UNPAID")}`}</p>
               {r.papers.length ? <p className="m-0 text-[12px]">{t("Papers")}: <span className="font-mono">{r.papers.join(", ")}</span></p> : null}
-              {r.presents ? <p className="m-0 text-[12px] text-[#7A5410]">{t("Presents")} {r.presents}</p> : null}
+              {r.presents ? <p className="m-0 text-[12px] text-[#7A4508]">{t("Presents")} {r.presents}</p> : null}
             </div>
             {r.checked_in_at
               ? <Act action={checkIn} fields={{ slug, id: r.id }} className={`${ui.ghost} h-9! text-[13px]!`}>{t("Checked in ✓ · reprint badge")}</Act>

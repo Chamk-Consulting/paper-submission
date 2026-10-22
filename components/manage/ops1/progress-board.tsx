@@ -131,7 +131,7 @@ export function ProgressBoard({ slug, rows, min, ext, decisionsAt, template }: {
                 {e.message ? <p className="m-0 mt-1 text-[12px] italic text-[#4A5263]">“{e.message}”</p> : null}
                 {e.status === "pending" ? (
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <button type="button" disabled={pending || tooLate} onClick={() => decide(e, true, null)} className={`h-8 rounded-[4px] px-3 text-[12px] font-semibold ${tooLate ? "bg-[#EEF0EC] text-[#6B7280]" : "bg-[#18744F] text-white"}`}>{tooLate && decisionsAt ? t("Can’t — past {d}", { d: day(decisionsAt) }) : t("Approve")}</button>
+                    <button type="button" disabled={pending || tooLate} onClick={() => decide(e, true, null)} className={`h-8 rounded-[4px] px-3 text-[12px] font-semibold ${tooLate ? "bg-[#EEF0EC] text-[#4A5263]" : "bg-[#18744F] text-white"}`}>{tooLate && decisionsAt ? t("Can’t — past {d}", { d: day(decisionsAt) }) : t("Approve")}</button>
                     {offer ? <button type="button" disabled={pending} onClick={() => decide(e, false, offer)} className="h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[12px] font-semibold">{t("Offer {d}", { d: day(offer) })}</button> : null}
                     <button type="button" disabled={pending} onClick={() => decide(e, false, null)} className="h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[12px] font-semibold text-[#8C1D18]">{t("Refuse")}</button>
                   </div>

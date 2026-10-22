@@ -72,7 +72,7 @@ function Brand() {
   const s = useSummary();
   return (
     <div className="min-w-0">
-      <div className="font-serif text-[24px] leading-none text-[#F5F6F3]">Plenary</div>
+      <div className="font-serif text-[22px] leading-none text-[#F5F6F3]">Plenary</div>
       <p className="mb-0 mt-2 max-w-[34ch] text-[13px] leading-[1.55] text-[#B9C3DA]">{t("Conference submission & review, built for researchers.")}</p>
       {s?.signedIn ? (
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px]">

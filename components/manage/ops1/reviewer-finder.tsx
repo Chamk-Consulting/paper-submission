@@ -113,7 +113,7 @@ export function ReviewerFinder({ slug, submission, invitations, suggestions, min
                     <td className={`${ui.td} text-[13px] text-[#4A5263]`}>{t("{n}% on time", { n: x.onTime })}</td>
                     <td className={`${ui.td} text-right`}>
                       <button type="button" disabled={!en || pending} onClick={() => (coi ? (setOvr(x), setWhy(""), setOvrErr(null)) : invite(x))}
-                        className={`h-[30px] rounded-[4px] px-3 text-[12px] font-semibold ${!en ? "bg-[#EEF0EC] text-[#6B7280]" : coi ? "border border-[#F1D29A] bg-[#FFF6E6] text-[#7A4508]" : "bg-[#F2A93B] text-[#0E1B3D]"}`}>{cta}</button>
+                        className={`h-[30px] rounded-[4px] px-3 text-[12px] font-semibold ${!en ? "bg-[#EEF0EC] text-[#6B7385]" : coi ? "border border-[#F1D29A] bg-[#FFF6E6] text-[#7A4508]" : "bg-[#F2A93B] text-[#0E1B3D]"}`}>{cta}</button>
                     </td>
                   </tr>
                 );

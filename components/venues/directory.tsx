@@ -399,8 +399,8 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
     <article className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white p-4 @2xl:flex-row @2xl:items-start">
       <Link href={href} aria-label={t("Open {venue}", { venue: v.acr })} className={`relative block w-full flex-none overflow-hidden rounded-[6px] bg-[#EEF0EC] no-underline @2xl:aspect-video @2xl:w-[200px] ${ws ? "aspect-[3/1]" : "aspect-video"}`}>
         <VenueCoverImage cover={v.cover} field={v.field} alt={t("Cover image of {venue}", { venue: v.acr })} />
-        <span className="absolute left-2 top-2 rounded-[2px] bg-white/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.04em] text-[#121826]">{v.society ?? v.acr.slice(0, 10)}</span>
-        {hasRealCover(v.cover) && v.cover?.credit ? <span className="absolute bottom-1.5 right-2 max-w-[90%] truncate text-[10px] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,.6)]">{v.cover.credit}</span> : null}
+        <span className="absolute left-2 top-2 rounded-[2px] bg-white/90 px-1.5 py-0.5 font-mono text-[11px] font-semibold tracking-[0.04em] text-[#121826]">{v.society ?? v.acr.slice(0, 10)}</span>
+        {hasRealCover(v.cover) && v.cover?.credit ? <span className="absolute bottom-1.5 right-2 max-w-[90%] truncate text-[11px] text-white/90 [text-shadow:0_1px_2px_rgba(0,0,0,.6)]">{v.cover.credit}</span> : null}
       </Link>
       <div className="min-w-0 flex-auto">
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1.5">
@@ -415,7 +415,7 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
         {v.accepting ? <div className="mt-2 text-[13px] text-[#4A5263]">{t("Accepting:")} {t(v.accepting)}</div> : null}
         {ws && (roles.length || mine?.papers.length) ? (
           <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[#EEF0EC] pt-2.5 text-[12px]">
-            <span className="me-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("You")}</span>
+            <span className="me-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("You")}</span>
             {roles.map((r) => <span key={r} className="rounded-full bg-[#0E1B3D] px-2 py-0.5 font-semibold text-white">{t(r)}</span>)}
             {mine?.papers.slice(0, 3).map((p) => (
               <Link key={p.id} href={p.href} title={p.title} className="inline-flex max-w-[220px] items-center gap-1 rounded-full px-2 py-0.5 font-semibold no-underline" style={{ background: STAGE_TONE[p.stage][0], color: STAGE_TONE[p.stage][1] }}>

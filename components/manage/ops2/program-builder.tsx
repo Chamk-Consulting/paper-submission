@@ -165,19 +165,19 @@ export function ProgramBuilder({ slug, tz, days, rooms, sessions, pool, clashes,
                                           <span className="font-mono text-[11px]">{x.number ? paperNo(x.number) : ""}</span> {x.title}
                                           <span className="block text-[11px] text-[#4A5263]">{x.presenter ?? ""}</span>
                                           {x.presenter_id && clashPeople.has(x.presenter_id) && clashSessions.has(s.code) ? <span className={`${ui.tag} bg-[#FDECEA] text-[#8C1D18]`}>{t("CLASH")}</span> : null}
-                                          {x.presenter_id && (x.presenter_id === s.chair_id || x.presenter_id === s.cochair_id) ? <span className={`${ui.tag} ml-1 bg-[#FFF6E6] text-[#7A5410]`}>{t("CHAIR PRESENTS")}</span> : null}
+                                          {x.presenter_id && (x.presenter_id === s.chair_id || x.presenter_id === s.cochair_id) ? <span className={`${ui.tag} ml-1 bg-[#FFF6E6] text-[#7A4508]`}>{t("CHAIR PRESENTS")}</span> : null}
                                         </span>
                                         {canEdit ? <Act action={unplaceTalk} fields={{ slug, talk: x.id }} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#4A5263]">×</Act> : null}
                                       </li>
                                     ))}
                                     {placeable ? (
                                       <li><Act action={placeTalk} fields={{ slug, session: s.id, submission: cur.submission_id, presenter: cur.presenter_id ?? "" }}
-                                        className="w-full cursor-pointer rounded-[4px] border border-dashed border-[#F2A93B] bg-[#FFF6E6] px-2 py-1.5 text-left text-[12px] font-medium text-[#7A5410]">
+                                        className="w-full cursor-pointer rounded-[4px] border border-dashed border-[#F2A93B] bg-[#FFF6E6] px-2 py-1.5 text-left text-[12px] font-medium text-[#7A4508]">
                                         + {t("Place {id} here", { id: paperNo(cur.number) })}
                                       </Act></li>
                                     ) : null}
                                     {Array.from({ length: Math.max(0, perSession - s.talks.length - (placeable ? 1 : 0)) }, (_, i) => (
-                                      <li key={`e${i}`} className="rounded-[4px] border border-dashed border-[#DADDE3] px-2 py-1.5 text-[11px] text-[#B7BDC9]">{t("Empty")}</li>
+                                      <li key={`e${i}`} className="rounded-[4px] border border-dashed border-[#DADDE3] px-2 py-1.5 text-[11px] text-[#6B7385]">{t("Empty")}</li>
                                     ))}
                                   </ul>
                                 ) : null}

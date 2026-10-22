@@ -154,4 +154,5 @@ export const signup4_fr: Record<string, string> = {
   "Registration {n}": "Inscription {n}",
   "{n} drafts in progress": "{n} brouillons en cours",
   "View drafts": "Voir les brouillons",
+  "{d}d {h}h": "{d} j {h} h",
 };

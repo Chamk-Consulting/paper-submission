@@ -208,7 +208,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
                     pasted.split("").forEach((ch, k) => { if (k < n) d[k] = ch; });
                     update(d, Math.min(pasted.length, n - 1), pasted.length >= EMAIL_CODE_MIN);
                   }}
-                  className={`box-border h-14 w-full rounded-[6px] text-center font-mono ${len > 6 ? "text-[20px]" : "text-[24px]"} font-medium text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]`}
+                  className={`box-border h-14 w-full rounded-[6px] text-center font-mono ${len > 6 ? "text-[20px]" : "text-[22px]"} font-medium text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]`}
                   style={{ border, background: bg }}
                 />
               );
@@ -256,7 +256,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
           <span className={`font-mono text-[13px] ${ui.muted}`} aria-label={t("You can ask for a new code in {n} seconds", { n: left })}>{t("Resend in {time}", { time: mmss(left) })}</span>
         ) : null}
         {limit && !locked ? <span className={`text-[13px] ${ui.muted}`}>{t("Resend limit reached")} · <Link href="/account-help" className={ui.link}>{t("Recover your account")}</Link></span> : null}
-        <span aria-hidden className="text-[#B7BDC9]">·</span>
+        <span aria-hidden className="text-[#6B7385]">·</span>
         <Link href={changeHref} className={ui.link}>{t(copy.change)}</Link>
       </div>
 

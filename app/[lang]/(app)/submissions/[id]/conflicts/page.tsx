@@ -37,7 +37,7 @@ async function Inner({ params }: P) {
       <>
         <section className={asideCard}>
           <p className={kicker}>{t("Conflicts on this paper")}</p>
-          <div className="mt-2 font-serif text-[30px] leading-none">{total}</div>
+          <div className="mt-2 font-serif text-[28px] leading-none">{total}</div>
           <p className="mb-0 mt-1.5 text-[14px] text-[#4A5263]">{t("{auto} found automatically · {own} added by you", { auto: auto.length, own: Object.keys(initial).length })}</p>
         </section>
         <section className={asideCard}>

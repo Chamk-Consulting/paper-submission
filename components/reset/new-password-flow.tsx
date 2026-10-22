@@ -52,7 +52,7 @@ export function NewPasswordFlow({ email, acceptedAt }: { email: string; accepted
   if (done) {
     return (
       <SplitLayout showAside={false} aside={aside}>
-        <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">{t("Password updated")}</p>
+        <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#14603F]">{t("Password updated")}</p>
         <h1 className={`mt-1.5 ${ui.h1}`}>{t("You're all set")}</h1>
         <p className={`mt-2.5 ${ui.muted}`}>
           {t("Your new password works now.")}{" "}

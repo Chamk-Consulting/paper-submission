@@ -16,7 +16,7 @@ export function AnnotationsCard({ items }: { items: { assignmentId: string; n: n
       <ul className="m-0 mt-2.5 flex list-none flex-col gap-2 p-0 text-[14px]">
         {items.map((a) => (
           <li key={a.assignmentId} className="flex items-center gap-2">
-            <span aria-hidden className="rounded-[3px] bg-[#E6EDFC] px-1.5 py-px font-mono text-[10px] text-[#1F47A8]">PDF</span>
+            <span aria-hidden className="rounded-[3px] bg-[#E6EDFC] px-1.5 py-px font-mono text-[11px] text-[#1F47A8]">PDF</span>
             {a.url ? <a href={a.url} target="_blank" rel="noreferrer" className="text-[#2F5FD0]">{t("Reviewer {n}", { n: a.n ?? "?" })}</a> : <span>{t("Reviewer {n}", { n: a.n ?? "?" })}</span>}
             {a.reviewer ? <span className="text-[13px] text-[#4A5263]">· {a.reviewer}</span> : null}
           </li>

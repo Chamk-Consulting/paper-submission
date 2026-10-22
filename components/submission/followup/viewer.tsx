@@ -128,7 +128,7 @@ function Pane({ submissionId, files, initialTab, onClose, idx, setIdx, panel, se
   }, [onClose, pages]);
 
   const zi = ZOOMS.indexOf(zoom);
-  const barBtn = "flex size-9 items-center justify-center rounded-[4px] text-[18px] text-[#F5F6F3] hover:bg-white/10 disabled:opacity-40";
+  const barBtn = "flex size-9 items-center justify-center rounded-[4px] text-[17px] text-[#F5F6F3] hover:bg-white/10 disabled:opacity-40";
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0E1B3D]/70 sm:p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label={t("Document viewer")} className="flex min-h-0 flex-auto flex-col overflow-hidden bg-white outline-none sm:rounded-[8px]">
@@ -137,7 +137,7 @@ function Pane({ submissionId, files, initialTab, onClose, idx, setIdx, panel, se
           <div role="tablist" aria-label={t("Files")} className="flex min-w-0 flex-auto gap-1 overflow-x-auto">
             {files.map((f, i) => (
               <button key={f.id} type="button" role="tab" aria-selected={i === idx} onClick={() => setIdx(i)} className={`flex h-9 max-w-[260px] flex-none items-center gap-2 rounded-[4px] px-2.5 text-[14px] ${i === idx ? "bg-white/15" : "hover:bg-white/10"}`}>
-                <span className="rounded-[3px] bg-[#F2A93B] px-1 font-mono text-[10px] font-semibold text-[#0E1B3D]">{ext(f.name)}</span><span className="truncate">{f.name}</span>
+                <span className="rounded-[3px] bg-[#F2A93B] px-1 font-mono text-[11px] font-semibold text-[#0E1B3D]">{ext(f.name)}</span><span className="truncate">{f.name}</span>
               </button>
             ))}
           </div>

@@ -42,7 +42,7 @@ async function Inner({ params }: P) {
         <div className="flex flex-col gap-4">
           <section className={ui.card}>
             <p className="m-0 flex flex-wrap gap-2 font-mono text-[12px] text-[#4A5263]"><span className="font-semibold text-[#121826]">{paperId(paper.number)}</span>{[paper.topic, ...paper.keywords.slice(0, 2)].filter(Boolean).join(" · ").toUpperCase()}</p>
-            <h2 className="m-0 mt-1.5 font-serif text-[24px] font-normal leading-[1.25]">{paper.title}</h2>
+            <h2 className="m-0 mt-1.5 font-serif text-[22px] font-normal leading-[1.25]">{paper.title}</h2>
             <p className="m-0 mt-2 text-[13px] text-[#4A5263]">
               {t("Authors: {n} (hidden from reviewers, shown to you as AE)", { n: authors.count })}
               {authors.institutions.length ? ` · ${authors.institutions.slice(0, 3).join(", ")}` : ""}{authors.countries.length ? `, ${authors.countries.join(", ")}` : ""}

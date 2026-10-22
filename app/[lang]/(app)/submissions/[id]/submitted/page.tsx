@@ -38,10 +38,10 @@ async function Inner({ params }: P) {
         <TestBanner venueSlug={venue.slug} passed />
         <section className={`${card} border-t-4 border-t-[#18744F]`}>
           <p className="m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-[#14603F]">{t("Test passed")} · {new Date(sub.testSubmittedAt!).toLocaleString(t.intl, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" })} UTC</p>
-          <h2 className="mt-3 font-serif text-[24px] font-normal leading-[1.25]">{sub.title}</h2>
+          <h2 className="mt-3 font-serif text-[22px] font-normal leading-[1.25]">{sub.title}</h2>
           <p className="mt-1.5 text-[15px] text-[#4A5263]">{t("Every check a real author meets passed. No paper ID was taken and nobody was emailed.")}</p>
           <ul className="m-0 mt-4 grid list-none gap-1.5 p-0 sm:grid-cols-2">
-            {checked.map((c) => <li key={c} className="flex items-center gap-2 text-[15px]"><span aria-hidden className="text-[#18744F]">✓</span>{c}</li>)}
+            {checked.map((c) => <li key={c} className="flex items-center gap-2 text-[15px]"><span aria-hidden className="text-[#14603F]">✓</span>{c}</li>)}
           </ul>
           <div className="mt-5 flex flex-wrap items-start gap-2.5">
             <Link href={`/manage/${venue.slug}/setup/go-live`} className={primaryBtn}>{t("Back to go-live review")}</Link>
@@ -92,7 +92,7 @@ async function Inner({ params }: P) {
       <section className={`${card} border-t-4 border-t-[#18744F]`}>
         <p className="m-0 font-mono text-[12px] uppercase tracking-[0.06em] text-[#14603F]">{t("Submitted")} · {sub.submittedAt ? `${new Date(sub.submittedAt).toLocaleString(t.intl, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" })} UTC` : ""}</p>
         <div className="mt-3 flex flex-wrap items-baseline gap-3"><span className="font-mono text-[40px] font-medium leading-none">{no}</span><span className="text-[15px] text-[#4A5263]">{t("Paper ID — quote it in any message to the organisers")}</span></div>
-        <h2 className="mt-4 font-serif text-[24px] font-normal leading-[1.25]">{sub.title}</h2>
+        <h2 className="mt-4 font-serif text-[22px] font-normal leading-[1.25]">{sub.title}</h2>
         <p className="mt-1.5 text-[15px] text-[#4A5263]">{venue.acr} · {t(sub.paperType)} · {t(authors.length === 1 ? "{n} author" : "{n} authors", { n: authors.length })}</p>
         <p className="mt-4 rounded-[6px] border border-[#B9E0CB] bg-[#F3FAF6] px-3.5 py-3 text-[15px]">
           {/* TODO(email): receipts are recorded; emails go out once the Send Email hook is set up. */}

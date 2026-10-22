@@ -104,7 +104,7 @@ export function ProfileForm({
                     onChange={(e) => setScripts(scripts.map((s, j) => (j === i ? { ...s, v: e.target.value } : s)))}
                     className={`${ui.input} min-w-0 flex-auto text-[17px]`} style={{ textAlign: meta.dir === "rtl" ? "right" : "left" }} />
                   <button type="button" onClick={() => setScripts(scripts.filter((_, j) => j !== i))} aria-label={t("Remove {script} name", { script: t(meta.name) })}
-                    className="h-11 flex-[0_0_44px] rounded-[4px] border border-[#DADDE3] bg-white text-[18px] text-[#4A5263]">×</button>
+                    className="h-11 flex-[0_0_44px] rounded-[4px] border border-[#DADDE3] bg-white text-[17px] text-[#4A5263]">×</button>
                 </div>
               );
             })}

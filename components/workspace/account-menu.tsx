@@ -29,7 +29,7 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
         className="flex h-10 items-center gap-2 rounded-full border border-[#2A3C6E] bg-transparent py-0 pl-1 pr-2.5 text-[14px] text-[#F5F6F3]">
         <span className="flex size-[30px] items-center justify-center rounded-full bg-[#E6EDFC] text-[13px] font-semibold text-[#1F47A8]">{initials}</span>
         <span className="hidden max-w-[180px] truncate sm:inline">{name}</span>
-        <span aria-hidden className="text-[10px]">▾</span>
+        <span aria-hidden className="text-[11px]">▾</span>
       </button>
       {open ? (
         <div role="menu" className="absolute right-0 top-[50px] z-20 w-[260px] overflow-hidden rounded-[8px] border border-[#DADDE3] bg-white text-[#121826] shadow-[0_12px_32px_rgba(18,24,38,.16)]">

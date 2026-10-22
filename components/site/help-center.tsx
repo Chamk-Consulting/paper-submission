@@ -157,7 +157,7 @@ export function HelpCenter({ initialQuery = "", signedIn, hero = false }: { init
 
       <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[8px] bg-[#0E1B3D] p-6 text-[#F5F6F3]">
         <div className="max-w-[60ch]">
-          <h2 className="m-0 font-serif text-[24px] font-normal">{t("Still stuck?")}</h2>
+          <h2 className="m-0 font-serif text-[22px] font-normal">{t("Still stuck?")}</h2>
           <p className="mb-0 mt-1 text-[14px] text-[#D6DCEA]">{t("For a question about a paper or decision, message the venue. For problems with Plenary itself, contact support.")}</p>
         </div>
         <div className="flex flex-wrap gap-2.5">

@@ -220,7 +220,7 @@ function LiveRunSheet({ s, a }: { s: ChairSession; a: ReturnType<typeof useAtten
         {cur ? (
           <>
             <p className="m-0 mt-4 font-mono text-[11px] tracking-[0.06em] text-[#B9C3DA]">{t("Now speaking")}</p>
-            <p className="m-0 mt-0.5 text-[18px] font-semibold">{cur.presenter ?? t("Presenter")}</p>
+            <p className="m-0 mt-0.5 text-[17px] font-semibold">{cur.presenter ?? t("Presenter")}</p>
             <p className="m-0 text-[13px] text-[#B9C3DA]">{cur.number ? `#${cur.number} · ` : ""}{inQa ? t("questions") : t("talk")}</p>
             <div className="mt-2 font-mono text-[64px] font-semibold leading-none tabular-nums sm:text-[80px]" style={{ color }}>
               {inQa ? mmss(elapsed - talkSec) : mmss(elapsed)}

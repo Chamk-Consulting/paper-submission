@@ -16,7 +16,7 @@ export function BadgeCard({ badge, qr, venue, dates, t, print = false }: {
       </div>
       <div className="flex items-center gap-4 px-[18px] py-5">
         <div className="min-w-0 flex-auto">
-          <p className="m-0 break-words font-serif text-[30px] leading-[1.1]">{first || "—"}{rest.length ? <><br />{rest.join(" ")}</> : null}</p>
+          <p className="m-0 break-words font-serif text-[28px] leading-[1.1]">{first || "—"}{rest.length ? <><br />{rest.join(" ")}</> : null}</p>
           {badge.affiliation ? <p className="mb-0 mt-2 text-[14px] text-[#4A5263]">{badge.affiliation}</p> : null}
           <p className="mb-0 mt-1 font-mono text-[12px] text-[#4A5263]">{badge.plenary_id ?? badge.number}</p>
         </div>

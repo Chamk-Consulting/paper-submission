@@ -56,11 +56,11 @@ export function DecisionTable({ slug, rows, min, canChangeReleased }: { slug: st
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5">
           <p className="m-0 text-[13px] text-[#4A5263]">{t("Acceptance rate")}</p>
-          <p className="m-0 mt-0.5 font-serif text-[30px] leading-[1.15]">{decided.length ? Math.round((acc / decided.length) * 100) : 0}%</p>
+          <p className="m-0 mt-0.5 font-serif text-[28px] leading-[1.15]">{decided.length ? Math.round((acc / decided.length) * 100) : 0}%</p>
           <p className="m-0 text-[12px] text-[#4A5263]">{t("{a} of {b} decided papers", { a: acc, b: decided.length })}</p>
         </div>
-        <div className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5"><p className="m-0 text-[13px] text-[#4A5263]">{t("Undecided")}</p><p className="m-0 mt-0.5 font-serif text-[30px] leading-[1.15]" style={{ color: und ? "#A8600F" : "#14603F" }}>{und}</p></div>
-        <div className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5"><p className="m-0 text-[13px] text-[#4A5263]">{t("Can’t decide yet")}</p><p className="m-0 mt-0.5 font-serif text-[30px] leading-[1.15]" style={{ color: blocked ? "#B3261E" : "#121826" }}>{blocked}</p><p className="m-0 text-[12px] text-[#4A5263]">{t("fewer than {n} reviews (F2)", { n: min })}</p></div>
+        <div className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5"><p className="m-0 text-[13px] text-[#4A5263]">{t("Undecided")}</p><p className="m-0 mt-0.5 font-serif text-[28px] leading-[1.15]" style={{ color: und ? "#A8600F" : "#14603F" }}>{und}</p></div>
+        <div className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5"><p className="m-0 text-[13px] text-[#4A5263]">{t("Can’t decide yet")}</p><p className="m-0 mt-0.5 font-serif text-[28px] leading-[1.15]" style={{ color: blocked ? "#B3261E" : "#121826" }}>{blocked}</p><p className="m-0 text-[12px] text-[#4A5263]">{t("fewer than {n} reviews (F2)", { n: min })}</p></div>
         <div className="rounded-[8px] border border-[#DADDE3] bg-[#F7F8F6] px-4 py-3.5"><p className="m-0 text-[13px] text-[#4A5263]">{t("Status")}</p><p className="m-0 mt-1 text-[15px] font-semibold">{t("Drafts — authors see nothing")}</p><p className="m-0 text-[12px] text-[#4A5263]">{t("until you release (F4)")}</p></div>
       </div>
 
@@ -102,7 +102,7 @@ export function DecisionTable({ slug, rows, min, canChangeReleased }: { slug: st
                     <span className="flex gap-1">
                       {Array.from({ length: cols }, (_, k) => {
                         const v = r.scores[k];
-                        if (v == null) return <span key={k} className="grid h-7 w-8 place-items-center rounded-[4px] bg-[#F5F6F3] font-mono text-[12px] text-[#9AA3B5]">–</span>;
+                        if (v == null) return <span key={k} className="grid h-7 w-8 place-items-center rounded-[4px] bg-[#F5F6F3] font-mono text-[12px] text-[#6B7385]">–</span>;
                         const [bg, ink] = scoreTone(v);
                         return <span key={k} className="grid h-7 w-8 place-items-center rounded-[4px] font-mono text-[12px] font-semibold" style={{ background: bg, color: ink }}>{Number.isInteger(v) ? v : v.toFixed(1)}</span>;
                       })}
@@ -123,7 +123,7 @@ export function DecisionTable({ slug, rows, min, canChangeReleased }: { slug: st
                           <option value="" className="bg-white text-[#121826]">{t("Not decided")}</option>
                           {DECISIONS.map((d) => <option key={d} value={d} className="bg-white text-[#121826]">{t(DECISION_LABEL[d])}</option>)}
                         </select>
-                        {r.released ? <span className="font-mono text-[10px] uppercase text-[#4A5263]">{t("Released")}</span> : null}
+                        {r.released ? <span className="font-mono text-[11px] uppercase text-[#4A5263]">{t("Released")}</span> : null}
                       </span>
                     ) : (
                       <span className="text-[13px] text-[#A8600F]">{t("Needs {n} reviews (has {m})", { n: min, m: r.reviewsIn })} · <Link href={`/manage/${slug}/reviews`}>{t("chase")}</Link></span>

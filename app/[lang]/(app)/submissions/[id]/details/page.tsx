@@ -25,7 +25,7 @@ async function Inner({ params }: P) {
           <div className={`${kicker} border-b border-[#DADDE3] bg-[#FBFBF9] px-[18px] py-2.5`}>{t("How it will look in the program")}</div>
           <div className="px-[18px] py-4">
             <div className="font-mono text-[12px] text-[#4A5263]">[Session] · [Room] · [Time]</div>
-            <div className="mt-1.5 font-serif text-[19px] leading-[1.25]">{s.shortTitle || (s.title === "Untitled paper" ? t("Your title appears here") : s.title)}</div>
+            <div className="mt-1.5 font-serif text-[17px] leading-[1.25]">{s.shortTitle || (s.title === "Untitled paper" ? t("Your title appears here") : s.title)}</div>
             <div className="mt-1.5 text-[13px] text-[#4A5263]">{byline || t("Authors from step 3")}</div>
           </div>
         </section>

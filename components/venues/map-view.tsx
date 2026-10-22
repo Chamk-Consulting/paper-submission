@@ -130,12 +130,12 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
             <path d={geo.dots} fill="none" stroke="#9AA3B5" strokeWidth={key === "world" ? 3.6 : 4.6} strokeLinecap="round" />
             {route ? <path d={route} fill="none" stroke="#2F5FD0" strokeWidth="2" strokeDasharray="5 5" /> : null}
           </svg>
-          {geo.lat.map((g) => <span key={g.t} aria-hidden className="absolute left-1 font-mono text-[9px] text-[#7D8AA3]" style={{ top: `${g.y}%`, transform: "translateY(-110%)" }}>{g.t}</span>)}
+          {geo.lat.map((g) => <span key={g.t} aria-hidden className="absolute left-1 font-mono text-[11px] text-[#7D8AA3]" style={{ top: `${g.y}%`, transform: "translateY(-110%)" }}>{g.t}</span>)}
           {geo.oceans.map((o) => <span key={`${o.t}${o.x}`} aria-hidden className="absolute hidden whitespace-nowrap font-serif text-[13px] italic tracking-[0.08em] text-[#8C9BB6] sm:block" style={{ left: `${o.x}%`, top: `${o.y}%`, transform: "translate(-50%,-50%)" }}>{t(o.t)}</span>)}
           {home && homeVisible ? (
             <>
               <span aria-hidden className="absolute size-3 rounded-full bg-[#2F5FD0] shadow-[0_0_0_5px_rgba(47,95,208,.22)]" style={{ left: `${((geo.PX(home[0]) / MW) * 100).toFixed(2)}%`, top: `${((geo.PY(home[1]) / geo.MH) * 100).toFixed(2)}%`, transform: "translate(-50%,-50%)" }} />
-              <span className="absolute rounded-[2px] border border-[#BFD0F5] bg-white px-[5px] py-px font-mono text-[10px] font-semibold uppercase text-[#1F47A8]" style={{ left: `${((geo.PX(home[0]) / MW) * 100).toFixed(2)}%`, top: `${((geo.PY(home[1]) / geo.MH) * 100).toFixed(2)}%`, transform: "translate(10px,4px)" }}>{t("You")} · {home[2]}</span>
+              <span className="absolute rounded-[2px] border border-[#BFD0F5] bg-white px-[5px] py-px font-mono text-[11px] font-semibold uppercase text-[#1F47A8]" style={{ left: `${((geo.PX(home[0]) / MW) * 100).toFixed(2)}%`, top: `${((geo.PY(home[1]) / geo.MH) * 100).toFixed(2)}%`, transform: "translate(10px,4px)" }}>{t("You")} · {home[2]}</span>
             </>
           ) : null}
           {onMap.map((v) => {

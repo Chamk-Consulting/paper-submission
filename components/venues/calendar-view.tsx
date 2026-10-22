@@ -135,7 +135,7 @@ export function CalendarView({ rows, now, tz }: { rows: Row[]; now: number; tz: 
                   style={{ background: isSel ? "#FFFBF3" : past ? "#FBFBF9" : "#FFFFFF", outline: isSel ? "2px solid #F2A93B" : "none", outlineOffset: -2 }}>
                   <span className="flex items-center justify-between">
                     <span className="flex size-6 items-center justify-center rounded-full font-mono text-[12px]" style={{ fontWeight: isToday ? 700 : 400, color: isToday ? "#FFFFFF" : past ? "#B7BDC9" : "#4A5263", background: isToday ? "#0E1B3D" : "transparent" }}>{d}</span>
-                    {isToday ? <span className="hidden font-mono text-[10px] font-semibold text-[#0E1B3D] sm:inline">{t("TODAY")}</span> : null}
+                    {isToday ? <span className="hidden font-mono text-[11px] font-semibold text-[#0E1B3D] sm:inline">{t("TODAY")}</span> : null}
                   </span>
                   {items.slice(0, 3).map((e) => {
                     const soon = soonSub(e);

@@ -42,7 +42,7 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
               <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 {form.settings.criteria.map((c) => (
                   <div key={c.key} className="rounded-[6px] border border-[#DADDE3] px-3 py-2.5 text-center">
-                    <div className="font-serif text-[30px] leading-none">{r?.scores?.[c.key] ?? "—"}</div>
+                    <div className="font-serif text-[28px] leading-none">{r?.scores?.[c.key] ?? "—"}</div>
                     <div className="mt-1 text-[12px] text-[#4A5263]">{t(c.name)}</div>
                   </div>
                 ))}

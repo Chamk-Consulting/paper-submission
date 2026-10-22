@@ -92,7 +92,7 @@ function YourData({ lastExport }: { lastExport: DataRequest | null }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0EC] pt-3">
           <span><strong className="text-[14px]">{t("Import from PaperCept or another system")}</strong><span className="block text-[13px] text-[#4A5263]">{t("Bring past papers and reviews using your society's export or ORCID.")}</span></span>
-          <span aria-disabled title={t("Coming soon")} className={`${small} text-[#9AA3B5]!`}>{t("Import")} · {t("soon")}</span>
+          <span aria-disabled title={t("Coming soon")} className={`${small} text-[#6B7385]!`}>{t("Import")} · {t("soon")}</span>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0EC] pt-3">
           <span><strong className="text-[14px]">{t("Found a duplicate account?")}</strong><span className="block text-[13px] text-[#4A5263]">{t("Merge it into this one — papers and reviews move with it.")}</span></span>

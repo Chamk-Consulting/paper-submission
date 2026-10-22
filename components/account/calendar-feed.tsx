@@ -85,7 +85,7 @@ export function CalendarFeed({ hasFeed, since, initialFlags, items, timezone }: 
               <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
                 {apps.map(([name, href]) => href
                   ? <a key={name} href={href} target={name === "Apple Calendar" ? undefined : "_blank"} rel="noopener noreferrer" className={`${small} h-11`}>{t(name)}</a>
-                  : <span key={name} aria-disabled className={`${small} h-11 text-[#9AA3B5]!`}>{t(name)}</span>)}
+                  : <span key={name} aria-disabled className={`${small} h-11 text-[#6B7385]!`}>{t(name)}</span>)}
               </div>
               <p className="mb-1.5 mt-3.5 text-[14px] font-medium">{t("Or copy the feed address")}</p>
               {url ? (

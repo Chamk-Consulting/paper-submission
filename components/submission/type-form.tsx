@@ -39,7 +39,7 @@ export function TypeForm({ venue, types, tracks, initialType, initialTrack, subm
         </div>
       </section>
 
-      <h2 className="mb-0 mt-7 font-serif text-[24px] font-normal">{t("What are you submitting?")}</h2>
+      <h2 className="mb-0 mt-7 font-serif text-[22px] font-normal">{t("What are you submitting?")}</h2>
       <p className="mt-1 text-[#4A5263]">{t("Each type has its own page limit, deadline and review. You can change this until you submit.")}</p>
       <div role="radiogroup" aria-label={t("Submission type")} className="mt-4 flex flex-col gap-3">
         {types.map((ty) => {

@@ -41,7 +41,7 @@ export function VenueMeTabs({ venueId, work, news, deadlines, contacts, now }: {
                   const tm = when(w.at, now);
                   return (
                     <li key={w.id} className="grid grid-cols-12 items-center gap-x-3 gap-y-1 border-t border-[#EEF0EC] px-5 py-3">
-                      <span className="col-span-12 sm:col-span-2"><span className="inline-flex rounded-[3px] px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(w.role)}</span></span>
+                      <span className="col-span-12 sm:col-span-2"><span className="inline-flex rounded-[3px] px-1.5 py-px font-mono text-[11px] font-medium uppercase tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(w.role)}</span></span>
                       <Link href={w.href} className="col-span-12 min-w-0 text-[#121826] no-underline hover:underline sm:col-span-7">
                         <span className="block truncate font-medium">{w.title}</span>
                         <span className="block truncate text-[13px] text-[#4A5263]">{t(w.detail)}</span>

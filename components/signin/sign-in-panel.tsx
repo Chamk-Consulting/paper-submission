@@ -120,7 +120,7 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
             <div className="mt-6 flex flex-col gap-1.5">
               <label htmlFor="pr-id" className={LABEL}>{t("Email, phone, Plenary ID or alias")}</label>
               <div className="box-border flex h-12 items-center gap-2.5 rounded-[4px] border-2 bg-white px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ borderColor: idErrors?.length ? "#B3261E" : tone.border }}>
-                <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[4px] font-mono text-[10px] font-semibold" style={{ background: tone.iconBg, color: tone.iconInk }}>{d.icon}</span>
+                <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[4px] font-mono text-[11px] font-semibold" style={{ background: tone.iconBg, color: tone.iconInk }}>{d.icon}</span>
                 <input
                   id="pr-id" name="identifier" type="text" autoComplete="username webauthn" autoCapitalize="none" spellCheck={false}
                   placeholder="name@uni.edu · +234… · PL-4821-0937 · a.researcher"
@@ -192,7 +192,7 @@ function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; n
   const lead = byEmail ? t("We sent a link and a code to") : t("We sent a link and a code to your account email");
   return (
     <>
-      <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#18744F]">{t("Link sent")}</p>
+      <p className="mt-7 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#14603F]">{t("Link sent")}</p>
       <h1 className={`mt-2.5 ${H1}`}>{t("Check your inbox")}</h1>
       <p className={`mt-2.5 ${MUTED}`}>{lead} <strong className={INK}>{state.sentTo}</strong>. {t("It expires in 15 minutes. On another device? Enter the code from the same email.")}</p>
       {state.notice ? <p role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">{t(state.notice)}</p> : null}
@@ -202,7 +202,7 @@ function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; n
         <div className="mt-[22px] flex flex-col gap-1.5">
           <label htmlFor="pr-code" className={LABEL}>{t("Verification code")}</label>
           <input id="pr-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={10} placeholder="000000" aria-describedby="pr-code-err"
-            className="box-border h-[46px] rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 font-mono text-[18px] tracking-[0.3em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
+            className="box-border h-[46px] rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 font-mono text-[17px] tracking-[0.3em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
             style={vState.fieldErrors?.code?.length ? { borderColor: "#B3261E" } : undefined} />
           <FieldError id="pr-code-err" errors={vState.fieldErrors?.code} />
         </div>

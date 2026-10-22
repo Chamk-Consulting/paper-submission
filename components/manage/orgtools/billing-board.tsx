@@ -104,7 +104,7 @@ export function BillingBoard({ slug, data, stripeOn, paid }: { slug: string; dat
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className={ui.kicker}>{t("Plan for this event")}</p>
-              <p className="m-0 mt-1.5 font-serif text-[30px]">{plan ? t(plan.name) : t("No plan chosen yet")}</p>
+              <p className="m-0 mt-1.5 font-serif text-[28px]">{plan ? t(plan.name) : t("No plan chosen yet")}</p>
               <p className="m-0 mt-0.5 text-[14px] text-[#4A5263]">{plan ? t(plan.desc) : t("Choose the plan that fits your event. You can change it later.")}</p>
             </div>
             <div className="text-right">

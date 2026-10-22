@@ -60,7 +60,7 @@ export function ExportPanel({ page, expiredHint }: { page: ExportPage; expiredHi
           <div className="flex flex-wrap items-start gap-4">
             <span aria-hidden className="flex size-12 flex-none items-center justify-center rounded-[8px] bg-[#E6EDFC] font-mono text-[12px] font-semibold text-[#1F47A8]">ZIP</span>
             <div className="min-w-0 flex-[1_1_260px]">
-              <h2 className="m-0 text-[19px] font-semibold">{t("Your export is ready")}</h2>
+              <h2 className="m-0 text-[17px] font-semibold">{t("Your export is ready")}</h2>
               <p className="m-0 mt-0.5 text-[14px] text-[#4A5263]">
                 plenary-export.zip · {mb(latest.detail?.bytes)} · {t("made {date}", { date: fmtDate(latest.created_at) })} · {t("link works until {date}", { date: fmtDate(latest.detail?.expires_at) })}
               </p>
@@ -70,14 +70,14 @@ export function ExportPanel({ page, expiredHint }: { page: ExportPage; expiredHi
           </div>
         ) : preparing ? (
           <div aria-live="polite">
-            <h2 className="m-0 text-[19px] font-semibold">{t("Preparing your export…")}</h2>
+            <h2 className="m-0 text-[17px] font-semibold">{t("Preparing your export…")}</h2>
             <p className="m-0 mt-1 text-[14px] text-[#4A5263]">{t("This usually takes under a minute. Keep this page open.")}</p>
             <div aria-hidden className="mt-3 h-2 overflow-hidden rounded-[4px] bg-[#EEF0EC]"><div className="h-2 w-[35%] animate-pulse rounded-[4px] bg-[#2F5FD0] motion-reduce:animate-none" /></div>
           </div>
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="min-w-0 flex-[1_1_260px]">
-              <h2 className="m-0 text-[19px] font-semibold">{t("Download everything")}</h2>
+              <h2 className="m-0 text-[17px] font-semibold">{t("Download everything")}</h2>
               <p className="m-0 mt-0.5 text-[14px] text-[#4A5263]">{t("We put it together now. The download link works for 7 days.")}</p>
             </div>
             <button type="button" onClick={make} disabled={pending} className={primary}>{t("Make my export")}</button>

@@ -214,7 +214,7 @@ export function IdentifiersSection({ p, state, form }: { p: Profile; state: Acco
         <div className="flex flex-col gap-1.5">
           <div className="text-[14px] font-medium">{t("Plenary ID")}</div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[18px]">{p.plenary_id ?? "—"}</span>
+            <span className="font-mono text-[17px]">{p.plenary_id ?? "—"}</span>
             {p.plenary_id ? <CopyButton text={p.plenary_id} /> : null}
           </div>
           <span className={sx.help}>{t("Give it to chairs and co-authors instead of your email.")}</span>

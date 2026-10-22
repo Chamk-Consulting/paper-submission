@@ -39,7 +39,7 @@ export function InvitationForm({ mode, id, token, no, due, ae, email }: Props) {
     const next = encodeURIComponent(`/reviews/${id}`);
     return (
       <div className="rounded-[8px] border border-[#B9E0CB] bg-[#F3FAF6] p-5">
-        <h2 className="m-0 font-serif text-[24px] font-normal text-[#14603F]">{t("Thank you — you're reviewing {no}.", { no })}</h2>
+        <h2 className="m-0 font-serif text-[22px] font-normal text-[#14603F]">{t("Thank you — you're reviewing {no}.", { no })}</h2>
         {mode === "signed" ? (
           <>
             <p className="mb-0 mt-2 text-[15px]">{t("The PDF and review form are open now. Due {d}; we'll remind you 3 days before.", { d: due })}</p>
@@ -65,7 +65,7 @@ export function InvitationForm({ mode, id, token, no, due, ae, email }: Props) {
   if (state.ok && state.result === "declined") {
     return (
       <div className="rounded-[8px] border border-[#DADDE3] bg-white p-5">
-        <h2 className="m-0 font-serif text-[24px] font-normal">{mode === "token" ? t("Thanks for letting us know") : t("Declined.")}</h2>
+        <h2 className="m-0 font-serif text-[22px] font-normal">{mode === "token" ? t("Thanks for letting us know") : t("Declined.")}</h2>
         <p className="mb-0 mt-2 text-[15px] text-[#4A5263]">
           {mode === "token" ? t("{ae} has been told. You don't need an account for this.", { ae }) : t("{ae} has been told, with your suggestion.", { ae })}
         </p>

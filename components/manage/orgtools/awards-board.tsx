@@ -191,7 +191,7 @@ export function AwardsBoard({ slug, board }: { slug: string; board: Board }) {
         <aside className="flex flex-[1_1_320px] flex-col gap-4">
           <section className={ui.card}>
             <p className={ui.kicker}>{t("Winner")}</p>
-            <p className="m-0 mt-2 font-serif text-[24px] leading-[1.2]">{winner ? winner.title : t("Not chosen yet")}</p>
+            <p className="m-0 mt-2 font-serif text-[22px] leading-[1.2]">{winner ? winner.title : t("Not chosen yet")}</p>
             <p className="m-0 mt-1 text-[14px] text-[#4A5263]">{winner ? `${no4(winner.number)} · ${winner.authors ?? ""}` : t("Pick a shortlisted paper.")}</p>
             {chair ? (
               <>

@@ -63,7 +63,7 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {form.settings.criteria.map((c) => {
                           const v = rv.scores?.[c.key];
-                          return <span key={c.key} title={t(c.name)} className={`inline-flex h-7 min-w-7 items-center justify-center rounded-[4px] px-1.5 font-mono text-[13px] ${v ? scoreTone(v) : "bg-[#EEF0EC] text-[#9AA3B5]"}`}>{v ?? "–"}</span>;
+                          return <span key={c.key} title={t(c.name)} className={`inline-flex h-7 min-w-7 items-center justify-center rounded-[4px] px-1.5 font-mono text-[13px] ${v ? scoreTone(v) : "bg-[#EEF0EC] text-[#6B7385]"}`}>{v ?? "–"}</span>;
                         })}
                       </div>
                       {rv.to_authors ? (

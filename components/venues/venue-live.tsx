@@ -15,6 +15,24 @@ const dateOnly = (iso: string, tz: string, intl = "en-GB") => weekdayDate(new Da
 const DEADLINE = new Set(["submission", "proposal", "final", "registration"]);
 const pad = (n: number) => String(n).padStart(2, "0");
 
+/** Compact next-deadline strip: the countdown in one line, for narrower screens where the full card would push the page down. */
+export function DeadlineStrip({ dates, generatedAt }: { dates: VenueDate[]; generatedAt: string }) {
+  const t = useT();
+  const { now, tz } = useClock(generatedAt);
+  const next = dates.find((d) => DEADLINE.has(d.kind) && Date.parse(d.startsAt) > now);
+  if (!next) return null;
+  const ms = Date.parse(next.startsAt) - now;
+  const days = Math.floor(ms / DAY), hours = Math.floor((ms % DAY) / 3600e3);
+  const soon = days < 7;
+  return (
+    <p className="m-0 inline-flex max-w-full flex-wrap items-center gap-x-2.5 gap-y-1 rounded-[6px] bg-[#0E1B3D] px-3 py-2 text-[13px] text-[#D6DCEA]">
+      <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#F2A93B]">{t("Next deadline")} · {t(next.label)}</span>
+      <span className={`font-mono text-[15px] font-semibold ${soon ? "text-[#F2A93B]" : "text-white"}`}>{t("{d}d {h}h", { d: days, h: hours })}</span>
+      <span>{t("{time} in {city}", { time: fmtLocal(next.startsAt, tz, true, t.intl), city: cityOf(tz) })}</span>
+    </p>
+  );
+}
+
 /** Navy countdown card (top right of canvas PV02). */
 export function CountdownCard({ dates, generatedAt }: { dates: VenueDate[]; generatedAt: string }) {
   const t = useT();

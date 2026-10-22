@@ -124,7 +124,7 @@ async function Inner({ params }: P) {
             <h2 className={ui.h2}>{t("{name} in numbers", { name: ctx.label })}</h2>
             <dl className="m-0 mt-3 grid grid-cols-2 gap-3">
               {[[t("Submissions"), st.submissions], [t("Accepted"), `${st.accepted} · ${pct(st.accepted, st.submissions)}%`], [t("Reviews"), st.reviews], [t("Reviews on time"), st.on_time === null ? "—" : `${st.on_time}%`], [t("Countries"), st.countries], [t("Attendees"), `${st.attendees}/${st.registered}`]].map(([k, v]) => (
-                <div key={String(k)} className="rounded-[6px] bg-[#F7F8F6] p-2.5"><dt className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#4A5263]">{k}</dt><dd className="m-0 font-serif text-[22px]">{v}</dd></div>
+                <div key={String(k)} className="rounded-[6px] bg-[#F7F8F6] p-2.5"><dt className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{k}</dt><dd className="m-0 font-serif text-[22px]">{v}</dd></div>
               ))}
             </dl>
           </section>

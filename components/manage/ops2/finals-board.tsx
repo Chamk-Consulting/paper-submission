@@ -14,14 +14,14 @@ export type FinalRow = {
 };
 
 const statusTag: Record<string, [string, string]> = {
-  complete: ["COMPLETE", "bg-[#E1F3EA] text-[#14603F]"], in_progress: ["IN PROGRESS", "bg-[#FFF6E6] text-[#7A5410]"],
+  complete: ["COMPLETE", "bg-[#E1F3EA] text-[#14603F]"], in_progress: ["IN PROGRESS", "bg-[#FFF6E6] text-[#7A4508]"],
   incomplete: ["INCOMPLETE", "bg-[#FDECEA] text-[#8C1D18]"], dropped: ["DROPPED", "bg-[#EEF0EC] text-[#4A5263]"],
 };
 
 const DECISION: Record<string, string> = { accept_oral: "Oral", accept_poster: "Poster", conditional: "Conditional" };
 
 function Tick({ v, title }: { v: "done" | "needed" | "na"; title: string }) {
-  const cls = v === "done" ? "text-[#18744F]" : v === "needed" ? "text-[#B3261E] font-semibold" : "text-[#B7BDC9]";
+  const cls = v === "done" ? "text-[#14603F]" : v === "needed" ? "text-[#B3261E] font-semibold" : "text-[#6B7385]";
   return <span title={title} className={`font-mono text-[15px] ${cls}`}>{v === "done" ? "✓" : v === "needed" ? "!" : "–"}</span>;
 }
 
@@ -40,7 +40,7 @@ export function FinalsBoard({ slug, rows, deadline, pastDeadline, daysLeft }: { 
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className={ui.card}><p className={ui.kicker}>{t("Accepted")}</p><p className="m-0 mt-1 font-serif text-[32px]">{rows.length}</p><p className={`${ui.hint} m-0`}>{t("{o} oral · {p} poster · {c} conditional", { o: by("accept_oral"), p: by("accept_poster"), c: by("conditional") })}</p></div>
-        <div className={ui.card}><p className={ui.kicker}>{t("Complete")}</p><p className="m-0 mt-1 font-serif text-[32px] text-[#18744F]">{complete}</p><p className={`${ui.hint} m-0`}>{t("PDF + © + REG")}</p></div>
+        <div className={ui.card}><p className={ui.kicker}>{t("Complete")}</p><p className="m-0 mt-1 font-serif text-[32px] text-[#14603F]">{complete}</p><p className={`${ui.hint} m-0`}>{t("PDF + © + REG")}</p></div>
         <div className={ui.card}><p className={ui.kicker}>{t("Missing copyright")}</p><p className="m-0 mt-1 font-serif text-[32px] text-[#B3261E]">{noCopyright}</p><p className={`${ui.hint} m-0`}>{t("IEEE not confirmed (G3)")}</p></div>
         <div className={ui.card}>
           <p className={ui.kicker}>{t("Deadline")}</p>

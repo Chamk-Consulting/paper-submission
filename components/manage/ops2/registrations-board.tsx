@@ -10,7 +10,7 @@ import { paperNo } from "@/lib/manage/ops2-time";
 import { markRegistrationPaid } from "@/lib/attend/actions";
 import { fmtMoney } from "@/lib/attend/money";
 
-const tagGreen = "bg-[#E1F3EA] text-[#14603F]", tagAmber = "bg-[#FFF6E6] text-[#7A5410]";
+const tagGreen = "bg-[#E1F3EA] text-[#14603F]", tagAmber = "bg-[#FFF6E6] text-[#7A4508]";
 
 export type RegRow = {
   id: string; number: string; reg_type: string; full_name: string | null; email: string | null; affiliation: string | null; covers_papers: number;
@@ -106,13 +106,13 @@ export function RegistrationsBoard({ slug, rows }: { slug: string; rows: RegRow[
                             <Act action={unlinkPaper} fields={{ slug, reg: r.id, sub: p.id }} className="cursor-pointer border-0 bg-transparent p-0 text-[11px] text-[#B3261E]">×</Act>
                           </span>
                         ))}
-                        {r.papers.length > r.covers_papers ? <span className={`${ui.tag} bg-[#FFF6E6] text-[#7A5410]`}>{t("over limit")}</span> : null}
+                        {r.papers.length > r.covers_papers ? <span className={`${ui.tag} bg-[#FFF6E6] text-[#7A4508]`}>{t("over limit")}</span> : null}
                       </div>
                     </td>
                     <td className={ui.td}>
                       {r.status === "cancelled" ? <span className={`${ui.tag} bg-[#EEF0EC] text-[#4A5263]`}>{t("CANCELLED")}</span>
                         : <span className={`${ui.tag} ${r.paid_at ? tagGreen : tagAmber}`}>{t(r.paid_at ? "PAID" : r.status === "awaiting_payment" ? "AWAITING PAYMENT" : "UNPAID")}</span>}
-                      {r.checked_in_at ? <span className={`${ui.tag} ml-1 bg-[#E8EEFB] text-[#1F3F8F]`}>{t("CHECKED IN")}</span> : null}
+                      {r.checked_in_at ? <span className={`${ui.tag} ml-1 bg-[#E8EEFB] text-[#1F47A8]`}>{t("CHECKED IN")}</span> : null}
                       {r.invoice_number ? (
                         <span className="mt-1 block text-[11px] text-[#4A5263]">
                           <a href={`/venues/${slug}/register/document?r=${r.id}&kind=invoice`} className="font-mono">{r.invoice_number}</a>

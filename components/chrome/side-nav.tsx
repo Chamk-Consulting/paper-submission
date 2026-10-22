@@ -98,7 +98,7 @@ function useMiddle(p: string, s: Summary | null, tab?: string) {
       ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "Reviews", icon: ic(PenLine), href: "/reviews", on: p.startsWith("/reviews") }] : []),
       ...(sessionChair ? [{ kind: "leaf" as const, key: "chair", label: "Sessions I chair", icon: ic(Presentation), href: "/chair", on: p.startsWith("/chair") }] : []),
       { kind: "leaf", key: "schedule", label: "My schedule", icon: ic(CalendarClock), href: "/workspace/schedule", on: p.startsWith("/workspace/schedule") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
-      { kind: "leaf", key: "id", label: "My Plenary ID & badge", icon: ic(IdCard), href: "/settings/profile#plenary-id", on: false },
+      { kind: "leaf", key: "id", label: "My Plenary ID", icon: ic(IdCard), href: "/settings/profile#plenary-id", on: false },
     ],
   };
   const onEvents = p === "/workspace/events";
@@ -329,7 +329,7 @@ function EventSwitcher({ org, p, t }: { org: NonNullable<ReturnType<typeof useOr
         className={`flex w-full items-center gap-2 rounded-[6px] border border-[#DADDE3] bg-[#F7F8F6] px-2.5 py-1.5 text-start ${many ? "cursor-pointer hover:border-[#B7BDC9]" : "cursor-default"}`}>
         <span className="min-w-0 flex-auto">
           <span className="block truncate text-[13px] font-semibold text-[#121826]">{org.name}</span>
-          <span className="block font-mono text-[10px] uppercase tracking-[0.06em] text-[#A8600F]">{t(org.roleLabel)}</span>
+          <span className="block font-mono text-[11px] uppercase tracking-[0.06em] text-[#A8600F]">{t(org.roleLabel)}</span>
         </span>
         {many ? <ChevronsUpDown size={14} strokeWidth={2} aria-hidden className="flex-none text-[#4A5263]" /> : null}
       </button>
@@ -338,7 +338,7 @@ function EventSwitcher({ org, p, t }: { org: NonNullable<ReturnType<typeof useOr
           {org.events.map((e) => (
             <button key={e.slug} type="button" onClick={() => pick(e.slug)}
               className={`${rowBase} h-auto min-h-9 w-full cursor-pointer border-0 py-1.5 text-start ${e.slug === org.slug ? rowOn : `bg-transparent ${rowOff}`}`}>
-              <span className="min-w-0 flex-auto"><span className="block truncate">{e.shortName ?? e.name}</span><span className="block font-mono text-[10px] uppercase text-[#4A5263]">{t(e.roleLabel)}</span></span>
+              <span className="min-w-0 flex-auto"><span className="block truncate">{e.shortName ?? e.name}</span><span className="block font-mono text-[11px] uppercase text-[#4A5263]">{t(e.roleLabel)}</span></span>
               {e.slug === org.slug ? <Check size={14} aria-hidden className="flex-none" /> : null}
             </button>
           ))}
@@ -404,12 +404,12 @@ function FilterResults({ nodes, q, onPick, t }: { nodes: MenuNode[]; q: string; 
   );
 }
 
-function MenuFilter({ q, setQ, t }: { q: string; setQ: (v: string) => void; t: (k: string) => string }) {
+function MenuFilter({ q, setQ, t, autoFocus }: { q: string; setQ: (v: string) => void; t: (k: string) => string; autoFocus?: boolean }) {
   return (
     <div className="relative mb-1.5 rail:hidden">
       <Search size={14} strokeWidth={2} aria-hidden className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-[#4A5263]" />
       <label htmlFor="menu-filter" className="sr-only">{t("Filter menu")}</label>
-      <input id="menu-filter" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Filter menu")} autoComplete="off"
+      <input id="menu-filter" type="search" value={q} autoFocus={autoFocus} onChange={(e) => setQ(e.target.value)} placeholder={t("Filter menu")} autoComplete="off"
         onKeyDown={(e) => { if (e.key === "Escape") setQ(""); }}
         className="h-8 w-full rounded-[6px] border border-[#DADDE3] bg-[#F7F8F6] pe-7 ps-8 text-[13px] text-[#121826] outline-none placeholder:text-[#6B7385] focus:border-[#2F5FD0] focus:bg-white [&::-webkit-search-cancel-button]:hidden" />
       {q ? (
@@ -472,6 +472,7 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
   const rail = useRail();
   const tree = useTree(p, s, tab);
   const [q, setQ] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
   const open = useMap(OPEN_KEY);
   const last = useMap(LAST_KEY);
   useFollow(tree.all);
@@ -480,8 +481,7 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
   const railNow = () => rail === "rail" || (rail === "auto" && (!window.matchMedia("(min-width: 1024px)").matches || !!document.querySelector("[data-focus-mode]")));
   const isRailNow = useSyncExternalStore(listenResize, railNow, () => false);
   const toggle = () => write(RAIL_KEY, railNow() ? "full" : "rail");
-  const filterRef = useRef<HTMLDivElement>(null);
-  const top = topLeaves(p, s);
+    const top = topLeaves(p, s);
   const help = helpGroup(p);
 
   const full = (n: MenuNode) => n.kind === "leaf"
@@ -498,16 +498,20 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
   return (
     <nav aria-label={t("Workspace")} data-rail={rail}
       className="side-menu sticky top-[60px] box-border hidden h-[calc(100dvh-60px)] w-[248px] flex-none flex-col border-e border-[#DADDE3] bg-white md:flex rail:w-16">
-      <div className="flex flex-none flex-col gap-0.5 border-b border-[#EEF0EC] px-3 pb-2.5 pt-3 rail:items-center rail:px-2" ref={filterRef}>
-        <MenuFilter q={q} setQ={setQ} t={t} />
-        <button type="button" onClick={() => { toggle(); window.setTimeout(() => document.getElementById("menu-filter")?.focus(), 50); }} title={t("Filter menu")}
-          className="mx-auto hidden size-10 cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#F5F6F3] rail:flex">
-          <Search {...I} /><span className="sr-only">{t("Filter menu")}</span>
-        </button>
-        <Link href="/workspace/events?intent=submit" title={t("New submission")}
-          className="mb-1 flex h-9 items-center justify-center gap-2 rounded-[6px] bg-[#F2A93B] text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] rail:size-10 rail:p-0">
-          <Plus size={16} strokeWidth={2.25} aria-hidden /><span className="rail:sr-only">{t("New submission")}</span>
-        </Link>
+      <div className="flex flex-none flex-col gap-0.5 border-b border-[#EEF0EC] px-3 pb-2.5 pt-3 rail:items-center rail:px-2">
+        {/* Only the header has a search box; the menu filter is a small icon that opens on demand. */}
+        {filterOpen || q ? <MenuFilter q={q} setQ={(v) => { setQ(v); if (!v) setFilterOpen(false); }} t={t} autoFocus /> : null}
+        <div className="mb-1 flex items-center gap-1.5 rail:flex-col">
+          <Link href="/workspace/events?intent=submit" title={t("New submission")}
+            className="flex h-9 min-w-0 flex-auto items-center justify-center gap-2 rounded-[6px] bg-[#F2A93B] text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] rail:size-10 rail:flex-none rail:p-0">
+            <Plus size={16} strokeWidth={2.25} aria-hidden /><span className="rail:sr-only">{t("New submission")}</span>
+          </Link>
+          <button type="button" aria-expanded={filterOpen || !!q} title={t("Filter menu")}
+            onClick={() => { if (railNow()) toggle(); setFilterOpen((o) => !o || !!q); }}
+            className={`flex size-9 flex-none cursor-pointer items-center justify-center rounded-[6px] border border-[#DADDE3] bg-white text-[#4A5263] hover:bg-[#F5F6F3] rail:size-10 ${filterOpen || q ? "border-[#2F5FD0] text-[#2F5FD0]" : ""}`}>
+            <Search {...I} /><span className="sr-only">{t("Filter menu")}</span>
+          </button>
+        </div>
         {top.map(both)}
       </div>
       <div className="min-h-0 flex-auto overflow-y-auto overscroll-contain px-3 pb-4 pt-2 rail:px-2">

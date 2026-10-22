@@ -9,7 +9,7 @@ export function Crumbs({ items }: { items: [string, string | null][] }) {
     <nav aria-label="Breadcrumb" className="text-[13px] text-[#4A5263]">
       {items.map(([label, href], i) => (
         <span key={i}>
-          {i ? <span className="mx-1.5 text-[#9AA3B5]">/</span> : null}
+          {i ? <span className="mx-1.5 text-[#6B7385]">/</span> : null}
           {href ? <Link href={href} className="text-[#2F5FD0] no-underline hover:underline">{label}</Link> : <span>{label}</span>}
         </span>
       ))}
@@ -31,7 +31,7 @@ export function Head({ kicker, title, sub, right }: { kicker?: ReactNode; title:
 }
 
 export function Tag({ tone, children }: { tone: keyof typeof TAG; children: ReactNode }) {
-  return <span className={`inline-flex items-center rounded-[3px] px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-[0.04em] ${TAG[tone]}`}>{children}</span>;
+  return <span className={`inline-flex items-center rounded-[3px] px-1.5 py-px font-mono text-[11px] font-medium uppercase tracking-[0.04em] ${TAG[tone]}`}>{children}</span>;
 }
 
 /** Two-column body: main + 300px aside (stacks on narrow screens). */

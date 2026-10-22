@@ -54,7 +54,7 @@ async function Inner({ params }: P) {
         <div className="w-full min-w-0 flex-auto">
           <section className={ui.card}>
             <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <p className="m-0 text-[18px] font-semibold">{t("{n} of {total} required sections ready", { n: ready, total: required.length })}</p>
+              <p className="m-0 text-[17px] font-semibold">{t("{n} of {total} required sections ready", { n: ready, total: required.length })}</p>
               {opensAt ? (
                 <p className="m-0 text-[14px] text-[#4A5263]">
                   {live ? t("Submissions opened") : t("Submissions open")} <strong className="text-[#121826]">{fmt(opensAt, { day: "numeric", month: "short" })}</strong>

@@ -63,7 +63,7 @@ export function DueNext({ items, now }: { items: DueItem[]; now: number }) {
             const [bg, ink] = ROLE_TINT[i.role];
             return (
               <li key={i.id} className="grid grid-cols-12 items-center gap-x-3 gap-y-1.5 border-b border-[#EEF0EC] px-5 py-3.5 last:border-b-0">
-                <span className="col-span-12 sm:col-span-2"><span className="inline-flex rounded-[3px] px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(i.tag)}</span></span>
+                <span className="col-span-12 sm:col-span-2"><span className="inline-flex rounded-[3px] px-1.5 py-px font-mono text-[11px] font-medium uppercase tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(i.tag)}</span></span>
                 <span className="col-span-12 min-w-0 sm:col-span-6">
                   <span className="block truncate font-medium">{i.title}</span>
                   <span className="block truncate text-[13px] text-[#4A5263]">{i.venue} · {t(i.detail[0], i.detail[1])}</span>

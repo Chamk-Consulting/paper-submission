@@ -42,7 +42,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
               <span className="rounded-[2px] bg-[#E6EDFC] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em] text-[#1F47A8]">{hasNext ? t("YOUR SUBMISSION") : t("OPEN CALLS")}</span>
               {venue?.iso ? <span className="font-mono text-[13px] font-semibold text-[#F2A93B]"><Countdown iso={venue.iso} generatedAt={venue.generatedAt} /></span> : null}
             </div>
-            <div className="mt-2.5 font-serif text-[24px] leading-[1.2]">{venue ? venue.name : hasNext ? t("Continue where you left off") : t("Find a venue to submit to")}</div>
+            <div className="mt-2.5 font-serif text-[22px] leading-[1.2]">{venue ? venue.name : hasNext ? t("Continue where you left off") : t("Find a venue to submit to")}</div>
             <div className="mt-1 text-[14px] text-[#B9C3DA]">
               {venue?.iso && venue.aoe ? (
                 <>{[venue.label, venue.city].filter(Boolean).join(" · ")}{venue.label || venue.city ? " · " : ""}{t("deadline {when}", { when: venue.aoe })}<span className="block">{t("That's")} <LocalDeadline iso={venue.iso} /> {t("for you")}.</span></>

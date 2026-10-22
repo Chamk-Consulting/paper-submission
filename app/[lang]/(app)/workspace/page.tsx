@@ -138,7 +138,7 @@ function MySubmissions({ papers, t }: { papers: MyPaper[]; t: Awaited<ReturnType
                       <span className="flex gap-1" aria-hidden>{[1, 2, 3, 4, 5, 6].map((i) => <span key={i} className={`h-1.5 w-5 rounded-full ${i <= step ? (p.stage === "rejected" || p.stage === "withdrawn" ? "bg-[#9AA3B5]" : "bg-[#18744F]") : "bg-[#DADDE3]"}`} />)}</span>
                       <span className="mt-1 block text-[12px] text-[#4A5263]">{t("Stage {n} of 6 · {label}", { n: step, label: t(STEP_LABEL[step]) })}</span>
                     </td>
-                    <td className="border-b border-[#EEF0EC] px-5 py-3 align-top"><span className="inline-flex rounded-[3px] px-1.5 py-px font-mono text-[10px] font-medium uppercase tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(pill)}</span></td>
+                    <td className="border-b border-[#EEF0EC] px-5 py-3 align-top"><span className="inline-flex rounded-[3px] px-1.5 py-px font-mono text-[11px] font-medium uppercase tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(pill)}</span></td>
                   </tr>
                 );
               })}

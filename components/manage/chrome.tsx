@@ -65,5 +65,5 @@ export async function SetupLayout({ ctx, current, children }: { ctx: EventCtx; c
 }
 
 export function Lock({ on, label }: { on: boolean; label: string }) {
-  return on ? <span className="ml-2 inline-flex items-center gap-1 rounded-[3px] bg-[#EEF0EC] px-1.5 py-px font-mono text-[10px] uppercase text-[#4A5263]" title={label}>🔒 {label}</span> : null;
+  return on ? <span className="ml-2 inline-flex items-center gap-1 rounded-[3px] bg-[#EEF0EC] px-1.5 py-px font-mono text-[11px] uppercase text-[#4A5263]" title={label}>🔒 {label}</span> : null;
 }

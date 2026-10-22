@@ -34,7 +34,7 @@ async function Inner({ params }: P) {
         <div className="mt-6 flex flex-col gap-4">
           {g.sections.map((s) => (
             <section key={s.h} className="rounded-[8px] border border-[#DADDE3] bg-white px-6 py-5">
-              <h2 className="m-0 text-[18px] font-semibold">{t(s.h)}</h2>
+              <h2 className="m-0 text-[17px] font-semibold">{t(s.h)}</h2>
               {s.p?.map((x) => <p key={x} className="mb-0 mt-2.5 max-w-[68ch] text-[15px] leading-[1.65]">{t(x)}</p>)}
               {s.list ? (
                 <ul className="mb-0 mt-2.5 flex max-w-[68ch] flex-col gap-1.5 pl-5 text-[15px] leading-[1.6]">

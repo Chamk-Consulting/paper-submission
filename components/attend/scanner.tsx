@@ -116,7 +116,7 @@ export function DeskScanner({ slug, tz, initialChecked, registered }: { slug: st
       <div aria-live="polite">
         {pending ? <p className="mb-0 mt-3.5 text-[14px] text-[#4A5263]">{t("Checking…")}</p> : res ? (
           <div role="status" className="mt-3.5 rounded-[8px] border px-4 py-3.5" style={{ background: bg, borderColor: bd }}>
-            <p className="m-0 text-[18px] font-bold" style={{ color: ink }}>{title}</p>
+            <p className="m-0 text-[17px] font-bold" style={{ color: ink }}>{title}</p>
             {text ? <p className="mb-0 mt-1 text-[14px] text-[#121826]">{text}</p> : null}
             {res.result === "unpaid" ? (
               <button type="button" onClick={() => run(res.raw, true)} className="mt-2.5 inline-flex h-9 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[13px] font-semibold text-[#0E1B3D]">{t("Check in anyway")}</button>

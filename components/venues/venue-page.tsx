@@ -152,7 +152,7 @@ export async function VenueView({ data, pub, myEvents, mode = "public" }: { data
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 {policies.map((p) => (
                   <div key={p.title} className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5">
-                    <div className="flex items-center gap-2 font-semibold">{p.title}{p.tag ? <span className="rounded-[2px] bg-[#FBEFDD] px-1.5 py-px font-mono text-[10px] text-[#7A4508]">{p.tag}</span> : null}</div>
+                    <div className="flex items-center gap-2 font-semibold">{p.title}{p.tag ? <span className="rounded-[2px] bg-[#FBEFDD] px-1.5 py-px font-mono text-[11px] text-[#7A4508]">{p.tag}</span> : null}</div>
                     <div className="mt-1 text-[14px] text-[#4A5263]">{p.text}</div>
                   </div>
                 ))}

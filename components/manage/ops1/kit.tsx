@@ -12,7 +12,7 @@ export function KpiRow({ items }: { items: Kpi[] }) {
       {items.map((k) => (
         <div key={k.l} className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5">
           <p className="m-0 text-[13px] text-[#4A5263]">{k.l}</p>
-          <p className="m-0 mt-0.5 font-serif text-[30px] leading-[1.15]" style={{ color: k.c ?? "#121826" }}>{k.v}</p>
+          <p className="m-0 mt-0.5 font-serif text-[28px] leading-[1.15]" style={{ color: k.c ?? "#121826" }}>{k.v}</p>
           {k.s ? <p className="m-0 text-[12px] text-[#4A5263]">{k.s}</p> : null}
         </div>
       ))}

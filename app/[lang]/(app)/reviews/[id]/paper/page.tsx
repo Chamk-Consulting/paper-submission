@@ -29,7 +29,7 @@ async function Inner({ params, searchParams }: { params: Promise<{ id: string }>
   return (
     <WorkspaceShell ctx={ctx} active="reviews">
       <Crumbs items={[[t("Reviews"), "/reviews"], [no, `/reviews/${id}`], [t("Paper"), null]]} />
-      <h1 className="mb-0 mt-2 font-serif text-[30px] font-normal leading-[1.2]">{form.paper.title}</h1>
+      <h1 className="mb-0 mt-2 font-serif text-[28px] font-normal leading-[1.2]">{form.paper.title}</h1>
       <div className="mt-2 flex flex-wrap items-center gap-3 text-[14px]">
         {blind === "double" ? <Tag tone="b">{t("BLIND · AUTHOR DETAILS REMOVED")}</Tag> : null}
         {form.paper.version && form.paper.version > 1 ? <Tag tone="n">{t("VERSION {n}", { n: form.paper.version })}</Tag> : null}

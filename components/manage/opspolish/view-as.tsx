@@ -77,7 +77,7 @@ export function ViewAs({ slug, label, snap, back, nowIso }: { slug: string; labe
       </section>
 
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <h2 className="m-0 font-serif text-[26px] font-normal">{snap.person.name}</h2>
+        <h2 className="m-0 font-serif text-[28px] font-normal">{snap.person.name}</h2>
         <span className="text-[14px] text-[#4A5263]">{[snap.person.affiliation, snap.person.plenary_id].filter(Boolean).join(" · ")}</span>
         <span className="flex flex-wrap gap-1">{snap.roles.map((r) => <span key={r} className={`${ui.tag} bg-[#EEF0EC] text-[#4A5263]`}>{t(r.replace(/_/g, " "))}</span>)}</span>
       </div>
