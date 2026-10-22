@@ -27,6 +27,19 @@ export function CookieConsent() {
   const state = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const dialog = useRef<HTMLDialogElement>(null);
   const [prefs, setPrefs] = useState(false);
+  const banner = useRef<HTMLElement>(null);
+
+  // While the banner is up, leave room under the page so it never covers the last button (e.g. "Continue" on a phone).
+  useEffect(() => {
+    const el = banner.current;
+    if (state !== "none" || !el) return;
+    const body = document.body;
+    const fit = () => { body.style.paddingBottom = `${el.offsetHeight + 24}px`; };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => { ro.disconnect(); body.style.paddingBottom = ""; };
+  }, [state]);
 
   useEffect(() => onOpenCookieSettings(() => {
     setPrefs(getConsent()?.preferences ?? false);
@@ -42,6 +55,7 @@ export function CookieConsent() {
     <>
       {state === "none" ? (
         <section
+          ref={banner}
           role="region"
           aria-label={t("Cookie consent")}
           className="consent-in vt-consent fixed inset-x-3 bottom-3 z-[90] rounded-[10px] border border-[#DADDE3] bg-white p-5 text-[14px] leading-[1.5] text-[#121826] shadow-[0_12px_40px_rgba(14,27,61,0.18)] sm:inset-x-auto sm:left-5 sm:bottom-5 sm:w-[min(560px,calc(100vw-40px))]"
