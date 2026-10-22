@@ -15,7 +15,7 @@ export function SignupFunnel({ t, rows }: { t: T; rows: FunnelRow[] }) {
   const n = Object.fromEntries(rows.map((r) => [r.step, Number(r.n)]));
   const top = Math.max(1, n.started ?? 0, n.code_sent ?? 0);
   return (
-    <section className="mt-6 rounded-[8px] border border-[#DADDE3] bg-white px-5 py-4">
+    <section id="signups" className="mt-6 scroll-mt-24 rounded-[8px] border border-[#DADDE3] bg-white px-5 py-4">
       <h2 className="m-0 text-[16px] font-semibold">{t("Sign-up funnel · last 30 days")}</h2>
       {rows.length === 0 ? <p className="mb-0 mt-2 text-[14px] text-[#4A5263]">{t("No sign-ups recorded yet (or the database update is pending).")}</p> : (
         <ul className="m-0 mt-3 flex list-none flex-col gap-2 p-0 text-[14px]">

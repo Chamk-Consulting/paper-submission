@@ -1,100 +1,185 @@
 "use client";
 
 import {
-  BookOpenCheck, CalendarDays, CalendarRange, ChevronDown, ClipboardCheck, FileStack, FileText, House, LayoutDashboard,
-  Mail, PanelLeftClose, PanelLeftOpen, PenLine, Settings, Settings2, Users, CircleHelp,
+  Award, BadgeCheck, Bell, BookOpen, BookOpenCheck, Briefcase, Building2, CalendarClock, CalendarCog, CalendarRange,
+  ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, FileCheck,
+  FileStack, FileText, Files, Filter, Gauge, Gavel, History, House, IdCard, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
+  Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
+  Search, Send, Settings, Settings2, ShieldAlert, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
+  UsersRound, X, Check,
 } from "lucide-react";
-import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { CookieSettingsLink } from "@/components/consent/cookie-consent";
-import { ORGANIZER_GROUPS, ORGANIZER_NAV, OWNER_ONLY } from "@/lib/site/organizer-nav";
+import { ORGANIZER_NAV, OWNER_ONLY } from "@/lib/site/organizer-nav";
 import { manageSlug } from "@/lib/site/chrome-mode";
 import type { Summary, VenueRef } from "@/components/chrome/summary";
 import { useEventHint } from "@/components/chrome/event-hint";
 
 /*
- * The workspace side menu. Three parts: a fixed top (your own pages), a middle that scrolls (your venues, and the
- * organiser groups for the event you run), a fixed bottom (settings, help, collapse). Every group folds; the
- * browser remembers which ones are open, and the group holding the current page always opens by itself.
- * Width: 248 px; a 64 px icon bar on tablets (768–1023 px) or when the person collapses it. Uses start/end, never
- * left/right, so it mirrors in right-to-left languages.
+ * The workspace side menu, built from one data tree (menuTree below): groups hold pages or other groups (two levels,
+ * three for a single venue). Every group folds; clicking its name opens it and goes to its default page — or the last
+ * page opened there — while the chevron only folds. Rows a person can't use are left out (roles from the summary).
+ * Three parts: a fixed top (filter, New submission, Home, Inbox), a middle that scrolls, a fixed bottom (Help &
+ * support, collapse). 248 px wide; a 64 px icon bar on tablets, when collapsed, or while submitting a paper — there a
+ * group opens as a small panel beside the bar. Uses start/end, never left/right, so it mirrors right to left.
  */
 
 const VENUE_COLORS = ["#2F5FD0", "#A8600F", "#18744F", "#6B4FBF", "#B3261E"];
 const I = { size: 16, strokeWidth: 1.75, "aria-hidden": true } as const;
+const ic = (C: typeof House) => <C {...I} />;
 
-type Item = { key: string; href: string; label: string; icon: ReactNode; badge?: "subs" | "unread"; needs?: (s: Summary | null) => boolean };
+/* ---------------------------------------------------------------- the tree */
+
+export type Leaf = { kind: "leaf"; key: string; label: string; icon?: ReactNode; href: string; count?: number; on: boolean; isNew?: boolean };
+export type Group = { kind: "group"; key: string; label: string; icon: ReactNode; items: MenuNode[]; def?: string; dot?: string };
+type MenuNode = Leaf | Group;
+
+const ORGANIZER_ROLES = /^(owner|chair|program_chair|deputy_chair|ceb_chair|publication_chair|registration_chair|staff)$/;
 const hasRole = (s: Summary | null, re: RegExp) => !!s?.venues?.some((v) => v.roles.some((r) => re.test(r)));
-const TOP: Item[] = [
-  { key: "home", href: "/workspace", label: "Home", icon: <House {...I} /> },
-  { key: "submissions", href: "/workspace/submissions", label: "My submissions", icon: <FileText {...I} />, badge: "subs" },
-  { key: "reviews", href: "/reviews", label: "Reviews", icon: <PenLine {...I} />, needs: (s) => hasRole(s, /reviewer|associate_editor|chair|owner/) },
-  { key: "sessions", href: "/chair", label: "Sessions I chair", icon: <CalendarDays {...I} />, needs: (s) => hasRole(s, /^session_chair$/) },
-  { key: "inbox", href: "/inbox", label: "Inbox", icon: <Mail {...I} />, badge: "unread" },
+export const isOn = (p: string, href: string) => { const h = href.split("#")[0]; return p === h || (h !== "/" && p.startsWith(`${h}/`)); };
+
+/** Organiser groups: [key, label, icon, default page, [organiser key, icon]…]. */
+const ORG_GROUPS: [string, string, typeof House, string, [string, typeof House][]][] = [
+  ["overview", "Overview", LayoutDashboard, "dashboard", [["dashboard", Gauge]]],
+  ["submissions", "Submissions", FileStack, "papers", [["papers", Files], ["similarity", ScanSearch]]],
+  ["reviewing", "Reviewing", ClipboardCheck, "reviews", [["assignment", UserPlus], ["reviews", ChartNoAxesColumn], ["decisions", Gavel], ["awards", Award]]],
+  ["after", "After acceptance", BookOpenCheck, "finals", [["finals", FileCheck], ["proceedings", BookOpen]]],
+  ["event", "Event", CalendarRange, "program", [["program", CalendarCog], ["registrations", Ticket], ["live", Radio], ["checkin", QrCode]]],
+  ["team", "Team & email", Users, "people", [["people", Contact], ["committee", UsersRound], ["email", Send]]],
+  ["settings", "Event settings", Settings2, "setup", [["setup", SlidersHorizontal], ["billing", CreditCard], ["roles", ShieldAlert], ["audit", History]]],
 ];
-const GROUP_ICON: Record<string, ReactNode> = {
-  overview: <LayoutDashboard {...I} />, submissions: <FileStack {...I} />, reviewing: <ClipboardCheck {...I} />,
-  after: <BookOpenCheck {...I} />, event: <CalendarRange {...I} />, team: <Users {...I} />, settings: <Settings2 {...I} />,
-};
-const SETTINGS: [string, string][] = [
-  ["/settings/profile", "Profile & expertise"], ["/settings/security", "Sign-in & security"], ["/settings/notifications", "Notifications"],
-  ["/settings/calendar", "Calendar feed"], ["/settings/privacy", "Privacy & data"],
+const SETTINGS_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
+  ["/settings/profile", "Profile & expertise", UserRound, (p) => p.startsWith("/settings/profile")],
+  ["/settings/security", "Sign-in & security", KeyRound, (p) => p.startsWith("/settings/security")],
+  ["/settings/notifications", "Notifications & calendar", Bell, (p) => p.startsWith("/settings/notifications") || p.startsWith("/settings/calendar")],
+  ["/settings/privacy", "Privacy & data", Lock, (p) => p.startsWith("/settings/privacy")],
 ];
 
-export function activeKey(p: string): string {
-  if (p === "/workspace") return "home";
-  if (p.startsWith("/workspace/submissions") || p.startsWith("/submissions/")) return "submissions";
-  if (p.startsWith("/reviews")) return "reviews";
-  if (p.startsWith("/chair")) return "sessions";
-  if (p.startsWith("/inbox")) return "inbox";
-  if (p.startsWith("/settings")) return "settings";
-  if (p === "/manage/roles") return "m:roles";
-  return "";
+/** Events this person organises (for the switcher), with the role label shown beside the name. */
+export function organizerEvents(s: Summary | null): (VenueRef & { roleLabel: string })[] {
+  return (s?.venues ?? []).filter((v) => v.roles.some((r) => ORGANIZER_ROLES.test(r)))
+    .map((v) => ({ ...v, roleLabel: v.roles.includes("owner") ? "Owner" : "Chair" }));
 }
-export const isOn = (p: string, href: string) => p === href || (href !== "/" && p.startsWith(`${href}/`));
+
+function useOrganizer(p: string, s: Summary | null) {
+  const hint = useEventHint();
+  const stored = useStored(ORG_KEY);
+  const events = organizerEvents(s);
+  const fromUrl = manageSlug(p);
+  const slug = fromUrl ?? (stored && events.some((e) => e.slug === stored) ? stored : null) ?? s?.organizerOf ?? events[0]?.slug ?? null;
+  if (!slug) return null;
+  const v = events.find((x) => x.slug === slug) ?? s?.venues?.find((x) => x.slug === slug);
+  const name = hint?.slug === slug ? hint.name : v ? v.shortName ?? v.name : fromUrl ? slug : null;
+  if (!name) return null;
+  const roleLabel = hint?.slug === slug ? hint.roleLabel : v?.roles.includes("owner") ? "Owner" : "Chair";
+  const nav = new Map(ORGANIZER_NAV.filter(([k]) => !OWNER_ONLY.has(k) || /owner/i.test(roleLabel)).map(([k, l, path]) => [k, {
+    label: l, href: path.startsWith("@") ? path.slice(1) : `/manage/${slug}${path}`,
+  }]));
+  // longest matching link wins (Setup vs Setup › Committee)
+  const onKey = [...nav.entries()].filter(([, i]) => isOn(p, i.href)).sort((a, b) => b[1].href.length - a[1].href.length)[0]?.[0] ?? null;
+  const groups: Group[] = ORG_GROUPS.map(([gk, gl, gi, def, items]) => ({
+    kind: "group" as const, key: `org:${gk}`, label: gl, icon: ic(gi), def,
+    items: items.filter(([k]) => nav.has(k)).map(([k, icon]) => ({ kind: "leaf" as const, key: k, label: nav.get(k)!.label, icon: ic(icon), href: nav.get(k)!.href, on: onKey === k })),
+  })).filter((g) => g.items.length);
+  return { slug, name, roleLabel, groups, events };
+}
+
+/** Everything in the middle part, in order. Rows the person can't use are left out. */
+function useMiddle(p: string, s: Summary | null) {
+  const reviewer = hasRole(s, /^(reviewer|associate_editor|chair|program_chair|deputy_chair|owner)$/) || p.startsWith("/reviews");
+  const sessionChair = hasRole(s, /^session_chair$/) || p.startsWith("/chair");
+  const myWork: Group = {
+    kind: "group", key: "work", label: "My work", icon: ic(Briefcase), def: "subs",
+    items: [
+      { kind: "leaf", key: "subs", label: "My submissions", icon: ic(FileText), href: "/workspace/submissions", count: s?.submissionCount, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
+      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "Reviews", icon: ic(PenLine), href: "/reviews", on: p.startsWith("/reviews") }] : []),
+      ...(sessionChair ? [{ kind: "leaf" as const, key: "chair", label: "Sessions I chair", icon: ic(Presentation), href: "/chair", on: p.startsWith("/chair") }] : []),
+      { kind: "leaf", key: "schedule", label: "My schedule", icon: ic(CalendarClock), href: "/workspace/schedule", on: p.startsWith("/workspace/schedule") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
+      { kind: "leaf", key: "id", label: "My Plenary ID & badge", icon: ic(IdCard), href: "/settings/profile#plenary-id", on: false },
+    ],
+  };
+  const find: Leaf = { kind: "leaf", key: "find", label: "Find events", icon: ic(Compass), href: "/workspace/events", on: p === "/workspace/events" };
+  const venues: Group | null = s?.venues?.length ? {
+    kind: "group", key: "venues", label: "Your venues", icon: ic(Building2),
+    items: s.venues.map((v, i) => {
+      const ev = `/workspace/events/${v.slug}`;
+      return {
+        kind: "group" as const, key: `venue:${v.slug}`, label: v.shortName ?? v.name, icon: <span aria-hidden className="size-2.5 flex-none rounded-[2px]" style={{ background: VENUE_COLORS[i % VENUE_COLORS.length] }} />,
+        dot: VENUE_COLORS[i % VENUE_COLORS.length], def: "me",
+        items: [
+          { kind: "leaf" as const, key: "me", label: "My page", icon: ic(UserRound), href: `/venues/${v.slug}/me`, on: p.startsWith(`/venues/${v.slug}/me`) },
+          { kind: "leaf" as const, key: "event", label: "Event page", icon: ic(Compass), href: ev, on: p === ev || p === `${ev}/archive` },
+          { kind: "leaf" as const, key: "program", label: "Program", icon: ic(CalendarRange), href: `${ev}/program`, on: p.startsWith(`${ev}/program`) },
+          { kind: "leaf" as const, key: "register", label: "Register", icon: ic(Ticket), href: `/venues/${v.slug}/register`, on: p.startsWith(`/venues/${v.slug}/register`) },
+          { kind: "leaf" as const, key: "badge", label: "Badge", icon: ic(BadgeCheck), href: `/venues/${v.slug}/badge`, on: p.startsWith(`/venues/${v.slug}/badge`) },
+        ],
+      };
+    }),
+  } : null;
+  const admin: Group | null = s?.isAdmin ? {
+    kind: "group", key: "admin", label: "Platform admin", icon: ic(ShieldCheck), def: "dash",
+    items: [
+      { kind: "leaf", key: "dash", label: "Dashboard", icon: ic(LayoutDashboard), href: "/admin", on: p.startsWith("/admin") },
+      { kind: "leaf", key: "funnel", label: "Sign-up funnel", icon: ic(Filter), href: "/admin#signups", on: false },
+    ],
+  } : null;
+  const settings: Group = {
+    kind: "group", key: "settings", label: "Settings", icon: ic(Settings), def: "/settings/profile",
+    items: SETTINGS_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
+  };
+  return { myWork, find, venues, admin, settings };
+}
+
+function helpGroup(p: string): Group {
+  return {
+    kind: "group", key: "help", label: "Help & support", icon: ic(LifeBuoy), def: "help",
+    items: [
+      { kind: "leaf", key: "help", label: "Help & guides", icon: ic(CircleHelp), href: "/workspace/help", on: p.startsWith("/workspace/help") },
+      { kind: "leaf", key: "support", label: "Contact support", icon: ic(MessageSquare), href: "/workspace/support", on: p.startsWith("/workspace/support") },
+      { kind: "leaf", key: "legal", label: "Legal", icon: ic(Scale), href: "/workspace/legal/privacy", on: p.startsWith("/workspace/legal") },
+    ],
+  };
+}
+
+const leaves = (n: MenuNode): Leaf[] => (n.kind === "leaf" ? [n] : n.items.flatMap(leaves));
+const hasOn = (n: MenuNode): boolean => leaves(n).some((l) => l.on);
 
 /* ---------------------------------------------------------------- remembered state (this browser only) */
 
 const subs = new Set<() => void>();
 const listen = (f: () => void) => { subs.add(f); window.addEventListener("storage", f); return () => { subs.delete(f); window.removeEventListener("storage", f); }; };
+const listenResize = (f: () => void) => { const off = listen(f); window.addEventListener("resize", f); return () => { off(); window.removeEventListener("resize", f); }; };
 function read(key: string): string | null { try { return localStorage.getItem(key); } catch { return null; } }
 function write(key: string, v: string) { try { localStorage.setItem(key, v); } catch { /* storage blocked */ } subs.forEach((f) => f()); }
-
-const listenResize = (f: () => void) => { const off = listen(f); window.addEventListener("resize", f); return () => { off(); window.removeEventListener("resize", f); }; };
+const useStored = (key: string) => useSyncExternalStore(listen, () => read(key), () => null);
+function useMap(key: string): Record<string, string | boolean> {
+  const raw = useStored(key) ?? "{}";
+  try { return JSON.parse(raw) as Record<string, string | boolean>; } catch { return {}; }
+}
+const patchMap = (key: string, patch: Record<string, string | boolean>) => {
+  let cur: Record<string, unknown> = {};
+  try { cur = JSON.parse(read(key) ?? "{}"); } catch { /* bad JSON */ }
+  write(key, JSON.stringify({ ...cur, ...patch }));
+};
 
 const OPEN_KEY = "plenary.sideGroups";
+/** Groups open the first time; the rest stay folded until used. */
+const OPEN_BY_DEFAULT = new Set(["work", "venues"]);
+const LAST_KEY = "plenary.sideLast";
 const RAIL_KEY = "plenary.sideRail";
-function useOpenMap(): Record<string, boolean> {
-  const raw = useSyncExternalStore(listen, () => read(OPEN_KEY) ?? "{}", () => "{}");
-  try { return JSON.parse(raw) as Record<string, boolean>; } catch { return {}; }
-}
-function setOpen(map: Record<string, boolean>, key: string, open: boolean) { write(OPEN_KEY, JSON.stringify({ ...map, [key]: open })); }
-/** "auto" = full on large screens, icon bar on tablets; "rail" / "full" = the person's choice. */
+const ORG_KEY = "plenary.orgEvent";
+/** "auto" = full on large screens, icon bar on tablets and while submitting; "rail" / "full" = the person's choice. */
 type Rail = "auto" | "rail" | "full";
-function useRail(): Rail {
-  return useSyncExternalStore(listen, () => (read(RAIL_KEY) as Rail | null) ?? "auto", () => "auto");
-}
+const useRail = (): Rail => (useStored(RAIL_KEY) as Rail | null) ?? "auto";
 
-/* ---------------------------------------------------------------- organiser block */
-
-function useOrganizer(p: string, s: Summary | null) {
-  const hint = useEventHint();
-  const slug = manageSlug(p) ?? s?.organizerOf ?? null;
-  if (!slug) return null;
-  const v: VenueRef | undefined = s?.venues?.find((x) => x.slug === slug);
-  const name = hint?.slug === slug ? hint.name : v ? v.shortName ?? v.name : manageSlug(p) ? slug : null;
-  if (!name) return null;
-  const roleLabel = hint?.slug === slug ? hint.roleLabel : v?.roles.includes("owner") ? "Owner" : "Chair";
-  const byKey = new Map(ORGANIZER_NAV.filter(([k]) => !OWNER_ONLY.has(k) || /owner/i.test(roleLabel)).map(([k, l, path]) => [k, {
-    key: k, label: l, href: path.startsWith("@") ? path.slice(1) : `/manage/${slug}${path}`,
-  }]));
-  const all = [...byKey.values()];
-  // longest matching link wins (Setup vs Setup › Committee)
-  const on = all.filter((i) => isOn(p, i.href)).sort((a, b) => b.href.length - a.href.length)[0]?.key ?? (p === "/manage/roles" ? "roles" : null);
-  const groups = ORGANIZER_GROUPS.map(([gk, gl, keys]) => ({ key: gk, label: gl, items: keys.map((k) => byKey.get(k)).filter((x): x is NonNullable<typeof x> => !!x) }))
-    .filter((g) => g.items.length);
-  return { slug, name, roleLabel, groups, on };
+/** Where a group's name leads: the last page opened in it, else its default page, else its first page. */
+function target(g: Group, last: Record<string, string | boolean>): Leaf {
+  const own = g.items.filter((n): n is Leaf => n.kind === "leaf");
+  const pick = (k: unknown) => own.find((l) => l.key === k);
+  return pick(last[g.key]) ?? pick(g.def) ?? own[0] ?? leaves(g)[0];
 }
 
 /* ---------------------------------------------------------------- pieces */
@@ -102,198 +187,333 @@ function useOrganizer(p: string, s: Summary | null) {
 const rowBase = "flex items-center gap-2.5 rounded-[6px] px-3 text-[14px] no-underline";
 const rowOn = "bg-[#E6EDFC] font-semibold text-[#0E1B3D]";
 const rowOff = "text-[#121826] hover:bg-[#F5F6F3]";
-const eyebrow = "font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]";
 
 function Count({ n }: { n?: number }) {
   return n ? <span className="ms-auto font-mono text-[12px] text-[#4A5263] rail:hidden">{n > 99 ? "99+" : n}</span> : null;
 }
-function Dot({ n }: { n?: number }) {
-  return n ? <span aria-hidden className="absolute end-1.5 top-1.5 hidden size-2 rounded-full bg-[#F2A93B] rail:block" /> : null;
+
+function LeafRow({ l, depth, onPick, t }: { l: Leaf; depth: number; onPick?: () => void; t: (k: string) => string }) {
+  return (
+    <Link href={l.href} onClick={onPick} aria-current={l.on ? "page" : undefined} prefetch={depth === 0 ? null : undefined}
+      className={`${rowBase} ${depth ? "h-[34px]" : "h-9"} ${l.on ? rowOn : rowOff}`}>
+      {depth > 1 ? null : l.icon}<span className="min-w-0 truncate">{t(l.label)}</span><Count n={l.count} />
+    </Link>
+  );
 }
 
-/** A heading that folds what is under it. `label` hides on the icon bar, where the icon stays as a link target. */
-function Fold({ id, label, icon, open, onToggle, extra, children, rail }: {
-  id: string; label: string; icon?: ReactNode; open: boolean; onToggle: () => void; extra?: ReactNode; children: ReactNode; rail?: ReactNode;
+/** A group: name (opens + goes to its page), chevron (folds only), and its rows indented under a guide line. */
+function GroupRow({ g, depth, open, onFold, last, onPick, t }: {
+  g: Group; depth: number; open: (k: string, dflt: boolean) => boolean; onFold: (k: string, v: boolean) => void;
+  last: Record<string, string | boolean>; onPick?: () => void; t: (k: string) => string;
 }) {
+  const isOpen = open(g.key, hasOn(g) || OPEN_BY_DEFAULT.has(g.key));
+  const go = target(g, last);
+  const active = hasOn(g);
   return (
     <div>
-      <button type="button" aria-expanded={open} aria-controls={`fold-${id}`} onClick={onToggle}
-        className={`flex w-full cursor-pointer items-center gap-2.5 rounded-[6px] border-0 bg-transparent px-3 text-start hover:bg-[#F5F6F3] rail:hidden ${icon ? "h-9 text-[14px] text-[#121826]" : `h-8 ${eyebrow}`}`}>
-        {icon}
-        <span className="min-w-0 flex-auto truncate">{label}</span>
-        {extra}
-        <ChevronDown size={14} strokeWidth={2} aria-hidden className={`flex-none text-[#4A5263] transition-transform ${open ? "" : "-rotate-90 rtl:rotate-90"}`} />
-      </button>
-      {rail ? <div className="hidden rail:block">{rail}</div> : null}
-      <div id={`fold-${id}`} hidden={!open} className="rail:hidden">{children}</div>
+      <div className={`group/row flex items-center rounded-[6px] ${active && !isOpen ? "bg-[#EEF2FB]" : ""} hover:bg-[#F5F6F3]`}>
+        <Link href={go.href} onClick={() => { onFold(g.key, true); onPick?.(); }} title={t(g.label)}
+          className={`flex h-9 min-w-0 flex-auto items-center gap-2.5 ps-3 text-[14px] no-underline ${active ? "font-semibold text-[#0E1B3D]" : "text-[#121826]"}`}>
+          {g.icon}<span className="min-w-0 truncate">{t(g.label)}</span>
+        </Link>
+        <button type="button" aria-expanded={isOpen} aria-label={t(g.label)}
+          onClick={() => onFold(g.key, !isOpen)}
+          className="flex size-9 flex-none cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#E9ECF2]">
+          <ChevronDown size={14} strokeWidth={2} aria-hidden className={`transition-transform ${isOpen ? "" : "-rotate-90 rtl:rotate-90"}`} />
+        </button>
+      </div>
+      {isOpen ? (
+        <ul className="m-0 mb-1 ms-[19px] flex list-none flex-col gap-px border-s border-[#DADDE3] p-0 ps-2">
+          {g.items.map((n) => (
+            <li key={n.key}>
+              {n.kind === "leaf"
+                ? <LeafRow l={n} depth={depth + 1} onPick={onPick} t={t} />
+                : <GroupRow g={n} depth={depth + 1} open={open} onFold={onFold} last={last} onPick={onPick} t={t} />}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 }
 
-/** Icon-bar link: icon only, name in a tooltip and for screen readers. */
-function RailLink({ href, label, icon, on, onPick, n }: { href: string; label: string; icon: ReactNode; on?: boolean; onPick?: () => void; n?: number }) {
+/** A small panel beside the icon bar (or above the bottom row), listing a group's pages. Closes on Escape, outside click. */
+function Flyout({ anchor, onClose, title, children, above }: { anchor: DOMRect; onClose: () => void; title: string; children: ReactNode; above?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const out = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) onClose(); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const id = window.setTimeout(() => document.addEventListener("mousedown", out), 0);
+    document.addEventListener("keydown", esc);
+    ref.current?.querySelector<HTMLElement>("a,button")?.focus();
+    return () => { window.clearTimeout(id); document.removeEventListener("mousedown", out); document.removeEventListener("keydown", esc); };
+  }, [onClose]);
+  const rtl = typeof document !== "undefined" && document.documentElement.dir === "rtl";
+  const top = Math.max(68, Math.min(anchor.top, window.innerHeight - 340));
+  const pos = above
+    ? { bottom: window.innerHeight - anchor.top + 6, ...(rtl ? { right: window.innerWidth - anchor.right } : { left: anchor.left }) }
+    : { top, ...(rtl ? { right: window.innerWidth - anchor.left + 8 } : { left: anchor.right + 8 }) };
   return (
-    <Link href={href} onClick={onPick} title={label} aria-current={on ? "page" : undefined}
-      className={`relative mx-auto flex size-10 items-center justify-center rounded-[6px] no-underline ${on ? rowOn : rowOff}`}>
-      {icon}<span className="sr-only">{label}</span><Dot n={n} />
-    </Link>
+    <div ref={ref} role="dialog" aria-label={title}
+      style={{ position: "fixed", ...pos }}
+      className="z-50 w-[248px] rounded-[8px] border border-[#DADDE3] bg-white p-2 text-[#121826] shadow-[0_12px_32px_rgba(18,24,38,.16)]">
+      <p className="m-0 px-3 pb-1.5 pt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{title}</p>
+      <div className="flex max-h-[300px] flex-col gap-px overflow-y-auto">{children}</div>
+    </div>
+  );
+}
+
+/** Icon-bar button: a page opens directly; a group opens its flyout. */
+function RailItem({ n, onPick, t }: { n: MenuNode; onPick?: () => void; t: (k: string) => string }) {
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const on = hasOn(n);
+  const cls = `relative mx-auto flex size-10 items-center justify-center rounded-[6px] border-0 no-underline ${on ? rowOn : `bg-transparent ${rowOff}`}`;
+  if (n.kind === "leaf") {
+    return (
+      <Link href={n.href} onClick={onPick} title={t(n.label)} aria-current={n.on ? "page" : undefined} className={cls}>
+        {n.icon}<span className="sr-only">{t(n.label)}</span>
+        {n.count ? <span aria-hidden className="absolute end-1.5 top-1.5 size-2 rounded-full bg-[#F2A93B]" /> : null}
+      </Link>
+    );
+  }
+  const flat = (g: Group, depth: number): ReactNode[] => g.items.flatMap((x) => x.kind === "leaf"
+    ? [<Link key={`${g.key}/${x.key}`} href={x.href} onClick={() => { setAnchor(null); onPick?.(); }} aria-current={x.on ? "page" : undefined}
+        className={`${rowBase} h-[34px] ${depth ? "ps-7" : ""} ${x.on ? rowOn : rowOff}`}>{depth ? null : x.icon}<span className="truncate">{t(x.label)}</span></Link>]
+    : [<p key={x.key} className="m-0 mt-1 flex items-center gap-2 px-3 py-1 text-[13px] font-semibold text-[#4A5263]">{x.icon}<span className="truncate">{t(x.label)}</span></p>, ...flat(x, depth + 1)]);
+  return (
+    <>
+      <button type="button" title={t(n.label)} aria-haspopup="dialog" aria-expanded={!!anchor}
+        onClick={(e) => setAnchor(anchor ? null : e.currentTarget.getBoundingClientRect())} className={`${cls} cursor-pointer`}>
+        {n.icon}<span className="sr-only">{t(n.label)}</span>
+      </button>
+      {anchor ? <Flyout anchor={anchor} onClose={() => setAnchor(null)} title={t(n.label)}>{flat(n, 0)}</Flyout> : null}
+    </>
+  );
+}
+
+/* ---------------------------------------------------------------- organiser block */
+
+function EventSwitcher({ org, p, t }: { org: NonNullable<ReturnType<typeof useOrganizer>>; p: string; t: (k: string) => string }) {
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const router = useRouter();
+  const many = org.events.length > 1;
+  function pick(slug: string) {
+    write(ORG_KEY, slug);
+    setAnchor(null);
+    const cur = manageSlug(p);
+    // Same page in the other event when you're on an organiser page; else that event's dashboard.
+    router.push(cur ? p.replace(`/manage/${cur}`, `/manage/${slug}`) : `/manage/${slug}`);
+  }
+  return (
+    <div className="px-1">
+      <button type="button" disabled={!many} aria-haspopup="dialog" aria-expanded={!!anchor}
+        onClick={(e) => setAnchor(anchor ? null : e.currentTarget.getBoundingClientRect())}
+        title={many ? t("Switch event") : org.name}
+        className={`flex w-full items-center gap-2 rounded-[6px] border border-[#DADDE3] bg-[#F7F8F6] px-2.5 py-1.5 text-start ${many ? "cursor-pointer hover:border-[#B7BDC9]" : "cursor-default"}`}>
+        <span className="min-w-0 flex-auto">
+          <span className="block truncate text-[13px] font-semibold text-[#121826]">{org.name}</span>
+          <span className="block font-mono text-[10px] uppercase tracking-[0.06em] text-[#A8600F]">{t(org.roleLabel)}</span>
+        </span>
+        {many ? <ChevronsUpDown size={14} strokeWidth={2} aria-hidden className="flex-none text-[#4A5263]" /> : null}
+      </button>
+      {anchor ? (
+        <Flyout anchor={anchor} onClose={() => setAnchor(null)} title={t("Switch event")}>
+          {org.events.map((e) => (
+            <button key={e.slug} type="button" onClick={() => pick(e.slug)}
+              className={`${rowBase} h-auto min-h-9 w-full cursor-pointer border-0 py-1.5 text-start ${e.slug === org.slug ? rowOn : `bg-transparent ${rowOff}`}`}>
+              <span className="min-w-0 flex-auto"><span className="block truncate">{e.shortName ?? e.name}</span><span className="block font-mono text-[10px] uppercase text-[#4A5263]">{t(e.roleLabel)}</span></span>
+              {e.slug === org.slug ? <Check size={14} aria-hidden className="flex-none" /> : null}
+            </button>
+          ))}
+        </Flyout>
+      ) : null}
+    </div>
   );
 }
 
 /* ---------------------------------------------------------------- lists */
 
-/** The menu body, shared by the side menu (with icon bar) and the phone menu (always full). */
-export function NavList({ p, s, onPick, part = "all" }: { p: string; s: Summary | null; onPick?: () => void; part?: "all" | "top" | "middle" }) {
-  const t = useT();
-  const key = activeKey(p);
+function useTree(p: string, s: Summary | null) {
   const org = useOrganizer(p, s);
-  const openMap = useOpenMap();
-  const activeGroup = org?.groups.find((g) => g.items.some((i) => i.key === org.on))?.key;
-  const venueOn = s?.venues?.some((v) => p.startsWith(`/venues/${v.slug}/`));
-
-  // The group with the current page opens by itself, even if it was folded before.
-  useEffect(() => {
-    if (activeGroup && openMap[`org:${activeGroup}`] === false) setOpen(openMap, `org:${activeGroup}`, true);
-    if (venueOn && openMap.venues === false) setOpen(openMap, "venues", true);
-  }, [activeGroup, venueOn]); // eslint-disable-line react-hooks/exhaustive-deps
-  const isOpen = (k: string, dflt: boolean) => openMap[k] ?? dflt;
-
-  const top = TOP.filter((i) => !i.needs || i.needs(s) || i.key === key).map((i) => {
-    const n = i.badge === "subs" ? s?.submissionCount : i.badge === "unread" ? s?.unread : undefined;
-    const on = key === i.key;
-    return (
-      <div key={i.key}>
-        <Link href={i.href} prefetch={null} onClick={onPick} aria-current={on ? "page" : undefined} className={`${rowBase} h-10 rail:hidden ${on ? rowOn : rowOff}`}>
-          {i.icon}<span className="truncate">{t(i.label)}</span><Count n={n} />
-        </Link>
-        <div className="hidden rail:block"><RailLink href={i.href} label={t(i.label)} icon={i.icon} on={on} onPick={onPick} n={n} /></div>
-      </div>
-    );
-  });
-
-  const middle = (
-    <>
-      {s?.venues?.length ? (
-        <div className="mt-3">
-          <Fold id="venues" label={t("Your venues")} open={isOpen("venues", true)} onToggle={() => setOpen(openMap, "venues", !isOpen("venues", true))}
-            rail={<div className="flex flex-col items-center gap-1 border-t border-[#EEF0EC] pt-2">
-              {s.venues.map((v, i) => (
-                <Link key={v.slug} href={`/venues/${v.slug}/me`} onClick={onPick} title={v.name} aria-current={p.startsWith(`/venues/${v.slug}/`) ? "page" : undefined}
-                  className={`flex size-10 items-center justify-center rounded-[6px] ${p.startsWith(`/venues/${v.slug}/`) ? rowOn : rowOff}`}>
-                  <span className="size-2.5 rounded-[2px]" style={{ background: VENUE_COLORS[i % VENUE_COLORS.length] }} /><span className="sr-only">{v.name}</span>
-                </Link>
-              ))}
-            </div>}>
-            {s.venues.map((v, i) => {
-              const on = p.startsWith(`/venues/${v.slug}/`);
-              return (
-                <Link key={v.slug} href={`/venues/${v.slug}/me`} onClick={onPick} aria-current={on ? "page" : undefined} className={`${rowBase} h-9 ${on ? rowOn : rowOff}`}>
-                  <span className="size-2 flex-none rounded-[2px]" style={{ background: VENUE_COLORS[i % VENUE_COLORS.length] }} />
-                  <span className="truncate">{v.name}</span>
-                </Link>
-              );
-            })}
-          </Fold>
-        </div>
-      ) : null}
-      {org ? (
-        <div className="mt-3 border-t border-[#EEF0EC] pt-3 rail:border-t-0 rail:pt-0">
-          <div className="mx-3 mb-1 flex items-center justify-between gap-2 rail:hidden">
-            <span className={eyebrow}>{t("Organizer")}</span>
-            <span className="rounded-[3px] bg-[#0E1B3D] px-1.5 py-px font-mono text-[10px] uppercase text-[#F2A93B]">{t(org.roleLabel)}</span>
-          </div>
-          <div className="truncate px-3 pb-2 text-[12px] text-[#4A5263] rail:hidden" title={org.name}>{org.name}</div>
-          <div className="flex flex-col gap-0.5 rail:items-center rail:border-t rail:border-[#EEF0EC] rail:pt-2">
-            {org.groups.map((g) => {
-              const on = g.key === activeGroup;
-              const open = isOpen(`org:${g.key}`, on || g.key === "overview");
-              if (g.items.length === 1) {
-                const i = g.items[0];
-                return (
-                  <div key={g.key}>
-                    <Link href={i.href} onClick={onPick} aria-current={org.on === i.key ? "page" : undefined} className={`${rowBase} h-9 rail:hidden ${org.on === i.key ? rowOn : rowOff}`}>
-                      {GROUP_ICON[g.key]}<span className="truncate">{t(i.label)}</span>
-                    </Link>
-                    <div className="hidden rail:block"><RailLink href={i.href} label={t(i.label)} icon={GROUP_ICON[g.key]} on={org.on === i.key} onPick={onPick} /></div>
-                  </div>
-                );
-              }
-              return (
-                <Fold key={g.key} id={`org-${g.key}`} label={t(g.label)} icon={GROUP_ICON[g.key]} open={open}
-                  onToggle={() => setOpen(openMap, `org:${g.key}`, !open)}
-                  rail={<RailLink href={g.items.find((i) => i.key === org.on)?.href ?? g.items[0].href} label={t(g.label)} icon={GROUP_ICON[g.key]} on={on} onPick={onPick} />}>
-                  <ul className="m-0 mb-1 ms-[19px] list-none border-s border-[#DADDE3] p-0 ps-2">
-                    {g.items.map((i) => (
-                      <li key={i.key}>
-                        <Link href={i.href} onClick={onPick} aria-current={org.on === i.key ? "page" : undefined}
-                          className={`${rowBase} h-[34px] ${org.on === i.key ? rowOn : rowOff}`}><span className="truncate">{t(i.label)}</span></Link>
-                      </li>
-                    ))}
-                  </ul>
-                </Fold>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-    </>
-  );
-
-  if (part === "top") return <>{top}</>;
-  if (part === "middle") return middle;
-  return <>{top}{middle}</>;
+  const m = useMiddle(p, s);
+  const middle: MenuNode[] = [m.myWork, m.find, ...(m.venues ? [m.venues] : [])];
+  const after: MenuNode[] = [...(m.admin ? [m.admin] : []), m.settings];
+  return { org, middle, after, all: [...middle, ...(org?.groups ?? []), ...after, helpGroup(p)] };
 }
 
-/** Settings with its pages nested, used in the side menu's fixed bottom. */
-function SettingsFold({ p }: { p: string }) {
-  const t = useT();
-  const openMap = useOpenMap();
-  const on = p.startsWith("/settings");
-  const open = openMap.settings ?? on;
-  useEffect(() => { if (on && openMap.settings === false) setOpen(openMap, "settings", true); }, [on]); // eslint-disable-line react-hooks/exhaustive-deps
-  const icon = <Settings {...I} />;
+/** Opens the groups holding the current page, and remembers that page as the group's last one. */
+function useFollow(nodes: MenuNode[]) {
+  const open = useMap(OPEN_KEY);
+  const sig = nodes.map((n) => leaves(n).filter((l) => l.on).map((l) => `${n.key}/${l.key}`).join(",")).join("|");
+  useEffect(() => {
+    const openPatch: Record<string, boolean> = {};
+    const lastPatch: Record<string, string> = {};
+    const walk = (n: MenuNode) => {
+      if (n.kind !== "group" || !hasOn(n)) return;
+      if (open[n.key] === false) openPatch[n.key] = true;
+      const own = n.items.find((x) => x.kind === "leaf" && x.on);
+      if (own) lastPatch[n.key] = own.key;
+      n.items.forEach(walk);
+    };
+    nodes.forEach(walk);
+    if (Object.keys(openPatch).length) patchMap(OPEN_KEY, openPatch);
+    if (Object.keys(lastPatch).length) patchMap(LAST_KEY, lastPatch);
+  }, [sig]); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+/** Filter: every page whose name (or group) matches, flat, with its group as a hint. */
+function FilterResults({ nodes, q, onPick, t }: { nodes: MenuNode[]; q: string; onPick?: () => void; t: (k: string) => string }) {
+  const needle = q.trim().toLowerCase();
+  const rows: { l: Leaf; path: string }[] = [];
+  const walk = (n: MenuNode, path: string[]) => {
+    if (n.kind === "leaf") {
+      const hay = [t(n.label), ...path].join(" ").toLowerCase();
+      if (hay.includes(needle)) rows.push({ l: n, path: path.join(" › ") });
+    } else n.items.forEach((x) => walk(x, [...path, t(n.label)]));
+  };
+  nodes.forEach((n) => walk(n, []));
+  if (!rows.length) return <p className="m-0 px-3 py-2 text-[13px] text-[#4A5263]">{t("No matching page.")}</p>;
   return (
-    <Fold id="settings" label={t("Settings")} icon={icon} open={open} onToggle={() => setOpen(openMap, "settings", !open)}
-      rail={<RailLink href="/settings/profile" label={t("Settings")} icon={icon} on={on} />}>
-      <ul className="m-0 mb-1 ms-[19px] list-none border-s border-[#DADDE3] p-0 ps-2">
-        {SETTINGS.map(([href, label]) => (
-          <li key={href}>
-            <Link href={href} aria-current={isOn(p, href) ? "page" : undefined} className={`${rowBase} h-[32px] ${isOn(p, href) ? rowOn : rowOff}`}><span className="truncate">{t(label)}</span></Link>
-          </li>
-        ))}
-      </ul>
-    </Fold>
+    <ul className="m-0 flex list-none flex-col gap-px p-0">
+      {rows.slice(0, 30).map(({ l, path }) => (
+        <li key={`${path}/${l.key}`}>
+          <Link href={l.href} onClick={onPick} className={`${rowBase} min-h-9 py-1 ${l.on ? rowOn : rowOff}`}>
+            {l.icon}
+            <span className="min-w-0"><span className="block truncate">{t(l.label)}</span>{path ? <span className="block truncate text-[11px] font-normal text-[#4A5263]">{path}</span> : null}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
+}
+
+function MenuFilter({ q, setQ, t }: { q: string; setQ: (v: string) => void; t: (k: string) => string }) {
+  return (
+    <div className="relative mb-1.5 rail:hidden">
+      <Search size={14} strokeWidth={2} aria-hidden className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-[#4A5263]" />
+      <label htmlFor="menu-filter" className="sr-only">{t("Filter menu")}</label>
+      <input id="menu-filter" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Filter menu")} autoComplete="off"
+        onKeyDown={(e) => { if (e.key === "Escape") setQ(""); }}
+        className="h-8 w-full rounded-[6px] border border-[#DADDE3] bg-[#F7F8F6] pe-7 ps-8 text-[13px] text-[#121826] outline-none placeholder:text-[#6B7385] focus:border-[#2F5FD0] focus:bg-white [&::-webkit-search-cancel-button]:hidden" />
+      {q ? (
+        <button type="button" onClick={() => setQ("")} aria-label={t("Clear")} className="absolute end-1 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded border-0 bg-transparent text-[#4A5263]">
+          <X size={13} aria-hidden />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** The menu body: used by the phone menu (always full, everything in one scroll). */
+export function NavList({ p, s, onPick }: { p: string; s: Summary | null; onPick?: () => void }) {
+  const t = useT();
+  const tree = useTree(p, s);
+  const [q, setQ] = useState("");
+  const open = useMap(OPEN_KEY);
+  const last = useMap(LAST_KEY);
+  useFollow(tree.all);
+  const isOpen = (k: string, d: boolean) => (typeof open[k] === "boolean" ? (open[k] as boolean) : d);
+  const fold = (k: string, v: boolean) => patchMap(OPEN_KEY, { [k]: v });
+  const top: Leaf[] = topLeaves(p, s);
+  const render = (n: MenuNode) => n.kind === "leaf"
+    ? <LeafRow key={n.key} l={n} depth={0} onPick={onPick} t={t} />
+    : <GroupRow key={n.key} g={n} depth={0} open={isOpen} onFold={fold} last={last} onPick={onPick} t={t} />;
+  return (
+    <div className="flex flex-col gap-0.5">
+      <MenuFilter q={q} setQ={setQ} t={t} />
+      {q ? <FilterResults nodes={[...top, ...tree.all]} q={q} onPick={onPick} t={t} /> : (
+        <>
+          {top.map(render)}
+          <Sep />
+          {tree.middle.map(render)}
+          {tree.org ? <><Sep label={t("Organizer")} /><EventSwitcher org={tree.org} p={p} t={t} />{tree.org.groups.map(render)}</> : null}
+          <Sep />
+          {tree.after.map(render)}
+          {render(helpGroup(p))}
+        </>
+      )}
+    </div>
+  );
+}
+
+function topLeaves(p: string, s: Summary | null): Leaf[] {
+  return [
+    { kind: "leaf", key: "home", label: "Home", icon: ic(House), href: "/workspace", on: p === "/workspace" },
+    { kind: "leaf", key: "inbox", label: "Inbox", icon: ic(Inbox), href: "/inbox", count: s?.unread, on: p.startsWith("/inbox") },
+  ];
+}
+
+function Sep({ label }: { label?: string }) {
+  return label
+    ? <p className="m-0 mt-3 px-3 pb-1 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263] rail:hidden">{label}</p>
+    : <div aria-hidden className="mx-2 my-2 border-t border-[#EEF0EC]" />;
 }
 
 /** The side menu (768 px and up). `data-rail` drives the icon-bar look through the `rail:` variant (globals.css). */
 export function SideMenu({ p, s }: { p: string; s: Summary | null }) {
   const t = useT();
   const rail = useRail();
-  function toggle() {
-    const wide = window.matchMedia("(min-width: 1024px)").matches;
-    const isRail = rail === "rail" || (rail === "auto" && !wide);
-    write(RAIL_KEY, isRail ? "full" : "rail");
-  }
-  // For the button's name only; the look itself comes from CSS, so there's no flash before this runs.
-  const isRailNow = useSyncExternalStore(listenResize, () => rail === "rail" || (rail === "auto" && !window.matchMedia("(min-width: 1024px)").matches), () => false);
-  const help = <CircleHelp {...I} />;
+  const tree = useTree(p, s);
+  const [q, setQ] = useState("");
+  const open = useMap(OPEN_KEY);
+  const last = useMap(LAST_KEY);
+  useFollow(tree.all);
+  const isOpen = (k: string, d: boolean) => (typeof open[k] === "boolean" ? (open[k] as boolean) : d);
+  const fold = (k: string, v: boolean) => patchMap(OPEN_KEY, { [k]: v });
+  const railNow = () => rail === "rail" || (rail === "auto" && (!window.matchMedia("(min-width: 1024px)").matches || !!document.querySelector("[data-focus-mode]")));
+  const isRailNow = useSyncExternalStore(listenResize, railNow, () => false);
+  const toggle = () => write(RAIL_KEY, railNow() ? "full" : "rail");
+  const filterRef = useRef<HTMLDivElement>(null);
+  const top = topLeaves(p, s);
+  const help = helpGroup(p);
+
+  const full = (n: MenuNode) => n.kind === "leaf"
+    ? <LeafRow key={n.key} l={n} depth={0} t={t} />
+    : <GroupRow key={n.key} g={n} depth={0} open={isOpen} onFold={fold} last={last} t={t} />;
+  // Both looks are in the page; CSS shows one (no flash before the stored choice is read).
+  const both = (n: MenuNode) => (
+    <div key={n.key}>
+      <div className="rail:hidden">{full(n)}</div>
+      <div className="hidden rail:block"><RailItem n={n} t={t} /></div>
+    </div>
+  );
+
   return (
     <nav aria-label={t("Workspace")} data-rail={rail}
       className="side-menu sticky top-[60px] box-border hidden h-[calc(100dvh-60px)] w-[248px] flex-none flex-col border-e border-[#DADDE3] bg-white md:flex rail:w-16">
-      <div className="flex flex-none flex-col gap-0.5 border-b border-[#EEF0EC] px-3 pb-3 pt-4 rail:px-2">
-        <NavList p={p} s={s} part="top" />
+      <div className="flex flex-none flex-col gap-0.5 border-b border-[#EEF0EC] px-3 pb-2.5 pt-3 rail:items-center rail:px-2" ref={filterRef}>
+        <MenuFilter q={q} setQ={setQ} t={t} />
+        <button type="button" onClick={() => { toggle(); window.setTimeout(() => document.getElementById("menu-filter")?.focus(), 50); }} title={t("Filter menu")}
+          className="mx-auto hidden size-10 cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#F5F6F3] rail:flex">
+          <Search {...I} /><span className="sr-only">{t("Filter menu")}</span>
+        </button>
+        <Link href="/workspace/events" title={t("New submission")}
+          className="mb-1 flex h-9 items-center justify-center gap-2 rounded-[6px] bg-[#F2A93B] text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] rail:size-10 rail:p-0">
+          <Plus size={16} strokeWidth={2.25} aria-hidden /><span className="rail:sr-only">{t("New submission")}</span>
+        </Link>
+        {top.map(both)}
       </div>
-      <div className="min-h-0 flex-auto overflow-y-auto overscroll-contain px-3 pb-4 rail:px-2">
-        <NavList p={p} s={s} part="middle" />
-        <div className="mt-3 border-t border-[#EEF0EC] pt-3 rail:flex rail:justify-center">
-          <SettingsFold p={p} />
-        </div>
+      <div className="min-h-0 flex-auto overflow-y-auto overscroll-contain px-3 pb-4 pt-2 rail:px-2">
+        {q ? <FilterResults nodes={[...top, ...tree.all]} q={q} t={t} /> : (
+          <div className="flex flex-col gap-0.5 rail:items-center">
+            {tree.middle.map(both)}
+            {tree.org ? (
+              <>
+                <Sep label={t("Organizer")} />
+                <div aria-hidden className="mx-2 my-2 hidden w-8 border-t border-[#EEF0EC] rail:block" />
+                <div className="mb-1 rail:hidden"><EventSwitcher org={tree.org} p={p} t={t} /></div>
+                {tree.org.groups.map(both)}
+              </>
+            ) : null}
+            <div aria-hidden className="mx-2 my-2 border-t border-[#EEF0EC] rail:w-8" />
+            {tree.after.map(both)}
+          </div>
+        )}
       </div>
       <div className="flex flex-none flex-col gap-0.5 border-t border-[#DADDE3] px-3 py-2.5 rail:items-center rail:px-2">
         <div className="flex items-center gap-1 rail:flex-col">
-          <Link href="/help" className={`${rowBase} h-9 min-w-0 flex-auto text-[#4A5263] hover:bg-[#F5F6F3] rail:hidden`}>{help}<span className="truncate">{t("Help & guides")}</span></Link>
-          <div className="hidden rail:block"><RailLink href="/help" label={t("Help & guides")} icon={help} /></div>
+          <div className="min-w-0 flex-auto rail:hidden"><HelpButton g={help} t={t} /></div>
+          <div className="hidden rail:block"><RailItem n={help} t={t} /></div>
           <button type="button" onClick={toggle} aria-label={t(isRailNow ? "Expand menu" : "Collapse menu")} title={t(isRailNow ? "Expand menu" : "Collapse menu")}
             className="flex size-9 flex-none cursor-pointer items-center justify-center rounded-[6px] border-0 bg-transparent text-[#4A5263] hover:bg-[#F5F6F3] rail:size-10">
             <PanelLeftClose {...I} className="rtl:-scale-x-100 rail:hidden" />
@@ -306,3 +526,22 @@ export function SideMenu({ p, s }: { p: string; s: Summary | null }) {
   );
 }
 
+/** Help & support in the fixed bottom: one row that opens its three pages in a panel above it. */
+function HelpButton({ g, t }: { g: Group; t: (k: string) => string }) {
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const on = hasOn(g);
+  return (
+    <>
+      <button type="button" aria-haspopup="dialog" aria-expanded={!!anchor}
+        onClick={(e) => setAnchor(anchor ? null : e.currentTarget.getBoundingClientRect())}
+        className={`${rowBase} h-9 w-full cursor-pointer border-0 text-start ${on ? rowOn : `bg-transparent text-[#4A5263] hover:bg-[#F5F6F3]`}`}>
+        {g.icon}<span className="min-w-0 flex-auto truncate">{t(g.label)}</span>
+      </button>
+      {anchor ? (
+        <Flyout above anchor={anchor} onClose={() => setAnchor(null)} title={t(g.label)}>
+          {g.items.map((n) => n.kind === "leaf" ? <LeafRow key={n.key} l={n} depth={0} onPick={() => setAnchor(null)} t={t} /> : null)}
+        </Flyout>
+      ) : null}
+    </>
+  );
+}

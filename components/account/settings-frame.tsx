@@ -2,7 +2,7 @@ import Link from "@/components/site/link";
 import type { ReactNode } from "react";
 import { getT } from "@/lib/i18n/server";
 
-/* Shared head + sub-nav of the settings pages (canvas ST01–ST04). Also used by their skeletons. */
+/* Shared head of the settings pages (canvas ST01–ST04), plus a sub-nav on phones only. Also used by their skeletons. */
 
 export type SettingsKey = "profile" | "security" | "notifications" | "privacy";
 export const SETTINGS_NAV: [SettingsKey, string, string][] = [
@@ -29,8 +29,9 @@ export async function SettingsFrame({ active, children }: { active: SettingsKey;
         <h1 className="mb-0 mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t(title)}</h1>
         <p className="mb-0 mt-1.5 text-[#4A5263]">{t(subtitle)}</p>
       </div>
-      <div className="mt-6 flex flex-col items-stretch gap-7 md:flex-row md:items-start">
-        <nav aria-label={t("Settings")} className="flex flex-none gap-0.5 overflow-x-auto md:w-[210px] md:flex-col">
+      <div className="mt-6 flex flex-col items-stretch gap-7">
+        {/* Phones only: from 768 px the side menu holds these pages (Settings group), so no second menu here. */}
+        <nav aria-label={t("Settings")} className="flex flex-none gap-0.5 overflow-x-auto md:hidden">
           {SETTINGS_NAV.map(([k, label, href]) => (
             <Link key={k} href={href} aria-current={active === k ? "page" : undefined}
               className={`whitespace-nowrap rounded-[6px] border px-3 py-[9px] text-[14px] no-underline ${active === k ? "border-[#DADDE3] bg-white font-semibold text-[#121826]" : "border-transparent text-[#4A5263] hover:bg-white/60"}`}>
@@ -38,7 +39,7 @@ export async function SettingsFrame({ active, children }: { active: SettingsKey;
             </Link>
           ))}
         </nav>
-        <div className="flex w-full min-w-0 max-w-[860px] flex-auto flex-col gap-[18px]">{children}</div>
+        <div className="flex w-full min-w-0 max-w-[900px] flex-auto flex-col gap-[18px]">{children}</div>
       </div>
     </>
   );

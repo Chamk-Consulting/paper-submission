@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, negotiate } from "@/lib/i18n/config";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
+import { workspaceFor } from "@/lib/site/workspace-routes";
 
 // Thin edge layer: pick the language, refresh the Supabase session, keep signed-out users out of
 // private areas. Real permission checks live in server actions and RLS.
@@ -87,10 +88,21 @@ export default async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
-  if (user && AUTH_PAGES.includes(bare)) {
+  // Signed in: public pages and sign-in pages open their workspace version (lib/site/workspace-routes.ts).
+  // A sign-in page with ?next=/somewhere goes there instead, so "sign in to continue" links still land right.
+  const inWorkspace = user ? workspaceFor(bare) : null;
+  if (inWorkspace) {
     const url = request.nextUrl.clone();
-    url.pathname = `${prefix}/workspace`;
-    url.search = "";
+    const next = request.nextUrl.searchParams.get("next");
+    const safeNext = AUTH_PAGES.includes(bare) && next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+    if (safeNext) {
+      const [path, query = ""] = safeNext.split("?");
+      url.pathname = `${prefix}${workspaceFor(path) ?? path}`;
+      url.search = query ? `?${query}` : "";
+    } else {
+      url.pathname = `${prefix}${inWorkspace}`;
+      if (AUTH_PAGES.includes(bare) || bare === "/forgot-password" || bare === "/forgot-password/code" || bare === "/check-email" || bare === "/auth-error") url.search = "";
+    }
     return NextResponse.redirect(url);
   }
 

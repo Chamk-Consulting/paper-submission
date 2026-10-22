@@ -6,7 +6,15 @@
   @media (width >= 768px) and (width < 1024px) {
     &:where([data-rail="auto"], [data-rail="auto"] *) { @slot; }
   }
+  /* While submitting or editing a paper (a page marks itself [data-focus-mode]). */
+  @media (width >= 1024px) {
+    body:has([data-focus-mode]) &:where([data-rail="auto"], [data-rail="auto"] *) { @slot; }
+  }
 }
+
+/* Pages that draw their own full-width bands inside the workspace ([data-bleed]): their outer box no longer needs
+   to fill the screen height, the workspace frame already does. */
+main.app-frame .min-h-dvh { min-height: 0; }
 
 /* Plenary · Ink & Saffron */
 :root {

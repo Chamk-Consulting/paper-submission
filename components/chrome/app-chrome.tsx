@@ -21,7 +21,7 @@ import { refreshSummary, syncAuth, useSummary, type Summary } from "@/components
 
 const NAVY = "#0E1B3D";
 const PUBLIC_NAV: [string, string][] = [["/venues", "Venues"], ["/organizers", "For organizers"], ["/pricing", "Pricing"], ["/help", "Help"], ["/contact", "Contact"]];
-const SIGNED_IN_NAV: [string, string][] = [["/workspace", "My workspace"], ["/venues", "Venues"], ["/help", "Help"]];
+const SIGNED_IN_NAV: [string, string][] = [["/workspace", "My workspace"], ["/workspace/events", "Find events"], ["/workspace/help", "Help"]];
 
 function Count({ n, dark }: { n?: number; dark?: boolean }) {
   if (!n) return null;
@@ -81,14 +81,8 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
               {s.plenaryId ? <Link href="/settings/profile#plenary-id" className="font-mono text-[12px] text-[#2F5FD0] no-underline">{s.plenaryId} · {t("My Plenary ID")}</Link> : null}
             </div>
           ) : null}
-          <Link href="/venues" className="mb-2 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("New submission")}</Link>
-          <NavList p={p} s={s} />
-          <div className="mt-3 border-t border-[#EEF0EC] pt-3">
-            <Link href="/settings/profile" className={pub}>{t("Settings")}</Link>
-            <Link href="/help" className={pub}>{t("Help & guides")}</Link>
-            <Link href="/contact" className={pub}>{t("Contact")}</Link>
-            {s?.isAdmin ? <Link href="/admin" className={pub}>{t("Platform admin")}</Link> : null}
-          </div>
+          <Link href="/workspace/events" onClick={onClose} className="mb-2 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("New submission")}</Link>
+          <NavList p={p} s={s} onPick={onClose} />
         </div>
         <div className="auth-out flex flex-col gap-0.5 px-3 py-4">
           {PUBLIC_NAV.map(([href, label]) => (
@@ -141,9 +135,11 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
             <Link href="/manage/new" className="hidden sm:inline-flex h-9 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Host a conference")}</Link>
           </span>
           <span className="auth-in flex items-center gap-2.5 sm:gap-3">
-            <Link href="/venues" className="hidden h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] lg:flex">
-              <Plus size={15} strokeWidth={2.25} aria-hidden />{t("New submission")}
-            </Link>
+            {variant === "site" ? (
+              <Link href="/workspace/events" className="hidden h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] lg:flex">
+                <Plus size={15} strokeWidth={2.25} aria-hidden />{t("New submission")}
+              </Link>
+            ) : null}
             <Link href="/inbox" prefetch={null} aria-label={s?.unread ? `${t("Inbox")} · ${s.unread} ${t("unread")}` : t("Inbox")} title={t("Inbox")}
               className="relative box-border flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E] no-underline hover:bg-[#17285A]">
               <Mail size={18} strokeWidth={1.75} aria-hidden />
@@ -208,7 +204,7 @@ function SideMenuLive() {
 }
 
 /** Signed-in areas: the side menu pinned to the left edge, the page centred in the rest (1120 px; organiser pages
- * mark themselves wide with [data-wide-frame] and get 1360 px). */
+ * mark themselves wide with [data-wide-frame] and get 1360 px; pages with their own full-width bands mark [data-bleed]). */
 export function AppFrame({ children }: { children: ReactNode }) {
   const s = useSummary();
   return (
@@ -216,8 +212,8 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <Suspense fallback={<SideMenu p="" s={s} />}>
         <SideMenuLive />
       </Suspense>
-      <main id="main-content" className="app-frame box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10">
-        <div className="mx-auto w-full max-w-[1120px] has-[[data-wide-frame]]:max-w-[1360px]">{children}</div>
+      <main id="main-content" className="app-frame box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10 has-[[data-bleed]]:p-0">
+        <div className="mx-auto w-full max-w-[1120px] has-[[data-wide-frame]]:max-w-[1360px] has-[[data-bleed]]:max-w-none">{children}</div>
       </main>
       {s?.signedIn ? <InstallPrompt /> : null}
     </div>
