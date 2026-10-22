@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { refuseIfLocked } from "@/lib/auth/lock-check";
+import { resolveOnboarding, stepHref } from "@/lib/auth/onboarding";
 import { absoluteUrl, safeNext } from "@/lib/config/site";
 import { detectIdentifier } from "@/lib/auth/identifier";
 import { accountEmailFor, maskEmail, plenaryIdSignIn } from "@/lib/auth/plenary-id";
@@ -25,8 +26,11 @@ export type SignInState = {
 const GENERIC = "Those details didn't match an account, or the email isn't confirmed yet.";
 const LOCKED = "This account is locked. Write to Plenary support from the contact page if you think this is a mistake.";
 
-/** After any successful sign-in: /auth/continue opens the first unfinished step (plan B5), then `next`. */
-const continueTo = (next?: string) => `/auth/continue?next=${encodeURIComponent(safeNext(next))}`;
+/** After any successful sign-in: the first unfinished step (plan B5), then `next`. Same rule as /auth/continue. */
+async function continueTo(supabase: Awaited<ReturnType<typeof createClient>>, next?: string): Promise<string> {
+  const r = await resolveOnboarding(supabase);
+  return stepHref(r.step, safeNext(next), { ref: r.ref, email: r.user?.email });
+}
 
 /**
  * Turns whatever was typed into the account email. A Plenary ID is looked up server-side (signed request,
@@ -84,7 +88,7 @@ export async function signInWithPassword(_: SignInState, formData: FormData): Pr
   if (locked) return { message: locked };
   await recordSignIn(supabase, "password");
   // TODO(auth): "Keep me signed in" unchecked -> session-only cookies (no persistent maxAge).
-  redirect(continueTo(parsed.data.next));
+  redirect(await continueTo(supabase, parsed.data.next));
 }
 
 const codeRequestSchema = z.object({
@@ -142,5 +146,5 @@ export async function verifyCode(prev: SignInState, formData: FormData): Promise
   const locked = await refuseIfLocked(supabase);
   if (locked) return { ...prev, step: "sent", message: locked };
   await recordSignIn(supabase, "email_code");
-  redirect(continueTo(parsed.data.next));
+  redirect(await continueTo(supabase, parsed.data.next));
 }

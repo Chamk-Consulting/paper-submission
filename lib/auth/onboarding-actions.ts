@@ -202,7 +202,8 @@ export async function saveChosenPassword(_: PasswordState, formData: FormData): 
   }
   await supabase.auth.refreshSession();
   await noteStep(supabase, "password");
-  redirect(`/auth/continue?next=${encodeURIComponent(safeNext(p.data.next, "/welcome"))}`);
+  const r = await resolveOnboarding(supabase);
+  redirect(stepHref(r.step, safeNext(p.data.next, "/welcome"), { ref: r.ref, email: auth.user.email }));
 }
 
 export type Org = { id: string | null; name: string; place: string };

@@ -31,7 +31,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ reason?: string
         {code ? <p className="mb-3 rounded-[6px] border border-[#DADDE3] bg-white px-3 py-2 text-center font-mono text-[15px]">{t("Reference")} {code}</p> : null}
         <div className="grid gap-2">
           <Link href={`/contact${code ? `?ref=${code}` : ""}`} className="rounded-lg bg-navy px-4 py-2 text-center text-white hover:bg-navy-2">{t("Contact support")}</Link>
-          <Link href="/auth/continue" prefetch={false} className="rounded-lg border border-line px-4 py-2 text-center text-navy hover:bg-paper">{t("Try again")}</Link>
+          <a href="/auth/continue" className="rounded-lg border border-line px-4 py-2 text-center text-navy hover:bg-paper">{t("Try again")}</a>
         </div>
       </AuthCard>
     );

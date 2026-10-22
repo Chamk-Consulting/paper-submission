@@ -109,8 +109,10 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
         setMode("ok");
         const dest: string = ("href" in r && typeof r.href === "string" && r.href) || onSuccessHref;
         // An existing account that used "Create account": it is simply signed in (plan B3).
-        if ("returning" in r && r.returning) { setBack(true); setTimeout(() => router.replace(dest), 1400); return; }
-        router.replace(dest);
+        // route handlers (/auth/…) need a full page load, app pages a client navigation
+        const go = () => (dest.startsWith("/auth/") ? window.location.assign(dest) : router.replace(dest));
+        if ("returning" in r && r.returning) { setBack(true); setTimeout(go, 1400); return; }
+        go();
         return;
       }
       if (r.reason === "locked" || tries - 1 <= 0) {
