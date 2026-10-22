@@ -4,9 +4,22 @@ import { useState } from "react";
 import { scorePassword } from "@/lib/auth/password-rules";
 import { ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
+import { FieldLabel } from "@/components/auth/field-label";
 
 const COLORS = ["#DADDE3", "#B3261E", "#A8600F", "#2F5FD0", "#18744F"];
 const LABELS = ["—", "Too weak", "Could be stronger", "Good", "Strong"];
+
+function Eye({ shown, onToggle, label }: { shown: boolean; onToggle: () => void; label: string }) {
+  return (
+    <button type="button" onClick={onToggle} aria-label={label} aria-pressed={shown} title={label}
+      className="flex w-[48px] flex-none items-center justify-center border-0 border-l border-[#B7BDC9] bg-[#F2F3F0] text-[#4A5263] hover:text-[#121826]">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M1.5 10S4.5 4 10 4s8.5 6 8.5 6-3 6-8.5 6S1.5 10 1.5 10z" /><circle cx="10" cy="10" r="2.6" />
+        {shown ? null : <path d="M3 17L17 3" />}
+      </svg>
+    </button>
+  );
+}
 
 /**
  * New password + confirm, with a strength bar, a live rule checklist and a show/hide toggle.
@@ -19,6 +32,7 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [show, setShow] = useState(false);
+  const [show2, setShow2] = useState(false);
 
   const r = scorePassword(pw, email);
   const mismatch = pw2.length > 0 && pw2 !== pw;
@@ -33,18 +47,15 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
   return (
     <>
       <div className="mt-3.5 flex flex-col gap-1.5">
-        <label htmlFor={`${idPrefix}-new`} className={ui.label}>{t("Password")}</label>
+        <FieldLabel htmlFor={`${idPrefix}-new`} required info={<>{t("At least 12 characters. A short phrase of three or four words is easy to remember and hard to guess.")} {t("Don’t reuse a password from another site — we check it against known leaks.")}</>}>{t("Password")}</FieldLabel>
         <div className="flex overflow-hidden rounded-[4px] bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ border: pwBad ? "2px solid #B3261E" : r.ok ? "2px solid #18744F" : "1px solid #B7BDC9" }}>
           <input
-            id={`${idPrefix}-new`} name="password" type={show ? "text" : "password"} autoComplete="new-password" maxLength={128}
+            id={`${idPrefix}-new`} name="password" aria-required="true" type={show ? "text" : "password"} autoComplete="new-password" maxLength={128}
             value={pw} onChange={(e) => { setPw(e.target.value); update(e.target.value, pw2); }}
             aria-describedby={`${idPrefix}-rules${serverErrors?.password ? ` ${idPrefix}-err` : ""}`} aria-invalid={pwBad || undefined}
             className="box-border h-[46px] min-w-0 flex-auto border-0 bg-transparent px-3.5 text-[16px] text-[#121826] outline-none"
           />
-          <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? t("Hide password") : t("Show password")} aria-pressed={show}
-            className="w-[68px] border-0 border-l border-[#B7BDC9] bg-[#F2F3F0] text-[13px] font-medium text-[#4A5263]">
-            {show ? t("Hide") : t("Show")}
-          </button>
+          <Eye shown={show} onToggle={() => setShow((v) => !v)} label={show ? t("Hide password") : t("Show password")} />
         </div>
         <div aria-hidden className="mt-1 grid grid-cols-4 gap-1">
           {[1, 2, 3, 4].map((i) => <span key={i} className="h-1 rounded-sm" style={{ background: r.sc >= i ? COLORS[r.sc] : "#DADDE3" }} />)}
@@ -64,13 +75,16 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
       </div>
 
       <div className="mt-3.5 flex flex-col gap-1.5">
-        <label htmlFor={`${idPrefix}-confirm`} className={ui.label}>{t("Confirm password")}</label>
-        <input
-          id={`${idPrefix}-confirm`} name="confirm" type={show ? "text" : "password"} autoComplete="new-password" maxLength={128}
-          value={pw2} onChange={(e) => { setPw2(e.target.value); update(pw, e.target.value); }} aria-invalid={confirmBad || undefined}
-          aria-describedby={`${idPrefix}-match`}
-          className={`${ui.input} h-[46px]`} style={{ border: confirmBad ? "2px solid #B3261E" : matchOk ? "2px solid #18744F" : "1px solid #B7BDC9" }}
-        />
+        <FieldLabel htmlFor={`${idPrefix}-confirm`} required info={t("Type the same password again, so a typo doesn’t lock you out.")}>{t("Confirm password")}</FieldLabel>
+        <div className="flex overflow-hidden rounded-[4px] bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ border: confirmBad ? "2px solid #B3261E" : matchOk ? "2px solid #18744F" : "1px solid #B7BDC9" }}>
+          <input
+            id={`${idPrefix}-confirm`} name="confirm" type={show2 ? "text" : "password"} autoComplete="new-password" maxLength={128} aria-required="true"
+            value={pw2} onChange={(e) => { setPw2(e.target.value); update(pw, e.target.value); }} aria-invalid={confirmBad || undefined}
+            aria-describedby={`${idPrefix}-match`}
+            className="box-border h-[46px] min-w-0 flex-auto border-0 bg-transparent px-3.5 text-[16px] text-[#121826] outline-none"
+          />
+          <Eye shown={show2} onToggle={() => setShow2((v) => !v)} label={show2 ? t("Hide password") : t("Show password")} />
+        </div>
         <span id={`${idPrefix}-match`} aria-live="polite" className="min-h-[18px] text-[13px]">
           {confirmBad ? <span className="text-[#B3261E]">{t(serverErrors?.confirm?.[0] ?? "The two passwords don't match yet.")}</span> : matchOk ? <span className="text-[#14603F]">✓ {t("Passwords match.")}</span> : null}
         </span>
