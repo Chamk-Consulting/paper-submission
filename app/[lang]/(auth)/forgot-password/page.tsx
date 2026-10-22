@@ -1,3 +1,4 @@
+import { AuthFormSkeleton } from "@/components/skeletons";
 import { Suspense } from "react";
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
@@ -20,7 +21,7 @@ async function Prefilled({ searchParams }: { searchParams: Promise<{ email?: str
 export default async function Page({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
   const t = await getT();
   return (
-    <SplitLayout
+    <SplitLayout showAside={false}
       aside={
         <NavyAside label={t("Password reset progress")} kicker={t("Resetting your password")} title={t("Locked out? Let’s get you back in.")}>
           <SetupSteps
@@ -39,7 +40,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
       <p className={`mt-4 ${ui.kicker}`}>{t("Step 1 of 3 · Password reset")}</p>
       <h1 className={`mt-1.5 ${ui.h1}`}>{t("Forgot your password?")}</h1>
       <p className={`mt-2.5 ${ui.muted}`}>{t("Tell us how you sign in. We'll email a reset code (and a link) to your account email.")}</p>
-      <Suspense fallback={<ForgotForm />}><Prefilled searchParams={searchParams} /></Suspense>
+      <Suspense fallback={<AuthFormSkeleton />}><Prefilled searchParams={searchParams} /></Suspense>
     </SplitLayout>
   );
 }

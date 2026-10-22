@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 async function Expired() {
   const t = await getT();
   return (
-    <SplitLayout aside={<NavyAside label={t("Password reset progress")} kicker={t("Resetting your password")} title={t("Let’s try that again.")} />}>
+    <SplitLayout showAside={false} aside={<NavyAside label={t("Password reset progress")} kicker={t("Resetting your password")} title={t("Let’s try that again.")} />}>
       <p className={ui.kicker}>{t("Password reset")}</p>
       <h1 className={`mt-1.5 ${ui.h1}`}>{t("This reset has expired")}</h1>
       <p className={`mt-2.5 ${ui.muted}`}>{t("Reset codes and links last 15 minutes and work once. Ask for a new one and you'll be back here in a minute.")}</p>

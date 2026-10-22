@@ -1,7 +1,5 @@
 import Link from "@/components/site/link";
 import type { ReactNode } from "react";
-import { SiteHeader } from "@/components/site/site-header";
-import { PublicFooter } from "@/components/venues/public-header";
 
 export type HelpTab = "lost-email" | "merge" | "claim";
 type TT = (k: string, v?: Record<string, string | number>) => string;
@@ -9,29 +7,23 @@ type TT = (k: string, v?: Record<string, string | number>) => string;
 export const helpCard = "rounded-[8px] border border-[#DADDE3] bg-white px-6 py-5";
 export const helpKicker = "m-0 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]";
 
-/** Page frame shared by the three AH02 tabs: public header, navy band, tabs. */
+/** The three AH02 tabs sit in the shared sign-in frame ((auth)/layout.tsx): navy band, tabs, two columns. */
 export function HelpPage({ children }: { children: ReactNode }) {
-  return (
-    <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
-      <SiteHeader />
-      {children}
-      <PublicFooter />
-    </div>
-  );
+  return <div className="mx-auto flex w-full max-w-[1200px] flex-auto flex-col pt-6">{children}</div>;
 }
 
 export function HelpBody({ t, tab, children, aside }: { t: TT; tab: HelpTab | null; children: ReactNode; aside?: ReactNode }) {
   const tabs: [HelpTab, string][] = [["lost-email", "I lost access to my email"], ["merge", "Merge two accounts"], ["claim", "Claim a paper"]];
   return (
     <>
-      <section className="bg-[#0E1B3D] text-[#F5F6F3]">
-        <div className="mx-auto max-w-[1280px] px-5 py-7 sm:px-8">
+      <section className="rounded-[10px] bg-[#0E1B3D] text-[#F5F6F3]">
+        <div className="px-5 py-6 sm:px-8">
           <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#B9C3DA]"><Link href="/sign-in" className="text-[#B9C3DA]">{t("Sign in")}</Link> / <Link href="/account-help" className="text-[#B9C3DA]">{t("Account help")}</Link></nav>
           <h1 className="mt-2 font-serif text-[34px] font-normal leading-[1.15] sm:text-[40px]">{t("Get back into your account")}</h1>
           <p className="mt-1 text-[#B9C3DA]">{t("Pick what happened. Every request is checked by a person at Plenary within 2 working days.")}</p>
         </div>
       </section>
-      <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-14 pt-6 sm:px-8">
+      <main id="main-content" className="box-border w-full flex-auto pb-10 pt-6">
         <nav aria-label={t("Account help")} className="flex flex-wrap gap-x-[22px] border-b border-[#DADDE3]">
           {tabs.map(([k, label]) => (
             <Link key={k} href={`/account-help/${k}`} aria-current={tab === k ? "page" : undefined}

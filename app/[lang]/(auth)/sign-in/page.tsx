@@ -6,10 +6,8 @@ import { OpenCallsPanel } from "@/components/signin/open-calls";
 import { senderDomain } from "@/lib/config/site";
 import { venueDeadline, venueSlugFrom } from "@/lib/auth/venue-deadline";
 import { LocalDeadline } from "@/components/auth/deadline-bits";
-import { Footer, TopBar } from "@/components/auth/chrome";
 import { getT } from "@/lib/i18n/server";
 import { AuthFormSkeleton } from "@/components/skeletons";
-import { Pin } from "@/components/motion/pin";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -50,23 +48,16 @@ async function Panel({ searchParams }: { searchParams: Promise<Search> }) {
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
   return (
-    <div className="flex min-h-dvh flex-wrap bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
-      <main className="box-border flex min-w-0 flex-[5_1_440px] flex-col px-5 py-7 sm:px-10">
-        <TopBar />
-
-        <Suspense fallback={null}>
-          <VenueBanner searchParams={searchParams} />
+    <>
+      <Suspense fallback={null}>
+        <VenueBanner searchParams={searchParams} />
+      </Suspense>
+      <main id="main-content" className="flex flex-auto items-center justify-center py-8">
+        <Suspense fallback={<div className="w-full max-w-[420px]"><AuthFormSkeleton tabs /></div>}>
+          <Panel searchParams={searchParams} />
         </Suspense>
-
-        <div className="flex flex-auto items-center justify-center py-8">
-          <Suspense fallback={<div className="w-full max-w-[420px]"><AuthFormSkeleton tabs /></div>}>
-            <Panel searchParams={searchParams} />
-          </Suspense>
-        </div>
-
-        <Footer />
       </main>
-      <Pin name="auth-aside" swap><OpenCallsPanel /></Pin>
-    </div>
+      <div className="auth-aside"><OpenCallsPanel /></div>
+    </>
   );
 }

@@ -27,8 +27,8 @@ export function AdminSkeleton() {
 export function AccountHelpSkeleton() {
   return (
     <Skeleton>
-      <div className="bg-[#0E1B3D] px-5 py-7 sm:px-8"><div className="mx-auto max-w-[1280px]"><Line dark size={13} w={140} /><Line dark size={40} lh={1.15} w={380} className="mt-2" /><Line dark w={480} className="mt-1" /></div></div>
-      <div className="mx-auto box-border max-w-[1280px] px-5 pb-14 pt-6 sm:px-8">
+      <div className="mx-auto mt-6 max-w-[1200px] rounded-[10px] bg-[#0E1B3D] px-5 py-6 sm:px-8"><div><Line dark size={13} w={140} /><Line dark size={40} lh={1.15} w={380} className="mt-2" /><Line dark w={480} className="mt-1" /></div></div>
+      <div className="mx-auto box-border max-w-[1200px] pb-10 pt-6">
         <div className="flex gap-6 border-b border-[#DADDE3] pb-2.5"><Bar w={180} h={18} /><Bar w={160} h={18} /><Bar w={110} h={18} /></div>
         <div className="mt-6 flex flex-wrap gap-6">
           <Card className="min-w-0 flex-[999_1_560px]"><Line size={17} w={220} /><Line w="80%" className="mt-2" /><div className="mt-4 grid gap-3.5 sm:grid-cols-2">{[0, 1, 2, 3].map((i) => <Bar key={i} h={62} />)}</div><Bar h={44} w={150} className="mt-5" /></Card>

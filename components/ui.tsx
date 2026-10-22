@@ -12,9 +12,8 @@ export function Brand({ light = false }: { light?: boolean }) {
 
 export function AuthCard({ title, lead, children, footer }: { title: string; lead?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   return (
-    <main className="grid min-h-dvh place-items-center px-4 py-10">
+    <main id="main-content" className="flex flex-auto items-center justify-center py-8">
       <div className="w-full max-w-md">
-        <div className="mb-6 text-center"><Brand /></div>
         <section className="rounded-xl border border-line bg-card p-6 shadow-sm sm:p-8">
           <h1 className="font-serif text-3xl text-navy">{title}</h1>
           {lead ? <p className="mt-2 text-sm text-muted">{lead}</p> : null}

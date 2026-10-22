@@ -69,7 +69,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
   return (
-    <Reveal fallback={<AuthSkeleton />}>
+    <Reveal fallback={<AuthSkeleton aside />}>
       <Content searchParams={searchParams} />
     </Reveal>
   );

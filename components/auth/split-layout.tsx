@@ -1,30 +1,28 @@
 import type { ReactNode } from "react";
-import { Footer, TopBar } from "@/components/auth/chrome";
-import { Pin } from "@/components/motion/pin";
 
 /* Shared shell of canvas PR02–PR09: paper form column + navy aside. */
 
 export { Logo } from "@/components/auth/logo";
 
-export function SplitLayout({ banner, children, aside, width = 420 }: { banner?: ReactNode; children: ReactNode; aside: ReactNode; width?: 420 | 440 }) {
+/**
+ * Content of a sign-in page inside the (auth) frame: the centred form column and, on large screens, the
+ * navy panel on the right. `showAside={false}` = single column (forgot password, codes, new password, two-step).
+ */
+export function SplitLayout({ banner, children, aside, width = 420, showAside = true }: { banner?: ReactNode; children: ReactNode; aside?: ReactNode; width?: 420 | 440; showAside?: boolean }) {
   return (
-    <div className="flex min-h-dvh flex-wrap bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
-      <main className="box-border flex min-w-0 flex-[5_1_440px] flex-col px-5 py-7 sm:px-10">
-        <TopBar />
-        {banner}
-        <div className="flex flex-auto items-center justify-center py-8">
-          <div className="w-full" style={{ maxWidth: width }}>{children}</div>
-        </div>
-        <Footer />
+    <>
+      {banner}
+      <main id="main-content" className="flex flex-auto items-center justify-center py-8">
+        <div className="w-full" style={{ maxWidth: width }}>{children}</div>
       </main>
-      <Pin name="auth-aside" swap>{aside}</Pin>
-    </div>
+      {aside && showAside ? <div className="auth-aside">{aside}</div> : null}
+    </>
   );
 }
 
 export function NavyAside({ label, kicker, title, children, titleSize = 44 }: { label: string; kicker: string; title: ReactNode; children?: ReactNode; titleSize?: 40 | 44 }) {
   return (
-    <aside aria-label={label} className="box-border flex min-w-0 flex-[7_1_520px] flex-col justify-center bg-[#0E1B3D] px-6 py-14 text-[#F5F6F3] sm:px-16">
+    <aside aria-label={label} className="box-border flex min-h-full w-full min-w-0 flex-col justify-center bg-[#0E1B3D] px-6 py-14 text-[#F5F6F3] sm:px-16">
       <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{kicker}</p>
       <h2 className="mt-3.5 max-w-[18ch] font-serif font-[350] leading-[1.08] tracking-[-0.015em]" style={{ fontSize: titleSize }}>{title}</h2>
       {children}

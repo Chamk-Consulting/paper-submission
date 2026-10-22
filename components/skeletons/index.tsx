@@ -233,7 +233,7 @@ export function StatusSkeleton() {
 
 export function AuthAsideSkeleton() {
   return (
-    <aside aria-hidden className="box-border flex min-w-0 flex-[7_1_520px] flex-col justify-center bg-[#0E1B3D] px-6 py-14 sm:px-16">
+    <aside aria-hidden className="box-border flex min-h-full w-full min-w-0 flex-col justify-center bg-[#0E1B3D] px-6 py-14 sm:px-16">
       <Line dark size={12} w={200} /><Line dark size={44} lh={1.08} w="min(460px, 85%)" className="mt-3.5" /><Line dark size={44} lh={1.08} w="min(360px, 70%)" />
       <Bar dark w="min(560px, 100%)" h={120} className="mt-8 rounded-[8px]!" />
     </aside>
@@ -255,9 +255,9 @@ export function AuthFormSkeleton({ tabs = false }: { tabs?: boolean }) {
   );
 }
 
-export function AuthSkeleton() {
+export function AuthSkeleton({ aside = false }: { aside?: boolean }) {
   return (
-    <SplitLayout aside={<AuthAsideSkeleton />}>
+    <SplitLayout aside={<AuthAsideSkeleton />} showAside={aside}>
       <AuthFormSkeleton />
     </SplitLayout>
   );

@@ -8,7 +8,7 @@ import { OpenCallsSkeleton } from "@/components/open-calls/rows";
 export async function OpenCallsPanel() {
   const t = await getT();
   return (
-    <aside aria-label={t("Open calls for papers")} className="box-border flex min-w-0 flex-[7_1_520px] flex-col justify-center bg-[#0E1B3D] px-6 py-14 text-[#F5F6F3] sm:px-16">
+    <aside aria-label={t("Open calls for papers")} className="box-border flex min-h-full w-full min-w-0 flex-col justify-center bg-[#0E1B3D] px-6 py-14 text-[#F5F6F3] sm:px-16">
       <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Open calls · shown in your time zone")}</p>
       <h2 className="mt-3.5 max-w-[20ch] font-serif text-[44px] font-[350] leading-[1.08] tracking-[-0.015em]">{t("Every deadline you care about, in one place.")}</h2>
       <div className="mt-8 overflow-hidden rounded-[8px] bg-[#17285A]">

@@ -45,7 +45,7 @@ async function Aside() {
 /** Two-step sign-in (ST02 authenticator app). */
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
   return (
-    <SplitLayout aside={<Suspense fallback={<AuthAsideSkeleton />}><Aside /></Suspense>}>
+    <SplitLayout showAside={false} aside={<Suspense fallback={<AuthAsideSkeleton />}><Aside /></Suspense>}>
       <Suspense fallback={<AuthFormSkeleton />}>
         <Left searchParams={searchParams} />
       </Suspense>

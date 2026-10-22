@@ -181,3 +181,11 @@ html { scroll-padding-top: 72px; }
 /* header lines up with the app frame: 1440 px, or 1600 px on organiser pages */
 .hdr-app { max-width: 1440px; }
 body:has([data-wide-frame]) .hdr-app { max-width: 1600px; }
+
+/* ------------------------------------------------------------------ sign-in frame ((auth)/layout.tsx) */
+/* The right-hand panel only shows from 1024 px: fixed to the right, the form column takes the rest. Phones and tablets get one column. */
+.auth-aside { display: none; }
+@media (min-width: 1024px) {
+  .auth-frame:has(.auth-aside) .auth-col { width: 44%; }
+  .auth-aside { display: flex; position: fixed; inset: 0 0 0 44%; overflow-y: auto; background: #0E1B3D; }
+}
