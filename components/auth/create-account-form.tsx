@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "@/components/site/link";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { focusFirstError } from "@/components/auth/focus-error";
-import { startSignup, type StartState } from "@/lib/auth/onboarding-actions";
+import { sendCodeToExisting, startSignup, type ExistingKind, type StartState } from "@/lib/auth/onboarding-actions";
 import { OrcidIcon, ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
 import { PasswordFields } from "@/components/auth/password-fields";
@@ -66,7 +66,7 @@ export function CreateAccountForm({ next, venue, withPassword = false }: { next?
       <p className={`mt-2 ${ui.muted}`}>{t("Free for authors and reviewers. Takes about a minute.")}</p>
 
       <p className="mt-1.5 text-[13px] text-[#4A5263]"><span aria-hidden className="text-[#B3261E]">*</span> {t("Required field")}</p>
-      {state.exists ? <ExistingAccount email={state.exists.email} next={next} /> : null}
+      {state.exists ? <ExistingAccount email={state.exists.email} kind={state.exists.kind ?? "complete"} next={next} /> : null}
       {state.message ? <div role="alert" data-form-error className="mt-4 rounded-[6px] border border-[#F0C2BE] bg-[#FDF0EF] px-3.5 py-3 text-[14px] text-[#7A1C15]">{t(state.message)}</div> : null}
       {orcidSoon ? <div role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-3 text-[14px] text-[#3B2A07]">{t("ORCID sign-up is coming soon. Use your email for now.")}</div> : null}
 
@@ -128,23 +128,42 @@ export function CreateAccountForm({ next, venue, withPassword = false }: { next?
   );
 }
 
-/** The email already has a Plenary account: go to sign-in (email filled in) or reset the password. */
-function ExistingAccount({ email, next }: { email: string; next?: string }) {
+/**
+ * The email already has a Plenary account. Sign in (email filled in), get a sign-in code right here, or reset the
+ * password; whatever the account still misses (password, profile) opens by itself after signing in.
+ */
+function ExistingAccount({ email, kind, next }: { email: string; kind: ExistingKind; next?: string }) {
   const t = useT();
+  const [msg, setMsg] = useState("");
+  const [pending, start] = useTransition();
   const q = (extra: Record<string, string>) => {
     const p = new URLSearchParams(extra);
     if (next) p.set("next", next);
     return p.toString();
   };
+  const secondary = kind === "secondary";
   return (
-    <div role="alert" className="mt-4 rounded-[8px] border border-[#BCCDF3] bg-[#F3F6FD] px-4 py-3.5 text-[14px] text-[#121826]">
-      <p className="m-0 font-semibold">{t("You already have a Plenary account")}</p>
-      <p className="m-0 mt-1 text-[#4A5263]">{t("{email} is already registered. Sign in instead — your papers and reviews are there.", { email })}</p>
+    <div role="alert" data-form-error className="mt-4 rounded-[8px] border border-[#BCCDF3] bg-[#F3F6FD] px-4 py-3.5 text-[14px] text-[#121826]">
+      <p className="m-0 font-semibold">{secondary ? t("This email belongs to an existing Plenary account") : t("You already have a Plenary account")}</p>
+      <p className="m-0 mt-1 text-[#4A5263]">
+        {secondary
+          ? t("{email} is saved as an extra email on an account. Sign in with that account's main email — your papers and reviews are there.", { email })
+          : kind === "no_profile"
+            ? t("{email} is already registered. Sign in to finish your research profile — it takes a minute.", { email })
+            : t("{email} is already registered. Sign in instead — your papers and reviews are there.", { email })}
+      </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Link href={`/sign-in?${q({ email })}`} className="inline-flex h-10 items-center rounded-[4px] bg-[#0E1B3D] px-4 text-[14px] font-semibold text-white no-underline">{t("Sign in")}</Link>
-        <Link href={`/forgot-password?${q({ email })}`} className="inline-flex h-10 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[14px] font-medium text-[#121826] no-underline">{t("Forgot password?")}</Link>
+        <Link href={`/sign-in?${q(secondary ? {} : { email })}`} className="inline-flex h-10 items-center rounded-[4px] bg-[#0E1B3D] px-4 text-[14px] font-semibold text-white no-underline">{t("Sign in")}</Link>
+        {!secondary ? (
+          <button type="button" disabled={pending} onClick={() => start(async () => { const r = await sendCodeToExisting(email, next); if (r?.message) setMsg(r.message); })}
+            className="inline-flex h-10 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[14px] font-medium text-[#121826] disabled:opacity-60">
+            {pending ? t("Sending…") : t("Email me a sign-in code")}
+          </button>
+        ) : null}
+        <Link href={`/forgot-password?${q(secondary ? {} : { email })}`} className="inline-flex h-10 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[14px] font-medium text-[#121826] no-underline">{t("Forgot password?")}</Link>
       </div>
-      <p className="m-0 mt-2.5 text-[13px] text-[#4A5263]">{t("No password yet? On the sign-in page choose “Email me a link” — it also contains a code.")}</p>
+      {msg ? <p className="m-0 mt-2 text-[13px] text-[#B3261E]">{t(msg)}</p> : null}
+      {!secondary ? <p className="m-0 mt-2.5 text-[13px] text-[#4A5263]">{t("No password yet? Choose “Email me a sign-in code” — you'll set one right after.")}</p> : null}
     </div>
   );
 }

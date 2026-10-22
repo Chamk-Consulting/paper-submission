@@ -12,13 +12,31 @@ import { refuseIfLocked } from "@/lib/auth/lock-check";
 import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { resolveOnboarding, stepHref } from "@/lib/auth/onboarding";
 import { noteStep, overLimit } from "@/lib/auth/attempts";
+import { expiresIn, sign, signingReady } from "@/lib/auth/signing";
 
+export type ExistingKind = "complete" | "no_profile" | "secondary";
 export type StartState = {
   message?: string;
   fieldErrors?: Record<string, string[] | undefined>;
-  /** Old order only (SIGNUP_PASSWORD_FIRST=1): the email already has a confirmed account. */
-  exists?: { email: string };
+  /** The email already has a Plenary account: offer sign-in (and how to continue) instead of a second account. */
+  exists?: { email: string; kind?: ExistingKind };
 };
+
+type EmailStatus = "none" | "unconfirmed" | "no_password" | "no_profile" | "complete" | "locked" | "secondary";
+
+/**
+ * What this email is today (database check, signed by this server so it can't be called in bulk from outside).
+ * Runs only after the robot check and the per-connection limit. null = check not available (treated as new).
+ */
+async function emailStatus(supabase: Awaited<ReturnType<typeof createClient>>, email: string): Promise<EmailStatus | null> {
+  if (!signingReady()) return null;
+  const exp = expiresIn(5);
+  const { data, error } = await supabase.rpc("signup_email_status", { p_email: email, p_expires: exp, p_sig: sign(`signup-status|${email}`, exp) });
+  if (error) return null;
+  return (data as EmailStatus) ?? null;
+}
+
+const LOCKED_MSG = "This account is locked, or it was merged into another one. If you merged it, sign in with the email of the account you kept. Otherwise write to Plenary support from the contact page.";
 
 /** Rollback switch (plan E4): SIGNUP_PASSWORD_FIRST=1 brings back the old step 1 with the password. One setting, no code change. */
 const passwordFirst = () => process.env.SIGNUP_PASSWORD_FIRST === "1";
@@ -100,7 +118,21 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
     redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`));
   }
 
-  // New and existing addresses alike: Supabase creates the account if needed (with no usable password) and emails a code.
+  // Existing email: say so and continue from where that account stopped (review 22 Oct, problem 4).
+  const status = await emailStatus(supabase, email);
+  if (status === "locked") return { message: LOCKED_MSG };
+  if (status === "complete" || status === "no_profile" || status === "secondary") return { exists: { email, kind: status } };
+  if (status === "unconfirmed" || status === "no_password") {
+    // Started before: a fresh code, then the missing steps (password, profile) open by themselves.
+    const { error: e1 } = status === "unconfirmed"
+      ? await supabase.auth.resend({ type: "signup", email })
+      : await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+    if (e1 && emailLimited(e1) && !/seconds/i.test(e1.message)) return { message: "We can’t send confirmation emails right now — too many were sent in the last hour. Please try again a little later." };
+    await noteStep(supabase, "code_sent");
+    redirect(`${verifyUrl(email, next, venue, `${firstName} ${lastName}`)}&reason=${status === "unconfirmed" ? "started" : "continue"}${e1 ? "&wait=1" : ""}`);
+  }
+
+  // New address: Supabase creates the account (with no usable password) and emails a code.
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
@@ -123,6 +155,19 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
   }
   await noteStep(supabase, "code_sent");
   redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`));
+}
+
+/** "Already have an account" panel → "Email me a sign-in code": a code, then the usual next-step rule. */
+export async function sendCodeToExisting(email: string, next?: string): Promise<{ message?: string }> {
+  const parsed = z.string().trim().toLowerCase().email().safeParse(email);
+  if (!parsed.success) return { message: "That email doesn’t look right." };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithOtp({ email: parsed.data, options: { shouldCreateUser: false } });
+  if (error && emailLimited(error) && !/seconds/i.test(error.message)) return { message: "Email sending is paused for a little while (too many emails this hour). Please try again later." };
+  const q = new URLSearchParams({ email: parsed.data, reason: "signin" });
+  if (next) q.set("next", safeNext(next));
+  if (error) q.set("wait", "1");
+  redirect(`/create-account/verify?${q.toString()}`);
 }
 
 export type ResendResult = { ok: boolean; message?: string };

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "@/components/site/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { resendSignupCode, signupStatus, verifySignupCode } from "@/lib/auth/onboarding-actions";
 import { resendResetCode, verifyResetCode } from "@/lib/auth/reset-actions";
@@ -50,7 +49,6 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
   const copy = COPY[kind];
   const verify = (e: string, c: string) => (kind === "recovery" ? verifyResetCode(e, c) : verifySignupCode(e, c, next));
   const resendCode = kind === "recovery" ? resendResetCode : resendSignupCode;
-  const router = useRouter();
   // box count follows the emailed code; a pasted/autofilled code of another length (6–10) re-sizes the boxes
   const [len, setLen] = useState(EMAIL_CODE_LENGTH);
   const blank = (n = len) => Array<string>(n).fill("");
@@ -109,8 +107,9 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
         setMode("ok");
         const dest: string = ("href" in r && typeof r.href === "string" && r.href) || onSuccessHref;
         // An existing account that used "Create account": it is simply signed in (plan B3).
-        // route handlers (/auth/…) need a full page load, app pages a client navigation
-        const go = () => (dest.startsWith("/auth/") ? window.location.assign(dest) : router.replace(dest));
+        // A full page load: the person is signed in from here on, and every part of the page (header, menus)
+        // must start from the new session rather than from what was cached while signed out.
+        const go = () => window.location.assign(dest);
         if ("returning" in r && r.returning) { setBack(true); setTimeout(go, 1400); return; }
         go();
         return;

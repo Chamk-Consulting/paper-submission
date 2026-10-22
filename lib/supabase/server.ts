@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseEnv } from "@/lib/config/site";
 
@@ -8,6 +9,9 @@ import { supabaseEnv } from "@/lib/config/site";
  * Acts as the signed-in user, so row-level security applies.
  */
 export async function createClient() {
+  // Per-request data: the Supabase client reads the clock (token expiry), which Next.js refuses while it prepares
+  // a page ahead of time ("Date.now() while prerendering"). Marking the request first makes everything after it live.
+  await connection();
   const cookieStore = await cookies();
   return createServerClient(supabaseEnv.url(), supabaseEnv.publishableKey(), {
     cookies: {

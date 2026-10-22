@@ -33,12 +33,21 @@ async function Left({ searchParams }: { searchParams: Promise<Search> }) {
   return (
     <>
       <Link href={back(s)} className="text-[14px] text-[#2F5FD0] no-underline">← {t("Back")}</Link>
-      <p className={`mt-4 ${ui.kicker}`}>{t("Step 2 of 4")}</p>
-      <h1 className={`mt-1.5 ${ui.h1}`}>{t("Confirm your email")}</h1>
+      <p className={`mt-4 ${ui.kicker}`}>{s.reason === "signin" ? t("Sign in") : t("Step 2 of 4")}</p>
+      <h1 className={`mt-1.5 ${ui.h1}`}>{s.reason === "signin" ? t("Check your email") : t("Confirm your email")}</h1>
       <p className={`mt-2.5 ${ui.muted}`}>
         {t("We sent a code and a link to")} <strong className="text-[#121826]">{email}</strong>{" "}
         <Link href={back(s)} className={`text-[14px] ${ui.link}`}>{t("Change")}</Link>
       </p>
+      {s.reason === "started" ? (
+        <p role="status" className="mt-4 rounded-[6px] border border-[#BCCDF3] bg-[#F3F6FD] px-3.5 py-2.5 text-[14px] text-[#121826]">{t("You started an account with this email but didn't confirm it. We've sent a new code — enter it to continue where you left off.")}</p>
+      ) : null}
+      {s.reason === "continue" ? (
+        <p role="status" className="mt-4 rounded-[6px] border border-[#BCCDF3] bg-[#F3F6FD] px-3.5 py-2.5 text-[14px] text-[#121826]">{t("This email is already confirmed — you just haven't finished setting up. Enter the code and you'll continue with your password and profile.")}</p>
+      ) : null}
+      {s.reason === "signin" ? (
+        <p role="status" className="mt-4 rounded-[6px] border border-[#BCCDF3] bg-[#F3F6FD] px-3.5 py-2.5 text-[14px] text-[#121826]">{t("Enter the code to sign in to your account.")}</p>
+      ) : null}
       {s.reason === "unconfirmed" ? (
         <p role="status" className="mt-4 rounded-[6px] border border-[#BCCDF3] bg-[#F3F6FD] px-3.5 py-2.5 text-[14px] text-[#121826]">{t("Your account isn't confirmed yet, so we can't sign you in with a password. We've emailed you a new code — enter it below to finish.")}</p>
       ) : null}

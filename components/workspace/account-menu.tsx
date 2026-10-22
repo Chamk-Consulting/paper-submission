@@ -37,6 +37,7 @@ export function AccountMenu({ name, initials, plenaryId, isAdmin = false }: { na
             <div className="truncate font-semibold">{name}</div>
             {plenaryId ? <div className="font-mono text-[12px] text-[#4A5263]">{plenaryId}</div> : null}
           </div>
+          <Link role="menuitem" href="/settings/profile#plenary-id" className={item}>{t("My Plenary ID")}</Link>
           <Link role="menuitem" href="/settings/profile" className={item}>{t("Profile & expertise")}</Link>
           <Link role="menuitem" href="/settings/security" className={item}>{t("Sign-in & security")}</Link>
           <Link role="menuitem" href="/settings/notifications" className={item}>{t("Notifications")}</Link>

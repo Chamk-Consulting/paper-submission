@@ -48,6 +48,22 @@ export function refreshSummary(force = false): Promise<void> {
   return inflight;
 }
 
+/**
+ * Call on every page change. Signing in or out happens without a full page load (code screens, server actions),
+ * so compare the session cookie with what the header shows and refresh at once when they disagree.
+ */
+export function syncAuth(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  const cookie = hasSessionCookie();
+  const shown = state?.signedIn ?? document.documentElement.dataset.auth === "in";
+  if (cookie !== shown) {
+    setAuthFlag(cookie);
+    if (!cookie) { clearSummary(); return Promise.resolve(); }
+    return refreshSummary(true);
+  }
+  return refreshSummary();
+}
+
 /** Forget the person (sign out). */
 export function clearSummary() {
   state = { signedIn: false }; writeCache(null); setAuthFlag(false); emit();

@@ -269,3 +269,39 @@ returns table (step text, n bigint) language sql stable security definer set sea
 $$;
 revoke all on function public.signup_funnel_counts(integer) from public, anon, authenticated;
 grant execute on function public.signup_funnel_counts(integer) to service_role;
+
+-- ---------------------------------------------------------------- step 1: what to do with this email (review 22 Oct, problem 4)
+-- Answers only when the web app signed the request (after its robot check and per-connection limit), so the API
+-- can't be used to check emails in bulk. Returns one word:
+--   none · unconfirmed · no_password · no_profile · complete · locked · secondary (a confirmed extra email of an account)
+create or replace function public.signup_email_status(p_email text, p_expires bigint, p_sig text)
+returns text language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_email text := lower(btrim(coalesce(p_email, '')));
+  u auth.users;
+  p public.persons;
+begin
+  if not private.signed('signup-status|' || v_email, p_expires, p_sig) then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+  select * into u from auth.users where lower(email) = v_email limit 1;
+  if u.id is null then
+    if exists (select 1 from public.person_emails e join public.persons x on x.id = e.person_id
+                where e.email = v_email::extensions.citext and e.verified_at is not null and x.user_id is not null) then
+      return 'secondary';
+    end if;
+    return 'none';
+  end if;
+  select * into p from public.persons where user_id = u.id;
+  if (u.banned_until is not null and u.banned_until > now()) or p.locked_at is not null or p.merged_into is not null then
+    return 'locked';
+  end if;
+  if u.email_confirmed_at is null then return 'unconfirmed'; end if;
+  if coalesce(u.raw_user_meta_data ->> 'password_set_at', '') = '' and u.raw_user_meta_data ->> 'onb' = 'password' then
+    return 'no_password';
+  end if;
+  if p.id is null or p.profile_completed_at is null then return 'no_profile'; end if;
+  return 'complete';
+end $$;
+revoke all on function public.signup_email_status(text, bigint, text) from public;
+grant execute on function public.signup_email_status(text, bigint, text) to anon, authenticated;

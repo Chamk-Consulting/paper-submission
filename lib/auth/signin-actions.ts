@@ -24,6 +24,7 @@ export type SignInState = {
 };
 
 const GENERIC = "Those details didn't match an account, or the email isn't confirmed yet.";
+const NO_MATCH = "Those details didn't match. No password yet, or forgot it? Choose “Email me a link” — it signs you in with a code.";
 const LOCKED = "This account is locked. Write to Plenary support from the contact page if you think this is a mistake.";
 
 /** After any successful sign-in: the first unfinished step (plan B5), then `next`. Same rule as /auth/continue. */
@@ -82,7 +83,8 @@ export async function signInWithPassword(_: SignInState, formData: FormData): Pr
       redirect(`/create-account/verify?${q.toString()}`);
     }
     if (error.code === "user_banned") return { message: LOCKED };
-    return { message: GENERIC };
+    // Accounts made with "Create account" have no password until step 3: point to the code instead.
+    return { message: NO_MATCH };
   }
   const locked = await refuseIfLocked(supabase);
   if (locked) return { message: locked };

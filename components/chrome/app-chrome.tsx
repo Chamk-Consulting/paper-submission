@@ -11,7 +11,7 @@ import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { barePath, manageSlug } from "@/lib/site/chrome-mode";
 import { ORGANIZER_NAV, OWNER_ONLY } from "@/lib/site/organizer-nav";
-import { refreshSummary, useSummary, type Summary, type VenueRef } from "@/components/chrome/summary";
+import { refreshSummary, syncAuth, useSummary, type Summary, type VenueRef } from "@/components/chrome/summary";
 import { useEventHint } from "@/components/chrome/event-hint";
 
 /*
@@ -192,7 +192,7 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
           {s?.name ? (
             <div className="mb-2 rounded-[8px] border border-[#EEF0EC] px-3 py-2.5">
               <div className="truncate font-semibold">{s.name}</div>
-              {s.plenaryId ? <div className="font-mono text-[12px] text-[#4A5263]">{s.plenaryId}</div> : null}
+              {s.plenaryId ? <Link href="/settings/profile#plenary-id" className="font-mono text-[12px] text-[#2F5FD0] no-underline">{s.plenaryId} · {t("My Plenary ID")}</Link> : null}
             </div>
           ) : null}
           <Link href="/venues" className="mb-2 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("New submission")}</Link>
@@ -288,7 +288,8 @@ function HeaderBody({ p, variant }: { p: string | null; variant: Variant }) {
   const [menuFor, setMenuFor] = useState<string | null>(null);
   const hydrated = useSyncExternalStore(noop, () => true, () => false);
   // badges stay fresh in the background as people move around (throttled in the store)
-  useEffect(() => { void refreshSummary(); }, [p]);
+  // signed in or out without a page load? the header catches up on the next page (and badges stay fresh)
+  useEffect(() => { void syncAuth(); }, [p]);
   useEffect(() => {
     const onFocus = () => void refreshSummary(true);
     window.addEventListener("focus", onFocus);
