@@ -38,7 +38,7 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
             {plenaryId ? <div className="font-mono text-[12px] text-[#4A5263]">{plenaryId}</div> : null}
           </div>
           <Link role="menuitem" href="/settings/profile#plenary-id" className={item}>{t("My Plenary ID")}</Link>
-          <Link role="menuitem" href="/settings/profile" className={item}>{t("Settings")}</Link>
+          <Link role="menuitem" href="/settings/profile" className={item}>{t("Account")}</Link>
           <InstallMenuItem className={`${item} w-full border-0 bg-transparent text-left`} />
           <form action={signOut} onSubmit={() => clearSummary()} className="border-t border-[#EEF0EC]">
             <button role="menuitem" type="submit" className="block w-full border-0 bg-transparent px-3.5 py-[9px] text-left text-[14px] text-[#B3261E] hover:bg-[#FDECEA]">{t("Sign out")}</button>

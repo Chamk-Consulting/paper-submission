@@ -19,7 +19,8 @@ const MSG = {
   generic: "Something went wrong. Please try again.",
   signIn: "Your session has ended. Sign in again.",
   denied: "You don’t have permission to change this.",
-  topics: "Pick between 3 and 10 topics.",
+  topics: "Pick up to 10 topics (3 or more if you review).",
+  languages: "Pick up to 10 languages.",
   firstName: "Enter your first name.",
   lastName: "Enter your last name.",
   scholar: "Use a full address starting with https://",
@@ -83,7 +84,6 @@ const profileSchema = z.object({
   website_url: opt(300, /^https:\/\/\S+$/, MSG.scholar),
   ieee_member: z.string().trim().max(20, MSG.ieee),
   scholar_url: opt(300, /^https:\/\/scholar\.google\.[a-z.]+\/citations\?(\S*&)?user=[\w-]+/, "Use your Google Scholar profile address (…/citations?user=…)."),
-  topics: z.array(z.string().trim().min(1).max(120)).min(3, MSG.topics).max(10, MSG.topics),
 });
 
 /** Light clean-up so pasted identifiers match the stored format. */
@@ -119,7 +119,7 @@ export async function saveProfile(_: AccountState, fd: FormData): Promise<Accoun
     pronouns: str(fd, "pronouns"), name_scripts: scripts, other_names: list("other_names"), former_names: list("former_names"),
     orcid: ids.orcid, scopus_id: str(fd, "scopus_id"), researcher_id: ids.researcher, dblp_url: ids.dblp,
     semantic_scholar_id: str(fd, "semantic_scholar_id"), xplore_author_id: str(fd, "xplore_author_id"), website_url: ids.site,
-    ieee_member: str(fd, "ieee_member"), scholar_url: str(fd, "scholar_url"), topics: [...new Set(fd.getAll("topics").map(String))],
+    ieee_member: str(fd, "ieee_member"), scholar_url: str(fd, "scholar_url"),
   });
   if (!parsed.success) return { fieldErrors: issues(parsed.error) };
   const v = parsed.data;
@@ -149,6 +149,25 @@ export async function saveProfile(_: AccountState, fd: FormData): Promise<Accoun
     }
   }
 
+  page("/settings/profile");
+  return saved();
+}
+
+/* ---------------------------------------------------------------- profile › Reviewing tab */
+const reviewingSchema = z.object({
+  topics: z.array(z.string().trim().min(2).max(80)).max(10, MSG.topics),
+  languages: z.array(z.string().trim().min(2).max(40)).max(10, MSG.languages),
+});
+/** Topics you can review and the languages you can review in. Optional: authors who don't review leave them empty. */
+export async function saveReviewing(_: AccountState, fd: FormData): Promise<AccountState> {
+  const uniq = (k: string) => [...new Set(fd.getAll(k).map((x) => String(x).trim()).filter(Boolean))];
+  const parsed = reviewingSchema.safeParse({ topics: uniq("topics"), languages: uniq("languages") });
+  if (!parsed.success) return { fieldErrors: issues(parsed.error) };
+  const v = parsed.data;
+  const c = await ctx();
+  if (!c) return { error: MSG.signIn };
+  const lang = await c.supabase.from("persons").update({ review_languages: v.languages }).eq("id", c.personId);
+  if (lang.error) return { error: friendly(lang.error.message) };
   const { data: cur } = await c.supabase.from("person_topics").select("topic").eq("person_id", c.personId);
   const have = new Set(((cur ?? []) as { topic: string }[]).map((x) => x.topic));
   const drop = [...have].filter((x) => !v.topics.includes(x));
@@ -161,7 +180,7 @@ export async function saveProfile(_: AccountState, fd: FormData): Promise<Accoun
     const r = await c.supabase.from("person_topics").insert(add.map((topic) => ({ person_id: c.personId, topic })));
     if (r.error) return { error: friendly(r.error.message) };
   }
-  page("/settings/profile");
+  page("/settings/profile/reviewing");
   return saved();
 }
 
@@ -234,7 +253,7 @@ export async function addConflict(_: AccountState, fd: FormData): Promise<Accoun
     person_id: c.personId, other_person: v.other_person || null, institution: v.other_person ? null : v.institution, reason: v.reason,
   });
   if (error) return { error: friendly(error.message) };
-  page("/settings/profile");
+  page("/settings/profile/reviewing");
   return saved();
 }
 
@@ -244,7 +263,7 @@ export async function removeConflict(id: string): Promise<AccountState> {
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("declared_conflicts").delete().eq("id", id).eq("person_id", c.personId);
   if (error) return { error: friendly(error.message) };
-  page("/settings/profile");
+  page("/settings/profile/reviewing");
   return saved();
 }
 

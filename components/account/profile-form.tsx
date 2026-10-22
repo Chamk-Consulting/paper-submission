@@ -9,19 +9,15 @@ import { sx } from "@/components/account/styles";
 import { AccountSaveBar, FieldErr, useDirty } from "@/components/account/save-bar";
 import { IdentifiersSection, NameSection } from "@/components/account/profile-identity";
 
-/* Canvas ST01 — Profile & expertise. */
+/* Canvas ST01 — Profile › About you. Topics and conflicts live on the Reviewing tab (reviewing-form.tsx). */
 
-const TOPICS = ["Adaptive control", "Marine systems", "Nonlinear control", "Optimal control", "Robust control", "Networked control", "Estimation", "Learning-based control", "Multi-agent systems", "Autonomous vehicles", "Model predictive control", "Robotics"];
 const small = "inline-flex h-8 items-center whitespace-nowrap rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[13px] font-semibold text-[#0E1B3D] hover:bg-[#F7F8F6] disabled:opacity-60";
 const link = "border-0 bg-transparent p-0 text-[13px] text-[#2F5FD0] underline hover:text-[#1F47A8] disabled:opacity-60";
 const tagCls = "rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em]";
 
 export function ProfileForm({ p }: { p: Profile }) {
-  const t = useT();
   const [state, action] = useActionState<AccountState, FormData>(saveProfile, {});
   const { dirty, onChange, onSubmit } = useDirty();
-  const [topics, setTopics] = useState<string[]>(p.topics);
-  const all = [...TOPICS, ...p.topics.filter((x) => !TOPICS.includes(x))];
   const F = "pf";
 
   return (
@@ -32,28 +28,6 @@ export function ProfileForm({ p }: { p: Profile }) {
 
       <Affiliations items={p.affiliations} />
 
-      <section className={sx.card}>
-        <h2 className={sx.h2}>{t("Review topics")}</h2>
-        <p className={sx.sub + " text-[13px]"}>{t("From the IEEE Control Systems Society keyword list.")}</p>
-        <div className="mt-3.5 flex flex-wrap gap-1.5" role="group" aria-label={t("Review topics")}>
-          {all.map((x) => {
-            const on = topics.includes(x);
-            return (
-              <button key={x} type="button" aria-pressed={on} onClick={() => { setTopics(on ? topics.filter((y) => y !== x) : [...topics, x]); onChange(); }}
-                className={`h-8 rounded-full border px-3 text-[13px] font-semibold ${on ? "border-[#0E1B3D] bg-[#0E1B3D] text-[#F5F6F3]" : "border-[#DADDE3] bg-white text-[#4A5263] hover:border-[#B7BDC9]"}`}>
-                <span aria-hidden>{on ? "✓" : "+"}</span> {t(x)}
-              </button>
-            );
-          })}
-        </div>
-        {topics.map((x) => <input key={x} form={F} type="hidden" name="topics" value={x} />)}
-        <p className={`mb-0 mt-2.5 text-[13px] ${topics.length < 3 || topics.length > 10 ? "text-[#A8600F]" : "text-[#4A5263]"}`}>
-          {t("{n} selected · pick 3–10. Editors invite you to papers with matching keywords.", { n: topics.length })}
-        </p>
-        <FieldErr state={state} name="topics" />
-      </section>
-
-      <Conflicts items={p.conflicts} />
 
       <form id={F} action={action} onSubmit={onSubmit}>
         <AccountSaveBar state={state} dirty={dirty} />
@@ -79,12 +53,19 @@ function Affiliations({ items }: { items: Affiliation[] }) {
             <span className="min-w-0">
               <strong className="text-[14px]">{[a.institution, a.department].filter(Boolean).join(", ")}</strong>
               {a.ror_id ? <a href={a.ror_id} target="_blank" rel="noopener noreferrer" className={`${tagCls} ml-2 bg-[#E1F3EA] text-[#14603F] no-underline`} title={a.ror_id}>{t("ROR ✓")}</a> : null}
-              <span className="block text-[13px] text-[#4A5263]">
-                {[a.position_title, a.starts_on || a.ends_on ? `${yearOf(a.starts_on) || "…"} – ${a.ends_on ? yearOf(a.ends_on) : t("now")}` : null].filter(Boolean).join(" · ")}
-              </span>
+              {a.position_title || a.starts_on || a.ends_on ? (
+                <span className="block text-[13px] text-[#4A5263]">
+                  {[a.position_title, a.starts_on || a.ends_on ? `${yearOf(a.starts_on) || "…"} – ${a.ends_on ? yearOf(a.ends_on) : t("now")}` : null].filter(Boolean).join(" · ")}
+                </span>
+              ) : (
+                <button type="button" className={`${link} block`} onClick={() => setEditing(a.id)}>{t("Add your role and years")}</button>
+              )}
+              {a.ror_id ? null : (
+                <span className="mt-1 block text-[13px] text-[#7A4508]">{t("Not matched to the institutions list. Edit it and pick your institution from the suggestions, so conflict checks recognise it.")}</span>
+              )}
             </span>
             <span className="flex flex-none items-center gap-2">
-              <span className={`${tagCls} ${a.ends_on ? "bg-[#EEF0EC] text-[#4A5263]" : "bg-[#E1F3EA] text-[#14603F]"}`}>{a.ends_on ? t("PAST") : t("CURRENT")}</span>
+              <span className={`rounded-full px-2 py-px text-[12px] font-semibold ${a.ends_on ? "bg-[#EEF0EC] text-[#4A5263]" : "bg-[#E1F3EA] text-[#14603F]"}`}>{a.ends_on ? t("Past") : t("Current")}</span>
               <button type="button" className={link} onClick={() => setEditing(a.id)}>{t("Edit")}<span className="sr-only"> {a.institution}</span></button>
             </span>
           </div>
@@ -177,7 +158,7 @@ function InstitutionPicker({ a, state }: { a: Affiliation | null; state: Account
 }
 
 /* ---------------------------------------------------------------- conflicts */
-function Conflicts({ items }: { items: Conflict[] }) {
+export function Conflicts({ items }: { items: Conflict[] }) {
   const t = useT();
   const [adding, setAdding] = useState(false);
   const [pending, start] = useTransition();

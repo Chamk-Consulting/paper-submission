@@ -20,6 +20,8 @@ export type Profile = {
   affiliations: Affiliation[];
   topics: string[];
   conflicts: Conflict[];
+  review_languages: string[];
+  availability: "normal" | "low" | "off"; available_from: string | null;
 };
 
 type PersonRow = {
@@ -28,6 +30,7 @@ type PersonRow = {
   visibility: string | null; timezone: string | null; locale: string | null;
   middle_name?: string | null; name_order?: string | null; paper_name?: string | null; badge_name?: string | null; name_pronunciation?: string | null;
   other_names?: string[] | null; former_names?: string[] | null; orcid_verified_at?: string | null;
+  review_languages?: string[] | null; availability?: string | null; available_from?: string | null;
   scopus_id?: string | null; researcher_id?: string | null; dblp_url?: string | null; semantic_scholar_id?: string | null; xplore_author_id?: string | null; website_url?: string | null;
 };
 
@@ -81,7 +84,30 @@ export async function getProfile(): Promise<Profile | null> {
     affiliations: (affs ?? []) as Affiliation[],
     topics: ((topics ?? []) as { topic: string }[]).map((x) => x.topic),
     conflicts: (conflicts ?? []) as Conflict[],
+    review_languages: person.review_languages ?? [],
+    availability: person.availability === "low" || person.availability === "off" ? person.availability : "normal",
+    available_from: person.available_from ?? null,
   };
+}
+
+/** Topic suggestions for the Reviewing tab: the keyword lists of the events you take part in, else the default list. */
+export async function getTopicSuggestions(): Promise<{ group: string; keywords: string[] }[]> {
+  const m = await me();
+  if (!m) return [];
+  const { data } = await m.supabase.from("venue_members").select("venues(short_name, name, details)").eq("person_id", m.person.id);
+  type V = { short_name: string | null; name: string; details: { keyword_groups?: { group: string; keywords: string[] }[] } | null };
+  const seen = new Set<string>();
+  const out: { group: string; keywords: string[] }[] = [];
+  for (const row of (data ?? []) as unknown as { venues: V | V[] | null }[]) {
+    const v = Array.isArray(row.venues) ? row.venues[0] : row.venues;
+    if (!v || seen.has(v.name)) continue;
+    seen.add(v.name);
+    const kws = [...new Set((v.details?.keyword_groups ?? []).flatMap((g) => g.keywords))];
+    if (kws.length) out.push({ group: v.short_name ?? v.name, keywords: kws });
+  }
+  if (out.length) return out;
+  const { DEFAULT_KEYWORDS } = await import("@/lib/submission/steps");
+  return DEFAULT_KEYWORDS.map((g) => ({ group: g.group, keywords: [...g.keywords] }));
 }
 
 export type SignInEvent = { id: number; method: string; place: string | null; user_agent: string | null; result: string; at: string };
