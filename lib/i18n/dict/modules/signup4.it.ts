@@ -199,4 +199,5 @@ export const signup4_it: Record<string, string> = {
   "Suggested from {source}": "Suggeriti da {source}",
   "{n} of {max} chosen": "{n} di {max} scelti",
   "{topic} — already added": "{topic} — già aggiunto",
+  "Topics you can review, languages, how busy you are, and conflicts of interest.": "Temi che puoi revisionare, lingue, disponibilità e conflitti di interesse.",
 };

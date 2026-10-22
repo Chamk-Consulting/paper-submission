@@ -9,7 +9,6 @@ import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { getProfile } from "@/lib/account/data";
 import { getT } from "@/lib/i18n/server";
 import { getMe } from "@/lib/auth/me";
-import { ProfileTabs } from "@/components/account/profile-tabs";
 import { PlenaryIdCard } from "@/components/auth/plenary-id-card";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,7 +24,6 @@ async function Inner() {
   return (
     <WorkspaceShell ctx={ctx} active="m:settings">
       <SettingsFrame active="profile">
-        <ProfileTabs active="about" />
         {me ? <PlenaryIdCard className="mb-5" name={name} affiliation={me.affiliation?.institution ?? null} id={person?.plenary_id ?? null} orcid={person?.orcid ?? null} /> : null}
         <ProfileForm p={profile} />
       </SettingsFrame>

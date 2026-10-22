@@ -180,7 +180,7 @@ export async function saveReviewing(_: AccountState, fd: FormData): Promise<Acco
     const r = await c.supabase.from("person_topics").insert(add.map((topic) => ({ person_id: c.personId, topic })));
     if (r.error) return { error: friendly(r.error.message) };
   }
-  page("/settings/profile/reviewing");
+  page("/settings/reviewing");
   return saved();
 }
 
@@ -253,7 +253,7 @@ export async function addConflict(_: AccountState, fd: FormData): Promise<Accoun
     person_id: c.personId, other_person: v.other_person || null, institution: v.other_person ? null : v.institution, reason: v.reason,
   });
   if (error) return { error: friendly(error.message) };
-  page("/settings/profile/reviewing");
+  page("/settings/reviewing");
   return saved();
 }
 
@@ -263,7 +263,7 @@ export async function removeConflict(id: string): Promise<AccountState> {
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("declared_conflicts").delete().eq("id", id).eq("person_id", c.personId);
   if (error) return { error: friendly(error.message) };
-  page("/settings/profile/reviewing");
+  page("/settings/reviewing");
   return saved();
 }
 

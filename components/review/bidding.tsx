@@ -74,7 +74,7 @@ export function Bidding({ papers, open, matches = {}, hasTopics = false }: {
           className="ml-auto h-9 w-full rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[14px] sm:w-[280px]" />
       </div>
       {filter === "match" && !hasTopics ? (
-        <p className="mb-0 mt-2 text-[14px] text-[#4A5263]">{t("Add your topics to sort papers by how well they match you.")} <Link href="/settings/profile/reviewing" className="text-[#2F5FD0]">{t("Edit my topics")}</Link></p>
+        <p className="mb-0 mt-2 text-[14px] text-[#4A5263]">{t("Add your topics to sort papers by how well they match you.")} <Link href="/settings/reviewing" className="text-[#2F5FD0]">{t("Edit my topics")}</Link></p>
       ) : null}
       {err ? <p role="alert" className="mb-0 mt-2 text-[14px] text-[#B3261E]">{t(err)}</p> : null}
 

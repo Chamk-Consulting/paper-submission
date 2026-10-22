@@ -54,6 +54,7 @@ const ORG_GROUPS: [string, string, typeof House, string, [string, typeof House][
 /** Account: who you are and how you get in. Settings: how Plenary behaves for you. */
 const ACCOUNT_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
   ["/settings/profile", "Profile", UserRound, (p) => p.startsWith("/settings/profile")],
+  ["/settings/reviewing", "Reviewing", ClipboardCheck, (p) => p.startsWith("/settings/reviewing")],
   ["/settings/security", "Security", KeyRound, (p) => p.startsWith("/settings/security")],
   ["/settings/privacy", "Privacy", Lock, (p) => p.startsWith("/settings/privacy")],
 ];

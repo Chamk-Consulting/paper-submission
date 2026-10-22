@@ -4,21 +4,23 @@ import { getT } from "@/lib/i18n/server";
 
 /* Shared head of the settings pages (canvas ST01–ST04), plus a sub-nav on phones only. Also used by their skeletons. */
 
-export type SettingsKey = "profile" | "security" | "notifications" | "privacy";
+export type SettingsKey = "profile" | "reviewing" | "security" | "notifications" | "privacy";
 export const SETTINGS_NAV: [SettingsKey, string, string][] = [
   ["profile", "Profile", "/settings/profile"],
+  ["reviewing", "Reviewing", "/settings/reviewing"],
   ["security", "Security", "/settings/security"],
   ["privacy", "Privacy", "/settings/privacy"],
   ["notifications", "Notifications", "/settings/notifications"],
 ];
 const SETTINGS_HEAD: Record<SettingsKey, [string, string]> = {
   profile: ["Your profile", "Name, affiliations, research IDs, review topics and conflicts."],
+  reviewing: ["Reviewing", "Topics you can review, languages, how busy you are, and conflicts of interest."],
   security: ["Sign-in & security", "Email addresses, password, passkey, two-step sign-in and devices."],
   notifications: ["Notifications & calendar", "Choose what reaches your inbox, and how deadlines reach your calendar."],
   privacy: ["Privacy & data", "Who sees your profile, your consents, and downloading or deleting your data."],
 };
 /** The sidebar group each page sits in, shown above its title. */
-const GROUP: Record<SettingsKey, string> = { profile: "Account", security: "Account", privacy: "Account", notifications: "Settings" };
+const GROUP: Record<SettingsKey, string> = { profile: "Account", reviewing: "Account", security: "Account", privacy: "Account", notifications: "Settings" };
 export const settingsTitle = (k: SettingsKey) => SETTINGS_HEAD[k][0];
 
 export async function SettingsFrame({ active, children }: { active: SettingsKey; children: ReactNode }) {
