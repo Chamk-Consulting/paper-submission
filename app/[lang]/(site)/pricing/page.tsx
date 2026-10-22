@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
 import { SiteHeader } from "@/components/site/site-header";
-import { SiteFooter } from "@/components/site/site-footer";
 import { PricingPlans } from "@/components/site/pricing-plans";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -38,7 +37,6 @@ export default async function Pricing() {
         </section>
         <p className="mt-6 font-mono text-[12px] text-[#4A5263]">{t("Prices are placeholders for design review.")}</p>
       </main>
-      <SiteFooter />
     </div>
   );
 }

@@ -7,7 +7,6 @@ import { readSentSummary } from "@/lib/site/actions";
 import { contact } from "@/lib/config/contact";
 import { Reveal } from "@/components/motion/reveal";
 import { SiteHeader } from "@/components/site/site-header";
-import { PublicFooter } from "@/components/venues/public-header";
 import { Bar, Line, Skeleton } from "@/components/skeletons/parts";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -89,7 +88,6 @@ export default function Page(props: { searchParams: Promise<{ ref?: string }> })
           <div className="max-w-[720px] rounded-[8px] border border-[#DADDE3] bg-white p-9"><Bar w={48} h={48} className="rounded-full" /><Line size={42} lh={1.08} w="60%" className="mt-8" /><Line w="80%" className="mt-3" /><Bar h={70} className="mt-6" /></div>
         </Skeleton>
       }><Inner {...props} /></Reveal>
-      <PublicFooter />
     </div>
   );
 }

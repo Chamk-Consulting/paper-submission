@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PublicHeader, PublicFooter } from "@/components/venues/public-header";
+import { PublicHeader } from "@/components/venues/public-header";
 import { ProgramBoard } from "@/components/program/program-board";
 import { NotPublished, ProgramHero } from "@/components/program/hero";
 import { ProgramSkeleton } from "@/components/skeletons/program";
@@ -34,7 +34,6 @@ async function Inner({ params }: { params: Promise<Params> }) {
       <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-4 pb-16 pt-5 sm:px-8">
         {sessions.length ? <ProgramBoard venue={venue} sessions={sessions} signedIn={signedIn} generatedAt={new Date().toISOString()} /> : <NotPublished t={t} venue={venue} />}
       </main>
-      <PublicFooter />
     </div>
   );
 }

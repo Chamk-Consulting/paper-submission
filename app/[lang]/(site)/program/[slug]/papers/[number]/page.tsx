@@ -5,7 +5,7 @@ import { getT } from "@/lib/i18n/server";
 import { loadProgram } from "@/lib/program/data";
 import { fmtDay, fmtTime } from "@/lib/program/time";
 import { loadProgramPaper, type ProgramPaper } from "@/lib/attend/data";
-import { PublicHeader, PublicFooter } from "@/components/venues/public-header";
+import { PublicHeader } from "@/components/venues/public-header";
 import { SaveButton } from "@/components/program/session-view";
 import { CiteBox } from "@/components/attend/cite-box";
 import { Reveal } from "@/components/motion/reveal";
@@ -122,7 +122,6 @@ async function Inner({ params }: { params: Promise<Params> }) {
           </section>
         </aside>
       </main>
-      <PublicFooter />
     </div>
   );
 }

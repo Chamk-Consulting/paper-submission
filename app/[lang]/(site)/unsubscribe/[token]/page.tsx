@@ -4,7 +4,6 @@ import { getT } from "@/lib/i18n/server";
 import { getUnsubInfo } from "@/lib/data/unsub";
 import { Reveal } from "@/components/motion/reveal";
 import { SiteHeader } from "@/components/site/site-header";
-import { PublicFooter } from "@/components/venues/public-header";
 import { UnsubscribeCard } from "@/components/data/unsubscribe-card";
 import { UnsubscribeSkeleton } from "@/components/skeletons/data";
 
@@ -39,7 +38,6 @@ export default function Page(props: P) {
       <main className="mx-auto box-border w-full max-w-[760px] flex-auto px-5 pb-16 pt-12 sm:px-6">
         <Reveal fallback={<UnsubscribeSkeleton />}><Inner {...props} /></Reveal>
       </main>
-      <PublicFooter />
     </div>
   );
 }

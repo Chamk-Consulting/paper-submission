@@ -1,10 +1,8 @@
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { OpenCallsStrip } from "@/components/landing/open-calls-strip";
-import { site } from "@/lib/config/site";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
-import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -244,34 +242,6 @@ export default async function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-[#DADDE3] bg-white">
-        <div className={`${wrap} grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-8 pb-10 pt-14 text-[14px]`}>
-          <div><div className="font-serif text-[22px]">Plenary</div><p className="mt-2 text-[#4A5263]">{t("Conference submission and review for the research community.")}</p></div>
-          <div className="flex flex-col gap-2">
-            <div className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Product")}</div>
-            <Link href="/venues" className="text-[#121826] no-underline">{t("Venues")}</Link>
-            <a href="#roles" className="text-[#121826] no-underline">{t("For authors & reviewers")}</a>
-            <Link href="/organizers" className="text-[#121826] no-underline">{t("For organizers")}</Link>
-            <Link href="/pricing" className="text-[#121826] no-underline">{t("Pricing")}</Link>
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Resources")}</div>
-            <Link href="/help" className="text-[#121826] no-underline">{t("Help centre")}</Link>
-            <Link href="/contact" className="text-[#121826] no-underline">{t("Contact")}</Link>
-            <Link href="/maintenance" className="text-[#121826] no-underline">{t("System status")}</Link>
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Legal")}</div>
-            <Link href="/legal/privacy" className="text-[#121826] no-underline">{t("Privacy & GDPR")}</Link>
-            <Link href="/legal/terms" className="text-[#121826] no-underline">{t("Terms")}</Link>
-            <Link href="/legal/security" className="text-[#121826] no-underline">{t("Security")}</Link>
-            <Link href="/legal/cookies" className="text-[#121826] no-underline">{t("Cookies")}</Link>
-            <CookieSettingsLink className="self-start text-left text-[#121826]" />
-          </div>
-        </div>
-        <div className={`${wrap} pb-8 font-mono text-[12px] text-[#4A5263]`}>© 2026 {site.legalName}</div>
-      </footer>
     </div>
   );
 }

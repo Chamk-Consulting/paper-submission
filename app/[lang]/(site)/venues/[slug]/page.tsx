@@ -1,7 +1,6 @@
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PublicFooter } from "@/components/venues/public-header";
 import { CountdownCard, DatesList, FollowButton, LiveHeader, StatusCard } from "@/components/venues/venue-live";
 import { getVenue, getVenuePublic } from "@/lib/venues/data";
 import { AttendingSection, GallerySection, TravelSection } from "@/components/venues/venue-sections";
@@ -211,7 +210,6 @@ async function Venue({ params }: { params: Promise<Params> }) {
           </section>
         </aside>
       </div>
-      <PublicFooter />
     </div>
   );
 }

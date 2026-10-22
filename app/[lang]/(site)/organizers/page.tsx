@@ -2,7 +2,6 @@ import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
 import { SiteHeader } from "@/components/site/site-header";
-import { SiteFooter } from "@/components/site/site-footer";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -111,7 +110,6 @@ export default async function Organizers() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </div>
   );
 }

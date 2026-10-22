@@ -4,6 +4,7 @@ import Link from "@/components/site/link";
 import { useEffect } from "react";
 import { useT } from "@/lib/i18n/client";
 import { SiteHeader } from "@/components/chrome/app-chrome";
+import { SiteFooter } from "@/components/site/site-footer";
 
 /** ER01 — unexpected error inside a page. */
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -26,6 +27,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         {error.digest ? <p className="mb-0 mt-[18px] font-mono text-[12px] text-[#4A5263]">{t("Reference")}: {error.digest}</p> : null}
       </section>
     </main>
+    <SiteFooter size="minimal" />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PublicHeader, PublicFooter } from "@/components/venues/public-header";
+import { PublicHeader } from "@/components/venues/public-header";
 import { ProgramHero } from "@/components/program/hero";
 import { SaveButton, TalkList } from "@/components/program/session-view";
 import { ProgramSkeleton } from "@/components/skeletons/program";
@@ -92,7 +92,6 @@ async function Inner({ params }: { params: Promise<Params> }) {
           <Link href={`/program/${venue.slug}`} className="text-[14px]">{t("← Back to the program")}</Link>
         </aside>
       </main>
-      <PublicFooter />
     </div>
   );
 }

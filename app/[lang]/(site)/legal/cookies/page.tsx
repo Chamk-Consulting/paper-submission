@@ -3,7 +3,6 @@ import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { site } from "@/lib/config/site";
 import { LiveHeader } from "@/components/venues/venue-live";
-import { PublicFooter } from "@/components/venues/public-header";
 import { ConsentStatus } from "@/components/consent/consent-status";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -71,7 +70,6 @@ export default async function CookiePolicy() {
         <p className="mt-1 max-w-[64ch] text-[#4A5263]">{t("You can change or withdraw your choice at any time with “Cookie settings” at the bottom of every page, or delete cookies in your browser settings.")}{" "}<Link href="/account-help" className="text-[#2F5FD0]">{t("Questions? Visit the Help centre.")}</Link></p>
         <p className="mt-6 font-mono text-[12px] text-[#4A5263]">{t("Last updated: {date}", { date: "18 October 2026" })} · {site.legalName}</p>
       </main>
-      <PublicFooter />
     </div>
   );
 }

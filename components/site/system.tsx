@@ -28,16 +28,17 @@ export function SystemCard({ icon, tone, code, title, body, primary, secondary, 
   );
 }
 
-export function SystemFrame({ children }: { children: ReactNode }) {
+/** `footer`: only for pages outside the public layout (page not found); the public layout adds it everywhere else. */
+export function SystemFrame({ children, footer = false }: { children: ReactNode; footer?: boolean }) {
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <SiteHeader />
       <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-14 pt-7 sm:px-8">{children}</main>
-      <SiteFooter />
+      {footer ? <SiteFooter size="minimal" /> : null}
     </div>
   );
 }
 
-export function SystemPage(props: Parameters<typeof SystemCard>[0]) {
-  return <SystemFrame><SystemCard {...props} /></SystemFrame>;
+export function SystemPage({ footer, ...props }: Parameters<typeof SystemCard>[0] & { footer?: boolean }) {
+  return <SystemFrame footer={footer}><SystemCard {...props} /></SystemFrame>;
 }

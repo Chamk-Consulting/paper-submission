@@ -1,6 +1,6 @@
 import { Bar, Card, Line, Skeleton } from "@/components/skeletons/parts";
 import { WorkspaceShell } from "@/components/workspace/shell";
-import { PublicHeader, PublicFooter } from "@/components/venues/public-header";
+import { PublicHeader } from "@/components/venues/public-header";
 
 /* Prerendered shells for the program (PG01–PG03) and session-chair (CH01, M05) pages. */
 
@@ -37,7 +37,6 @@ export function ProgramSkeleton({ variant = "board" }: { variant?: "board" | "se
           )}
         </div>
       </Skeleton>
-      <PublicFooter />
     </div>
   );
 }

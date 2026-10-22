@@ -1,7 +1,6 @@
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { PublicFooter } from "@/components/venues/public-header";
 import { LiveHeader } from "@/components/venues/venue-live";
 import { getVenue, getVenueArchive } from "@/lib/venues/data";
 import { fmtRange } from "@/lib/venues/time";
@@ -142,7 +141,6 @@ async function Archive({ params }: { params: Promise<Params> }) {
         </section>
         <p className="mt-2 text-[12px] text-[#4A5263]">{t("Figures come from the organizers or the imported records.")} <Link href={`/venues/${a.slug}`} className="text-[#2F5FD0] underline">{t("Venue page")}</Link></p>
       </main>
-      <PublicFooter />
     </div>
   );
 }

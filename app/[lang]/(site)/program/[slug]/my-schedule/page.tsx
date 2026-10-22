@@ -1,7 +1,7 @@
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { PublicHeader, PublicFooter } from "@/components/venues/public-header";
+import { PublicHeader } from "@/components/venues/public-header";
 import { ProgramHero } from "@/components/program/hero";
 import { MySchedule, PrintButton } from "@/components/program/my-schedule";
 import { ProgramSkeleton } from "@/components/skeletons/program";
@@ -44,7 +44,6 @@ async function Inner({ params }: { params: Promise<Params> }) {
         <h1 className="m-0 mb-4 hidden font-serif text-[28px] font-normal print:block">{t("My schedule")} · {acr}</h1>
         <MySchedule sessions={sessions} slug={venue.slug} tz={venue.timezone} />
       </main>
-      <div className="print:hidden"><PublicFooter /></div>
     </div>
   );
 }

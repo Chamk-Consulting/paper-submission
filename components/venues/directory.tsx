@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 import Link from "@/components/site/link";
 import { ViewTransition, startTransition, useCallback, useEffect, useMemo, useState, type SetStateAction } from "react";
 import { VT } from "@/lib/motion";
-import { PublicFooter, PublicHeader } from "@/components/venues/public-header";
+import { PublicHeader } from "@/components/venues/public-header";
 import dynamic from "next/dynamic";
 import { useT } from "@/lib/i18n/client";
 import { useClock, useFollows } from "@/components/venues/use-clock";
@@ -286,7 +286,6 @@ export function Directory({ venues, generatedAt, ready }: { venues: DirectoryVen
           </ViewTransition>
         </section>
       </div>
-      <PublicFooter />
     </div>
   );
 }
