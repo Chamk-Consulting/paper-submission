@@ -112,4 +112,10 @@ export const signup4_fr: Record<string, string> = {
   "Account & sign-in": "Compte et connexion",
   "Organise an event": "Organiser un événement",
   "Quick links": "Liens rapides",
+  "After acceptance": "Après acceptation",
+  "Collapse menu": "Réduire le menu",
+  "Event settings": "Réglages de l’événement",
+  "Expand menu": "Déplier le menu",
+  "Team & email": "Équipe et e-mails",
+  "Already have an account": "Vous avez déjà un compte",
 };

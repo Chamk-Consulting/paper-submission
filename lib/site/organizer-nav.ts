@@ -9,3 +9,14 @@ export const ORGANIZER_NAV: [string, string, string][] = [
 ];
 /** Organizer items only the event owner sees. */
 export const OWNER_ONLY = new Set(["billing"]);
+
+/** The organiser links in folding groups for the side menu: [group key, group label, organiser keys]. */
+export const ORGANIZER_GROUPS: [string, string, string[]][] = [
+  ["overview", "Overview", ["dashboard"]],
+  ["submissions", "Submissions", ["papers", "similarity"]],
+  ["reviewing", "Reviewing", ["assignment", "reviews", "decisions", "awards"]],
+  ["after", "After acceptance", ["finals", "proceedings"]],
+  ["event", "Event", ["program", "registrations", "live", "checkin"]],
+  ["team", "Team & email", ["people", "committee", "email"]],
+  ["settings", "Event settings", ["setup", "billing", "roles", "audit"]],
+];
