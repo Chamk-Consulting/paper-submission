@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownUp, Award, BadgeCheck, CalendarPlus, CalendarRange, FileCheck, Gauge, Receipt, Ticket, Search, UserRound } from "lucide-react";
+import { Award, BadgeCheck, CalendarPlus, CalendarRange, FileCheck, Gauge, Receipt, Ticket, Search, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
@@ -86,13 +86,10 @@ function Toolbar<S extends string>({ id, q, setQ, sort, setSort, sorts, shown, t
           <input id={`${id}-q`} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t(placeholder)}
             className="h-9 min-w-0 flex-auto border-0 bg-transparent text-[14px] text-[#121826] outline-none" />
         </div>
-        <label className="flex h-10 items-center gap-2 text-[13px] text-[#4A5263]">
-          <ArrowDownUp size={15} aria-hidden />
-          <span className="sr-only sm:not-sr-only">{t("Sort")}</span>
-          <select value={sort} onChange={(e) => setSort(e.target.value as S)} className="h-10 rounded-[6px] border border-[#B7BDC9] bg-white px-2.5 text-[14px] text-[#121826]">
-            {sorts.map(([k, l]) => <option key={k} value={k}>{t(l)}</option>)}
-          </select>
-        </label>
+        <select aria-label={t("Sort")} value={sort} onChange={(e) => setSort(e.target.value as S)}
+          className="h-10 cursor-pointer rounded-[6px] border border-[#B7BDC9] bg-white px-2.5 text-[14px] text-[#121826] hover:border-[#8A93A6]">
+          {sorts.map(([k, l]) => <option key={k} value={k}>{t(l)}</option>)}
+        </select>
       </div>
       <p aria-live="polite" className="m-0 text-[13px] text-[#4A5263]">
         {active ? t("Showing {n} of {total}", { n: shown, total }) : (total === 1 ? t("1 event") : t("{n} events", { n: total }))}
