@@ -1,5 +1,7 @@
+import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
+import { PageHero, heroBtn } from "@/components/site/page-hero";
 import { SiteHeader } from "@/components/site/site-header";
 import { PricingPlans } from "@/components/site/pricing-plans";
 
@@ -20,9 +22,16 @@ export default async function Pricing() {
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <SiteHeader />
-      <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-16 pt-12 sm:px-8">
-        <h1 className="m-0 font-serif text-[40px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[52px]">{t("Simple pricing per event")}</h1>
-        <p className="mt-3 max-w-[60ch] text-[17px] text-[#4A5263]">{t("Authors and reviewers never pay. You pay per accepted paper, only after submissions open.")}</p>
+      <PageHero tone="navy" kicker={t("Pricing")}
+        title={t("Simple pricing per event")}
+        lead={t("Authors and reviewers never pay. You pay per accepted paper, only after submissions open.")}
+        actions={
+          <div className="flex flex-wrap gap-3">
+            <Link href="/manage/new" className={heroBtn.primary}>{t("Create an event")}</Link>
+            <Link href="/contact?tab=sales" className={heroBtn.secondaryNavy}>{t("Talk to sales")}</Link>
+          </div>
+        } />
+      <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-16 pt-10 sm:px-8">
         <PricingPlans />
         <section className="mt-12 max-w-[820px]" aria-labelledby="pq">
           <h2 id="pq" className="m-0 font-serif text-[28px] font-normal">{t("Questions")}</h2>

@@ -14,7 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const [{ q }, ctx] = await Promise.all([searchParams, getWorkspaceCtx()]);
-  const body = <HelpCenter initialQuery={typeof q === "string" ? q.slice(0, 80) : ""} signedIn={!!ctx} />;
+  const query = typeof q === "string" ? q.slice(0, 80) : "";
+  const body = <HelpCenter initialQuery={query} signedIn={!!ctx} />;
   if (ctx) {
     return (
       <WorkspaceShell ctx={ctx} active="m:help">
@@ -25,7 +26,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <SiteHeader />
-      <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-14 pt-8 sm:px-8">{body}</main>
+      <main className="flex flex-auto flex-col"><HelpCenter initialQuery={query} signedIn={false} hero /></main>
     </div>
   );
 }

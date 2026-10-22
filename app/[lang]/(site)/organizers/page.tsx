@@ -1,6 +1,7 @@
 import Link from "@/components/site/link";
 import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
+import { PageHero, heroBtn } from "@/components/site/page-hero";
 import { SiteHeader } from "@/components/site/site-header";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,17 +32,17 @@ export default async function Organizers() {
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <SiteHeader />
-      <section className="bg-[#0E1B3D] text-[#F5F6F3]">
-        <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1.1fr_1fr] lg:py-20">
-          <div>
-            <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#F2A93B]">{t("For conference organizers")}</p>
-            <h1 className="mt-3 font-serif text-[40px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[54px]">{t("Run submissions, reviews and the program in one place.")}</h1>
-            <p className="mt-4 max-w-[52ch] text-[17px] text-[#D6DCEA]">{t("Built for IEEE-style conferences: double-blind review, associate editors, copyright and Xplore export — without the PIN emails.")}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/manage/new" className="inline-flex h-12 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[16px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Start a free trial event")}</Link>
-              <Link href="/contact?tab=sales" className="inline-flex h-12 items-center rounded-[4px] border border-[#3A4C7E] px-5 text-[16px] font-medium text-[#F5F6F3] no-underline hover:bg-[#17285A]">{t("Book a demo")}</Link>
-            </div>
+      <PageHero tone="navy"
+        kicker={t("For conference organizers")}
+        title={t("Run submissions, reviews and the program in one place.")}
+        lead={t("Built for IEEE-style conferences: double-blind review, associate editors, copyright and Xplore export — without the PIN emails.")}
+        actions={
+          <div className="flex flex-wrap gap-3">
+            <Link href="/manage/new" className={heroBtn.primary}>{t("Start a free trial event")}</Link>
+            <Link href="/contact?tab=sales" className={heroBtn.secondaryNavy}>{t("Book a demo")}</Link>
           </div>
+        }
+        aside={
           <div aria-hidden className="rounded-[10px] bg-white p-5 text-[#121826] shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
             <div className="flex items-center justify-between">
               <span className="font-serif text-[20px]">{t("Event dashboard")}</span>
@@ -59,8 +60,8 @@ export default async function Organizers() {
               {bars.map((h, i) => <span key={i} className="flex-1 rounded-t-[3px]" style={{ height: `${h}%`, background: i === 3 ? "#F2A93B" : "#2F5FD0" }} />)}
             </div>
           </div>
-        </div>
-      </section>
+        }
+      />
 
       <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-16 sm:px-8">
         <div className="-mt-8 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">

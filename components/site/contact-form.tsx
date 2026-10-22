@@ -5,6 +5,7 @@ import { Turnstile } from "@/components/site/turnstile";
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
+import { PageHero } from "@/components/site/page-hero";
 import { sendContact, type ContactState } from "@/lib/site/actions";
 import { contact, CONTACT_TOPICS, SALES_KINDS, SALES_ROLES, SALES_SIZES, SALES_SYSTEMS } from "@/lib/config/contact";
 
@@ -60,17 +61,16 @@ export function ContactPage({ initialTab, email, signedIn }: { initialTab: "supp
 
   return (
     <>
-      <section className="border-b border-[#DADDE3] bg-white">
-        <div className="mx-auto box-border max-w-[1280px] px-5 pt-10 sm:px-8">
-          <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/help" className="text-[#121826]">{t("Help & guides")}</Link> / {t("Contact")}</p>
-          <h1 className="mt-2.5 font-serif text-[40px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[48px]">{t("How can we help?")}</h1>
-          <p className="mt-2.5 max-w-[62ch] text-[17px] text-[#4A5263]">{t("Write to the people who build Plenary. We reply within {time}, Monday to Friday, in {langs}.", { time: t(contact.replyTime), langs: t(contact.languages) })}</p>
-          <div role="tablist" aria-label={t("Who do you want to reach?")} className="mt-7 flex flex-wrap gap-1">
+      <PageHero
+        kicker={<><Link href="/help" className="text-[#4A5263] no-underline hover:underline">{t("Help & guides")}</Link> / {t("Contact")}</>}
+        title={t("How can we help?")}
+        lead={t("Write to the people who build Plenary. We reply within {time}, Monday to Friday, in {langs}.", { time: t(contact.replyTime), langs: t(contact.languages) })}
+        tabs={
+          <div role="tablist" aria-label={t("Who do you want to reach?")} className="flex flex-wrap gap-1">
             <button type="button" role="tab" id="tab-support" aria-controls="panel" aria-selected={tab === "support"} onClick={() => setTab("support")} className={tabCls(tab === "support")}>{t("Get support")}</button>
             <button type="button" role="tab" id="tab-sales" aria-controls="panel" aria-selected={tab === "sales"} onClick={() => setTab("sales")} className={tabCls(tab === "sales")}>{t("Talk to sales")}</button>
           </div>
-        </div>
-      </section>
+        } />
 
       <div id="panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mx-auto box-border flex w-full max-w-[1280px] flex-auto flex-wrap items-start justify-between gap-7 px-5 pb-16 pt-7 sm:px-8">
         {tab === "support" ? (

@@ -109,4 +109,7 @@ export const signup4_it: Record<string, string> = {
   "Need help?": "Serve aiuto?",
   "Write to": "Scrivi a",
   "or use the contact form — a person replies within 2 working days.": "oppure usa il modulo di contatto: una persona risponde entro 2 giorni lavorativi.",
+  "Account & sign-in": "Account e accesso",
+  "Organise an event": "Organizza un evento",
+  "Quick links": "Link rapidi",
 };

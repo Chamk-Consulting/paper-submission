@@ -5,6 +5,9 @@ import Link from "@/components/site/link";
 import { useMemo, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { contact } from "@/lib/config/contact";
+import { PageHero } from "@/components/site/page-hero";
+
+const QUICK: [string, string][] = [["/venues", "Submit a paper"], ["/help/reviewers", "Review"], ["/organizers", "Organise an event"], ["/account-help", "Account & sign-in"]];
 
 /* Canvas HP01 — Help & guides: search, guide groups, FAQ and "Still stuck?". */
 
@@ -47,7 +50,7 @@ const FAQ: [string, string][] = [
   ["My PDF fails the upload check", "The check names the page and the problem — usually fonts not embedded or the wrong paper size. Export again as PDF with all fonts embedded, or use the venue’s template."],
 ];
 
-export function HelpCenter({ initialQuery = "", signedIn }: { initialQuery?: string; signedIn: boolean }) {
+export function HelpCenter({ initialQuery = "", signedIn, hero = false }: { initialQuery?: string; signedIn: boolean; hero?: boolean }) {
   const t = useT();
   const [q, setQ] = useState(initialQuery);
   const needle = q.trim().toLowerCase();
@@ -60,10 +63,11 @@ export function HelpCenter({ initialQuery = "", signedIn }: { initialQuery?: str
   const n = groups.reduce((s, g) => s + g.guides.length, 0) + faq.length;
 
   return (
-    <div>
-      <h1 className="m-0 font-serif text-[36px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[40px]">{t("Help & guides")}</h1>
-      <p className="mt-1.5 text-[#4A5263]">{t("Answers for authors, reviewers, editors and organizers.")}</p>
-      <div role="search" className="mt-5 flex h-[50px] max-w-[720px] items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#0E1B3D]">
+    <>
+      {hero ? (
+        <PageHero kicker={t("Help")} title={t("Help & guides")} lead={t("Answers for authors, reviewers, editors and organizers.")}
+          actions={<>
+      <div role="search" className="flex h-[50px] max-w-[720px] items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#0E1B3D]">
         <Search size={18} strokeWidth={1.75} color="#4A5263" className="flex-none" aria-hidden />
         <label htmlFor="help-q" className="sr-only">{t("Search help")}</label>
         <input id="help-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("What do you need help with?")} className="h-full min-w-0 flex-auto border-0 bg-transparent text-[16px] outline-none" />
@@ -78,6 +82,32 @@ export function HelpCenter({ initialQuery = "", signedIn }: { initialQuery?: str
         )}
       </p>
 
+            <nav aria-label={t("Quick links")} className="mt-5 flex flex-wrap gap-2">
+              {QUICK.map(([href, label]) => <Link key={href} href={href} className="inline-flex h-9 items-center rounded-full border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]">{t(label)}</Link>)}
+            </nav>
+          </>} />
+      ) : (
+        <div>
+          <h1 className="m-0 font-serif text-[36px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[40px]">{t("Help & guides")}</h1>
+          <p className="mb-5 mt-1.5 text-[#4A5263]">{t("Answers for authors, reviewers, editors and organizers.")}</p>
+      <div role="search" className="flex h-[50px] max-w-[720px] items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#0E1B3D]">
+        <Search size={18} strokeWidth={1.75} color="#4A5263" className="flex-none" aria-hidden />
+        <label htmlFor="help-q" className="sr-only">{t("Search help")}</label>
+        <input id="help-q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("What do you need help with?")} className="h-full min-w-0 flex-auto border-0 bg-transparent text-[16px] outline-none" />
+      </div>
+      <p className="mt-2.5 text-[13px] text-[#4A5263]" aria-live="polite">
+        {needle ? t(n === 1 ? "{n} result for “{q}”" : "{n} results for “{q}”", { n, q: q.trim() }) : (
+          <>{t("Popular:")}{" "}
+            {(["copyright", "extra pages", "passkeys", "conflicts"] as const).map((w, i) => (
+              <span key={w}>{i ? " · " : ""}<button type="button" onClick={() => setQ(t(w))} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#2F5FD0] underline">{t(w)}</button></span>
+            ))}
+          </>
+        )}
+      </p>
+
+        </div>
+      )}
+      <div className={hero ? "mx-auto box-border w-full max-w-[1280px] flex-auto px-5 pb-14 pt-6 sm:px-8" : ""}>
       {groups.length ? (
         <div className="mt-5 grid gap-3.5 md:grid-cols-2">
           {groups.map((g) => (
@@ -135,7 +165,7 @@ export function HelpCenter({ initialQuery = "", signedIn }: { initialQuery?: str
           <Link href="/contact" className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-4 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Contact Plenary support")}</Link>
         </div>
       </section>
-      <p className="mt-3 flex items-center gap-2 text-[13px] text-[#4A5263]"><span className="size-2 rounded-full bg-[#18744F]" />{t("All systems working · replies within {time}", { time: t(contact.replyTime) })}</p>
-    </div>
+      </div>
+    </>
   );
 }
