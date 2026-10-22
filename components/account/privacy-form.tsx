@@ -6,7 +6,7 @@ import { useT } from "@/lib/i18n/client";
 import { requestData, savePrivacy, type AccountState } from "@/lib/account/actions";
 import type { Consents, DataRequest } from "@/lib/account/data";
 import { sx } from "@/components/account/styles";
-import { AccountSaveBar, useDirty } from "@/components/account/save-bar";
+import { ManualSaveBar, useDirty } from "@/components/account/save-bar";
 import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 
 /* Canvas ST04 — Privacy & data. */
@@ -33,7 +33,7 @@ export function PrivacyForm({ visibility, consents, lastExport, lastDelete }: {
   visibility: "public" | "signed_in" | "venues_only"; consents: Consents; lastExport: DataRequest | null; lastDelete: DataRequest | null;
 }) {
   const t = useT();
-  const [state, action] = useActionState<AccountState, FormData>(savePrivacy, {});
+  const [state, action, pending] = useActionState<AccountState, FormData>(savePrivacy, {});
   const { dirty, onChange, onSubmit } = useDirty();
   const date = (iso: string | null, long = false) => (iso ? new Date(iso).toLocaleDateString(t.intl, long ? { day: "numeric", month: "long", year: "numeric" } : { month: "short", year: "numeric" }) : "—");
 
@@ -72,9 +72,9 @@ export function PrivacyForm({ visibility, consents, lastExport, lastDelete }: {
       <YourData lastExport={lastExport} />
       <DeleteAccount lastDelete={lastDelete} date={(iso) => date(iso, true)} />
 
-      <form id="pv" action={action} onSubmit={onSubmit}>
-        <AccountSaveBar state={state} dirty={dirty} />
-      </form>
+      <form id="pv" action={action} onSubmit={onSubmit} />
+      <ManualSaveBar form="pv" pending={pending} dirty={dirty} savedAt={state.savedAt} error={state.error}
+        note="Downloading or deleting your data has its own buttons above." />
     </div>
   );
 }

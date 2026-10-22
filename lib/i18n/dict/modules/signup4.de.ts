@@ -258,4 +258,6 @@ export const signup4_de: Record<string, string> = {
   "Pick the date you’ll review again.": "Wählen Sie das Datum, ab dem Sie wieder begutachten.",
   "{n} events in the feed · times in AoE, with your local time in the description": "{n} Termine im Feed · Zeiten in AoE, mit Ihrer Ortszeit in der Beschreibung",
   "One-off download": "Einmaliger Download",
+  "Affiliations are saved as you add or edit them.": "Zugehörigkeiten werden gespeichert, sobald Sie sie hinzufügen oder bearbeiten.",
+  "Downloading or deleting your data has its own buttons above.": "Für das Herunterladen oder Löschen Ihrer Daten gibt es eigene Schaltflächen weiter oben.",
 };

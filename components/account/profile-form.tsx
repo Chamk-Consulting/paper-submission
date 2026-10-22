@@ -6,7 +6,7 @@ import { addConflict, deleteAffiliation, findPeople, removeConflict, saveAffilia
 import type { Affiliation, Conflict, Profile } from "@/lib/account/data";
 import { searchOrganizations, type Org } from "@/lib/auth/onboarding-actions";
 import { sx } from "@/components/account/styles";
-import { AccountSaveBar, FieldErr, useDirty } from "@/components/account/save-bar";
+import { FieldErr, ManualSaveBar, useDirty } from "@/components/account/save-bar";
 import { IdentifiersSection, NameSection } from "@/components/account/profile-identity";
 
 /* Canvas ST01 — Profile › About you. Topics and conflicts live on the Reviewing tab (reviewing-form.tsx). */
@@ -16,7 +16,7 @@ const link = "border-0 bg-transparent p-0 text-[13px] text-[#2F5FD0] underline h
 const tagCls = "rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em]";
 
 export function ProfileForm({ p }: { p: Profile }) {
-  const [state, action] = useActionState<AccountState, FormData>(saveProfile, {});
+  const [state, action, pending] = useActionState<AccountState, FormData>(saveProfile, {});
   const { dirty, onChange, onSubmit } = useDirty();
   const F = "pf";
 
@@ -29,9 +29,11 @@ export function ProfileForm({ p }: { p: Profile }) {
       <Affiliations items={p.affiliations} />
 
 
-      <form id={F} action={action} onSubmit={onSubmit}>
-        <AccountSaveBar state={state} dirty={dirty} />
-      </form>
+      {/* The fields above belong to this form by id; the bar sits outside it so it stays pinned while you scroll. */}
+      <form id={F} action={action} onSubmit={onSubmit} />
+      <ManualSaveBar form={F} pending={pending} dirty={dirty} savedAt={state.savedAt}
+        error={state.error ?? (state.fieldErrors && Object.keys(state.fieldErrors).length ? "Check the highlighted fields." : undefined)}
+        note="Affiliations are saved as you add or edit them." />
     </div>
   );
 }
