@@ -4,11 +4,10 @@ import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { saveNewPassword, type NewPasswordState } from "@/lib/auth/reset-actions";
 import { maskEmail, scorePassword } from "@/lib/auth/password-rules";
+import { PasswordMeter, useLeakCheck } from "@/components/auth/password-meter";
 import { NavyAside, SetupSteps, ShieldNote, SplitLayout, ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
 
-const COLORS = ["#DADDE3", "#B3261E", "#A8600F", "#2F5FD0", "#18744F"];
-const LABELS = ["—", "Too weak", "Could be stronger", "Good", "Strong"];
 const stamp = (intl: string) => new Date().toLocaleTimeString(intl, { hour: "2-digit", minute: "2-digit" });
 
 /** Canvas PR11: choose a new password, then the "You're all set" state. */
@@ -27,9 +26,8 @@ export function NewPasswordFlow({ email, acceptedAt }: { email: string; accepted
   const mismatch = pw2.length > 0 && pw2 !== pw;
   const matchOk = pw2.length > 0 && pw2 === pw;
   const triedOrServer = tried || !!state.fieldErrors?.password;
-  const rule = (pass: boolean, label: string) => ({ t: t(label), mark: pass ? "✓" : triedOrServer ? "!" : "·", ink: pass ? "#14603F" : triedOrServer ? "#B3261E" : "#4A5263" });
-  const rules = [rule(r.long, "At least 12 characters"), rule(r.notCommon, "Not a common or leaked password"), rule(r.notEmail, "Doesn’t contain your name or email")];
-  const newBorder = triedOrServer && !r.ok ? "2px solid #B3261E" : "1px solid #B7BDC9";
+  const leak = useLeakCheck(pw, r.long && r.mixed && r.notCommon && r.notEmail);
+  const newBorder = (triedOrServer && !r.ok) || leak === "leaked" ? "2px solid #B3261E" : "1px solid #B7BDC9";
   const confirmBorder = mismatch || state.fieldErrors?.confirm ? "2px solid #B3261E" : matchOk ? "2px solid #18744F" : "1px solid #B7BDC9";
 
   const steps = [
@@ -77,7 +75,7 @@ export function NewPasswordFlow({ email, acceptedAt }: { email: string; accepted
       <form
         action={(fd) => { setSavedAt(stamp(t.intl)); return action(fd); }}
         onSubmit={(e) => {
-          if (!r.ok || pw !== pw2) { e.preventDefault(); setTried(true); }
+          if (!r.ok || pw !== pw2 || leak === "leaked" || leak === "checking") { e.preventDefault(); setTried(true); }
         }}
         noValidate
       >
@@ -105,20 +103,7 @@ export function NewPasswordFlow({ email, acceptedAt }: { email: string; accepted
               {show ? t("Hide") : t("Show")}
             </button>
           </div>
-          <div aria-hidden className="mt-1 grid grid-cols-4 gap-1">
-            {[1, 2, 3, 4].map((i) => <span key={i} className="h-1 rounded-sm" style={{ background: r.sc >= i ? COLORS[r.sc] : "#DADDE3" }} />)}
-          </div>
-          <div className="flex justify-between text-[13px]">
-            <span className={ui.muted}>{t("Strength")}</span>
-            <span className="font-semibold" style={{ color: r.sc ? COLORS[r.sc] : "#4A5263" }}>{t(LABELS[r.sc])}</span>
-          </div>
-          <ul id="pr11-rules" className="m-0 mt-1 flex list-none flex-col gap-1 p-0 text-[13px]">
-            {rules.map((x) => (
-              <li key={x.t} className="flex items-center gap-2" style={{ color: x.ink }}>
-                <span aria-hidden className="w-4 text-center font-semibold">{x.mark}</span>{x.t}
-              </li>
-            ))}
-          </ul>
+          <PasswordMeter id="pr11-rules" pw={pw} email={email} flag={triedOrServer} leak={leak} />
           {state.fieldErrors?.password ? <span role="alert" className={ui.error}>{t(state.fieldErrors.password[0])}</span> : null}
         </div>
 

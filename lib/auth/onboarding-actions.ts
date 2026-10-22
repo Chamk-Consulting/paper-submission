@@ -83,7 +83,7 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
 
   if (legacy) {
     const rules = scorePassword(password, email);
-    if (!rules.ok) return { fieldErrors: { password: ["Choose a password that meets all three rules."] } };
+    if (!rules.ok) return { fieldErrors: { password: ["Choose a password that meets all the rules."] } };
     if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
   }
 
@@ -227,7 +227,7 @@ export async function saveChosenPassword(_: PasswordState, formData: FormData): 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user?.email) return { message: "Your session ended. Sign in again with a code to choose your password." };
   const { password, confirm } = p.data;
-  if (!scorePassword(password, auth.user.email).ok) return { fieldErrors: { password: ["Choose a password that meets all three rules."] } };
+  if (!scorePassword(password, auth.user.email).ok) return { fieldErrors: { password: ["Choose a password that meets all the rules."] } };
   if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
   if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
 

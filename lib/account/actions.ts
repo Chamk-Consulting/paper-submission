@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { newToken } from "@/lib/tokens";
+import { isPwnedPassword } from "@/lib/auth/pwned";
 import { scorePassword } from "@/lib/auth/password-rules";
 import { notifyEvents } from "@/lib/account/data";
 import { absoluteUrl, supabaseEnv } from "@/lib/config/site";
@@ -28,8 +29,10 @@ const MSG = {
   reason: "Say briefly why (at least 2 characters).",
   conflictTarget: "Pick a person or type an institution.",
   wrongPassword: "Your current password is not right.",
-  weakPassword: "Use at least 12 characters, not a common password and not your email.",
-  samePassword: "The new password must be different.",
+  weakPassword: "Use at least 12 characters with a mix of letters, numbers and symbols (or 16+ characters), not a common password and not your email.",
+  samePassword: "Choose a password different from your current one.",
+  leakedPassword: "That password has appeared in a data leak. Choose another.",
+  passwordMismatch: "The two passwords don't match yet.",
   reply: "Write a reply first.",
   timezone: "Pick a time zone from the list.",
 };
@@ -249,12 +252,15 @@ export async function removeConflict(id: string): Promise<AccountState> {
 export async function changePassword(_: AccountState, fd: FormData): Promise<AccountState> {
   const current = String(fd.get("current") ?? "");
   const next = String(fd.get("next") ?? "");
+  const confirm = String(fd.get("confirm") ?? "");
   const c = await ctx();
   if (!c) return { error: MSG.signIn };
   const email = c.user.email ?? "";
-  if (!scorePassword(next, email).ok) return { fieldErrors: { next: MSG.weakPassword } };
-  if (next === current) return { fieldErrors: { next: MSG.samePassword } };
   if (!current) return { fieldErrors: { current: MSG.wrongPassword } };
+  if (next === current) return { fieldErrors: { next: MSG.samePassword } };
+  if (!scorePassword(next, email, current).ok) return { fieldErrors: { next: MSG.weakPassword } };
+  if (next !== confirm) return { fieldErrors: { confirm: MSG.passwordMismatch } };
+  if (await isPwnedPassword(next)) return { fieldErrors: { next: MSG.leakedPassword } };
   // Check the current password on a throwaway client so the signed-in session (and its two-step level) is kept.
   const probe = createSupabaseClient(supabaseEnv.url(), supabaseEnv.publishableKey(), { auth: { persistSession: false, autoRefreshToken: false } });
   const check = await probe.auth.signInWithPassword({ email, password: current });
@@ -264,7 +270,11 @@ export async function changePassword(_: AccountState, fd: FormData): Promise<Acc
     return { fieldErrors: { current: MSG.wrongPassword } };
   }
   const { error } = await c.supabase.auth.updateUser({ password: next });
-  if (error) return { error: /weak|pwned|leaked/i.test(error.message) ? MSG.weakPassword : /aal2|assurance/i.test(error.message) ? "Enter your authenticator code first — sign out and back in." : MSG.generic };
+  if (error) {
+    if (error.code === "same_password" || /different from the old/i.test(error.message)) return { fieldErrors: { next: MSG.samePassword } };
+    if (error.code === "weak_password" || /weak|pwned|leaked/i.test(error.message)) return { fieldErrors: { next: MSG.leakedPassword } };
+    return { error: /aal2|assurance/i.test(error.message) ? "Enter your authenticator code first — sign out and back in." : MSG.generic };
+  }
   await sendSecurityNotice("password_changed", email);
   page("/settings/security");
   return saved();

@@ -13,7 +13,7 @@ import { PlenaryIdCard } from "@/components/auth/plenary-id-card";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t("Profile & expertise") };
+  return { title: t("Your profile") };
 }
 
 async function Inner() {

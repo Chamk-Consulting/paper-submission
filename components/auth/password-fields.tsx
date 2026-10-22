@@ -1,14 +1,13 @@
 "use client";
 import { Eye, EyeOff } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { scorePassword } from "@/lib/auth/password-rules";
+import { PasswordMeter, useLeakCheck } from "@/components/auth/password-meter";
 import { ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
 import { FieldLabel } from "@/components/auth/field-label";
 
-const COLORS = ["#DADDE3", "#B3261E", "#A8600F", "#2F5FD0", "#18744F"];
-const LABELS = ["—", "Too weak", "Could be stronger", "Good", "Strong"];
 
 function EyeToggle({ shown, onToggle, label }: { shown: boolean; onToggle: () => void; label: string }) {
   return (
@@ -36,39 +35,26 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
   const mismatch = pw2.length > 0 && pw2 !== pw;
   const matchOk = pw2.length > 0 && pw2 === pw;
   const flag = tried || !!serverErrors?.password;
-  const rule = (pass: boolean, label: string) => ({ label: t(label), mark: pass ? "✓" : flag ? "!" : "·", ink: pass ? "#14603F" : flag ? "#B3261E" : "#4A5263" });
-  const rules = [rule(r.long, "At least 12 characters"), rule(r.notCommon, "Not a common password"), rule(r.notEmail, "Doesn’t contain your email name")];
-  const pwBad = (flag && !r.ok) || !!serverErrors?.password;
+  const leak = useLeakCheck(pw, r.long && r.mixed && r.notCommon && r.notEmail);
+  const pwBad = (flag && !r.ok) || leak === "leaked" || !!serverErrors?.password;
   const confirmBad = mismatch || !!serverErrors?.confirm || (tried && pw2 !== pw);
-  const update = (a: string, b: string) => onValid?.(scorePassword(a, email).ok && a === b);
+  const valid = r.ok && pw === pw2 && leak !== "leaked" && leak !== "checking";
+  useEffect(() => { onValid?.(valid); }, [valid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
       <div className="mt-3.5 flex flex-col gap-1.5">
-        <FieldLabel htmlFor={`${idPrefix}-new`} required info={<>{t("At least 12 characters. A short phrase of three or four words is easy to remember and hard to guess.")} {t("Don’t reuse a password from another site — we check it against known leaks.")}</>}>{t("Password")}</FieldLabel>
-        <div className="flex overflow-hidden rounded-[4px] bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ border: pwBad ? "2px solid #B3261E" : r.ok ? "2px solid #18744F" : "1px solid #B7BDC9" }}>
+        <FieldLabel htmlFor={`${idPrefix}-new`} required info={<>{t("At least 12 characters with a mix of letters, numbers and symbols — or a phrase of 16+ characters, which is easy to remember and hard to guess.")} {t("Don’t reuse a password from another site — we check it against known leaks.")}</>}>{t("Password")}</FieldLabel>
+        <div className="flex overflow-hidden rounded-[4px] bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ border: pwBad ? "2px solid #B3261E" : r.ok && leak !== "checking" ? "2px solid #14603F" : "1px solid #B7BDC9" }}>
           <input
             id={`${idPrefix}-new`} name="password" aria-required="true" type={show ? "text" : "password"} autoComplete="new-password" maxLength={128}
-            value={pw} onChange={(e) => { setPw(e.target.value); update(e.target.value, pw2); }}
+            value={pw} onChange={(e) => setPw(e.target.value)}
             aria-describedby={`${idPrefix}-rules${serverErrors?.password ? ` ${idPrefix}-err` : ""}`} aria-invalid={pwBad || undefined}
             className="box-border h-[46px] min-w-0 flex-auto border-0 bg-transparent px-3.5 text-[16px] text-[#121826] outline-none"
           />
           <EyeToggle shown={show} onToggle={() => setShow((v) => !v)} label={show ? t("Hide password") : t("Show password")} />
         </div>
-        <div aria-hidden className="mt-1 grid grid-cols-4 gap-1">
-          {[1, 2, 3, 4].map((i) => <span key={i} className="h-1 rounded-sm" style={{ background: r.sc >= i ? COLORS[r.sc] : "#DADDE3" }} />)}
-        </div>
-        <div className="flex justify-between text-[13px]" aria-live="polite">
-          <span className={ui.muted}>{t("Strength")}</span>
-          <span className="font-semibold" style={{ color: r.sc ? COLORS[r.sc] : "#4A5263" }}>{t(LABELS[r.sc])}</span>
-        </div>
-        <ul id={`${idPrefix}-rules`} className="m-0 mt-1 flex list-none flex-col gap-1 p-0 text-[13px]">
-          {rules.map((x) => (
-            <li key={x.label} className="flex items-center gap-2" style={{ color: x.ink }}>
-              <span aria-hidden className="w-4 text-center font-semibold">{x.mark}</span>{x.label}
-            </li>
-          ))}
-        </ul>
+        <PasswordMeter id={`${idPrefix}-rules`} pw={pw} email={email} flag={flag} leak={leak} />
         {serverErrors?.password ? <span id={`${idPrefix}-err`} role="alert" className={ui.error}>{t(serverErrors.password[0])}</span> : null}
       </div>
 
@@ -77,7 +63,7 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
         <div className="flex overflow-hidden rounded-[4px] bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ border: confirmBad ? "2px solid #B3261E" : matchOk ? "2px solid #18744F" : "1px solid #B7BDC9" }}>
           <input
             id={`${idPrefix}-confirm`} name="confirm" type={show2 ? "text" : "password"} autoComplete="new-password" maxLength={128} aria-required="true"
-            value={pw2} onChange={(e) => { setPw2(e.target.value); update(pw, e.target.value); }} aria-invalid={confirmBad || undefined}
+            value={pw2} onChange={(e) => setPw2(e.target.value)} aria-invalid={confirmBad || undefined}
             aria-describedby={`${idPrefix}-match`}
             className="box-border h-[46px] min-w-0 flex-auto border-0 bg-transparent px-3.5 text-[16px] text-[#121826] outline-none"
           />

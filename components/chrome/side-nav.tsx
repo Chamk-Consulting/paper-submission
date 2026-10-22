@@ -5,7 +5,7 @@ import {
   ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, FileCheck,
   FileStack, FileText, Files, Filter, Gauge, Gavel, History, House, IdCard, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
   Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
-  Search, Send, Settings, Settings2, ShieldAlert, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
+  CircleUserRound, Search, Send, Settings, Settings2, ShieldAlert, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
   UsersRound, X, Check, Star,
 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
@@ -51,11 +51,14 @@ const ORG_GROUPS: [string, string, typeof House, string, [string, typeof House][
   ["team", "Team & email", Users, "people", [["people", Contact], ["committee", UsersRound], ["email", Send]]],
   ["settings", "Event settings", Settings2, "setup", [["setup", SlidersHorizontal], ["billing", CreditCard], ["roles", ShieldAlert], ["audit", History]]],
 ];
+/** Account: who you are and how you get in. Settings: how Plenary behaves for you. */
+const ACCOUNT_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
+  ["/settings/profile", "Profile", UserRound, (p) => p.startsWith("/settings/profile")],
+  ["/settings/security", "Security", KeyRound, (p) => p.startsWith("/settings/security")],
+  ["/settings/privacy", "Privacy", Lock, (p) => p.startsWith("/settings/privacy")],
+];
 const SETTINGS_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
-  ["/settings/profile", "Profile & expertise", UserRound, (p) => p.startsWith("/settings/profile")],
-  ["/settings/security", "Sign-in & security", KeyRound, (p) => p.startsWith("/settings/security")],
-  ["/settings/notifications", "Notifications & calendar", Bell, (p) => p.startsWith("/settings/notifications") || p.startsWith("/settings/calendar")],
-  ["/settings/privacy", "Privacy & data", Lock, (p) => p.startsWith("/settings/privacy")],
+  ["/settings/notifications", "Notifications", Bell, (p) => p.startsWith("/settings/notifications") || p.startsWith("/settings/calendar")],
 ];
 
 /** Events this person organises (for the switcher), with the role label shown beside the name. */
@@ -143,11 +146,15 @@ function useMiddle(p: string, s: Summary | null, tab?: string) {
       { kind: "leaf", key: "funnel", label: "Sign-up funnel", icon: ic(Filter), href: "/admin#signups", on: false },
     ],
   } : null;
+  const account: Group = {
+    kind: "group", key: "account", label: "Account", icon: ic(CircleUserRound), def: "/settings/profile",
+    items: ACCOUNT_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
+  };
   const settings: Group = {
-    kind: "group", key: "settings", label: "Settings", icon: ic(Settings), def: "/settings/profile",
+    kind: "group", key: "settings", label: "Settings", icon: ic(Settings), def: "/settings/notifications",
     items: SETTINGS_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
   };
-  return { myWork, find, venues, admin, settings };
+  return { myWork, find, venues, admin, account, settings };
 }
 
 function helpGroup(p: string): Group {
@@ -354,7 +361,7 @@ function useTree(p: string, s: Summary | null, tab?: string) {
   const org = useOrganizer(p, s);
   const m = useMiddle(p, s, tab);
   const middle: MenuNode[] = [m.myWork, m.find, ...(m.venues ? [m.venues] : [])];
-  const after: MenuNode[] = [...(m.admin ? [m.admin] : []), m.settings];
+  const after: MenuNode[] = [...(m.admin ? [m.admin] : []), m.account, m.settings];
   return { org, middle, after, all: [...middle, ...(org?.groups ?? []), ...after, helpGroup(p)] };
 }
 

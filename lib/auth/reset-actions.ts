@@ -99,7 +99,7 @@ export async function saveNewPassword(_: NewPasswordState, formData: FormData): 
   }
 
   const r = scorePassword(password, data.user.email ?? "");
-  if (!r.ok) return { fieldErrors: { password: ["Choose a password that meets all three rules."] } };
+  if (!r.ok) return { fieldErrors: { password: ["Choose a password that meets all the rules."] } };
   if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
   if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
 

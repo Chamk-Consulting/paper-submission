@@ -6,17 +6,19 @@ import { getT } from "@/lib/i18n/server";
 
 export type SettingsKey = "profile" | "security" | "notifications" | "privacy";
 export const SETTINGS_NAV: [SettingsKey, string, string][] = [
-  ["profile", "Profile & expertise", "/settings/profile"],
-  ["security", "Sign-in & security", "/settings/security"],
-  ["notifications", "Notifications & calendar", "/settings/notifications"],
-  ["privacy", "Privacy & data", "/settings/privacy"],
+  ["profile", "Profile", "/settings/profile"],
+  ["security", "Security", "/settings/security"],
+  ["privacy", "Privacy", "/settings/privacy"],
+  ["notifications", "Notifications", "/settings/notifications"],
 ];
 const SETTINGS_HEAD: Record<SettingsKey, [string, string]> = {
-  profile: ["Profile & expertise", "How co-authors, chairs and editors find and match you."],
-  security: ["Sign-in & security", "How you sign in, and where you are signed in."],
+  profile: ["Your profile", "Name, affiliations, research IDs, review topics and conflicts."],
+  security: ["Sign-in & security", "Email addresses, password, passkey, two-step sign-in and devices."],
   notifications: ["Notifications & calendar", "Choose what reaches your inbox, and how deadlines reach your calendar."],
-  privacy: ["Privacy & data", "What we keep, who can see it, and how to take it with you."],
+  privacy: ["Privacy & data", "Who sees your profile, your consents, and downloading or deleting your data."],
 };
+/** The sidebar group each page sits in, shown above its title. */
+const GROUP: Record<SettingsKey, string> = { profile: "Account", security: "Account", privacy: "Account", notifications: "Settings" };
 export const settingsTitle = (k: SettingsKey) => SETTINGS_HEAD[k][0];
 
 export async function SettingsFrame({ active, children }: { active: SettingsKey; children: ReactNode }) {
@@ -25,13 +27,13 @@ export async function SettingsFrame({ active, children }: { active: SettingsKey;
   return (
     <>
       <div>
-        <p className="m-0 font-mono text-[12px] text-[#4A5263]">{t("Settings")}</p>
+        <p className="m-0 text-[13px] text-[#4A5263]">{t(GROUP[active])}</p>
         <h1 className="mb-0 mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t(title)}</h1>
         <p className="mb-0 mt-1.5 text-[#4A5263]">{t(subtitle)}</p>
       </div>
       <div className="mt-6 flex flex-col items-stretch gap-7">
         {/* Phones only: from 768 px the side menu holds these pages (Settings group), so no second menu here. */}
-        <nav aria-label={t("Settings")} className="flex flex-none gap-0.5 overflow-x-auto md:hidden">
+        <nav aria-label={t("Account and settings")} className="flex flex-none gap-0.5 overflow-x-auto md:hidden">
           {SETTINGS_NAV.map(([k, label, href]) => (
             <Link key={k} href={href} aria-current={active === k ? "page" : undefined}
               className={`whitespace-nowrap rounded-[6px] border px-3 py-[9px] text-[14px] no-underline ${active === k ? "border-[#DADDE3] bg-white font-semibold text-[#121826]" : "border-transparent text-[#4A5263] hover:bg-white/60"}`}>
