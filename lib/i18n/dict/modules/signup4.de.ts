@@ -254,4 +254,8 @@ export const signup4_de: Record<string, string> = {
   "Your deadlines, reviews and sessions in Google, Outlook or Apple Calendar.": "Ihre Fristen, Gutachten und Sitzungen in Google, Outlook oder Apple Kalender.",
   "Your papers": "Ihre Beiträge",
   "Your reviews": "Ihre Gutachten",
+  "Conflicts are saved as you add or remove them.": "Konflikte werden gespeichert, sobald Sie sie hinzufügen oder entfernen.",
+  "Pick the date you’ll review again.": "Wählen Sie das Datum, ab dem Sie wieder begutachten.",
+  "{n} events in the feed · times in AoE, with your local time in the description": "{n} Termine im Feed · Zeiten in AoE, mit Ihrer Ortszeit in der Beschreibung",
+  "One-off download": "Einmaliger Download",
 };

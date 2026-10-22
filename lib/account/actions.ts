@@ -166,7 +166,14 @@ export async function saveReviewing(_: AccountState, fd: FormData): Promise<Acco
   const v = parsed.data;
   const c = await ctx();
   if (!c) return { error: MSG.signIn };
-  const lang = await c.supabase.from("persons").update({ review_languages: v.languages }).eq("id", c.personId);
+  const av = String(fd.get("availability") ?? "normal");
+  const availability = av === "low" || av === "off" ? av : "normal";
+  const from = String(fd.get("available_from") ?? "");
+  if (availability === "off" && !/^\d{4}-\d{2}-\d{2}$/.test(from)) return { fieldErrors: { availability: "Pick the date you’ll review again." } };
+  const lang = await c.supabase.from("persons").update({
+    review_languages: v.languages, availability, monthly_limit: availability === "normal" ? 4 : availability === "low" ? 1 : 0,
+    available_from: availability === "off" ? from : null,
+  }).eq("id", c.personId);
   if (lang.error) return { error: friendly(lang.error.message) };
   const { data: cur } = await c.supabase.from("person_topics").select("topic").eq("person_id", c.personId);
   const have = new Set(((cur ?? []) as { topic: string }[]).map((x) => x.topic));

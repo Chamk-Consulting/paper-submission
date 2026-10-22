@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n/client";
 import { newFeed, saveFeedFlags, type AccountState } from "@/lib/account/actions";
 import type { CalItem, FeedFlags } from "@/lib/account/data";
 import { sx } from "@/components/account/styles";
+import { ManualSaveBar } from "@/components/account/save-bar";
 
 /* Canvas CL01 — Add deadlines to my calendar. The feed address exists only in this browser tab right after it is made. */
 
@@ -33,16 +34,14 @@ export function CalendarFeed({ hasFeed, since, initialFlags, items, timezone }: 
   const fmtDay = new Intl.DateTimeFormat(t.intl, { day: "numeric", month: "short", timeZone: tz });
   const fmtTime = new Intl.DateTimeFormat(t.intl, { hour: "2-digit", minute: "2-digit", timeZone: tz });
 
-  const toggle = (k: keyof FeedFlags) => {
-    const next = { ...flags, [k]: !flags[k] };
-    setFlags(next);
-    setCopied(false);
-    if (exists) start(async () => setMsg(await saveFeedFlags(next)));
-  };
+  const [saved, setSaved] = useState(initialFlags);
+  const dirty = exists && INCLUDE.some(([k]) => flags[k] !== saved[k]);
+  const toggle = (k: keyof FeedFlags) => { setFlags({ ...flags, [k]: !flags[k] }); setCopied(false); setMsg(null); };
+  const save = () => start(async () => { const r = await saveFeedFlags(flags); setMsg(r); if (!r.error) setSaved(flags); });
   const make = () => start(async () => {
     const r = await newFeed(flags);
     setMsg(r);
-    if (r.url) { setUrl(r.url); setExists(true); setCopied(false); }
+    if (r.url) { setUrl(r.url); setExists(true); setCopied(false); setSaved(flags); }
   });
   const webcal = url ? url.replace(/^https?:/, "webcal:") : null;
   const copy = async () => {
@@ -57,8 +56,7 @@ export function CalendarFeed({ hasFeed, since, initialFlags, items, timezone }: 
   const ics = `/feed/me?${new URLSearchParams(Object.entries(flags).map(([k, v]) => [k, v ? "1" : "0"])).toString()}`;
 
   return (
-    <div className="mt-6 flex flex-col items-start gap-6 lg:flex-row">
-      <div className="flex w-full min-w-0 max-w-[760px] flex-auto flex-col gap-[18px]">
+    <div className="flex w-full min-w-0 flex-col gap-[18px]">
         <section className={sx.card}>
           <h2 className={sx.h2}>{t("1 · What to include")}</h2>
           <div className="mt-3 flex flex-col gap-2">
@@ -70,7 +68,6 @@ export function CalendarFeed({ hasFeed, since, initialFlags, items, timezone }: 
               </label>
             ))}
           </div>
-          {msg?.error ? <p role="alert" className="mb-0 mt-2 text-[13px] text-[#B3261E]">{t(msg.error)}</p> : exists && msg?.savedAt && !url ? <p role="status" className="mb-0 mt-2 text-[13px] text-[#14603F]">{t("Feed updated. Calendar apps pick up changes within a few hours.")}</p> : null}
         </section>
 
         <section className={sx.card}>
@@ -78,6 +75,7 @@ export function CalendarFeed({ hasFeed, since, initialFlags, items, timezone }: 
           {!exists ? (
             <div className="mt-3">
               <p className="m-0 text-[14px] text-[#4A5263]">{t("Make your private feed address first. You can replace it at any time.")}</p>
+              {msg?.error ? <p role="alert" className="mb-0 mt-2 text-[13px] text-[#B3261E]">{t(msg.error)}</p> : null}
               <button type="button" onClick={make} disabled={pending} className="mt-3 inline-flex h-[42px] items-center rounded-[4px] border-0 bg-[#0E1B3D] px-4 text-[14px] font-semibold text-white disabled:opacity-60">{pending ? t("Making…") : t("Make my feed address")}</button>
             </div>
           ) : (
@@ -110,6 +108,7 @@ export function CalendarFeed({ hasFeed, since, initialFlags, items, timezone }: 
 
         <section className={sx.card}>
           <h2 className={sx.h2}>{t("Preview · next events in the feed")}</h2>
+          <p className="mb-0 mt-1 text-[13px] text-[#4A5263]">{t("{n} events in the feed · times in AoE, with your local time in the description", { n: shown.length })}</p>
           {upcoming.length === 0 ? <p className="mb-0 mt-3 text-[14px] text-[#4A5263]">{t("Nothing coming up yet. Deadlines appear here as soon as you submit, review or follow a venue.")}</p> : upcoming.map((e) => {
             const d = new Date(e.starts_at);
             const timed = e.category === "sessions";
@@ -121,20 +120,14 @@ export function CalendarFeed({ hasFeed, since, initialFlags, items, timezone }: 
             );
           })}
         </section>
-      </div>
 
-      <aside className="flex w-full flex-col gap-4 lg:w-[300px] lg:flex-none">
-        <section className="rounded-[8px] bg-[#0E1B3D] px-5 py-[18px] text-[#F5F6F3]">
-          <p className="m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("In the feed")}</p>
-          <div className="mt-1.5 font-serif text-[34px]">{shown.length}</div>
-          <p className="m-0 text-[13px] text-[#B9C3DA]">{t("events · times in AoE with your local time in the description")}</p>
-        </section>
-        <section className="rounded-[8px] border border-[#DADDE3] bg-white px-5 py-[18px]">
-          <p className="mb-2 mt-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("One-off download")}</p>
-          <p className="m-0 text-[14px] text-[#4A5263]">{t("Prefer a file? It won't update when dates change.")}</p>
+        <section className={sx.card}>
+          <h2 className={sx.h2}>{t("One-off download")}</h2>
+          <p className="mb-0 mt-1 text-[14px] text-[#4A5263]">{t("Prefer a file? It won't update when dates change.")}</p>
           <a href={ics} download className={`${small} mt-2.5`}>{t("Download .ics")}</a>
         </section>
-      </aside>
+
+      {exists ? <ManualSaveBar pending={pending} dirty={dirty} error={msg?.error} savedAt={msg?.savedAt} onSave={save} /> : null}
     </div>
   );
 }

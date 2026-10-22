@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { WorkspaceShell } from "@/components/workspace/shell";
 import { SettingsFrame } from "@/components/account/settings-frame";
-import { BusyCard, Conflicts, ReviewingForm } from "@/components/account/reviewing-form";
+import { ReviewingForm } from "@/components/account/reviewing-form";
 import { SettingsSkeleton } from "@/components/skeletons/site2";
 import { Reveal } from "@/components/motion/reveal";
 import { getWorkspaceCtx } from "@/lib/workspace/data";
@@ -21,8 +21,6 @@ async function Inner() {
     <WorkspaceShell ctx={ctx} active="m:settings">
       <SettingsFrame active="reviewing">
         <ReviewingForm p={profile} suggestions={suggestions} />
-        <BusyCard initial={{ availability: profile.availability, available_from: profile.available_from }} />
-        <Conflicts items={profile.conflicts} />
       </SettingsFrame>
     </WorkspaceShell>
   );

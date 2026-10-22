@@ -4,10 +4,9 @@ import { X } from "lucide-react";
 import { useActionState, useMemo, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { saveReviewing, type AccountState } from "@/lib/account/actions";
-import { saveAvailability, type ActionState } from "@/lib/review/actions";
 import type { Profile } from "@/lib/account/data";
 import { sx } from "@/components/account/styles";
-import { AccountSaveBar, FieldErr, useDirty } from "@/components/account/save-bar";
+import { FieldErr, ManualSaveBar, useDirty } from "@/components/account/save-bar";
 import { Conflicts } from "@/components/account/profile-form";
 
 /* Profile › Reviewing tab: topics you can review, languages you review in, how busy you are, conflicts.
@@ -19,7 +18,7 @@ const chip = "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text
 
 export function ReviewingForm({ p, suggestions }: { p: Profile; suggestions: { group: string; keywords: string[] }[] }) {
   const t = useT();
-  const [state, action] = useActionState<AccountState, FormData>(saveReviewing, {});
+  const [state, action, pending] = useActionState<AccountState, FormData>(saveReviewing, {});
   const { dirty, onChange, onSubmit } = useDirty();
   const [topics, setTopics] = useState<string[]>(p.topics);
   const [langs, setLangs] = useState<string[]>(p.review_languages);
@@ -41,6 +40,7 @@ export function ReviewingForm({ p, suggestions }: { p: Profile; suggestions: { g
   const exact = all.some((k) => k.toLowerCase() === needle) || topics.some((k) => k.toLowerCase() === needle);
 
   return (
+    <>
     <form id="rv" action={action} onSubmit={onSubmit} className="flex flex-col gap-[18px]">
       <section className={sx.card} aria-labelledby="rv-topics">
         <h2 id="rv-topics" className={sx.h2}>{t("Topics you can review")}</h2>
@@ -115,15 +115,18 @@ export function ReviewingForm({ p, suggestions }: { p: Profile; suggestions: { g
         <FieldErr state={state} name="languages" />
       </section>
 
-      <AccountSaveBar state={state} dirty={dirty} />
+      <BusySection initial={{ availability: p.availability, available_from: p.available_from }} onChange={onChange} />
     </form>
+      <Conflicts items={p.conflicts} />
+      <ManualSaveBar form="rv" pending={pending} dirty={dirty} error={state.error ?? Object.values(state.fieldErrors ?? {})[0]} savedAt={state.savedAt}
+        note="Conflicts are saved as you add or remove them." />
+    </>
   );
 }
 
-/** "How busy are you?" — the same setting as on the Reviews page; editors see it before inviting you. */
-export function BusyCard({ initial }: { initial: { availability: "normal" | "low" | "off"; available_from: string | null } }) {
+/** "How busy are you?" — the same setting as on the Reviews page; editors see it before inviting you. Part of the Reviewing form. */
+function BusySection({ initial, onChange }: { initial: { availability: "normal" | "low" | "off"; available_from: string | null }; onChange: () => void }) {
   const t = useT();
-  const [state, action, pending] = useActionState<ActionState, FormData>(saveAvailability, {});
   const [v, setV] = useState(initial.availability);
   const [from, setFrom] = useState(initial.available_from ?? "");
   const opts: ["normal" | "low" | "off", string][] = [
@@ -135,29 +138,20 @@ export function BusyCard({ initial }: { initial: { availability: "normal" | "low
     <section className={sx.card} aria-labelledby="rv-busy">
       <h2 id="rv-busy" className={sx.h2}>{t("How busy are you?")}</h2>
       <p className={sx.sub + " text-[13px]"}>{t("Editors see this before they invite you.")}</p>
-      <form action={action} className="mt-3.5">
-        <fieldset className="m-0 flex max-w-[460px] flex-col gap-1.5 border-0 p-0">
-          <legend className="sr-only">{t("How busy are you?")}</legend>
-          {opts.map(([k, l]) => (
-            <label key={k} className={`flex cursor-pointer flex-wrap items-center gap-2 rounded-[6px] border px-3 py-2 text-[14px] ${v === k ? "border-[#2F5FD0] bg-[#FBFCFF]" : "border-[#DADDE3]"}`}>
-              <input type="radio" name="availability" value={k} checked={v === k} onChange={() => setV(k)} className="accent-[#2F5FD0]" />
-              <span>{l}</span>
-              {k === "off" && v === "off" ? (
-                <input type="date" name="available_from" aria-label={t("Not reviewing until")} required value={from} onChange={(e) => setFrom(e.target.value)}
-                  className="h-8 rounded-[4px] border border-[#B7BDC9] px-2 text-[13px]" />
-              ) : null}
-            </label>
-          ))}
-        </fieldset>
-        <div className="mt-3 flex items-center gap-3">
-          <button type="submit" disabled={pending} className="inline-flex h-9 cursor-pointer items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-semibold text-[#0E1B3D] hover:bg-[#F7F8F6] disabled:opacity-60">
-            {pending ? t("Saving…") : t("Save")}
-          </button>
-          <span role="status" className={`text-[13px] ${state.error ? "text-[#B3261E]" : "text-[#14603F]"}`}>{state.error ? t(state.error) : state.ok ? t("Saved") : ""}</span>
-        </div>
-      </form>
+      <fieldset className="m-0 mt-3.5 flex max-w-[460px] flex-col gap-1.5 border-0 p-0">
+        <legend className="sr-only">{t("How busy are you?")}</legend>
+        {opts.map(([k, l]) => (
+          <label key={k} className={`flex cursor-pointer flex-wrap items-center gap-2 rounded-[6px] border px-3 py-2 text-[14px] ${v === k ? "border-[#2F5FD0] bg-[#FBFCFF]" : "border-[#DADDE3]"}`}>
+            <input type="radio" name="availability" value={k} checked={v === k} onChange={() => { setV(k); onChange(); }} className="accent-[#2F5FD0]" />
+            <span>{l}</span>
+            {k === "off" && v === "off" ? (
+              <input type="date" name="available_from" aria-label={t("Not reviewing until")} required value={from} onChange={(e) => { setFrom(e.target.value); onChange(); }}
+                className="h-8 rounded-[4px] border border-[#B7BDC9] px-2 text-[13px]" />
+            ) : null}
+          </label>
+        ))}
+      </fieldset>
     </section>
   );
 }
 
-export { Conflicts };
