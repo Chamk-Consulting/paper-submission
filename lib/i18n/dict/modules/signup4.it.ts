@@ -147,4 +147,11 @@ export const signup4_it: Record<string, string> = {
   "You have no paper at {acr}.": "Non hai articoli a {acr}.",
   "No events yet — events where you have a paper or a role appear here.": "Ancora nessun evento — qui compaiono gli eventi in cui hai un articolo o un ruolo.",
   "You don’t follow any events yet. Follow one to get its deadline reminders.": "Non segui ancora nessun evento. Seguine uno per ricevere i promemoria delle scadenze.",
+  "Actions for {name}": "Azioni per {name}",
+  "After acceptance: PDF file check · © copyright · REG registration. Green = done, amber = needed, grey = not yet.": "Dopo l’accettazione: PDF controllo del file · © copyright · REG registrazione. Verde = fatto, ambra = richiesto, grigio = non ancora.",
+  "Decision for {id}": "Decisione per {id}",
+  "Not decided": "Non deciso",
+  "Registration {n}": "Registrazione {n}",
+  "{n} drafts in progress": "{n} bozze in corso",
+  "View drafts": "Vedi le bozze",
 };

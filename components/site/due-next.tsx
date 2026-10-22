@@ -31,7 +31,17 @@ export function DueNext({ items, now }: { items: DueItem[]; now: number }) {
   const [role, setRole] = useState<"all" | DueRole>("all");
   const count = (r: DueRole) => items.filter((i) => i.role === r).length;
   const tabs: ["all" | DueRole, string, number][] = [["all", t("All"), items.length], ["author", t("Author"), count("author")], ["reviewer", t("Reviewer"), count("reviewer")], ["chair", t("Chair"), count("chair")]];
-  const shown = role === "all" ? items : items.filter((i) => i.role === role);
+  const filtered = role === "all" ? items : items.filter((i) => i.role === role);
+  // Three or more drafts become one row ("5 drafts in progress"), instead of a column of identical "Continue" rows.
+  const drafts = filtered.filter((i) => i.id.startsWith("dr-"));
+  const shown: DueItem[] = drafts.length < 3 ? filtered : filtered.flatMap((i) => {
+    if (!i.id.startsWith("dr-")) return [i];
+    if (i !== drafts[0]) return [];
+    const at = drafts.map((d) => d.at).filter((x): x is string => !!x).sort()[0] ?? null;
+    const venues = [...new Set(drafts.map((d) => d.venue))];
+    return [{ ...i, id: "dr-group", title: t("{n} drafts in progress", { n: drafts.length }),
+      venue: venues.slice(0, 2).join(", ") + (venues.length > 2 ? ` +${venues.length - 2}` : ""), detail: ["Continue where you left off"], at, action: "View drafts", href: "/workspace/submissions" }];
+  });
 
   return (
     <section className="rounded-[8px] border border-[#DADDE3] bg-white" aria-labelledby="due-h">

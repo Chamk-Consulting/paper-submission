@@ -1,5 +1,6 @@
 "use client";
 
+import { RowMenu } from "@/components/manage/row-menu";
 import { useActionState, useMemo, useRef, useState, useTransition } from "react";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
@@ -87,8 +88,12 @@ export function PeopleTable({ slug, rows, canMessage, canViewAs }: { slug: strin
                     {[p.papers ? t("{n} papers", { n: p.papers }) : null, p.reviews ? t("{n} reviews", { n: p.reviews }) : null].filter(Boolean).join(" · ") || "—"}
                   </td>
                   <td className={`${ui.td} whitespace-nowrap text-right`}>
-                    {canViewAs && !p.you ? <Link href={`/manage/${slug}/people/${p.id}/view`} className="text-[13px] text-[#1F47A8] underline">{t("View as")}</Link> : null}
-                    {canMessage && !p.you ? <button type="button" onClick={() => setMsgTo(p)} className="ml-3 border-0 bg-transparent p-0 text-[13px] text-[#1F47A8] underline">{t("Message")}</button> : null}
+                    {p.you ? null : (
+                      <RowMenu label={p.name} actions={[
+                        ...(canViewAs ? [{ label: t("View as"), href: `/manage/${slug}/people/${p.id}/view` }] : []),
+                        ...(canMessage ? [{ label: t("Message"), onClick: () => setMsgTo(p) }] : []),
+                      ]} />
+                    )}
                   </td>
                 </tr>
               ))}

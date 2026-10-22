@@ -19,14 +19,15 @@ const ST: Record<Stage, [string, string, string]> = {
 type Group = "draft" | "review" | "decision" | "done";
 const GROUP: Record<Stage, Group> = { draft: "draft", submitted: "review", review: "review", decision: "decision", revise: "decision", final: "decision", done: "done", rejected: "done", withdrawn: "done" };
 const FILTERS: [Group | "all", string][] = [["all", "All"], ["draft", "Drafts"], ["review", "In review"], ["decision", "Action needed"], ["done", "Done"]];
-const TICK: Record<Check, [string, string, string]> = { ok: ["#E1F3EA", "#14603F", "done"], need: ["#FBEFDD", "#7A4508", "needed"], no: ["#EEF0EC", "#9AA3B5", "not yet"] };
+const AFTER_ACCEPTANCE = new Set(["final", "done"]);
+const TICK: Record<Check, [string, string, string]> = { ok: ["#E1F3EA", "#14603F", "done"], need: ["#FBEFDD", "#7A4508", "needed"], no: ["#EEF0EC", "#4A5263", "not yet"] };
 
 const month = (d: string | null, intl: string) => (d ? new Date(`${d}T00:00:00Z`).toLocaleString(intl, { month: "short", year: "numeric", timeZone: "UTC" }) : null);
 
 function Tick({ label, title, s }: { label: string; title: string; s: Check }) {
   const t = useT();
   const [bg, ink, word] = TICK[s];
-  return <span title={`${t(title)}: ${t(word)}`} className="inline-flex h-[22px] items-center rounded-[3px] px-1.5 font-mono text-[10px] font-semibold" style={{ background: bg, color: ink }}>{label}</span>;
+  return <span title={`${t(title)}: ${t(word)}`} className="inline-flex h-[22px] items-center rounded-[3px] px-1.5 font-mono text-[11px] font-semibold" style={{ background: bg, color: ink }}>{label}</span>;
 }
 
 /** "Step 3 of 7" and other stage details come from the server in English. */
@@ -100,10 +101,13 @@ export function PapersList({ papers, initialQuery = "" }: { papers: MyPaper[]; i
                     <span className="rounded-[2px] px-2 py-0.5 font-mono text-[11px] font-medium tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(label)}</span>
                     {p.detail ? <span className="mt-1 block text-[12px] text-[#4A5263]">{detailText(t, p.detail)}</span> : null}
                   </span>
+                  {/* PDF, copyright and registration only matter once a paper is accepted: no grey "not yet" ticks before. */}
                   <span className="col-start-2 flex gap-1.5 lg:col-start-auto lg:justify-end">
-                    <Tick label="PDF" title="PDF check" s={p.checks.pdf} />
-                    <Tick label="©" title="Copyright" s={p.checks.copyright} />
-                    <Tick label="REG" title="Registration" s={p.checks.registration} />
+                    {AFTER_ACCEPTANCE.has(p.stage) ? <>
+                      <Tick label="PDF" title="PDF check" s={p.checks.pdf} />
+                      <Tick label="©" title="Copyright" s={p.checks.copyright} />
+                      <Tick label="REG" title="Registration" s={p.checks.registration} />
+                    </> : null}
                   </span>
                 </Link>
               );
@@ -118,7 +122,7 @@ export function PapersList({ papers, initialQuery = "" }: { papers: MyPaper[]; i
           <Link href="/venues" className="text-[#2F5FD0] underline">{t("Find a venue to submit to.")}</Link>
         </div>
       ) : null}
-      <p className="mt-2.5 text-[12px] text-[#4A5263]">{t("Ticks: PDF file check · © copyright · REG registration. Green = done, amber = needed, grey = not yet.")}</p>
+      <p className="mt-2.5 text-[12px] text-[#4A5263]">{t("After acceptance: PDF file check · © copyright · REG registration. Green = done, amber = needed, grey = not yet.")}</p>
     </section>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarClock, CalendarRange } from "lucide-react";
+import { CalendarClock } from "lucide-react";
 import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { getWorkspaceCtx } from "@/lib/workspace/data";
@@ -14,7 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
 async function Inner() {
   const [ctx, t] = await Promise.all([getWorkspaceCtx(), getT()]);
   const venues = ctx?.venues ?? [];
-  const btn = "inline-flex h-9 items-center gap-2 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]";
   return (
     <div>
       <h1 className="m-0 font-serif text-[36px] font-normal leading-[1.1] tracking-[-0.01em]">{t("My schedule")}</h1>
@@ -22,15 +21,14 @@ async function Inner() {
       {venues.length ? (
         <ul className="m-0 mt-6 grid list-none gap-3 p-0 md:grid-cols-2">
           {venues.map((v) => (
-            <li key={v.slug} className="flex flex-col gap-3 rounded-[8px] border border-[#DADDE3] bg-white p-5">
-              <div>
-                <p className="m-0 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{v.shortName ?? v.slug}</p>
-                <p className="m-0 mt-1 font-serif text-[20px] leading-[1.25]">{v.name}</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Link href={`/workspace/events/${v.slug}/program/my-schedule`} className={btn}><CalendarClock size={15} aria-hidden />{t("My schedule")}</Link>
-                <Link href={`/workspace/events/${v.slug}/program`} className={btn}><CalendarRange size={15} aria-hidden />{t("Program")}</Link>
-              </div>
+            <li key={v.slug}>
+              <Link href={`/workspace/events/${v.slug}/program/my-schedule`} className="flex h-full items-center justify-between gap-4 rounded-[8px] border border-[#DADDE3] bg-white p-5 text-[#121826] no-underline hover:border-[#B7BDC9] hover:bg-[#FBFCFF]">
+                <span className="min-w-0">
+                  <span className="block font-mono text-[12px] uppercase tracking-[0.06em] text-[#4A5263]">{v.shortName ?? v.slug}</span>
+                  <span className="mt-1 block font-serif text-[20px] leading-[1.25]">{v.name}</span>
+                </span>
+                <CalendarClock size={18} aria-hidden className="flex-none text-[#4A5263]" />
+              </Link>
             </li>
           ))}
         </ul>

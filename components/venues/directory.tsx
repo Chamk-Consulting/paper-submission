@@ -389,7 +389,8 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
   const t = useT();
   const [fbg, fink] = v.field ? FIELD_COLOR[v.field] : ["#EEF0EC", "#4A5263"];
   const soon = v.st.state === "soon";
-  const tags = [v.format ? t(FORMAT_LABEL[v.format]) : null, v.reviewMode ? t(v.reviewMode) : null, v.pageLimit, v.indexedIn.length ? v.indexedIn.join(" · ") : null].filter(Boolean) as string[];
+  // At most three tags on a card (field + these two): review mode and page limit live on the event page.
+  const tags = [v.format ? t(FORMAT_LABEL[v.format]) : null, v.indexedIn.length ? v.indexedIn.slice(0, 2).join(" · ") : null].filter(Boolean) as string[];
   const where = v.kind === "journal" ? t("Online") : [v.city, v.country].filter(Boolean).join(", ") || v.location || "";
   const href = ws ? `/workspace/events/${v.slug}` : `/venues/${v.slug}`;
   const act = ws ? (intent && isOpenCall(v) ? { label: "Submit a paper", href: `/submit/${v.slug}` } : primaryAction(v.slug, mine, isOpenCall(v))) : null;

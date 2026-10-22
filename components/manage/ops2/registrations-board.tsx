@@ -1,5 +1,6 @@
 "use client";
 
+import { RowMenu } from "@/components/manage/row-menu";
 import { useActionState, useMemo, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { ui } from "@/components/manage/ui";
@@ -123,8 +124,14 @@ export function RegistrationsBoard({ slug, rows }: { slug: string; rows: RegRow[
                       ) : null}
                     </td>
                     <td className={`${ui.td} whitespace-nowrap text-right`}>
-                      <button type="button" onClick={() => { setEdit(r); setTab("add"); }} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#2F5FD0] underline">{t("Edit")}</button>{" "}
-                      <Act action={deleteRegistration} fields={{ slug, id: r.id }} className="ml-2 cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#B3261E] underline" confirm={t("Delete registration {n}?", { n: r.number })}>{t("Delete")}</Act>
+                      <RowMenu label={t("Registration {n}", { n: r.number })} actions={[
+                        { label: t("Edit"), onClick: () => { setEdit(r); setTab("add"); } },
+                        { label: t("Delete"), danger: true, onClick: () => document.getElementById(`reg-del-${r.id}`)?.querySelector("button")?.click() },
+                      ]} />
+                      {/* The delete form stays in the row (it asks for confirmation and shows any error); the menu presses it. */}
+                      <span id={`reg-del-${r.id}`} className="[&_button]:hidden">
+                        <Act action={deleteRegistration} fields={{ slug, id: r.id }} className="" confirm={t("Delete registration {n}?", { n: r.number })}>{t("Delete")}</Act>
+                      </span>
                     </td>
                   </tr>
                 ))}

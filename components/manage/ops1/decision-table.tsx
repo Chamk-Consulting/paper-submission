@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useT } from "@/lib/i18n/client";
 import { ui } from "@/components/manage/ui";
 import { setDecision } from "@/lib/manage/ops1-actions";
-import { paperId, recTone, scoreTone, toCsv, AE_REC_LABEL, DECISION_COLOR, DECISION_LABEL, DECISION_SHORT, DECISIONS } from "@/lib/manage/ops1-shared";
+import { paperId, recTone, scoreTone, toCsv, AE_REC_LABEL, DECISION_COLOR, DECISION_LABEL, DECISIONS } from "@/lib/manage/ops1-shared";
 
 /* EM26 — decision table: scores, average, spread, AE recommendation, draft decisions (F1, F2, F4). */
 
@@ -113,13 +113,17 @@ export function DecisionTable({ slug, rows, min, canChangeReleased }: { slug: st
                   <td className={ui.td}><span className={ui.tag} style={{ background: rb, color: ri }}>{r.aeRec ? t(AE_REC_LABEL[r.aeRec] ?? r.aeRec) : t("PENDING")}</span></td>
                   <td className={ui.td}>
                     {r.decision === "desk_reject" ? <span className="text-[13px] text-[#B3261E]">{t("Desk rejected")}</span> : ok ? (
-                      <span className="flex flex-wrap items-center gap-1">
-                        {DECISIONS.map((d) => {
-                          const on = r.decision === d, c = DECISION_COLOR[d];
-                          return <button key={d} type="button" disabled={pending || locked} aria-pressed={on} onClick={() => pick(r, d)} className="h-7 rounded-[4px] px-2 text-[12px] font-semibold disabled:cursor-not-allowed"
-                            style={{ background: on ? c : "#FFFFFF", color: on ? "#FFFFFF" : "#4A5263", border: `1px solid ${on ? c : "#DADDE3"}` }}>{t(DECISION_SHORT[d])}</button>;
-                        })}
-                        {r.released ? <span className="ml-1 font-mono text-[10px] uppercase text-[#4A5263]">{t("Released")}</span> : null}
+                      <span className="flex items-center gap-2">
+                        {/* One dropdown per paper (was a row of four buttons); choosing "Not decided" clears the decision. */}
+                        <select aria-label={t("Decision for {id}", { id: paperId(r.number) })} disabled={pending || locked}
+                          value={r.decision && r.decision !== "desk_reject" ? r.decision : ""}
+                          onChange={(e) => { const d = e.target.value; if (d) pick(r, d); else if (r.decision) pick(r, r.decision); }}
+                          className="h-8 cursor-pointer rounded-[4px] border px-2 text-[13px] font-semibold disabled:cursor-not-allowed"
+                          style={r.decision ? { background: DECISION_COLOR[r.decision], color: "#FFFFFF", borderColor: DECISION_COLOR[r.decision] } : { background: "#FFFFFF", color: "#4A5263", borderColor: "#B7BDC9" }}>
+                          <option value="" className="bg-white text-[#121826]">{t("Not decided")}</option>
+                          {DECISIONS.map((d) => <option key={d} value={d} className="bg-white text-[#121826]">{t(DECISION_LABEL[d])}</option>)}
+                        </select>
+                        {r.released ? <span className="font-mono text-[10px] uppercase text-[#4A5263]">{t("Released")}</span> : null}
                       </span>
                     ) : (
                       <span className="text-[13px] text-[#A8600F]">{t("Needs {n} reviews (has {m})", { n: min, m: r.reviewsIn })} · <Link href={`/manage/${slug}/reviews`}>{t("chase")}</Link></span>
