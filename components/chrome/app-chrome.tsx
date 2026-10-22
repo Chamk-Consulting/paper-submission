@@ -214,8 +214,8 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <Suspense fallback={<SideMenu p="" s={s} />}>
         <SideMenuLive />
       </Suspense>
-      <main id="main-content" className="app-frame box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10 has-[[data-bleed]]:p-0">
-        <div className="mx-auto w-full max-w-[1120px] has-[[data-wide-frame]]:max-w-[1360px] has-[[data-bleed]]:max-w-none"><WorkspaceLinks>{children}</WorkspaceLinks></div>
+      <main id="main-content" className="app-frame box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10">
+        <div className="frame-box mx-auto w-full max-w-[1120px]"><WorkspaceLinks>{children}</WorkspaceLinks></div>
       </main>
       {s?.signedIn ? <InstallPrompt /> : null}
     </div>

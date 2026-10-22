@@ -8,13 +8,20 @@
   }
   /* While submitting or editing a paper (a page marks itself [data-focus-mode]). */
   @media (width >= 1024px) {
-    body:has([data-focus-mode]) &:where([data-rail="auto"], [data-rail="auto"] *) { @slot; }
+    body:has([data-focus-mode]:not([style*="display: none"], [style*="display: none"] *)) &:where([data-rail="auto"], [data-rail="auto"] *) { @slot; }
   }
 }
 
 /* Pages that draw their own full-width bands inside the workspace ([data-bleed]): their outer box no longer needs
    to fill the screen height, the workspace frame already does. */
 main.app-frame .min-h-dvh { min-height: 0; }
+
+/* Frame width from the page's marker. Next keeps recently seen pages in the document, hidden with an inline
+   "display: none !important", for instant Back; their markers must not count, or one visit to a full-width page
+   (Find events, an event) would leave every later page unpadded and uncentred. */
+main.app-frame:has([data-bleed]:not([style*="display: none"], [style*="display: none"] *)) { padding: 0; }
+main.app-frame > .frame-box:has([data-wide-frame]:not([style*="display: none"], [style*="display: none"] *)) { max-width: 1360px; }
+main.app-frame > .frame-box:has([data-bleed]:not([style*="display: none"], [style*="display: none"] *)) { max-width: none; }
 
 /* Responsive safety nets (found by the workspace audit at 390/768/1024/1440):
    - a grid column must be able to shrink below a wide table it holds (the table scrolls in its own box);

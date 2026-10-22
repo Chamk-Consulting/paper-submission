@@ -478,7 +478,7 @@ export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: st
   useFollow(tree.all);
   const isOpen = (k: string, d: boolean) => (typeof open[k] === "boolean" ? (open[k] as boolean) : d);
   const fold = (k: string, v: boolean) => patchMap(OPEN_KEY, { [k]: v });
-  const railNow = () => rail === "rail" || (rail === "auto" && (!window.matchMedia("(min-width: 1024px)").matches || !!document.querySelector("[data-focus-mode]")));
+  const railNow = () => rail === "rail" || (rail === "auto" && (!window.matchMedia("(min-width: 1024px)").matches || [...document.querySelectorAll("[data-focus-mode]")].some((e) => !e.closest('[style*="display: none"]'))));
   const isRailNow = useSyncExternalStore(listenResize, railNow, () => false);
   const toggle = () => write(RAIL_KEY, railNow() ? "full" : "rail");
     const top = topLeaves(p, s);
