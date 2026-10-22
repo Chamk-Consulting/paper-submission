@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Award, BadgeCheck, Bell, BookOpen, BookOpenCheck, Briefcase, Building2, CalendarClock, CalendarCog, CalendarRange,
+  Award, Bell, BookOpen, BookOpenCheck, Briefcase, CalendarClock, CalendarCog, CalendarRange,
   ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, FileCheck,
   FileStack, FileText, Files, Filter, Gauge, Gavel, History, House, IdCard, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
   Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
@@ -27,7 +27,6 @@ import { useEventHint } from "@/components/chrome/event-hint";
  * group opens as a small panel beside the bar. Uses start/end, never left/right, so it mirrors right to left.
  */
 
-const VENUE_COLORS = ["#2F5FD0", "#A8600F", "#18744F", "#6B4FBF", "#B3261E"];
 const I = { size: 16, strokeWidth: 1.75, "aria-hidden": true } as const;
 const ic = (C: typeof House) => <C {...I} />;
 
@@ -94,7 +93,7 @@ function useOrganizer(p: string, s: Summary | null) {
 }
 
 /** Everything in the middle part, in order. Rows the person can't use are left out. */
-function useMiddle(p: string, s: Summary | null, tab?: string) {
+function useMiddle(p: string, s: Summary | null) {
   const reviewer = hasRole(s, /^(reviewer|associate_editor|chair|program_chair|deputy_chair|owner)$/) || p.startsWith("/reviews");
   const sessionChair = hasRole(s, /^session_chair$/) || p.startsWith("/chair");
   const myWork: Group = {
@@ -107,41 +106,21 @@ function useMiddle(p: string, s: Summary | null, tab?: string) {
       { kind: "leaf", key: "id", label: "My Plenary ID", icon: ic(IdCard), href: "/settings/profile#plenary-id", on: false },
     ],
   };
-  const onEvents = p === "/workspace/events";
-  const followed = s?.following ?? [];
-  const find: Group = {
-    kind: "group", key: "find", label: "Find events", icon: ic(Compass), def: "all",
+  const current = s?.currentEvents ?? [];
+  const evLeaf = (slug: string, name: string) => ({ kind: "leaf" as const, key: `ev:${slug}`, label: name, href: `/workspace/events/${slug}`, on: p === `/workspace/events/${slug}` || p.startsWith(`/workspace/events/${slug}/`) });
+  const mineLeaf = { kind: "leaf" as const, key: "mine", label: "My events", icon: ic(Briefcase), href: "/workspace/events/mine", count: s?.myEventsCount || undefined, on: p === "/workspace/events/mine" };
+  const events: Group = {
+    kind: "group", key: "events", label: "Events", icon: ic(Compass), def: "explore",
     items: [
-      { kind: "leaf", key: "all", label: "All open calls", icon: ic(Search), href: "/workspace/events", on: onEvents && !tab },
-      { kind: "leaf", key: "mine", label: "My events", icon: ic(Briefcase), href: "/workspace/events?tab=mine", on: onEvents && tab === "mine" },
-      followed.length
-        ? {
-          kind: "group" as const, key: "following", label: "Following", icon: ic(Star), def: "tab",
-          items: [
-            { kind: "leaf" as const, key: "tab", label: "All followed", href: "/workspace/events?tab=following", count: followed.length, on: onEvents && tab === "following" },
-            ...followed.map((f) => ({ kind: "leaf" as const, key: f.slug, label: f.shortName ?? f.name, href: `/workspace/events/${f.slug}`, on: p === `/workspace/events/${f.slug}` })),
-          ],
-        }
-        : { kind: "leaf" as const, key: "following", label: "Following", icon: ic(Star), href: "/workspace/events?tab=following", on: onEvents && tab === "following" },
+      { kind: "leaf", key: "explore", label: "Explore", icon: ic(Search), href: "/workspace/events", on: p === "/workspace/events" },
+      current.length
+        ? { kind: "group" as const, key: "mine", label: "My events", icon: ic(Briefcase), def: "all",
+            items: [{ ...mineLeaf, key: "all", label: "All my events", icon: undefined }, ...current.map((e) => evLeaf(e.slug, e.name))] }
+        : mineLeaf,
+      { kind: "leaf", key: "following", label: "Following", icon: ic(Star), href: "/workspace/events/following", count: s?.followingCount || undefined, on: p === "/workspace/events/following" },
+      { kind: "leaf", key: "past", label: "Past events", icon: ic(History), href: "/workspace/events/past", on: p === "/workspace/events/past" },
     ],
   };
-  const venues: Group | null = s?.venues?.length ? {
-    kind: "group", key: "venues", label: "Your venues", icon: ic(Building2),
-    items: s.venues.map((v, i) => {
-      const ev = `/workspace/events/${v.slug}`;
-      return {
-        kind: "group" as const, key: `venue:${v.slug}`, label: v.shortName ?? v.name, icon: <span aria-hidden className="size-2.5 flex-none rounded-[2px]" style={{ background: VENUE_COLORS[i % VENUE_COLORS.length] }} />,
-        dot: VENUE_COLORS[i % VENUE_COLORS.length], def: "me",
-        items: [
-          { kind: "leaf" as const, key: "me", label: "My page", icon: ic(UserRound), href: `/venues/${v.slug}/me`, on: p.startsWith(`/venues/${v.slug}/me`) },
-          { kind: "leaf" as const, key: "event", label: "Event page", icon: ic(Compass), href: ev, on: p === ev || p === `${ev}/archive` },
-          { kind: "leaf" as const, key: "program", label: "Program", icon: ic(CalendarRange), href: `${ev}/program`, on: p.startsWith(`${ev}/program`) },
-          { kind: "leaf" as const, key: "register", label: "Register", icon: ic(Ticket), href: `/venues/${v.slug}/register`, on: p.startsWith(`/venues/${v.slug}/register`) },
-          { kind: "leaf" as const, key: "badge", label: "Badge", icon: ic(BadgeCheck), href: `/venues/${v.slug}/badge`, on: p.startsWith(`/venues/${v.slug}/badge`) },
-        ],
-      };
-    }),
-  } : null;
   const admin: Group | null = s?.isAdmin ? {
     kind: "group", key: "admin", label: "Platform admin", icon: ic(ShieldCheck), def: "dash",
     items: [
@@ -157,7 +136,7 @@ function useMiddle(p: string, s: Summary | null, tab?: string) {
     kind: "group", key: "settings", label: "Settings", icon: ic(Settings), def: "/settings/notifications",
     items: SETTINGS_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
   };
-  return { myWork, find, venues, admin, account, settings };
+  return { myWork, events, admin, account, settings };
 }
 
 function helpGroup(p: string): Group {
@@ -194,7 +173,7 @@ const patchMap = (key: string, patch: Record<string, string | boolean>) => {
 
 const OPEN_KEY = "plenary.sideGroups";
 /** Groups open the first time; the rest stay folded until used. */
-const OPEN_BY_DEFAULT = new Set(["work", "venues"]);
+const OPEN_BY_DEFAULT = new Set(["work", "events"]);
 const LAST_KEY = "plenary.sideLast";
 const RAIL_KEY = "plenary.sideRail";
 const ORG_KEY = "plenary.orgEvent";
@@ -360,10 +339,10 @@ function EventSwitcher({ org, p, t }: { org: NonNullable<ReturnType<typeof useOr
 
 /* ---------------------------------------------------------------- lists */
 
-function useTree(p: string, s: Summary | null, tab?: string) {
+function useTree(p: string, s: Summary | null) {
   const org = useOrganizer(p, s);
-  const m = useMiddle(p, s, tab);
-  const middle: MenuNode[] = [m.myWork, m.find, ...(m.venues ? [m.venues] : [])];
+  const m = useMiddle(p, s);
+  const middle: MenuNode[] = [m.myWork, m.events];
   const after: MenuNode[] = [...(m.admin ? [m.admin] : []), m.account, m.settings];
   return { org, middle, after, all: [...middle, ...(org?.groups ?? []), ...after, helpGroup(p)] };
 }
@@ -434,7 +413,7 @@ function MenuFilter({ q, setQ, t, autoFocus }: { q: string; setQ: (v: string) =>
 /** The menu body: used by the phone menu (always full, everything in one scroll). */
 export function NavList({ p, s, onPick, tab }: { p: string; s: Summary | null; onPick?: () => void; tab?: string }) {
   const t = useT();
-  const tree = useTree(p, s, tab);
+  const tree = useTree(p, s);
   const [q, setQ] = useState("");
   const open = useMap(OPEN_KEY);
   const last = useMap(LAST_KEY);
@@ -480,7 +459,7 @@ function Sep({ label }: { label?: string }) {
 export function SideMenu({ p, s, tab }: { p: string; s: Summary | null; tab?: string }) {
   const t = useT();
   const rail = useRail();
-  const tree = useTree(p, s, tab);
+  const tree = useTree(p, s);
   const [q, setQ] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const open = useMap(OPEN_KEY);

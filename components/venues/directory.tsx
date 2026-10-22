@@ -75,11 +75,12 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
       if (v) setViewState(v);
       if (p.get("q")) setQ(p.get("q") ?? "");
       const sc = SCOPES.find(([k]) => k === p.get("tab"))?.[0];
+      if (sc && sc !== "all" && ws) { window.location.replace(`/workspace/events/${sc}`); return; }
       if (sc) setScopeState(sc);
       if (p.get("intent") === "submit") setIntent(true);
     }, 0);
     return () => clearTimeout(tm);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- read once after hydration
   const [field, setField] = useSoftState<"all" | Field>("all");
   const [win, setWin] = useSoftState<Win>("any");
   const [kinds, setKinds] = useSoftState<string[]>([]);
@@ -102,12 +103,6 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
   const { now, tz } = useClock(generatedAt);
   const follows = useFollows();
 
-  function setScope(v: Scope) {
-    startTransition(() => setScopeState(v));
-    const u = new URL(window.location.href);
-    if (v === "all") u.searchParams.delete("tab"); else u.searchParams.set("tab", v);
-    window.history.replaceState(null, "", u);
-  }
   // The sidebar's "My events" / "Following" links change ?tab= while this page stays open.
   useEffect(() => {
     const on = () => { const sc = SCOPES.find(([k]) => k === new URLSearchParams(window.location.search).get("tab"))?.[0] ?? "all"; setScopeState(sc); };
@@ -185,23 +180,11 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
         <div className="mx-auto max-w-[1280px] px-5 pb-0 pt-7 sm:px-8">
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
             <div className="min-w-0">
-              <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#4A5263]">{t("Find events")}</p>
-              <h1 className="mt-1.5 font-serif text-[30px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[36px]">{t("Find your next call for papers")}</h1>
+              <p className="m-0 text-[13px] text-[#4A5263]">{t("Events")}</p>
+              <h1 className="mt-1 font-serif text-[30px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[36px]">{t("Explore events")}</h1>
               <p className="mb-0 mt-1.5 text-[14px] text-[#4A5263]">
                 {t("deadlines in")} <strong className="text-[#121826]">{tz === "UTC" ? t("your time zone") : `${cityOf(tz)} (${tz})`}</strong>, {t("AoE alongside")}
               </p>
-            </div>
-            <div role="tablist" aria-label={t("Show")} className="grid w-full grid-cols-3 gap-1 rounded-[8px] border border-[#DADDE3] bg-[#F5F6F3] p-1 sm:flex sm:w-auto">
-              {SCOPES.map(([k, label]) => {
-                const n = k === "mine" ? mineRows.length : k === "following" ? followRows.length : current.length;
-                const on = scope === k;
-                return (
-                  <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setScope(k)}
-                    className={`flex h-9 min-w-0 cursor-pointer items-center justify-center gap-1.5 rounded-[6px] border-0 px-2 text-[13px] font-semibold sm:flex-none sm:px-3 sm:text-[14px] ${on ? "bg-white text-[#0E1B3D] shadow-[0_1px_2px_rgba(18,24,38,.12)]" : "bg-transparent text-[#4A5263] hover:text-[#121826]"}`}>
-                    <span className="truncate">{k === "all" ? <><span className="sm:hidden">{t("All")}</span><span className="hidden sm:inline">{t(label)}</span></> : t(label)}</span><span className={`flex-none rounded-full px-1.5 font-mono text-[11px] ${on ? "bg-[#E6EDFC] text-[#1F47A8]" : "bg-[#E9ECF2] text-[#4A5263]"}`}>{n}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>
           <div role="search" className="mt-5 flex h-11 items-center gap-2.5 rounded-[6px] border border-[#B7BDC9] bg-white px-3.5 focus-within:border-[#2F5FD0]">
@@ -211,6 +194,11 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
               className="h-10 min-w-0 flex-auto border-0 bg-transparent text-[15px] text-[#121826] outline-none" />
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" aria-pressed={win === "open"} onClick={() => setWin(win === "open" ? "any" : "open")}
+              className={`h-8 cursor-pointer rounded-full px-3 text-[13px] font-semibold ${win === "open" ? "border border-[#14603F] bg-[#14603F] text-white" : "border border-[#B9E0CB] bg-[#F3FAF6] text-[#14603F] hover:border-[#14603F]"}`}>
+              {win === "open" ? "✓ " : ""}{t("Open for papers")}
+            </button>
+            <span aria-hidden className="mx-1 w-px self-stretch bg-[#DADDE3]" />
             {FIELDS.map(([k, label]) => {
               const on = field === k;
               return (
