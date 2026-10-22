@@ -45,6 +45,29 @@ export function ContactSkeleton() {
   );
 }
 
+/** Public Help: the navy banner (same padding and sizes as PageHero with search and quick links), then the guide cards. */
+export function HelpPublicSkeleton() {
+  return (
+    <Skeleton>
+      <section className="bg-[#0E1B3D]">
+        <div className="mx-auto box-border max-w-[1280px] px-5 pb-12 pt-12 sm:px-8 lg:pb-16 lg:pt-16">
+          <Line dark size={12} w={60} />
+          <Line dark size={52} lh={1.05} w="min(420px, 80%)" className="mt-3" />
+          <Line dark size={17} w="min(460px, 85%)" className="mt-4" />
+          <Bar h={50} className="mt-7 max-w-[720px] rounded-[6px]!" />
+          <Line dark size={13} w={320} className="mt-2.5" />
+          <div className="mt-5 flex flex-wrap gap-2">{[120, 80, 140, 150].map((w, i) => <Bar dark key={i} w={w} h={36} className="rounded-full!" />)}</div>
+        </div>
+      </section>
+      <div className="mx-auto box-border max-w-[1280px] px-5 pb-14 pt-6 sm:px-8">
+        <div className="mt-5 grid gap-3.5 md:grid-cols-2">
+          {[0, 1, 2, 3].map((i) => <Card key={i}><Line size={22} w={160} />{[0, 1, 2, 3].map((j) => <Line key={j} w="70%" className="mt-2.5" />)}</Card>)}
+        </div>
+      </div>
+    </Skeleton>
+  );
+}
+
 export function HelpSkeleton() {
   return (
     <Skeleton>

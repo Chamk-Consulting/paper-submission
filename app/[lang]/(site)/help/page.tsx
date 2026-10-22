@@ -5,7 +5,7 @@ import { WorkspaceShell } from "@/components/workspace/shell";
 import { Reveal } from "@/components/motion/reveal";
 import { SiteHeader } from "@/components/site/site-header";
 import { HelpCenter } from "@/components/site/help-center";
-import { HelpSkeleton } from "@/components/skeletons/site1";
+import { HelpPublicSkeleton } from "@/components/skeletons/site1";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -34,7 +34,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string }> }
 /** HP01 — Help & guides (inside the workspace when signed in, public otherwise). */
 export default function Page(props: { searchParams: Promise<{ q?: string }> }) {
   return (
-    <Reveal fallback={<div className="min-h-dvh bg-[#F5F6F3] px-5 pt-[92px] sm:px-8"><div className="mx-auto max-w-[1280px]"><HelpSkeleton /></div></div>}>
+    <Reveal fallback={<HelpPublicSkeleton />}>
       <Inner {...props} />
     </Reveal>
   );

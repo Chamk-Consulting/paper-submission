@@ -4,7 +4,7 @@ import { getDirectory } from "@/lib/venues/data";
 import { getMyEvents } from "@/lib/workspace/events";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
-import { DirectorySkeleton } from "@/components/skeletons";
+import { WorkspaceDirectorySkeleton } from "@/components/skeletons";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -21,7 +21,7 @@ export default function Page() {
   return (
     <>
       <span data-bleed hidden />
-      <Reveal fallback={<DirectorySkeleton />}>
+      <Reveal fallback={<WorkspaceDirectorySkeleton />}>
         <Inner />
       </Reveal>
     </>

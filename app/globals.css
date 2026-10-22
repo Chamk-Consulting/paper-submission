@@ -162,18 +162,24 @@ html.lang-leaving body { opacity: 0.55; transition: opacity var(--dur-base) var(
 .sk { background-color: #E9EBE6; background-image: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.65) 50%, transparent 100%); background-repeat: no-repeat; }
 .sk-dark { background-color: #1B2C5E; background-image: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.08) 50%, transparent 100%); background-repeat: no-repeat; }
 
-/* Reveal: skeleton bars stay invisible for the first 250 ms, so pages that load fast never flash grey.
-   The wrapper takes no box (display: contents), so layouts are unchanged. */
+/* Reveal — one loading rule for the whole app. The WHOLE placeholder (frames, borders, text, bars) stays invisible
+   for 700 ms, then fades in as one piece. Most pages answer within ~600 ms, so they never show a placeholder: no empty
+   boxes, no half-drawn page, no split-second grey flash (measured on the live site, Oct 2026). Only genuinely slow
+   pages show one. When the content arrives it fades in briefly instead of popping. Wrappers take no box. */
 @keyframes sk-wait { from { opacity: 0; } to { opacity: 1; } }
-.reveal-wait { display: contents; }
-.reveal-wait .sk, .reveal-wait .sk-dark { animation: sk-wait 150ms linear 250ms both, sk-shimmer 1.6s var(--ease-standard) 400ms infinite; }
+@keyframes reveal-in { from { opacity: 0.55; } to { opacity: 1; } }
+.reveal-wait, .reveal-in { display: contents; }
+.reveal-wait > * { animation: sk-wait 200ms var(--ease-standard) 700ms both; }
+.reveal-wait .sk, .reveal-wait .sk-dark { animation: sk-shimmer 1.6s var(--ease-standard) 900ms infinite; }
+.reveal-in > * { animation: reveal-in 140ms var(--ease-standard) both; }
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*), ::view-transition-new(*) { animation-name: vt-out !important; animation-duration: var(--dur-fast) !important; }
   ::view-transition-new(*) { animation-name: vt-in !important; }
   ::view-transition-group(*) { animation: none !important; }
   .sk, .sk-dark { animation: none; background-image: none; }
-  .reveal-wait .sk, .reveal-wait .sk-dark { animation: sk-wait 1ms linear 250ms both; }
+  .reveal-wait > * { animation: sk-wait 1ms linear 700ms both; }
+  .reveal-wait .sk, .reveal-wait .sk-dark, .reveal-in > * { animation: none; }
   .nav-progress[data-state] { transition: opacity var(--dur-fast) !important; }
   button:not(:disabled):active, a[class*="rounded"]:active { transform: none; }
 }
@@ -203,10 +209,9 @@ html[data-auth="in"] .auth-out { display: none !important; }
 /* Pages written as full-screen columns sit under the 60 px header: keep them exactly one screen tall. */
 .chrome-body .min-h-dvh { min-height: calc(100dvh - 60px); }
 /* public pages: the page fills the space above the shared footer instead of pushing it below the fold */
-.site-main > .min-h-dvh, .site-main > .reveal-wait, .site-main > .reveal-wait > .min-h-dvh { min-height: 0; flex: 1 1 auto; }
+.site-main > .min-h-dvh, .site-main > .reveal-wait > .min-h-dvh, .site-main > .reveal-in > .min-h-dvh { min-height: 0; flex: 1 1 auto; }
 /* in-page anchors land below the sticky header */
 html { scroll-padding-top: 72px; }
-/* header lines up with the app frame: 1440 px, or 1600 px on organiser pages */
 /* The workspace header spans the full width, like the side menu pinned to the left edge. */
 .hdr-app { max-width: none; }
 

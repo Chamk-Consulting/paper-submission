@@ -25,9 +25,9 @@ export async function WorkspaceSkeleton({ active }: { active: "home" | "submissi
       <Skeleton>
         {active === "home" ? (
           <>
-            <p className="m-0 font-mono text-[12px] text-[#4A5263]">{t("My workspace")}</p>
+            <Line size={12} w={100} />
             <Line size={40} lh={1.1} w="min(360px, 80%)" className="mt-1.5" />
-            <p className="mt-1.5 text-[#4A5263]">{t("Everything you owe, across every venue.")}</p>
+            <Line size={15} w="min(320px, 70%)" className="mt-1.5" />
             <div className="mt-6 grid max-w-[720px] gap-3.5 sm:grid-cols-2">
               {[0, 1].map((i) => (
                 <div key={i} className="rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4">
@@ -119,21 +119,23 @@ export async function DirectorySkeleton() {
   );
 }
 
-export function VenueSkeleton() {
+/** Event page. `navy` (public): the dark cover header the page opens with. `light` (workspace): the compact white header. */
+export function VenueSkeleton({ tone = "navy" }: { tone?: "navy" | "light" }) {
+  const dark = tone === "navy";
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <PublicHeader signedIn={false} />
       <Skeleton>
-        <div className="border-b border-[#DADDE3] bg-white px-5 pb-7 pt-6 sm:px-8">
+        <div className={dark ? "bg-[#0E1B3D] px-5 pb-10 pt-7 sm:px-8 lg:min-h-[380px]" : "border-b border-[#DADDE3] bg-white px-5 pb-7 pt-6 sm:px-8"}>
           <div className="mx-auto flex max-w-[1216px] flex-col gap-8 lg:flex-row lg:justify-between">
             <div className="min-w-0 flex-auto">
-              <Line size={14} w={200} />
-              <Line size={46} lh={1.05} w="min(340px, 70%)" className="mt-5" />
-              <Line size={20} w="min(620px, 90%)" className="mt-2" />
-              <Line size={15} w="min(420px, 70%)" className="mt-2" />
-              <div className="mt-5 flex flex-wrap gap-2.5"><Bar w={168} h={44} /><Bar w={140} h={44} /><Bar w={120} h={44} /></div>
+              <Line dark={dark} size={14} w={200} />
+              <Line dark={dark} size={46} lh={1.05} w="min(340px, 70%)" className="mt-5" />
+              <Line dark={dark} size={20} w="min(620px, 90%)" className="mt-2" />
+              <Line dark={dark} size={15} w="min(420px, 70%)" className="mt-2" />
+              <div className="mt-5 flex flex-wrap gap-2.5"><Bar dark={dark} w={168} h={44} /><Bar dark={dark} w={140} h={44} /><Bar dark={dark} w={120} h={44} /></div>
             </div>
-            <div className="box-border w-full rounded-[8px] bg-[#0E1B3D] p-5 lg:w-[380px] lg:flex-none">
+            <div className={`box-border w-full rounded-[8px] p-5 lg:w-[380px] lg:flex-none ${dark ? "bg-[#17285A]" : "bg-[#0E1B3D]"}`}>
               <Line dark size={12} w="55%" /><Line dark size={40} lh={1.1} w="80%" className="mt-3" /><Line dark size={13} w="65%" className="mt-3" />
               <div className="mt-4 grid grid-cols-4 gap-2">{[0, 1, 2, 3].map((i) => <Bar dark key={i} h={46} />)}</div>
             </div>
@@ -279,5 +281,36 @@ export async function ManageSkeleton({ rows = 3 }: { rows?: number }) {
         </div>
       </Skeleton>
     </WorkspaceShell>
+  );
+}
+
+/** Find events in the workspace: light header, three tabs, search, field chips, view tabs, then cards. Shapes only. */
+export function WorkspaceDirectorySkeleton() {
+  return (
+    <div className="flex min-h-dvh flex-col bg-[#F5F6F3]">
+      <Skeleton>
+        <section className="border-b border-[#DADDE3] bg-white">
+          <div className="mx-auto max-w-[1280px] px-5 pt-7 sm:px-8">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div><Line size={12} w={90} /><Line size={36} lh={1.1} w="min(460px, 80vw)" className="mt-1.5" /><Line size={14} w={280} className="mt-1.5" /></div>
+              <Bar w={360} h={44} className="max-w-full rounded-[8px]!" />
+            </div>
+            <Bar h={44} className="mt-5 rounded-[6px]!" />
+            <div className="mt-3 flex flex-wrap gap-2">{[70, 70, 76, 132, 138].map((w, i) => <Bar key={i} w={w} h={32} className="rounded-full!" />)}</div>
+            <div className="mt-4 flex gap-4 pb-3">{[40, 120, 40, 90].map((w, i) => <Line key={i} size={14} w={w} />)}</div>
+          </div>
+        </section>
+        <div className="mx-auto box-border flex w-full max-w-[1280px] flex-col gap-3 px-5 pb-14 pt-7 sm:px-8">
+          <div className="flex items-center justify-between"><Line size={14} w={120} /><Bar w={170} h={38} /></div>
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white p-4 sm:flex-row sm:items-start">
+              <Bar w={200} h={112} className="max-w-full flex-none rounded-[6px]!" />
+              <div className="min-w-0 flex-auto"><Line size={22} lh={1.2} w={i % 2 ? 110 : 150} /><Line size={14} w="75%" className="mt-1.5" /><Line size={14} w="50%" className="mt-1" /><div className="mt-2 flex gap-1.5">{[64, 72, 90].map((w, j) => <Bar key={j} w={w} h={20} />)}</div></div>
+              <div className="hidden w-[220px] flex-none sm:block"><Line size={12} w="60%" className="ml-auto" /><Line size={22} w="70%" className="ml-auto mt-1" /><div className="mt-3 flex justify-end gap-1.5"><Bar w={80} h={34} /><Bar w={110} h={34} /></div></div>
+            </div>
+          ))}
+        </div>
+      </Skeleton>
+    </div>
   );
 }

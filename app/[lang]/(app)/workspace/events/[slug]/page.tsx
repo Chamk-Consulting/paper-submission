@@ -20,7 +20,7 @@ export default function Page({ params }: { params: Promise<Params> }) {
   return (
     <>
       <span data-bleed hidden />
-      <Reveal fallback={<VenueSkeleton />}><Inner params={params} /></Reveal>
+      <Reveal fallback={<VenueSkeleton tone="light" />}><Inner params={params} /></Reveal>
     </>
   );
 }

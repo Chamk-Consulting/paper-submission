@@ -52,6 +52,11 @@ export function RegistrationsSkeleton() {
   return <Shell active="finals"><Kpis n={3} /><div className="grid gap-4 lg:grid-cols-[1fr_340px]"><TableRows rows={8} /><Card><Line size={22} w={180} /><Bar h={44} className="mt-4" /><Bar h={44} className="mt-3" /><Bar h={120} className="mt-3" /></Card></div></Shell>;
 }
 
+/** Registrations body only (KPIs, table, side card): the page header renders for real while this waits. */
+export function RegistrationsBodySkeleton() {
+  return <Skeleton className="flex flex-col gap-4"><Kpis n={3} /><div className="grid gap-4 lg:grid-cols-[1fr_340px]"><TableRows rows={8} /><Card><Line size={22} w={180} /><Bar h={44} className="mt-4" /><Bar h={44} className="mt-3" /><Bar h={120} className="mt-3" /></Card></div></Skeleton>;
+}
+
 export function ProgramSkeleton() {
   return (
     <Shell active="program" wide>
