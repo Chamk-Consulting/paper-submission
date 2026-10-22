@@ -6,6 +6,7 @@ import { LOCALES, LOCALE_NAMES } from "@/lib/i18n/config";
 import { setLanguageCookie } from "@/lib/consent-client";
 import { savePreferences, type AccountState } from "@/lib/account/actions";
 import { applyUi, parseUi, type UiPrefs } from "@/lib/account/ui-prefs";
+import { refreshSummary } from "@/components/chrome/summary";
 import { sx } from "@/components/account/styles";
 import { AccountSaveBar, FieldErr, useDirty } from "@/components/account/save-bar";
 
@@ -45,6 +46,7 @@ export function PreferencesForm({ locale, timezone, ui }: { locale: string; time
     if (r.ok && r.value) {
       const v = JSON.parse(r.value) as { locale: string; ui: unknown };
       applyUi(parseUi(v.ui));
+      void refreshSummary(true); // the tab's cached copy would otherwise put the old choices back
       if (v.locale && v.locale !== current) { setLanguageCookie(v.locale); window.location.reload(); }
     }
     return r;

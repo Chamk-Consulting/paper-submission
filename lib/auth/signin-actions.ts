@@ -1,5 +1,6 @@
 "use server";
 
+import { withStartPage } from "@/lib/account/start-page";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -30,7 +31,8 @@ const LOCKED = "This account is locked. Write to Plenary support from the contac
 /** After any successful sign-in: the first unfinished step (plan B5), then `next`. Same rule as /auth/continue. */
 async function continueTo(supabase: Awaited<ReturnType<typeof createClient>>, next?: string): Promise<string> {
   const r = await resolveOnboarding(supabase);
-  return stepHref(r.step, safeNext(next), { ref: r.ref, email: r.user?.email });
+  const to = r.step === "done" ? await withStartPage(supabase, safeNext(next)) : safeNext(next);
+  return stepHref(r.step, to, { ref: r.ref, email: r.user?.email });
 }
 
 /**
