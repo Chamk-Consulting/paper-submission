@@ -250,9 +250,9 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
 
         <div className="ml-auto flex flex-none items-center gap-2.5 sm:gap-3">
           <LanguageSelect id="hdr-lang" className="hidden border-[#2A3C6E]! bg-[#17285A]! text-[#F5F6F3]! lg:block" />
-          <span className="auth-out hidden items-center gap-3 sm:flex">
+          <span className="auth-out flex items-center gap-3">
             <Link href={`/sign-in?next=${encodeURIComponent(p === "/" ? "/workspace" : p)}`} className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline">{t("Sign in")}</Link>
-            <Link href="/manage/new" className="inline-flex h-9 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Host a conference")}</Link>
+            <Link href="/manage/new" className="hidden sm:inline-flex h-9 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Host a conference")}</Link>
           </span>
           <span className="auth-in flex items-center gap-2.5 sm:gap-3">
             <Link href="/venues" className="hidden h-[38px] items-center gap-2 rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26] lg:flex">
