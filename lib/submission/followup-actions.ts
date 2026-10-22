@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { checkPdf } from "@/lib/submission/pdf-check";
 import { loadSubmission } from "@/lib/submission/data";
 import { absUrl, sendMany, textToHtml } from "@/lib/email/send";
+import { dropOptedOut } from "@/lib/email/optouts";
 import type { ActionState } from "@/lib/submission/actions";
 
 /* Server actions for the author follow-up flows (SB10–SB15, CA01). Messages are English keys, translated by the forms. */
@@ -88,7 +89,8 @@ async function emailCoauthors(id: string, subject: string, body: string) {
   const to = ctx.authors.filter((a) => !a.isYou && a.email).map((a) => a.email!);
   if (!to.length) return 0;
   const text = `${body}\n\n${absUrl(`/submissions/${id}`)}`;
-  const r = await sendMany(to.map((addr) => ({ to: addr, subject, text, html: textToHtml(text) })));
+  const supabase = await createClient();
+  const r = await sendMany(await dropOptedOut(supabase, to.map((addr) => ({ to: addr, subject, text, html: textToHtml(text) })), "coauthor_changes"));
   return r.sent;
 }
 

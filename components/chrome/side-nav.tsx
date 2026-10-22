@@ -5,7 +5,7 @@ import {
   ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, FileCheck,
   FileStack, FileText, Files, Filter, Gauge, Gavel, History, House, IdCard, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
   Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
-  CircleUserRound, Search, Send, Settings, Settings2, ShieldAlert, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
+  CalendarDays, CircleUserRound, Search, Send, Settings, Settings2, ShieldAlert, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
   UsersRound, X, Check, Star,
 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
@@ -59,7 +59,9 @@ const ACCOUNT_ITEMS: [string, string, typeof House, (p: string) => boolean][] = 
   ["/settings/privacy", "Privacy", Lock, (p) => p.startsWith("/settings/privacy")],
 ];
 const SETTINGS_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
-  ["/settings/notifications", "Notifications", Bell, (p) => p.startsWith("/settings/notifications") || p.startsWith("/settings/calendar")],
+  ["/settings/notifications", "Notifications", Bell, (p) => p.startsWith("/settings/notifications")],
+  ["/settings/calendar", "Calendar", CalendarDays, (p) => p.startsWith("/settings/calendar")],
+  ["/settings/preferences", "Preferences", SlidersHorizontal, (p) => p.startsWith("/settings/preferences")],
 ];
 
 /** Events this person organises (for the switcher), with the role label shown beside the name. */

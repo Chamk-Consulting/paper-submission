@@ -313,19 +313,42 @@ export async function signOutOthers(): Promise<AccountState> {
 /* ---------------------------------------------------------------- ST03 notifications */
 const TIMEZONES = new Set(Intl.supportedValuesOf("timeZone"));
 export async function savePrefs(_: AccountState, fd: FormData): Promise<AccountState> {
-  const modes = Object.fromEntries(notifyEvents.map((k) => [k, fd.get(`mode_${k}`) === "digest" ? "digest" : "now"]));
-  const reminders = { d7: fd.get("d7") === "on", d3: fd.get("d3") === "on", h24: fd.get("h24") === "on" };
-  const tz = str(fd, "timezone");
-  const locale = z.enum(["en", "fr", "it", "de"]).safeParse(str(fd, "locale"));
-  if (tz && !TIMEZONES.has(tz) && tz !== "UTC") return { fieldErrors: { timezone: MSG.timezone } };
+  const mode = (k: string) => { const v = fd.get(`mode_${k}`); return v === "digest" || v === "off" ? v : "now"; };
+  const modes = Object.fromEntries(notifyEvents.map((k) => [k, mode(k)]));
+  const on = (k: string) => fd.get(k) === "on";
+  const reminders = { d7: on("d7"), d3: on("d3"), h24: on("h24"), papers: on("papers"), reviews: on("reviews"), followed: on("followed") };
   const c = await ctx();
   if (!c) return { error: MSG.signIn };
   const r1 = await c.supabase.from("notification_prefs").upsert({ person_id: c.personId, modes, reminders, updated_at: new Date().toISOString() });
   if (r1.error) return { error: friendly(r1.error.message) };
-  const r2 = await c.supabase.from("persons").update({ timezone: tz || null, locale: locale.success ? locale.data : null }).eq("id", c.personId);
-  if (r2.error) return { error: friendly(r2.error.message) };
   page("/settings/notifications");
-  return { ...saved(), value: locale.success ? locale.data : "" };
+  return saved();
+}
+
+/* ---------------------------------------------------------------- Settings › Preferences */
+export async function savePreferences(_: AccountState, fd: FormData): Promise<AccountState> {
+  const { parseUi } = await import("@/lib/account/ui-prefs");
+  const tz = str(fd, "timezone");
+  const locale = z.enum(["en", "fr", "it", "de"]).safeParse(str(fd, "locale"));
+  if (tz && !TIMEZONES.has(tz) && tz !== "UTC") return { fieldErrors: { timezone: MSG.timezone } };
+  const ui = parseUi({
+    textSize: str(fd, "textSize"), motion: str(fd, "motion"), contrast: str(fd, "contrast"), sidebar: str(fd, "sidebar"),
+    start: str(fd, "start"), followDevice: fd.get("followDevice") === "on",
+  });
+  const c = await ctx();
+  if (!c) return { error: MSG.signIn };
+  const { error } = await c.supabase.from("persons").update({ timezone: tz || null, locale: locale.success ? locale.data : null, ui_prefs: ui }).eq("id", c.personId);
+  if (error) return { error: friendly(error.message) };
+  page("/settings/preferences");
+  return { ...saved(), value: JSON.stringify({ locale: locale.success ? locale.data : "", ui }) };
+}
+
+/** "Follow my device": keeps the saved time zone (emails, reminders, calendar feed) in step with this device. */
+export async function setDeviceZone(tz: string): Promise<void> {
+  if (!TIMEZONES.has(tz)) return;
+  const c = await ctx();
+  if (!c) return;
+  await c.supabase.from("persons").update({ timezone: tz }).eq("id", c.personId);
 }
 
 /* ---------------------------------------------------------------- ST04 privacy */

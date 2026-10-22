@@ -17,6 +17,7 @@ import { NavProgress } from "@/components/motion/nav-progress";
 import { PwaLayer } from "@/components/pwa/pwa-layer";
 import { CookieConsent } from "@/components/consent/cookie-consent";
 import { RememberAccount } from "@/components/auth/remember-account";
+import { UI_FLAG } from "@/lib/account/ui-prefs";
 
 const AUTH_FLAG = `try{document.documentElement.dataset.auth=/(?:^|;\\s*)sb-[a-z0-9]+-auth-token(?:\\.0)?=/.test(document.cookie)?"in":"out"}catch(e){}`;
 
@@ -59,6 +60,8 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <head>
         {/* Before the first paint: signed-in or not, from the session cookie, so the shared header shows the right side at once. */}
         <script dangerouslySetInnerHTML={{ __html: AUTH_FLAG }} />
+        {/* Settings › Preferences remembered in this browser (text size, contrast, motion), also before the first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: UI_FLAG }} />
       </head>
       <body className="min-h-dvh bg-[#F5F6F3] antialiased">
         <Suspense fallback={null}><NavProgress /></Suspense>

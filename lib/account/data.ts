@@ -124,10 +124,16 @@ export async function getSecurity() {
   };
 }
 
-export const notifyEvents = ["review_invitation", "review_due", "coauthor_request", "coauthor_changes", "venue_announcements", "messages", "new_calls"] as const;
+export const notifyEvents = ["coauthor_request", "coauthor_changes", "paper_steps", "review_invitation", "review_due", "venue_announcements", "program_changes", "new_calls", "messages"] as const;
 export type NotifyEvent = (typeof notifyEvents)[number];
-export type Prefs = { modes: Record<NotifyEvent, "now" | "digest">; reminders: { d7: boolean; d3: boolean; h24: boolean }; timezone: string; locale: string; hasFeed: boolean };
-const defaultModes: Prefs["modes"] = { review_invitation: "now", review_due: "now", coauthor_request: "now", coauthor_changes: "digest", venue_announcements: "digest", messages: "now", new_calls: "digest" };
+export type NotifyMode = "now" | "digest" | "off";
+export type Reminders = { d7: boolean; d3: boolean; h24: boolean; papers: boolean; reviews: boolean; followed: boolean };
+export type Prefs = { modes: Record<NotifyEvent, NotifyMode>; reminders: Reminders; email: string; hasFeed: boolean };
+const defaultModes: Prefs["modes"] = {
+  coauthor_request: "now", coauthor_changes: "digest", paper_steps: "now", review_invitation: "now", review_due: "now",
+  venue_announcements: "digest", program_changes: "now", new_calls: "digest", messages: "now",
+};
+const MODES: readonly NotifyMode[] = ["now", "digest", "off"];
 
 export async function getPrefs(): Promise<Prefs | null> {
   const m = await me();
@@ -136,9 +142,18 @@ export async function getPrefs(): Promise<Prefs | null> {
     m.supabase.from("notification_prefs").select("modes, reminders").eq("person_id", m.person.id).maybeSingle(),
     m.supabase.rpc("my_calendar_feed"),
   ]);
-  const modes = { ...defaultModes, ...((data?.modes ?? {}) as Partial<Prefs["modes"]>) };
-  const reminders = { d7: true, d3: true, h24: true, ...((data?.reminders ?? {}) as Partial<Prefs["reminders"]>) };
-  return { modes, reminders, timezone: m.person.timezone ?? "", locale: m.person.locale ?? "", hasFeed: ((feed ?? []) as unknown[]).length > 0 };
+  const saved = (data?.modes ?? {}) as Record<string, unknown>;
+  const modes = Object.fromEntries(notifyEvents.map((k) => [k, MODES.includes(saved[k] as NotifyMode) ? saved[k] : defaultModes[k]])) as Prefs["modes"];
+  const reminders = { d7: true, d3: true, h24: true, papers: true, reviews: true, followed: false, ...((data?.reminders ?? {}) as Partial<Reminders>) };
+  return { modes, reminders, email: m.user.email ?? "", hasFeed: ((feed ?? []) as unknown[]).length > 0 };
+}
+
+/** Settings › Preferences: language, time zone and the display/workspace choices. */
+export async function getPreferences() {
+  const m = await me();
+  if (!m) return null;
+  const { parseUi } = await import("@/lib/account/ui-prefs");
+  return { locale: m.person.locale ?? "", timezone: m.person.timezone ?? "", ui: parseUi((m.person as { ui_prefs?: unknown }).ui_prefs) };
 }
 
 export type Consents = { processing: string | null; share_with_venues: boolean; product_news: boolean };

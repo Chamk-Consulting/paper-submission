@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireEvent, type EventCtx } from "@/lib/manage/data";
 import { friendlyDb, type ManageState } from "@/lib/manage/actions-util";
 import { absUrl, renderTemplate, sendMany, type Mail } from "@/lib/email/send";
+import { dropOptedOut } from "@/lib/email/optouts";
 import { unsubscribeUrls } from "@/lib/email/unsubscribe";
 import { addMinutes, paperNo, zonedToUtc } from "@/lib/manage/ops2-time";
 
@@ -570,7 +571,7 @@ export async function sendCampaign(_: Ops2State, fd: FormData): Promise<Ops2Stat
     const optional = !conds.some((c) => c === "acc" || c === "inc" || c === "late");
     const links = optional ? await unsubscribeUrls(venueId, rendered.filter((r) => r.p?.email).map((r) => r.a.person_id)) : new Map<string, string>();
     const mails: Mail[] = rendered.filter((r) => r.p?.email).map((r) => ({ to: r.p!.email!, subject: r.subj.text, text: r.body.text, replyTo: ctx.venue.contact_email ?? undefined, unsubscribeUrl: links.get(r.a.person_id) }));
-    const res = await sendMany(mails, 6);
+    const res = await sendMany(optional ? await dropOptedOut(supabase, mails, "venue_announcements") : mails, 6);
     await pool(rendered, 6, (r) => supabase.rpc("notify_people", { p_venue: venueId, p_people: [r.a.person_id], p_kind: "venue", p_subject: r.subj.text, p_body: r.body.text, p_submission: r.a.submission_id }));
     const { error } = await supabase.from("email_campaigns").update({ status: "sent", sent_at: new Date().toISOString(), recipients: aud.length, delivered: res.sent, bounced: res.failed, confirmed_twice: twice, sent_by: me }).eq("id", cid.data);
     if (error) return { error: friendlyDb(error.message) };

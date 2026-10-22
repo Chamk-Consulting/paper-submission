@@ -5,7 +5,7 @@ import { getT } from "@/lib/i18n/server";
 
 /* Skeletons for the account pages, inbox, search and calendar (slice site2). Real chrome, shimmering data. */
 
-const SECTIONS: Record<SettingsKey, number[]> = { profile: [150, 130, 150, 120, 140], reviewing: [220, 120, 190, 120], security: [260, 150, 120, 180], notifications: [360, 110, 130, 70], privacy: [200, 170, 190, 110] };
+const SECTIONS: Record<SettingsKey, number[]> = { profile: [150, 130, 150, 120, 140], reviewing: [220, 120, 190, 120], security: [260, 150, 120, 180], notifications: [360, 110, 130, 70], privacy: [200, 170, 190, 110], calendar: [200, 260], preferences: [220, 240, 200] };
 
 export async function SettingsSkeleton({ active }: { active: SettingsKey }) {
   return (

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getMe } from "@/lib/auth/me";
 import { friendlyDb, venueIdBySlug } from "@/lib/manage/actions-util";
 import { absUrl, renderTemplate, sendEmail, sendMany, emailConfigured, type Mail } from "@/lib/email/send";
+import { dropOptedOut } from "@/lib/email/optouts";
 import { newToken } from "@/lib/tokens";
 import { topicMatch, paperId, DECISION_LABEL } from "@/lib/manage/ops1-shared";
 import { buildLetter } from "@/lib/manage/ops1-letters";
@@ -150,7 +151,8 @@ export async function inviteReviewer(input: z.input<typeof inviteZ>): Promise<Op
   const vars = { "reviewer.first": first, "paper.id": paperId((sub?.number as number) ?? null), "paper.title": (sub?.title as string) ?? "", "venue.short": venue.short, "venue.name": venue.name, deadline: fmtDue(due), link };
   const subject = renderTemplate(tpl.subject, vars).text;
   const text = renderTemplate(tpl.body, vars).text;
-  const r = email ? await sendEmail({ to: email, subject, text, replyTo: me?.email || undefined }) : { ok: false, skipped: true };
+  const allowed = email ? await dropOptedOut(supabase, [{ to: email, subject, text, replyTo: me?.email || undefined }], "review_invitation") : [];
+  const r = allowed.length ? await sendEmail(allowed[0]) : { ok: false, skipped: true };
   if (person) {
     await supabase.rpc("notify_people", { p_venue: venue.id, p_people: [person], p_kind: "invite", p_subject: subject, p_body: text.replace(link, "").trim(),
       p_submission: submission, p_cta_label: "Accept or decline", p_cta_url: `/invite/review/${token}` });

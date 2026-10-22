@@ -23,6 +23,23 @@ main.app-frame:has([data-bleed]:not([style*="display: none"], [style*="display: 
 main.app-frame > .frame-box:has([data-wide-frame]:not([style*="display: none"], [style*="display: none"] *)) { max-width: 1360px; }
 main.app-frame > .frame-box:has([data-bleed]:not([style*="display: none"], [style*="display: none"] *)) { max-width: none; }
 
+/* Settings › Preferences (lib/account/ui-prefs.ts sets these on <html>).
+   Larger text: the workspace's fixed text sizes each step up about 2 px (the header and side menu keep theirs). */
+html[data-text="large"] main.app-frame :is(.text-\[11px\], .text-\[12px\]) { font-size: 13.5px; }
+html[data-text="large"] main.app-frame .text-\[13px\] { font-size: 15px; }
+html[data-text="large"] main.app-frame :is(.text-\[14px\], .text-\[15px\]) { font-size: 16.5px; }
+html[data-text="large"] main.app-frame .text-\[17px\] { font-size: 19px; }
+html[data-text="large"] main.app-frame { font-size: 16.5px; }
+/* Higher contrast: grey text and hairlines get darker everywhere. */
+html[data-contrast="high"] :is(.text-\[\#4A5263\], .text-\[\#6B7385\]) { color: #1F2533 !important; }
+html[data-contrast="high"] :is(.border-\[\#DADDE3\], .border-\[\#EEF0EC\], .border-\[\#B7BDC9\]) { border-color: #6B7385 !important; }
+html[data-contrast="high"] :is(.border-t-\[\#EEF0EC\]) { border-top-color: #6B7385 !important; }
+/* Reduce motion: no animations or transitions (content still appears after the same short wait). */
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+}
+html[data-motion="reduce"]::view-transition-group(*), html[data-motion="reduce"]::view-transition-old(*), html[data-motion="reduce"]::view-transition-new(*) { animation: none !important; }
+
 /* Responsive safety nets (found by the workspace audit at 390/768/1024/1440):
    - a grid column must be able to shrink below a wide table it holds (the table scrolls in its own box);
    - a scroll box contains its absolutely placed children (e.g. sr-only table headings), so they can't widen the page;

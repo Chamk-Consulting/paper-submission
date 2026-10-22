@@ -1,4 +1,5 @@
 "use client";
+import { UiSync } from "@/components/chrome/ui-sync";
 import { Mail, Menu, Plus, Search, X } from "lucide-react";
 
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
@@ -218,6 +219,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
         <div className="frame-box mx-auto w-full max-w-[1120px]"><WorkspaceLinks>{children}</WorkspaceLinks></div>
       </main>
       {s?.signedIn ? <InstallPrompt /> : null}
+      {s?.signedIn ? <UiSync /> : null}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { myFollows } from "@/lib/workspace/events";
 import { createClient } from "@/lib/supabase/server";
+import { parseUi } from "@/lib/account/ui-prefs";
 
 /** What the shared header and side menu need about the signed-in person. Never cached. */
 export async function GET() {
@@ -21,5 +22,7 @@ export async function GET() {
     organizerOf: ctx.organizerOf?.slug ?? null,
     isAdmin: admin === true,
     following: following.slice(0, 12).map((f) => ({ slug: f.slug, name: f.name, shortName: f.shortName })),
+    timezone: (ctx.me.person as { timezone?: string | null } | null)?.timezone ?? null,
+    ui: parseUi((ctx.me.person as { ui_prefs?: unknown } | null)?.ui_prefs),
   }, { headers });
 }
