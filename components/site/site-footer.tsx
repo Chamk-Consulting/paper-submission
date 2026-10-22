@@ -278,6 +278,10 @@ export function footerFor(p: string): { size: FooterSize | null; venue: string |
 /** Used by the public layout: picks the footer from the address. */
 export function SiteFooterLive() {
   const p = barePath(usePathname() ?? "/");
+  // Rendered in the browser only: the footer sits below the fold and depends on the address, the session and the
+  // clock; rendering it on the server too caused hydration mismatches on dynamic pages.
+  const mounted = useSyncExternalStore(noop, () => true, () => false);
+  if (!mounted) return null;
   const f = footerFor(p);
   return f.size ? <SiteFooter size={f.size} venue={f.venue} /> : null;
 }
