@@ -7,7 +7,7 @@ import { resendSignupCode, signupStatus, verifySignupCode } from "@/lib/auth/onb
 import { resendResetCode, verifyResetCode } from "@/lib/auth/reset-actions";
 import { ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
-import { EMAIL_CODE_LENGTH, EMAIL_CODE_MIN } from "@/lib/auth/code-length";
+import { EMAIL_CODE_LENGTH, EMAIL_CODE_MAX, EMAIL_CODE_MIN } from "@/lib/auth/code-length";
 
 type Mode = "wait" | "sent" | "wrong" | "ok" | "expired" | "locked";
 const EXPIRES = 15 * 60; // matches Supabase Auth "Email OTP expiration" = 900 s (plan D1)
@@ -123,11 +123,13 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
     });
   }
 
-  function update(d: string[], nextFocus?: number) {
+  // Auto-checks only a complete code: all boxes filled and at least the length the emails use, so a code is never
+  // sent half-typed. Shorter codes (6–7 digits) are checked with the button.
+  function update(d: string[], nextFocus?: number, whole = false) {
     setDigits(d);
     if (mode === "wrong" || mode === "ok") setMode("wait");
     if (nextFocus !== undefined) focus(nextFocus);
-    if (d.every(Boolean)) submit(d);
+    if (d.every(Boolean) && (whole || d.length >= EMAIL_CODE_LENGTH)) submit(d);
   }
 
   function resend(force = false) {
@@ -174,8 +176,14 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
                   onChange={(e) => {
                     let raw = e.target.value.replace(/[^0-9]/g, "");
                     const whole = raw.length >= EMAIL_CODE_MIN && raw.length <= 10 && raw.length !== len && i === 0;
-                    if (whole) { setLen(raw.length); update(raw.split(""), raw.length - 1); return; }
+                    if (whole) { setLen(raw.length); update(raw.split(""), raw.length - 1, true); return; }
                     const base = mode === "wrong" ? blank() : digits.slice();
+                    // Typing past the last box: the code is longer than expected, so add a box instead of overwriting.
+                    if (i === len - 1 && digits[i] && raw.length === 2 && raw[0] === digits[i] && len < EMAIL_CODE_MAX && mode !== "wrong") {
+                      setLen(len + 1);
+                      update([...base, raw[1]], len);
+                      return;
+                    }
                     if (raw.length === 2 && raw[0] === digits[i]) raw = raw[1];
                     if (raw.length > 1) {
                       let j = i;
@@ -199,7 +207,7 @@ export function OtpVerify({ email, onSuccessHref, changeHref, kind = "signup", s
                     if (n !== len) setLen(n);
                     const d = blank(n);
                     pasted.split("").forEach((ch, k) => { if (k < n) d[k] = ch; });
-                    update(d, Math.min(pasted.length, n - 1));
+                    update(d, Math.min(pasted.length, n - 1), pasted.length >= EMAIL_CODE_MIN);
                   }}
                   className={`box-border h-14 w-full rounded-[6px] text-center font-mono ${len > 6 ? "text-[20px]" : "text-[24px]"} font-medium text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]`}
                   style={{ border, background: bg }}
