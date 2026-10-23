@@ -19,6 +19,17 @@ import { RichTextView, type RichMode } from "@/components/rich-text/view";
 
 const GREEK: [string, string][] = [["α", "\\alpha"], ["β", "\\beta"], ["γ", "\\gamma"], ["δ", "\\delta"], ["ε", "\\varepsilon"], ["θ", "\\theta"], ["λ", "\\lambda"], ["μ", "\\mu"], ["π", "\\pi"], ["σ", "\\sigma"], ["τ", "\\tau"], ["φ", "\\phi"], ["ω", "\\omega"], ["Δ", "\\Delta"], ["Σ", "\\Sigma"], ["Ω", "\\Omega"], ["≤", "\\leq"], ["≥", "\\geq"], ["≈", "\\approx"], ["∞", "\\infty"], ["∈", "\\in"], ["→", "\\to"], ["±", "\\pm"], ["∂", "\\partial"]];
 
+/**
+ * The Markdown writer escapes "_", "\\" and "*" inside text, which breaks LaTeX ($H\\_\\\\infty$). Maths is written
+ * by the author as-is, so escapes are removed again inside $…$; the rest is trimmed.
+ */
+export function cleanMarkdown(md: string): string {
+  return md
+    .replace(/\$([^$\n]+)\$/g, (_, inner: string) => `$${inner.replace(/\\([\\_*[\]`~#^{}|])/g, "$1")}$`)
+    .replace(/[ \t]+$/gm, "")
+    .trim();
+}
+
 function extensionsFor(mode: RichMode, placeholder: string) {
   const full = mode === "full";
   const lists = mode !== "inline";
@@ -87,7 +98,7 @@ export function RichTextEditor({ name, value, onChange, mode = "full", id, label
       handleKeyDown: (_view, e) => mode === "inline" && e.key === "Enter",
     },
     onUpdate: ({ editor: ed }) => {
-      let next = ed.getMarkdown();
+      let next = cleanMarkdown(ed.getMarkdown());
       if (mode === "inline") next = next.replace(/\s*\n+\s*/g, " ");
       if (maxLength && next.length > maxLength) next = next.slice(0, maxLength);
       update(next.trim() ? next : "");
