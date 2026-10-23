@@ -7,9 +7,11 @@ import { useT } from "@/lib/i18n/client";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** "Closes in 4d 06h · 21 Oct, 23:59 AoE · Thu 12:59 your time (Lagos)" pill. */
-export function DeadlinePill({ deadline, generatedAt }: { deadline: string | null; generatedAt: string }) {
+/** `closedOn`: set when the database says this event is closed ("" = no known date), so the pill never says "open". */
+export function DeadlinePill({ deadline, generatedAt, closedOn }: { deadline: string | null; generatedAt: string; closedOn?: string }) {
   const { now, tz } = useClock(generatedAt);
   const t = useT();
+  if (closedOn !== undefined) return <div className="rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2 text-[14px] text-[#5C1A15]">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</div>;
   if (!deadline) return <div className="rounded-[6px] border border-[#DADDE3] bg-white px-3 py-2 text-[14px] text-[#4A5263]">{t("No deadline · submissions open")}</div>;
   const ms = Date.parse(deadline) - now;
   if (ms <= 0) return <div className="rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2 text-[14px] text-[#5C1A15]">{t("Deadline passed")} · {fmtAoE(deadline, t.intl)}</div>;

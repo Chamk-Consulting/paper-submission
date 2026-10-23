@@ -36,7 +36,7 @@ async function Inner({ params, searchParams }: P) {
   return (
     <WizardLayout
       header={<WizardHeader initials={initialsOf(name, me.email)} />}
-      band={<TitleBand crumb={t("New submission")} title={t("New submission")} venue={venue} generatedAt={generatedAt} />}
+      band={<TitleBand crumb={t("New submission")} title={t("New submission")} venue={venue} generatedAt={generatedAt} closedOn={closed ? (closedOn ?? "") : undefined} />}
       rail={<StepRail rail={{ done: { type: false, details: false, authors: false, keywords: false, files: false, conflicts: false, review: false }, current: "type", reachable: 1, base: "" }} />}
       aside={<TypeAside venue={venue} type={type} />}
     >

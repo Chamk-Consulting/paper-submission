@@ -21,7 +21,7 @@ export function WizardHeader({ right }: { initials: string; right?: ReactNode })
   );
 }
 
-export function TitleBand({ crumb, title, venue, generatedAt }: { crumb: string; title: string; venue: WizardVenue; generatedAt: string }) {
+export function TitleBand({ crumb, title, venue, generatedAt, closedOn }: { crumb: string; title: string; venue: WizardVenue; generatedAt: string; closedOn?: string }) {
   const t = useT();
   return (
     <Pin name="wz-band">
@@ -31,7 +31,7 @@ export function TitleBand({ crumb, title, venue, generatedAt }: { crumb: string;
           <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("My workspace")}</Link> / {crumb}</p>
           <h1 className="mt-2 font-serif text-[28px] font-normal leading-[1.15] sm:text-[34px]">{title} <span className="text-[#4A5263]">· {venue.acr}</span></h1>
         </div>
-        <DeadlinePill deadline={venue.deadline} generatedAt={generatedAt} />
+        <DeadlinePill deadline={venue.deadline} generatedAt={generatedAt} closedOn={closedOn} />
       </div>
     </div>
     </Pin>
