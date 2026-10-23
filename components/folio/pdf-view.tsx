@@ -40,7 +40,13 @@ export function PdfView({ url, zoom, onPages }: { url: string | null; zoom: numb
       try {
         const pdfjs = await loadPdfjs();
         if (!worker.current) worker.current = new pdfjs.PDFWorker();
-        const t = pdfjs.getDocument({ url, worker: worker.current });
+        // Fetch the whole file first (a PDF is small): no range requests against storage, and the
+        // bytes are already here when PDF.js starts.
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`PDF download failed (${res.status})`);
+        const data = new Uint8Array(await res.arrayBuffer());
+        if (cancelled) return;
+        const t = pdfjs.getDocument({ data, worker: worker.current });
         task = t;
         doc = await t.promise;
         if (cancelled) return;
@@ -72,7 +78,8 @@ export function PdfView({ url, zoom, onPages }: { url: string | null; zoom: numb
         el.scrollTop = keep * el.scrollHeight;
         setError(false);
       } catch (e) {
-        console.error("[folio] PDF preview failed", e);
+        const err = e as { name?: string; message?: string };
+        console.error(`[folio] PDF preview failed: ${err?.name ?? ""} ${err?.message ?? String(e)}`);
         if (!cancelled) setError(true);
       } finally {
         void task?.destroy();
