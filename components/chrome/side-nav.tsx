@@ -17,6 +17,7 @@ import { ORGANIZER_NAV, OWNER_ONLY } from "@/lib/site/organizer-nav";
 import { manageSlug } from "@/lib/site/chrome-mode";
 import type { Summary, VenueRef } from "@/components/chrome/summary";
 import { useEventHint } from "@/components/chrome/event-hint";
+import { isSoonHref } from "@/lib/site/coming-soon";
 
 /*
  * The workspace side menu, built from one data tree (menuTree below): groups hold pages or other groups (two levels,
@@ -33,7 +34,7 @@ const ic = (C: typeof House) => <C {...I} />;
 /* ---------------------------------------------------------------- the tree */
 
 /** `warn`: the count is amber (something due within 7 days). */
-export type Leaf = { kind: "leaf"; key: string; label: string; icon?: ReactNode; href: string; count?: number; warn?: boolean; on: boolean; isNew?: boolean };
+export type Leaf = { kind: "leaf"; key: string; label: string; icon?: ReactNode; href: string; count?: number; warn?: boolean; on: boolean; isNew?: boolean; soon?: boolean };
 /** `toggle`: the name only opens and closes the group (My work), instead of going to a page. */
 export type Group = { kind: "group"; key: string; label: string; icon: ReactNode; items: MenuNode[]; def?: string; dot?: string; toggle?: boolean };
 type MenuNode = Leaf | Group;
@@ -137,11 +138,11 @@ function useMiddle(p: string, s: Summary | null) {
   } : null;
   const account: Group = {
     kind: "group", key: "account", label: "Account", icon: ic(CircleUserRound), def: "/workspace/account/profile",
-    items: ACCOUNT_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
+    items: ACCOUNT_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p), soon: isSoonHref(href) })),
   };
   const settings: Group = {
     kind: "group", key: "settings", label: "Settings", icon: ic(Settings), def: "/workspace/settings/notifications",
-    items: SETTINGS_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
+    items: SETTINGS_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p), soon: isSoonHref(href) })),
   };
   return { myWork, events, admin, account, settings };
 }
@@ -212,7 +213,7 @@ function LeafRow({ l, depth, onPick, t }: { l: Leaf; depth: number; onPick?: () 
   return (
     <Link href={l.href} onClick={onPick} aria-current={l.on ? "page" : undefined} prefetch={depth === 0 ? null : undefined}
       className={`${rowBase} ${depth ? "h-[34px]" : "h-9"} ${l.on ? rowOn : rowOff}`}>
-      {depth > 1 ? null : l.icon}<span className="min-w-0 truncate">{t(l.label)}</span><Count n={l.count} warn={l.warn} />
+      {depth > 1 ? null : l.icon}<span className="min-w-0 truncate">{t(l.label)}</span>{l.soon ? <span className="ms-auto rounded-full bg-[#EEF0EC] px-1.5 text-[11px] font-medium text-[#4A5263] rail:hidden">{t("Soon")}</span> : null}<Count n={l.count} warn={l.warn} />
     </Link>
   );
 }

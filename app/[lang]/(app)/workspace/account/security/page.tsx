@@ -11,6 +11,8 @@ import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { getSecurity } from "@/lib/account/data";
 import { getSecurityPlus } from "@/lib/account/security-data";
 import { getT } from "@/lib/i18n/server";
+import { isSoon } from "@/lib/site/coming-soon";
+import { ComingSoonPage } from "@/components/account/coming-soon";
 import { pendingEmailChange } from "@/lib/account/security-actions";
 import { PendingEmailBanner } from "@/components/account/pending-email-banner";
 
@@ -34,6 +36,8 @@ async function Inner() {
 
 /** Canvas ST02-Security. */
 export default function Page() {
+  // Switched off for now (lib/site/coming-soon.ts); the page below is kept as is.
+  if (isSoon("security")) return <Reveal fallback={<SettingsSkeleton active="security" />}><ComingSoonPage active="security" next="/workspace/account/security" /></Reveal>;
   return (
     <Reveal fallback={<SettingsSkeleton active="security" />}>
       <Inner />

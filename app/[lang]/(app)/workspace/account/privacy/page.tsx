@@ -8,6 +8,8 @@ import { Reveal } from "@/components/motion/reveal";
 import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { getPrivacy } from "@/lib/account/data";
 import { getT } from "@/lib/i18n/server";
+import { isSoon } from "@/lib/site/coming-soon";
+import { ComingSoonPage } from "@/components/account/coming-soon";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -28,6 +30,8 @@ async function Inner() {
 
 /** Canvas ST04-Privacy. */
 export default function Page() {
+  // Switched off for now (lib/site/coming-soon.ts); the page below is kept as is.
+  if (isSoon("privacy")) return <Reveal fallback={<SettingsSkeleton active="privacy" />}><ComingSoonPage active="privacy" next="/workspace/account/privacy" /></Reveal>;
   return (
     <Reveal fallback={<SettingsSkeleton active="privacy" />}>
       <Inner />
