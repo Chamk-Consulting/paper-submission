@@ -6,7 +6,7 @@ import { movedTo, workspaceFor } from "@/lib/site/workspace-routes";
 
 // Thin edge layer: pick the language, refresh the Supabase session, keep signed-out users out of
 // private areas. Real permission checks live in server actions and RLS.
-const PROTECTED_PREFIXES = ["/workspace", "/submissions", "/submit", "/manage", "/reviews", "/settings", "/inbox", "/chair", "/search", "/admin"];
+const PROTECTED_PREFIXES = ["/workspace", "/folio", "/submissions", "/submit", "/manage", "/reviews", "/settings", "/inbox", "/chair", "/search", "/admin"];
 const AUTH_PAGES = ["/sign-in", "/sign-up", "/create-account"];
 const TWO_STEP_GUARDED = [...PROTECTED_PREFIXES, "/create-account/password", "/create-account/profile", "/welcome"];
 // Registration gate (plan B7): an account with an unfinished step (password or profile, kept in the session token as
