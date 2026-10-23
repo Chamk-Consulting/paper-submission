@@ -7,6 +7,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { loadProgram } from "@/lib/program/data";
 import { KIND_STYLE, dayKey, fmtDay, fmtTime, talkStart, tzLabel } from "@/lib/program/time";
 import { getT } from "@/lib/i18n/server";
+import { RichTextView } from "@/components/rich-text/view";
 
 /* PG01 "Full program (PDF)" and "Book of abstracts": a print-ready page (Print → Save as PDF). */
 
@@ -67,7 +68,7 @@ async function Inner({ params, searchParams }: { params: Promise<Params>; search
                           <div className="min-w-0">
                             <div className="font-semibold">{x.title}</div>
                             {x.authors ? <div className="text-[12px] italic text-[#4A5263]">{x.authors}</div> : null}
-                            {book && x.abstract ? <p className="m-0 mt-1 text-[12px] leading-[1.55]">{x.abstract}</p> : null}
+                            {book && x.abstract ? <RichTextView text={x.abstract} mode="abstract" className="m-0 mt-1 text-[12px] leading-[1.55]" /> : null}
                           </div>
                         </li>
                       ))}

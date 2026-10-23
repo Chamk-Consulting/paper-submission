@@ -8,6 +8,7 @@ import { saveReview } from "@/lib/review/actions";
 import { RECS_R2, type Rec } from "@/lib/review/shared";
 import { Pills } from "@/components/review/controls";
 import { ui } from "@/components/manage/ui";
+import { RichTextView } from "@/components/rich-text/view";
 
 type Addr = "yes" | "partly" | "no";
 const ADDR: [Addr, string][] = [["yes", "Yes"], ["partly", "Partly"], ["no", "No"]];
@@ -54,10 +55,10 @@ export function Round2Form({ id, items, initial, readOnly }: {
               <p className="m-0 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Your comment {n}", { n: i.n })}</p>
               <p className="mb-0 mt-1 whitespace-pre-line text-[15px]">{i.mine}</p>
               {i.response ? (
-                <p className="mb-0 mt-2 rounded-[4px] border-l-[3px] border-[#C9D6F5] bg-[#F7F9FE] px-3 py-2 text-[14px]">
+                <div className="mb-0 mt-2 rounded-[4px] border-l-[3px] border-[#C9D6F5] bg-[#F7F9FE] px-3 py-2 text-[14px]">
                   <span className="block text-[12px] font-medium text-[#1F47A8]">{t("Authors' response")}{i.where ? ` · ${i.where}` : ""}</span>
-                  {i.response}
-                </p>
+                  <RichTextView text={i.response} />
+                </div>
               ) : null}
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <span className="text-[13px] text-[#4A5263]">{t("Addressed?")}</span>

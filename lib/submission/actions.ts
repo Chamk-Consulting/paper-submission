@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { checkPdf } from "@/lib/submission/pdf-check";
 import { loadSubmission } from "@/lib/submission/data";
+import { mdToPlain, wordCount } from "@/lib/rich-text/plain";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string>; ok?: boolean; savedAt?: string };
 
@@ -56,8 +57,8 @@ export async function saveType(_: ActionState, fd: FormData): Promise<ActionStat
 
 /* SB02 — details + declarations. */
 const detailsSchema = z.object({
-  title: z.string().trim().min(10, "Enter the full title (at least 10 characters).").max(200, "200 characters at most."),
-  abstract: z.string().trim().min(1, "Enter the abstract.").refine((s) => s.split(/\s+/).length <= 250, "250 words at most."),
+  title: z.string().trim().refine((s) => mdToPlain(s).length >= 10, "Enter the full title (at least 10 characters).").refine((s) => s.length <= 200, "200 characters at most."),
+  abstract: z.string().trim().min(1, "Enter the abstract.").refine((s) => wordCount(s) <= 250, "250 words at most."),
   shortTitle: z.string().trim().max(120).optional(),
 });
 export async function saveDetails(_: ActionState, fd: FormData): Promise<ActionState> {

@@ -9,6 +9,7 @@ import { loadSubmission } from "@/lib/submission/data";
 import { absUrl, sendMany, textToHtml } from "@/lib/email/send";
 import { dropOptedOut } from "@/lib/email/optouts";
 import type { ActionState } from "@/lib/submission/actions";
+import { wordCount } from "@/lib/rich-text/plain";
 
 /* Server actions for the author follow-up flows (SB10–SB15, CA01). Messages are English keys, translated by the forms. */
 
@@ -98,7 +99,7 @@ async function emailCoauthors(id: string, subject: string, body: string) {
 
 const editSchema = z.object({
   title: z.string().trim().min(10, MSG.title).max(200, MSG.title),
-  abstract: z.string().trim().max(4000).refine((s) => !s || s.split(/\s+/).length <= 250, MSG.abstract),
+  abstract: z.string().trim().max(4000).refine((s) => !s || wordCount(s) <= 250, MSG.abstract),
   shortTitle: z.string().trim().max(80).optional(),
 });
 

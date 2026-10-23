@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n/client";
 import { useSchedule } from "@/components/program/program-board";
 import { fmtTime, talkStart } from "@/lib/program/time";
 import type { Session } from "@/lib/program/data";
+import { RichTextView } from "@/components/rich-text/view";
 
 /* Canvas PG02: save button + talks accordion with abstracts, authors and presenter. */
 
@@ -51,7 +52,7 @@ export function TalkList({ session, tz, slug }: { session: Session; tz: string; 
             </button>
             {on ? (
               <div className="border-t border-[#EEF0EC] px-4 pb-4 pt-3 sm:pl-[78px]">
-                <p className="m-0 max-w-[70ch] text-[14px] leading-[1.6]">{x.abstract ?? t("The abstract will appear here once the authors publish it.")}</p>
+                {x.abstract ? <RichTextView text={x.abstract} mode="abstract" className="m-0 max-w-[70ch] text-[14px] leading-[1.6]" /> : <p className="m-0 max-w-[70ch] text-[14px] leading-[1.6]">{t("The abstract will appear here once the authors publish it.")}</p>}
                 <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-[#4A5263]">
                   {slug && x.number ? <Link href={`/program/${slug}/papers/${x.number}`} className="font-semibold">{t("Paper page, slides & citation")}</Link> : null}
                   <span>{t("Paper (IEEE Xplore after the event)")}</span>

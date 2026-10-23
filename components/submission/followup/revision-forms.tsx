@@ -7,6 +7,7 @@ import type { ActionState } from "@/lib/submission/actions";
 import { ghostBtn, primaryBtn } from "@/components/submission/shell";
 import { ErrorBox, FieldError, Saved } from "@/components/submission/followup/bits";
 import { useT } from "@/lib/i18n/client";
+import { RichTextEditor } from "@/components/rich-text/editor";
 
 export type RevItem = { key: string; assignmentId: string | null; ordinal: string; no: number; quote: string; response: string; changedIn: string };
 
@@ -31,8 +32,8 @@ export function RespondForm({ id, items: initial }: { id: string; items: RevItem
               {c.response.trim().length > 5 ? <span className="rounded-[3px] bg-[#E1F3EA] px-1.5 font-mono text-[11px] uppercase text-[#14603F]">{t("Answered")}</span> : null}
             </p>
             {c.quote ? <blockquote className="m-0 mt-2 border-l-[3px] border-[#DADDE3] pl-3 text-[14px] text-[#4A5263]">{c.quote}</blockquote> : null}
-            <label htmlFor={`r-${c.key}`} className="mt-3 block text-[14px] font-semibold">{t("Your response")}</label>
-            <textarea id={`r-${c.key}`} rows={3} maxLength={6000} value={c.response} onChange={(e) => set(c.key, { response: e.target.value })} className="mt-1 w-full rounded-[4px] border border-[#B7BDC9] bg-white px-3 py-2 text-[15px]" />
+            <label id={`r-${c.key}-l`} htmlFor={`r-${c.key}`} className="mt-3 block text-[14px] font-semibold">{t("Your response")}</label>
+            <div className="mt-1"><RichTextEditor mode="full" id={`r-${c.key}`} value={c.response} maxLength={6000} minRows={4} labelledBy={`r-${c.key}-l`} onChange={(md) => set(c.key, { response: md })} /></div>
             <label htmlFor={`l-${c.key}`} className="mt-2 block text-[14px] font-semibold">{t("Changed in")}</label>
             <input id={`l-${c.key}`} maxLength={200} value={c.changedIn} placeholder={t("e.g. Sec. III-B, p. 4")} onChange={(e) => set(c.key, { changedIn: e.target.value })} className="mt-1 h-10 w-full max-w-[320px] rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[15px]" />
           </li>

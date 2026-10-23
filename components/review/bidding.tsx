@@ -7,6 +7,7 @@ import type { BidPaper } from "@/lib/review/data";
 import { paperNo } from "@/lib/review/shared";
 import Link from "@/components/site/link";
 import { Tag } from "@/components/review/parts";
+import { mdToPlain } from "@/lib/rich-text/plain";
 
 type Level = "eager" | "willing" | "not_my_area" | "conflict";
 const LEVELS: [Level, string][] = [["eager", "Eager"], ["willing", "Willing"], ["not_my_area", "Not my area"], ["conflict", "Conflict"]];
@@ -88,7 +89,7 @@ export function Bidding({ papers, open, matches = {}, hasTopics = false }: {
               <div className="flex flex-wrap items-center gap-1.5"><Tag tone="n">{paperNo(p.number)}</Tag>{p.topic ? <Tag tone="b">{p.topic}</Tag> : null}
                 {matches[p.submission_id] ? <span className="text-[12px] text-[#14603F]">✓ {t("Matches your topics: {list}", { list: matches[p.submission_id].matched.slice(0, 3).join(", ") })}</span> : null}</div>
               <h2 className="mb-0 mt-2 font-serif text-[20px] font-normal leading-[1.3]">{p.title}</h2>
-              {p.abstract ? <p className="mb-0 mt-1.5 line-clamp-3 text-[14px] text-[#4A5263]">{p.abstract}</p> : null}
+              {p.abstract ? <p className="mb-0 mt-1.5 line-clamp-3 text-[14px] text-[#4A5263]">{mdToPlain(p.abstract)}</p> : null}
               <div role="radiogroup" aria-label={t("Your bid")} className="mt-3 flex flex-wrap gap-2">
                 {LEVELS.map(([k, l]) => {
                   const on = v === k;

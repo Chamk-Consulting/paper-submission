@@ -8,6 +8,7 @@ import { asideCard, card, h2 } from "@/components/submission/shell";
 import { STEPS } from "@/lib/submission/data";
 import { Reveal } from "@/components/motion/reveal";
 import { WizardSkeleton } from "@/components/skeletons";
+import { mdToPlain, wordCount } from "@/lib/rich-text/plain";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -22,7 +23,7 @@ async function Inner({ params }: P) {
   const { sub, venue, authors, files, conflicts, done } = ctx;
   const paper = files.find((f) => f.role === "paper" && f.current);
   const extras = files.filter((f) => f.role !== "paper");
-  const words = sub.abstract?.trim() ? sub.abstract.trim().split(/\s+/).length : 0;
+  const words = wordCount(sub.abstract);
   const invites = authors.filter((a) => !a.hasAccount).length;
   const missing = STEPS.filter((s) => s.key !== "review" && !done[s.key]);
   const autoInst = new Set(authors.map((a) => a.institution).filter(Boolean)).size;
@@ -30,7 +31,7 @@ async function Inner({ params }: P) {
   const rows: [string, string, React.ReactNode][] = [
     [t("Venue & type"), "type", <span key="v"><strong>{venue.acr}</strong> · {t(sub.paperType)}{sub.track ? ` · ${t(sub.track)}` : ""}</span>],
     [t("Title"), "details", <span key="t" className="font-serif text-[17px] leading-[1.3]">{sub.title}</span>],
-    [t("Abstract"), "details", <span key="a" className="text-[#4A5263]">{(sub.abstract ?? "—").slice(0, 220)}{(sub.abstract?.length ?? 0) > 220 ? "…" : ""} <span className="font-mono text-[12px]">{t("{n} words", { n: words })}</span></span>],
+    [t("Abstract"), "details", <span key="a" className="text-[#4A5263]">{(mdToPlain(sub.abstract) || "—").slice(0, 220)}{mdToPlain(sub.abstract).length > 220 ? "…" : ""} <span className="font-mono text-[12px]">{t("{n} words", { n: words })}</span></span>],
     [t("Authors"), "authors", <ol key="au" className="m-0 list-none p-0">{authors.map((a) => <li key={a.personId}>{a.position}. {a.name}{a.corresponding ? <span className="text-[#4A5263]"> {t("(corresponding)")}</span> : null}{!a.hasAccount ? <span className="ml-1.5 font-mono text-[11px] text-[#7A4508]">{t("INVITE ON SUBMIT")}</span> : null}</li>)}</ol>],
     [t("Keywords"), "keywords", sub.keywords.length ? <span key="k">{sub.keywords.map((k, i) => <span key={k}>{i ? " · " : ""}{i === 0 ? <strong>{t(k)} {t("(main)")}</strong> : t(k)}</span>)}</span> : <span key="k0" className="text-[#B3261E]">{t("None yet")}</span>],
     [t("Files"), "files", paper ? <span key="f">{paper.name}{paper.pages != null ? ` · ${t("{n} pages", { n: paper.pages })}` : ""} <span className="ml-1 rounded-[2px] px-1.5 font-mono text-[11px]" style={{ background: paper.check.status === "failed" ? "#FDECEA" : "#E1F3EA", color: paper.check.status === "failed" ? "#B3261E" : "#14603F" }}>{paper.check.status === "failed" ? t("× PROBLEMS") : t("✓ PASSED")}</span>{extras.length ? <span className="block text-[#4A5263]">+ {extras.map((e) => e.name).join(" · ")}</span> : null}</span> : <span key="f0" className="text-[#B3261E]">{t("No PDF yet")}</span>],

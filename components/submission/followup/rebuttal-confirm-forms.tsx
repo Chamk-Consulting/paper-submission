@@ -7,6 +7,8 @@ import type { ActionState } from "@/lib/submission/actions";
 import { ghostBtn, primaryBtn } from "@/components/submission/shell";
 import { ErrorBox, Saved } from "@/components/submission/followup/bits";
 import { useT } from "@/lib/i18n/client";
+import { RichTextEditor } from "@/components/rich-text/editor";
+import { RichTextView } from "@/components/rich-text/view";
 
 const MAX = 2000;
 
@@ -32,13 +34,14 @@ export function RebuttalForm({ id, reviews, open }: { id: string; reviews: { ass
                   <span className="flex gap-1.5">{r.scores.map(([k, s]) => <span key={k} title={k} className="rounded-[3px] bg-[#EEF0EC] px-1.5 font-mono text-[12px]">{s}</span>)}</span>
                   <span aria-hidden className="ml-auto text-[#4A5263] transition-transform group-open:rotate-180">▾</span>
                 </summary>
-                <p className="mt-3 whitespace-pre-line rounded-[6px] bg-[#F7F8F6] px-3 py-2 text-[14px] leading-[1.6]">{r.review || "—"}</p>
+                {r.review ? <RichTextView text={r.review} className="mt-3 rounded-[6px] bg-[#F7F8F6] px-3 py-2 text-[14px] leading-[1.6]" /> : <p className="mt-3 rounded-[6px] bg-[#F7F8F6] px-3 py-2 text-[14px]">—</p>}
               </details>
               <div className="mt-4 flex items-baseline justify-between gap-2">
-                <label htmlFor={`rb-${r.assignmentId}`} className="font-semibold">{t("Your response to {who}", { who: r.label })}</label>
+                <label id={`rb-${r.assignmentId}-l`} htmlFor={`rb-${r.assignmentId}`} className="font-semibold">{t("Your response to {who}", { who: r.label })}</label>
                 <span className={`font-mono text-[13px] ${v.length > MAX ? "text-[#B3261E]" : "text-[#4A5263]"}`}>{t("{n} / 2,000", { n: v.length.toLocaleString(t.intl) })}</span>
               </div>
-              <textarea id={`rb-${r.assignmentId}`} rows={5} value={v} disabled={!open} onChange={(e) => setVals((s) => ({ ...s, [r.assignmentId]: e.target.value }))} className="mt-1.5 w-full rounded-[4px] border border-[#B7BDC9] bg-white px-3 py-2 text-[15px] disabled:bg-[#F7F8F6]" />
+              <div className="mt-1.5"><RichTextEditor mode="full" id={`rb-${r.assignmentId}`} value={v} disabled={!open} minRows={5} labelledBy={`rb-${r.assignmentId}-l`} invalid={v.length > MAX}
+                onChange={(md) => setVals((s) => ({ ...s, [r.assignmentId]: md }))} /></div>
             </section>
           );
         })}

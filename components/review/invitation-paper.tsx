@@ -2,6 +2,7 @@ import type { Invitation } from "@/lib/review/data";
 import { Tag } from "@/components/review/parts";
 import { daysUntil, fmtDayYear, paperNo } from "@/lib/review/shared";
 import type { T } from "@/lib/i18n/translate";
+import { RichTextView } from "@/components/rich-text/view";
 
 const BLIND: Record<string, string> = { double: "DOUBLE-BLIND", single: "SINGLE-BLIND", open: "OPEN REVIEW" };
 
@@ -21,7 +22,7 @@ export function InvitationPaper({ inv, t, intl, now, long = false }: { inv: Invi
         {blind === "double" ? `${t("Authors are hidden.")} ` : ""}
         {inv.keywords?.length ? `${t("Keywords:")} ${inv.keywords.join(", ")}` : ""}
       </p>
-      {inv.abstract ? <p className="mb-0 mt-3 whitespace-pre-line text-[15px] leading-[1.6]">{inv.abstract}</p> : null}
+      {inv.abstract ? <RichTextView text={inv.abstract} mode="abstract" className="mb-0 mt-3 text-[15px] leading-[1.6]" /> : null}
       <dl className="mb-0 mt-4 grid gap-3 border-t border-[#EEF0EC] pt-4 sm:grid-cols-3">
         <div>
           <dt className="font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Review due")}</dt>

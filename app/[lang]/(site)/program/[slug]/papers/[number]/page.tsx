@@ -10,6 +10,8 @@ import { SaveButton } from "@/components/program/session-view";
 import { CiteBox } from "@/components/attend/cite-box";
 import { Reveal } from "@/components/motion/reveal";
 import { PaperPageSkeleton } from "@/components/skeletons/attend";
+import { RichTextView } from "@/components/rich-text/view";
+import { mdToParagraph, mdToPlain, wordCount } from "@/lib/rich-text/plain";
 
 /* Canvas PP01 — public page of one paper in a published program: abstract, when & where, slides, citation. */
 
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { paper, data } = r;
   return {
     title: paper.title,
-    description: (paper.abstract ?? "").slice(0, 200) || t("{title} at {venue}", { title: paper.title, venue: data.venue.shortName ?? data.venue.name }),
+    description: mdToPlain(paper.abstract).slice(0, 200) || t("{title} at {venue}", { title: paper.title, venue: data.venue.shortName ?? data.venue.name }),
     other: { citation_title: paper.title, citation_conference_title: data.venue.name, ...(paper.authors[0] ? { citation_author: paper.authors[0].name } : {}) },
   };
 }
@@ -89,7 +91,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
         <div className="flex min-w-0 flex-col gap-[18px] lg:flex-[999_1_560px]">
           <section className={card}>
             <h2 className="m-0 text-[17px] font-semibold">{t("Abstract")}</h2>
-            <p className="mb-0 mt-2.5 max-w-[72ch] whitespace-pre-line text-[16px] leading-[1.7]">{paper.abstract ?? t("The abstract will appear here once the authors publish it.")}</p>
+            {paper.abstract ? <RichTextView text={paper.abstract} mode="abstract" className="mb-0 mt-2.5 max-w-[72ch] text-[16px] leading-[1.7]" /> : <p className="mb-0 mt-2.5 max-w-[72ch] whitespace-pre-line text-[16px] leading-[1.7]">{t("The abstract will appear here once the authors publish it.")}</p>}
             {paper.keywords.length ? <div className="mt-3.5 flex flex-wrap gap-1.5">{paper.keywords.map((k) => <span key={k} className="rounded-full bg-[#EEF0EC] px-2.5 py-[3px] text-[13px]">{k}</span>)}</div> : null}
           </section>
           <CiteBox formats={cite(paper, `${acr}${acr.includes(year) ? "" : ` ${year}`}`, year)} />

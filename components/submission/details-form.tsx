@@ -5,8 +5,9 @@ import { useActionState, useState } from "react";
 import { saveDetails, type ActionState } from "@/lib/submission/actions";
 import { card, ghostBtn, h2, primaryBtn } from "@/components/submission/shell";
 import { useT } from "@/lib/i18n/client";
+import { RichTextEditor } from "@/components/rich-text/editor";
+import { mdToPlain, wordCount } from "@/lib/rich-text/plain";
 
-const wc = (s: string) => (s.trim() ? s.trim().split(/\s+/).length : 0);
 
 /** SB02: title, abstract, short title, declarations. */
 export function DetailsForm({ id, typeLine, initial }: { id: string; typeLine: string; initial: { title: string; abstract: string; shortTitle: string; original: boolean; preprint: boolean; studentAward: boolean } }) {
@@ -15,7 +16,7 @@ export function DetailsForm({ id, typeLine, initial }: { id: string; typeLine: s
   const [title, setTitle] = useState(initial.title === "Untitled paper" ? "" : initial.title);
   const [abstract, setAbstract] = useState(initial.abstract);
   const fe = state.fieldErrors ?? {};
-  const words = wc(abstract);
+  const words = wordCount(abstract);
   const input = "w-full rounded-[4px] bg-white px-3.5 py-3 text-[17px] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]";
   const border = (bad: boolean) => ({ border: bad ? "2px solid #B3261E" : "1px solid #B7BDC9" });
 
@@ -26,14 +27,14 @@ export function DetailsForm({ id, typeLine, initial }: { id: string; typeLine: s
         <h2 className={h2}>{t("Paper details")}</h2>
         <p className="mt-1 text-[#4A5263]">{typeLine} · <Link href={`/submissions/${id}/type`} className="text-[#2F5FD0] underline">{t("Change")}</Link></p>
 
-        <div className="mt-5 flex items-baseline justify-between"><label htmlFor="sb2-title" className="font-medium">{t("Title")} <span className="text-[#B3261E]">*</span></label><span className="font-mono text-[12px] text-[#4A5263]">{title.length} / 200</span></div>
-        <textarea id="sb2-title" name="title" rows={2} maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} aria-invalid={!!fe.title || undefined} className={`${input} mt-1.5 resize-y`} style={border(!!fe.title)} />
-        <p className={`mt-1 text-[14px] ${fe.title ? "text-[#B3261E]" : "text-[#4A5263]"}`}>{fe.title ? t(fe.title) : t("Exactly as on the PDF. Sentence case.")}</p>
+        <div className="mt-5 flex items-baseline justify-between"><label id="sb2-title-l" htmlFor="sb2-title" className="font-medium">{t("Title")} <span className="text-[#B3261E]">*</span></label><span className="font-mono text-[12px] text-[#4A5263]">{mdToPlain(title).length} / 200</span></div>
+        <div className="mt-1.5"><RichTextEditor mode="inline" id="sb2-title" name="title" value={title} onChange={setTitle} maxLength={200} labelledBy="sb2-title-l" describedBy="sb2-title-h" invalid={!!fe.title} /></div>
+        <p id="sb2-title-h" className={`mt-1 text-[14px] ${fe.title ? "text-[#B3261E]" : "text-[#4A5263]"}`}>{fe.title ? t(fe.title) : t("Exactly as on the PDF. Sentence case. Italic and maths ($H_\\infty$) are kept.")}</p>
 
-        <div className="mt-5 flex items-baseline justify-between"><label htmlFor="sb2-abs" className="font-medium">{t("Abstract")} <span className="text-[#B3261E]">*</span></label><span className="font-mono text-[12px]" style={{ color: words > 250 ? "#B3261E" : "#4A5263" }}>{t("{n} / 250 words", { n: words })}</span></div>
-        <textarea id="sb2-abs" name="abstract" rows={9} value={abstract} onChange={(e) => setAbstract(e.target.value)} aria-invalid={!!fe.abstract || words > 250 || undefined} className={`${input} mt-1.5 resize-y text-[16px] leading-[1.6]`} style={border(!!fe.abstract || words > 250)} />
+        <div className="mt-5 flex items-baseline justify-between"><label id="sb2-abs-l" htmlFor="sb2-abs" className="font-medium">{t("Abstract")} <span className="text-[#B3261E]">*</span></label><span className="font-mono text-[12px]" style={{ color: words > 250 ? "#B3261E" : "#4A5263" }}>{t("{n} / 250 words", { n: words })}</span></div>
+        <div className="mt-1.5"><RichTextEditor mode="abstract" id="sb2-abs" name="abstract" value={abstract} onChange={setAbstract} minRows={9} labelledBy="sb2-abs-l" describedBy="sb2-abs-h" invalid={!!fe.abstract || words > 250} /></div>
         <div aria-hidden className="mt-1 h-1 w-full overflow-hidden rounded-sm bg-[#EEF0EC]"><div className="h-1" style={{ width: `${Math.min(100, (words / 250) * 100)}%`, background: words > 250 ? "#B3261E" : "#0E1B3D" }} /></div>
-        <p className={`mt-1 text-[14px] ${fe.abstract ? "text-[#B3261E]" : "text-[#4A5263]"}`}>{fe.abstract ? t(fe.abstract) : t("Plain text. 250 words at most.")}</p>
+        <p id="sb2-abs-h" className={`mt-1 text-[14px] ${fe.abstract ? "text-[#B3261E]" : "text-[#4A5263]"}`}>{fe.abstract ? t(fe.abstract) : t("Italic, lists and maths ($x^2$) are allowed. In the published abstract lists become plain sentences. 250 words at most.")}</p>
 
         <label htmlFor="sb2-short" className="mt-5 block font-medium">{t("Short title for the program")} <span className="font-normal text-[#4A5263]">{t("(optional)")}</span></label>
         <input id="sb2-short" name="shortTitle" maxLength={120} defaultValue={initial.shortTitle} placeholder={t("Shown in session listings if your title is long")} className={`${input} mt-1.5 h-12 py-0 text-[16px]`} style={border(false)} />

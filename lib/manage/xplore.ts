@@ -3,6 +3,7 @@
  * full upload package (metadata.xml + metadata.csv + README + final PDFs, zipped in the browser).
  * Kept papers = presented, or no-show kept by exception (H6), and not dropped.
  */
+import { mdToParagraph } from "@/lib/rich-text/plain";
 
 export type XAuthor = { name: string | null; given: string | null; family: string | null; affiliation: string | null; orcid: string | null };
 export type XPaper = {
@@ -31,7 +32,7 @@ export function xploreXml(venue: XVenue, papers: XPaper[], withPdfNames = false)
       "    <authors>",
       ...p.authors.map((a, i) => `      <author seq="${i + 1}"${a.orcid ? ` orcid="${esc(a.orcid)}"` : ""}><given>${esc(a.given)}</given><family>${esc(a.family ?? a.name)}</family><affiliation>${esc(a.affiliation)}</affiliation></author>`),
       "    </authors>",
-      p.abstract ? `    <abstract>${esc(p.abstract)}</abstract>` : "",
+      p.abstract ? `    <abstract>${esc(mdToParagraph(p.abstract))}</abstract>` : "",
       p.file_path ? `    <pdf file="${esc(withPdfNames ? `pdf/${pdfName(p)}` : p.file_path.split("/").pop())}" />` : "",
       "  </paper>",
     ].filter(Boolean).join("\n")),
@@ -53,7 +54,7 @@ export function xploreCsv(papers: XPaper[]): string {
     p.authors.map((a) => a.name ?? [a.given, a.family].filter(Boolean).join(" ")).join("; "),
     p.authors.map((a) => a.given ?? "").join("; "), p.authors.map((a) => a.family ?? a.name ?? "").join("; "),
     p.authors.map((a) => a.affiliation ?? "").join("; "), p.authors.map((a) => a.orcid ?? "").join("; "),
-    p.abstract ?? "", p.pages ?? "", p.session_code ?? "", p.file_path ? `pdf/${pdfName(p)}` : "", p.attendance === "no_show" ? "exception" : "yes",
+    mdToParagraph(p.abstract), p.pages ?? "", p.session_code ?? "", p.file_path ? `pdf/${pdfName(p)}` : "", p.attendance === "no_show" ? "exception" : "yes",
   ]);
   return "﻿" + [head, ...rows].map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";
 }

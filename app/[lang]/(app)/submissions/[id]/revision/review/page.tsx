@@ -7,6 +7,7 @@ import { loadRevisionFlow, revisionFlow } from "@/components/submission/followup
 import { RevisionSubmitForm } from "@/components/submission/followup/revision-forms";
 import { Reveal } from "@/components/motion/reveal";
 import { FlowSkeleton } from "@/components/skeletons/author";
+import { mdToPlain } from "@/lib/rich-text/plain";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -39,7 +40,7 @@ async function Inner({ params }: P) {
               {f.items.map((c) => (
                 <tr key={c.key} className="border-b border-[#EEF0EC] align-top">
                   <td className="py-2.5 pr-3"><span className="font-semibold">{c.ordinal ? `${c.ordinal}.${c.no}` : t("General")}</span> <span className="line-clamp-2 text-[#4A5263]">{c.quote}</span></td>
-                  <td className={`py-2.5 pr-3 ${c.response.trim().length > 5 ? "" : "text-[#B3261E]"}`}><span className="line-clamp-3">{c.response.trim() || t("Not answered")}</span></td>
+                  <td className={`py-2.5 pr-3 ${c.response.trim().length > 5 ? "" : "text-[#B3261E]"}`}><span className="line-clamp-3">{mdToPlain(c.response) || t("Not answered")}</span></td>
                   <td className="py-2.5">{c.changedIn || "—"}</td>
                 </tr>
               ))}

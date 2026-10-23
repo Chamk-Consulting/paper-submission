@@ -6,6 +6,7 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { useT } from "@/lib/i18n/client";
 import { archiveThread, markThreadRead, replyToThread, type AccountState } from "@/lib/account/actions";
 import type { InboxRow, ThreadMessage } from "@/lib/account/data";
+import { RichTextView } from "@/components/rich-text/view";
 
 /* Canvas IN01 — Inbox: filters + thread list on the left, the open thread on the right. */
 
@@ -139,7 +140,7 @@ export function ThreadView({ row, messages }: { row: InboxRow; messages: ThreadM
         {messages.map((m, i) => (
           <div key={m.id} className={i ? "mt-5 border-t border-[#EEF0EC] pt-5" : ""}>
             {messages.length > 1 ? <p className="mb-1.5 mt-0 text-[13px] text-[#4A5263]"><strong className="text-[#121826]">{m.is_me ? t("You") : m.sender}</strong> · <span suppressHydrationWarning>{when.full(m.created_at)}</span></p> : null}
-            {m.body.split(/\n{2,}/).map((p, k) => <p key={k} className={`${k ? "mt-3" : "mt-0"} mb-0 whitespace-pre-line`}>{p}</p>)}
+            <RichTextView text={m.body} />
           </div>
         ))}
         {cta?.cta_url ? <Link href={cta.cta_url} className="mt-4 inline-flex h-[38px] items-center rounded-[4px] bg-[#F2A93B] px-4 text-[13px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{cta.cta_label}</Link> : null}

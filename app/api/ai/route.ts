@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { extractText, getDocumentProxy } from "unpdf";
 import { createClient } from "@/lib/supabase/server";
+import { mdToPlain } from "@/lib/rich-text/plain";
 
 // AI side panel of the in-app viewer (SB05v Summary, SB05t Translate, SB05a Ask).
 // Signed-in authors/reviewers/managers of the paper only; public.use_ai enforces access and the hourly limit.
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
     return json({ error: "unreadable" }, 422);
   }
   const { data: sub } = await supabase.from("submissions").select("abstract").eq("id", b.submissionId).maybeSingle();
-  const { system, user: content } = prompt(b, pages, (sub?.abstract as string) ?? null);
+  const { system, user: content } = prompt(b, pages, sub?.abstract ? mdToPlain(sub.abstract as string) : null);
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
