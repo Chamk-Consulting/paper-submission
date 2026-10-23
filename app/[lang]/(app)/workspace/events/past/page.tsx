@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
+import { isSoon } from "@/lib/site/coming-soon";
+import { ComingSoonPage } from "@/components/account/coming-soon";
 import { EventsHead } from "@/components/workspace/events-head";
 import { PastList } from "@/components/workspace/events-lists";
 import { getEventRows } from "@/lib/workspace/events-pages";
@@ -25,5 +27,7 @@ async function Inner() {
 
 /** Events › Past events. */
 export default function Page() {
+  // Switched off for now (lib/site/coming-soon.ts); the page below is kept as is.
+  if (isSoon("pastevents")) return <Reveal fallback={null}><ComingSoonPage active="pastevents" next="/workspace/events/past" /></Reveal>;
   return <Reveal fallback={null}><Inner /></Reveal>;
 }

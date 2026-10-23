@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
+import { isSoon } from "@/lib/site/coming-soon";
+import { ComingSoonPage } from "@/components/account/coming-soon";
 import { EventsHead } from "@/components/workspace/events-head";
 import { MyEventsList } from "@/components/workspace/events-lists";
 import { byNext, getEventRows } from "@/lib/workspace/events-pages";
@@ -26,5 +28,7 @@ async function Inner() {
 
 /** Events › My events. */
 export default function Page() {
+  // Switched off for now (lib/site/coming-soon.ts); the page below is kept as is.
+  if (isSoon("myevents")) return <Reveal fallback={null}><ComingSoonPage active="myevents" next="/workspace/events/mine" /></Reveal>;
   return <Reveal fallback={null}><Inner /></Reveal>;
 }

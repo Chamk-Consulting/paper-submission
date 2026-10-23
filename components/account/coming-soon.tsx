@@ -19,6 +19,8 @@ const WHAT: Record<SoonKey, string[]> = {
   talks: ["Your talks and the sessions you chair", "Run a session: timing, attendance and presenter messages"],
   agenda: ["Your talks, sessions and deadlines in one calendar", "Month, day and list views, with clashes highlighted"],
   inbox: ["Messages from chairs and organizers", "Replies about your papers and reviews"],
+  myevents: ["Every event you take part in: as author, reviewer, chair or attendee", "Next deadline and what to do at each event"],
+  pastevents: ["Events that have ended, by year", "Certificates, final papers and receipts in one place"],
 };
 /** Page head for the My work pages (the settings pages use SettingsFrame). */
 const HEAD: Partial<Record<SoonKey, [string, string, string]>> = {
@@ -26,6 +28,8 @@ const HEAD: Partial<Record<SoonKey, [string, string, string]>> = {
   talks: ["My work", "Talks & sessions", "The talks you give and the sessions you chair."],
   agenda: ["My work", "Agenda", "Your timetable across events."],
   inbox: ["Inbox", "Inbox", "Messages from chairs, organizers and co-authors."],
+  myevents: ["Events", "My events", "Events where you have a paper, a review, a role or a registration."],
+  pastevents: ["Events", "Past events", "Events that have ended, with your certificates, final papers and receipts."],
 };
 
 async function SoonInner({ active, next }: { active: SoonKey; next: string }) {

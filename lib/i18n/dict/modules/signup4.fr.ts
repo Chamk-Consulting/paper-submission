@@ -490,4 +490,10 @@ export const signup4_fr: Record<string, string> = {
   "Describe the invoice.": "Décrivez la facture.",
   "Enter an amount.": "Saisissez un montant.",
   "Currency must be 3 letters, like EUR.": "La devise doit avoir 3 lettres, comme EUR.",
+  "Every event you take part in: as author, reviewer, chair or attendee": "Chaque événement auquel vous participez : comme auteur, relecteur, président ou participant",
+  "Next deadline and what to do at each event": "Prochaine échéance et ce qu’il reste à faire pour chaque événement",
+  "Events that have ended, by year": "Les événements terminés, par année",
+  "Certificates, final papers and receipts in one place": "Attestations, versions finales et reçus au même endroit",
+  "Events where you have a paper, a review, a role or a registration.": "Les événements où vous avez un article, une évaluation, un rôle ou une inscription.",
+  "Events that have ended, with your certificates, final papers and receipts.": "Les événements terminés, avec vos attestations, versions finales et reçus.",
 };
