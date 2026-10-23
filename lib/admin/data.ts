@@ -5,8 +5,8 @@ import { getMe, type Me } from "@/lib/auth/me";
 
 /* AD01 platform admin: loaders. Every read goes through admin_* RPCs, which refuse anyone not in platform_admins. */
 
-export type AdminTab = "support" | "venues" | "people" | "status";
-export const ADMIN_TABS: AdminTab[] = ["support", "venues", "people", "status"];
+export type AdminTab = "support" | "venues" | "people" | "status" | "payments" | "invoices" | "payouts";
+export const ADMIN_TABS: AdminTab[] = ["support", "venues", "people", "status", "payments", "invoices", "payouts"];
 
 export type SupportItem = {
   source: "contact" | "help"; id: string; reference: string; topic: string; subject: string; name: string | null; email: string | null;
@@ -59,3 +59,16 @@ export const loadAudit = (limit = 20) => rpc<AuditRow>("admin_audit_recent", { p
 export type FunnelRow = { step: string; n: number };
 /** Plan E1: sign-up steps reached in the last `days` days (counts only). */
 export const loadSignupFunnel = (days = 30) => rpc<FunnelRow>("admin_signup_funnel", { p_days: days });
+
+/* Money: every registration payment on the platform, and the platform's invoices to events. */
+export type AdminPayment = {
+  id: string; venue_slug: string; venue: string; number: string; full_name: string | null; email: string | null; reg_type: string;
+  amount_cents: number | null; currency: string; payment_method: string | null; status: "paid" | "awaiting" | "free" | "cancelled";
+  invoice_number: string | null; paid_at: string | null; created_at: string;
+};
+export type AdminInvoice = {
+  id: string; venue_id: string; venue_slug: string; venue: string; number: string; description: string; amount_cents: number | null; currency: string;
+  status: "due" | "paid" | "void"; method: string | null; issued_on: string; due_on: string; paid_at: string | null; invoice_sent_at: string | null;
+};
+export const loadAdminPayments = () => rpc<AdminPayment>("admin_payments", { p_limit: 2000 });
+export const loadAdminInvoices = () => rpc<AdminInvoice>("admin_invoices");

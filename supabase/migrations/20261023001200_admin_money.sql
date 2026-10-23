@@ -1,0 +1,4 @@
+-- Applied to the database on 2026-10-23 (migration admin_money). Kept for the record.
+-- public.admin_payments(limit), public.admin_invoices(), public.admin_create_invoice(venue, description, amount_cents, currency, due_days)
+-- and public.admin_set_invoice_status(invoice, 'paid'|'due'|'void', reason): platform admins only (private.require_admin),
+-- every change written to admin_audit (private.admin_log).

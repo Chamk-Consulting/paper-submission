@@ -3,7 +3,8 @@ import { connection } from "next/server";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
 import { AdminSkeleton } from "@/components/skeletons/admin";
-import { ADMIN_TABS, findPeople, loadAudit, loadMaintenance, loadSignupFunnel, loadOverview, loadSupport, loadVenues, requireAdmin, type AdminTab } from "@/lib/admin/data";
+import { ADMIN_TABS, findPeople, loadAdminInvoices, loadAdminPayments, loadAudit, loadMaintenance, loadSignupFunnel, loadOverview, loadSupport, loadVenues, requireAdmin, type AdminTab } from "@/lib/admin/data";
+import { AdminInvoices, AdminPayments, AdminPayouts } from "@/components/admin/money";
 import { emailConfigured } from "@/lib/email/send";
 import { AdminShell, PeopleView, StatusView, SupportView, VenuesView } from "@/components/admin/views";
 import { SignupFunnel } from "@/components/admin/signup-funnel";
@@ -27,6 +28,12 @@ async function Inner({ searchParams }: { searchParams: Promise<SP> }) {
   if (tab === "support") body = <SupportView t={t} items={await loadSupport()} selected={sp.id ?? null} now={now} />;
   else if (tab === "venues") body = <VenuesView t={t} venues={await loadVenues()} requireApproval={overview.require_venue_approval} />;
   else if (tab === "people") body = <PeopleView t={t} q={sp.q ?? ""} people={await findPeople(sp.q ?? "")} />;
+  else if (tab === "payments") body = <AdminPayments rows={await loadAdminPayments()} />;
+  else if (tab === "invoices") {
+    const [rows, venues] = await Promise.all([loadAdminInvoices(), loadVenues()]);
+    body = <AdminInvoices rows={rows} venues={venues.map((v) => ({ id: v.id, name: v.short_name || v.name })).sort((a, b) => a.name.localeCompare(b.name))} today={new Date(now).toISOString().slice(0, 10)} />;
+  }
+  else if (tab === "payouts") body = <AdminPayouts />;
   else {
     const [windows, audit, funnel] = await Promise.all([loadMaintenance(), loadAudit(20), loadSignupFunnel(30)]);
     body = <><StatusView t={t} windows={windows} audit={audit} emailOn={emailConfigured()} aiOn={!!process.env.ANTHROPIC_API_KEY} now={now} /><SignupFunnel t={t} rows={funnel} /></>;

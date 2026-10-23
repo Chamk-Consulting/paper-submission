@@ -2,7 +2,7 @@
 
 import {
   Award, Bell, BookOpen, BookOpenCheck, Briefcase, CalendarClock, CalendarCog, CalendarRange,
-  ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, ReceiptText, Wallet, FileCheck,
+  ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, Landmark, ReceiptText, Wallet, FileCheck,
   FileStack, FileText, Files, Filter, Gavel, History, House, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
   Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
   CalendarDays, CircleUserRound, Search, Send, Settings, Settings2, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
@@ -134,6 +134,9 @@ function useMiddle(p: string, s: Summary | null) {
     items: [
       { kind: "leaf", key: "dash", label: "Dashboard", icon: ic(LayoutDashboard), href: "/admin", on: p.startsWith("/admin") },
       { kind: "leaf", key: "funnel", label: "Sign-up funnel", icon: ic(Filter), href: "/admin#signups", on: false },
+      { kind: "leaf", key: "a-payments", label: "Payments", icon: ic(Wallet), href: "/admin?tab=payments", on: false },
+      { kind: "leaf", key: "a-invoices", label: "Invoices", icon: ic(ReceiptText), href: "/admin?tab=invoices", on: false },
+      { kind: "leaf", key: "a-payouts", label: "Payouts", icon: ic(Landmark), href: "/admin?tab=payouts", on: false },
     ],
   } : null;
   const account: Group = {

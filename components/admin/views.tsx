@@ -23,6 +23,7 @@ function Tag({ t, k }: { t: TT; k: string }) {
 export function AdminShell({ t, name, tab, overview, children }: { t: TT; name: string; tab: AdminTab; overview: Overview; children: ReactNode }) {
   const nav: [AdminTab, string, number | null][] = [
     ["support", "Support inbox", overview.support_new], ["venues", "Venue approvals", overview.venues_pending], ["people", "Find a person", null], ["status", "System status", null],
+    ["payments", "Payments", null], ["invoices", "Invoices", null], ["payouts", "Payouts", null],
   ];
   return (
     <div className="flex min-h-[calc(100dvh-60px)] flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">

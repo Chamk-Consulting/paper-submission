@@ -120,3 +120,26 @@ export async function cancelMaintenance(_: AdminState, fd: FormData): Promise<Ad
   if (error) return fail(error.message);
   return done("Maintenance cancelled.");
 }
+
+/* Money: issue a platform invoice to an event; mark one paid (bank transfer), due again, or void. */
+const invoiceSchema = z.object({
+  venue: uuid, description: z.string().trim().min(2, "Describe the invoice.").max(200),
+  amount: z.coerce.number().min(0, "Enter an amount.").max(1_000_000), currency: z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, "Currency must be 3 letters, like EUR."),
+  due: z.coerce.number().int().min(0).max(120).default(14),
+});
+export async function createPlatformInvoice(_: AdminState, fd: FormData): Promise<AdminState> {
+  const p = invoiceSchema.safeParse({ venue: fd.get("venue"), description: fd.get("description"), amount: fd.get("amount"), currency: fd.get("currency") || "EUR", due: fd.get("due") || 14 });
+  if (!p.success) return { error: p.error.issues[0]?.message ?? "Check the form." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_create_invoice", { p_venue: p.data.venue, p_description: p.data.description, p_amount_cents: Math.round(p.data.amount * 100), p_currency: p.data.currency, p_due_days: p.data.due });
+  if (error) return fail(error.message);
+  return done("Invoice issued. The event owner sees it under Event settings › Invoices.");
+}
+export async function setPlatformInvoiceStatus(_: AdminState, fd: FormData): Promise<AdminState> {
+  const id = String(fd.get("id") ?? ""), status = String(fd.get("status") ?? ""), reason = String(fd.get("reason") ?? "").trim().slice(0, 500) || null;
+  if (!uuid.safeParse(id).success || !["paid", "due", "void"].includes(status)) return { error: "Bad request." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_invoice_status", { p_invoice: id, p_status: status, p_reason: reason });
+  if (error) return fail(error.message);
+  return done(status === "paid" ? "Marked as paid." : status === "void" ? "Invoice cancelled." : "Marked as due again.");
+}
