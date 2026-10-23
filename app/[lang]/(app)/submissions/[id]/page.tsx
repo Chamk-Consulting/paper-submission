@@ -37,6 +37,11 @@ const ACTION: Record<string, string> = {
   "submission.submitted": "Submitted. Receipt recorded for all authors.",
   "submission.updated": "Submission updated before the deadline.",
   "submission.withdrawn": "Withdrawn by the authors.",
+  "submission.review_started": "Review started. Reviewers were assigned.",
+  "submission.reviews_complete": "All reviews received.",
+  "submission.decision_released": "Decision released.",
+  "submission.final_submitted": "Final version submitted.",
+  "submission.presented": "Presented at the conference.",
 };
 const shortAt = (iso: string, intl: string) => new Date(iso).toLocaleDateString(intl, { day: "numeric", month: "short", timeZone: "UTC" });
 

@@ -512,4 +512,9 @@ export const signup4_it: Record<string, string> = {
   "{names} haven't created an account yet. They can still be listed; they need one to register or present.": "{names} non hanno ancora creato un account. Restano nell’elenco; ne serve uno per iscriversi o presentare.",
   "Download decision letter (PDF)": "Scarica la lettera di decisione (PDF)",
   "The paper is accepted: withdrawing removes it from the program and the proceedings, and the organizers are told at once.": "L’articolo è accettato: ritirarlo lo toglie dal programma e dagli atti, e gli organizzatori vengono avvisati subito.",
+  "Review started. Reviewers were assigned.": "Revisione iniziata. I revisori sono stati assegnati.",
+  "All reviews received.": "Tutte le revisioni ricevute.",
+  "Decision released.": "Decisione pubblicata.",
+  "Final version submitted.": "Versione finale inviata.",
+  "Presented at the conference.": "Presentato alla conferenza.",
 };
