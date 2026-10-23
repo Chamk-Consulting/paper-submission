@@ -13,7 +13,7 @@ export const fmtDay = (iso: string, tz: string, intl = "en-GB") => weekdayDate(n
 export function tzLabel(tz: string, at = new Date()) {
   try {
     const part = new Intl.DateTimeFormat("en-GB", { timeZone: tz, timeZoneName: "shortOffset" }).formatToParts(at).find((p) => p.type === "timeZoneName")?.value;
-    return (part ?? "UTC").replace("GMT", "UTC");
+    return (part ?? "UTC").replace("GMT", "UTC").replace(/^UTC[+-]0$/, "UTC");
   } catch { return "UTC"; }
 }
 
