@@ -14,8 +14,9 @@ const ext = (n: string) => (n.split(".").pop() ?? "").toUpperCase().slice(0, 4);
 const ZOOMS = [50, 67, 80, 100, 125, 150, 200];
 
 async function loadPdfjs() {
-  const pdfjs = await import("pdfjs-dist");
-  if (!pdfjs.GlobalWorkerOptions.workerSrc) pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+  // Legacy build: same API, with polyfills (e.g. Uint8Array.toHex) for browsers a year or two old.
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  if (!pdfjs.GlobalWorkerOptions.workerSrc) pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/legacy/build/pdf.worker.min.mjs", import.meta.url).toString();
   return pdfjs;
 }
 

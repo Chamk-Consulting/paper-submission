@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy, PDFWorker } from "pdfjs-dist";
 
 async function loadPdfjs() {
-  const pdfjs = await import("pdfjs-dist");
-  if (!pdfjs.GlobalWorkerOptions.workerSrc) pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+  // Legacy build: same API, with polyfills (e.g. Uint8Array.toHex) for browsers a year or two old.
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  if (!pdfjs.GlobalWorkerOptions.workerSrc) pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/legacy/build/pdf.worker.min.mjs", import.meta.url).toString();
   return pdfjs;
 }
 
