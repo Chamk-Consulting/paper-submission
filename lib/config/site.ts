@@ -1,3 +1,5 @@
+import { movedTo } from "@/lib/site/workspace-routes";
+
 // Single place for everything that depends on the product domain.
 // When the domain is bought: set NEXT_PUBLIC_SITE_URL, EMAIL_FROM_AUTH, EMAIL_FROM_EVENTS and
 // SUPPORT_EMAIL in Vercel (production + staging). Nothing else in the code names the domain.
@@ -50,5 +52,9 @@ export function absoluteUrl(path: string): string {
 /** Only allow same-site relative paths as post-login destinations (prevents open redirects). */
 export function safeNext(next: string | null | undefined, fallback = "/workspace"): string {
   if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return fallback;
-  return next;
+  // an old address (/reviews, /settings/…) goes straight to its new home: server redirects skip proxy.ts
+  const cut = next.search(/[?#]/);
+  const [path, rest] = cut < 0 ? [next, ""] : [next.slice(0, cut), next.slice(cut)];
+  const moved = movedTo(path);
+  return moved ? moved + rest : next;
 }
