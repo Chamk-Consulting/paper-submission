@@ -87,6 +87,6 @@ export type { Vars, T } from "@/lib/i18n/t-core";
 import { makeTFrom, type T } from "@/lib/i18n/t-core";
 
 /** Server side only: the browser receives just the current language's table (see I18nProvider). */
-export function makeT(locale: Locale): T {
-  return makeTFrom(DICTS[locale] ?? {});
+export function makeT(locale: Locale, brand?: string): T {
+  return makeTFrom(DICTS[locale] ?? {}, brand);
 }

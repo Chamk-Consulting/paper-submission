@@ -14,7 +14,7 @@ export type AdminState = { error?: string; ok?: string; at?: number };
 const done = (ok: string): AdminState => { revalidatePath("/[lang]/admin", "page"); return { ok, at: Date.now() }; };
 const fail = (msg?: string): AdminState => {
   if (!msg) return { error: "Something went wrong. Please try again." };
-  if (/platform admins only|42501/i.test(msg)) return { error: "Only Plenary admins can do this." };
+  if (/platform admins only|42501/i.test(msg)) return { error: "Only platform admins can do this." };
   if (/give a reason/i.test(msg)) return { error: "Give a reason — the person can see it." };
   if (/lock your own/i.test(msg)) return { error: "You can’t lock your own account." };
   if (/write a reply/i.test(msg)) return { error: "Write a reply first." };
@@ -67,7 +67,7 @@ export async function decideVenue(_: AdminState, fd: FormData): Promise<AdminSta
     ? await supabase.rpc("admin_approve_venue", { p_venue: p.data.id, p_note: p.data.note || null })
     : await supabase.rpc("admin_request_venue_info", { p_venue: p.data.id, p_message: p.data.note ?? "" });
   if (error) return fail(error.message);
-  return done(p.data.intent === "approve" ? "Approved. The owner was told." : "Sent to the owner’s Plenary inbox.");
+  return done(p.data.intent === "approve" ? "Approved. The owner was told." : "Sent to the owner’s inbox.");
 }
 
 export async function setRequireApproval(_: AdminState, fd: FormData): Promise<AdminState> {

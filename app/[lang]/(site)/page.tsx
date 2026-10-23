@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { OpenCallsStrip } from "@/components/landing/open-calls-strip";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
+import { BrandName } from "@/lib/i18n/client";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: { absolute: `Plenary — ${t("conference submission and review")}` } };
+  return { title: { absolute: `${t.brand} — ${t("conference submission and review")}` } };
 }
 
 const wrap = "mx-auto max-w-[1280px] px-6";
@@ -123,7 +124,7 @@ export default async function Landing() {
                 <tr className="bg-[#0E1B3D] text-left text-[#F5F6F3]">
                   <th scope="col" className="px-5 py-3.5 font-mono text-[12px] font-medium uppercase tracking-[0.06em]">{t("Moment")}</th>
                   <th scope="col" className="px-5 py-3.5 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#B9C3DA]">{t("Legacy portal")}</th>
-                  <th scope="col" className="px-5 py-3.5 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">Plenary</th>
+                  <th scope="col" className="px-5 py-3.5 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]"><BrandName /></th>
                 </tr>
               </thead>
               <tbody>

@@ -1,19 +1,21 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import QRCode from "qrcode";
 import { getMe } from "@/lib/auth/me";
+import { getBrand } from "@/lib/config/brand";
 
 // PR09 "Save badge" as PDF: the signed-in person's Plenary ID card (business-card size, 85 × 55 mm).
 export async function GET() {
+  const brand = await getBrand();
   const me = await getMe();
   if (!me) return new Response("Sign in first", { status: 401 });
   const p = me.person;
   const id = p?.plenary_id;
-  if (!id) return new Response("Your Plenary ID is being issued — try again in a moment.", { status: 404 });
+  if (!id) return new Response(`Your ${brand} ID is being issued — try again in a moment.`, { status: 404 });
 
   const mm = (n: number) => (n * 72) / 25.4;
   const W = mm(85), H = mm(55);
   const doc = await PDFDocument.create();
-  doc.setTitle(`Plenary ID ${id}`);
+  doc.setTitle(`${brand} ID ${id}`);
   const page = doc.addPage([W, H]);
   const serif = await doc.embedFont(StandardFonts.TimesRoman);
   const sans = await doc.embedFont(StandardFonts.Helvetica);
@@ -31,7 +33,7 @@ export async function GET() {
   page.drawRectangle({ x: 0, y: H - mm(2.2), width: W, height: mm(2.2), color: navy });
   page.drawCircle({ x: mm(7), y: H - mm(8), size: mm(2.2), borderColor: ink, borderWidth: 0.8 });
   page.drawCircle({ x: mm(7), y: H - mm(8), size: mm(0.6), color: saffron });
-  page.drawText("Plenary", { x: mm(10.5), y: H - mm(9.3), size: 11, font: serif, color: ink });
+  page.drawText(`${brand}`, { x: mm(10.5), y: H - mm(9.3), size: 11, font: serif, color: ink });
 
   const name = (p.badge_name || p.paper_name || p.display_name || me.email).trim();
   page.drawText(fit(name, serif, 13, mm(48)), { x: mm(6), y: H - mm(19), size: 13, font: serif, color: ink });

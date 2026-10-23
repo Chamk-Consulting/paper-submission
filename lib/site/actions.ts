@@ -11,6 +11,8 @@ import { sendEmail, absUrl } from "@/lib/email/send";
 import { site } from "@/lib/config/site";
 import { contact, CONTACT_TOPICS, SALES_KINDS } from "@/lib/config/contact";
 import { turnstileOk } from "@/lib/site/turnstile";
+import { getBrand } from "@/lib/config/brand";
+import { brandify } from "@/lib/i18n/t-core";
 
 export type ContactState = { fieldErrors?: Record<string, string[] | undefined>; message?: string };
 
@@ -47,7 +49,7 @@ async function sendWithAttachments(m: { to: string; replyTo: string; subject: st
   await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: site.email.eventsFrom, to: [m.to], reply_to: m.replyTo, subject: m.subject, text: m.text, attachments }),
+    body: JSON.stringify({ from: brandify(site.email.eventsFrom, await getBrand()), to: [m.to], reply_to: m.replyTo, subject: brandify(m.subject, await getBrand()), text: m.text, attachments }),
     signal: AbortSignal.timeout(15000),
   }).catch(() => null);
 }

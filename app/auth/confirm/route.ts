@@ -6,6 +6,7 @@ import { safeNext } from "@/lib/config/site";
 import { markRecovery } from "@/lib/auth/recovery-cookie";
 import { refuseIfLocked } from "@/lib/auth/lock-check";
 import { makeT } from "@/lib/i18n/translate";
+import { getBrand } from "@/lib/config/brand";
 import { LOCALE_COOKIE, isLocale, negotiate, type Locale } from "@/lib/i18n/config";
 
 // Handles every email link: sign-up confirmation, password recovery, magic link, email change.
@@ -37,18 +38,18 @@ const COPY: Record<string, { kicker: string; title: string; lead: string; button
   email_change: { kicker: "Change email", title: "Confirm your new email", lead: "Confirm this change to your Plenary account email.", button: "Confirm the change" },
 };
 
-function page(tokenHash: string, type: string, next: string, locale: Locale) {
+function page(tokenHash: string, type: string, next: string, locale: Locale, brand: string) {
   const raw = COPY[type] ?? COPY.email;
-  const t = makeT(locale);
+  const t = makeT(locale, brand);
   const c = { kicker: t(raw.kicker), title: t(raw.title), lead: t(raw.lead), button: t(raw.button) };
   const sans = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
   const mono = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
   const html = `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><meta name="referrer" content="same-origin"><title>${esc(c.title)} · Plenary</title></head>
+<meta name="robots" content="noindex"><meta name="referrer" content="same-origin"><title>${esc(c.title)} · ${esc(brand)}</title></head>
 <body style="margin:0;min-height:100vh;background:#EEF0EC;font:16px/1.55 ${sans};color:#121826">
 <main style="max-width:480px;margin:0 auto;padding:56px 16px">
 <div style="background:#fff;border:1px solid #DADDE3;border-radius:10px;padding:32px 28px">
-<p style="margin:0;font:22px/1 Georgia,'Times New Roman',serif">Plenary</p>
+<p style="margin:0;font:22px/1 Georgia,'Times New Roman',serif">${esc(brand)}</p>
 <p style="margin:24px 0 0;font:500 11px/1.4 ${mono};letter-spacing:.08em;text-transform:uppercase;color:#18744F">${esc(c.kicker)}</p>
 <h1 style="margin:6px 0 0;font:400 30px/1.15 Georgia,'Times New Roman',serif">${esc(c.title)}</h1>
 <p style="margin:8px 0 0;color:#4A5263">${esc(c.lead)}</p>
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
       if (data.user) return NextResponse.redirect(new URL(destFor(type, next), origin));
     }
     const pref = request.cookies.get(LOCALE_COOKIE)?.value;
-    return page(tokenHash, type, next, isLocale(pref) ? pref : negotiate(request.headers.get("accept-language")));
+    return page(tokenHash, type, next, isLocale(pref) ? pref : negotiate(request.headers.get("accept-language")), await getBrand());
   }
 
   if (code) {

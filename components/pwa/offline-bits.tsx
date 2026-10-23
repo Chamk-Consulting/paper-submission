@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PAGE_CACHE } from "@/components/pwa/constants";
+import { useBrand } from "@/lib/i18n/client";
 
 export function RetryButton({ label }: { label: string }) {
   return (
@@ -13,6 +14,7 @@ export function RetryButton({ label }: { label: string }) {
 
 /** Lists public pages the service worker saved, so people can still read venues and deadlines offline. */
 export function SavedPages({ title, empty }: { title: string; empty: string }) {
+  const brand = useBrand();
   const [pages, setPages] = useState<{ href: string; label: string }[] | null>(null);
   useEffect(() => {
     let alive = true;
@@ -27,8 +29,8 @@ export function SavedPages({ title, empty }: { title: string; empty: string }) {
         const list = await Promise.all(keys.slice(0, 12).map(async (r) => {
           const href = new URL(r.url).pathname;
           const html = await (await cache.match(r))?.text().catch(() => "") ?? "";
-          const title = html.match(/<title>([^<]*)<\/title>/)?.[1]?.replace(/\s*·\s*Plenary\s*$/, "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "’").trim();
-          return { href, label: title || (href === "/" ? "Plenary" : href) };
+          const title = html.match(/<title>([^<]*)<\/title>/)?.[1]?.replace(/\s*·\s*[^·]+$/, "").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "’").trim();
+          return { href, label: title || (href === "/" ? brand : href) };
         }));
         if (alive) setPages(list.slice(0, 12));
       } catch {

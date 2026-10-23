@@ -1,5 +1,7 @@
 import "server-only";
 import { site } from "@/lib/config/site";
+import { getBrand } from "@/lib/config/brand";
+import { brandify } from "@/lib/i18n/t-core";
 
 /*
  * Outgoing email through Resend's HTTP API. Configure RESEND_API_KEY in Vercel (never in code or chat).
@@ -26,15 +28,18 @@ export async function sendEmail(m: Mail): Promise<MailResult> {
     return { ok: true, id: "test-address" };
   }
   if (real.length < to.length) m = { ...m, to: real };
+  // The product name from the database, in the sender name, subject and body (organizers' "plenary session" is kept).
+  const brand = await getBrand();
+  m = { ...m, subject: brandify(m.subject, brand), text: brandify(m.text, brand), html: m.html ? brandify(m.html, brand) : m.html, from: brandify(m.from ?? site.email.eventsFrom, brand) };
   const u = m.unsubscribeUrl;
   const text = u ? `${m.text}\n\n—\nStop these emails: ${u}` : m.text;
-  const html = m.html ? (u ? `${m.html}${unsubFooter(u)}` : m.html) : textToHtml(m.text, u);
+  const html = brandify(m.html ? (u ? `${m.html}${unsubFooter(u)}` : m.html) : textToHtml(m.text, u), brand);
   const headers = u ? { "List-Unsubscribe": `<${u.replace("/unsubscribe/", "/api/unsubscribe/")}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined;
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: m.from ?? site.email.eventsFrom, to: Array.isArray(m.to) ? m.to : [m.to], subject: m.subject, text, html, reply_to: m.replyTo, headers }),
+      body: JSON.stringify({ from: m.from, to: Array.isArray(m.to) ? m.to : [m.to], subject: m.subject, text, html, reply_to: m.replyTo, headers }),
       signal: AbortSignal.timeout(10000),
     });
     const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string };

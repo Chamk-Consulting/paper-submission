@@ -8,6 +8,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "../globals.css";
 import { site } from "@/lib/config/site";
+import { getBrand } from "@/lib/config/brand";
 import { LOCALES, isLocale } from "@/lib/i18n/config";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale, getT } from "@/lib/i18n/server";
@@ -27,18 +28,19 @@ export function generateStaticParams() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
+  const name = t.brand;
   return {
     metadataBase: new URL(site.url),
-    title: { default: `${site.name} — ${t("paper submission & review")}`, template: `%s · ${site.name}` },
+    title: { default: `${name} — ${t("paper submission & review")}`, template: `%s · ${name}` },
     description: t("Submit, review and run conferences, workshops and journals."),
     alternates: { languages: Object.fromEntries(LOCALES.map((l) => [l, `/${l}`])) },
-    applicationName: site.name,
+    applicationName: name,
     manifest: "/manifest.webmanifest",
     icons: {
       icon: [{ url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" }, { url: "/icons/icon.svg", type: "image/svg+xml" }],
       apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
     },
-    appleWebApp: { capable: true, title: site.name, statusBarStyle: "default" },
+    appleWebApp: { capable: true, title: name, statusBarStyle: "default" },
     formatDetection: { telephone: false },
   };
 }
@@ -54,7 +56,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  const locale = await getLocale();
+  const [locale, brand] = await Promise.all([getLocale(), getBrand()]);
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -65,7 +67,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       </head>
       <body className="min-h-dvh bg-[#F5F6F3] antialiased">
         <Suspense fallback={null}><NavProgress /></Suspense>
-        <I18nProvider locale={locale} dict={DICTS[locale]}>
+        <I18nProvider locale={locale} dict={DICTS[locale]} brand={brand}>
           {children}
           <PwaLayer />
           <CookieConsent />

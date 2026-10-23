@@ -17,13 +17,13 @@ export default async function CookiePolicy() {
   const t = await getT();
   const ref = (() => { try { return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").hostname.split(".")[0]; } catch { return "<project>"; } })();
   const necessary: Row[] = [
-    { name: `sb-${ref}-auth-token`, purpose: t("Keeps you signed in and secures every request you make."), duration: t("Until you sign out (at most 400 days)"), who: "Plenary (Supabase)" },
-    { name: "pl_recovery", purpose: t("Proves you confirmed a password-reset code, so only you can set the new password."), duration: t("15 minutes"), who: "Plenary" },
-    { name: "pl_consent", purpose: t("Remembers the cookie choice you make here."), duration: t("6 months"), who: "Plenary" },
-    { name: t("Offline storage (service worker)"), purpose: t("App files and public pages you opened (venues, deadlines), so Plenary opens fast and works offline. Never your papers, drafts or workspace."), duration: t("Until the next app update or you clear site data"), who: "Plenary" },
+    { name: `sb-${ref}-auth-token`, purpose: t("Keeps you signed in and secures every request you make."), duration: t("Until you sign out (at most 400 days)"), who: `${t.brand} (Supabase)` },
+    { name: "pl_recovery", purpose: t("Proves you confirmed a password-reset code, so only you can set the new password."), duration: t("15 minutes"), who: t.brand },
+    { name: "pl_consent", purpose: t("Remembers the cookie choice you make here."), duration: t("6 months"), who: t.brand },
+    { name: t("Offline storage (service worker)"), purpose: t("App files and public pages you opened (venues, deadlines), so Plenary opens fast and works offline. Never your papers, drafts or workspace."), duration: t("Until the next app update or you clear site data"), who: t.brand },
   ];
   const preferences: Row[] = [
-    { name: "NEXT_LOCALE", purpose: t("Remembers the language you chose."), duration: t("1 year with your consent; otherwise until you close the browser"), who: "Plenary" },
+    { name: "NEXT_LOCALE", purpose: t("Remembers the language you chose."), duration: t("1 year with your consent; otherwise until you close the browser"), who: t.brand },
     { name: "plenary.installDismissed", purpose: t("Remembers that you closed the “Install Plenary” invitation."), duration: t("Until you clear site data"), who: t("Plenary (local storage)") },
     { name: "plenary.passkeyOffer", purpose: t("Remembers that you don’t want to be offered a passkey again."), duration: t("Until you clear site data"), who: t("Plenary (local storage)") },
   ];

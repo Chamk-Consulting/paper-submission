@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { MUTED, NAVY, PDFDocument, SAFFRON, fonts, logo, pdfResponse, wrap } from "@/lib/manage/orgtools-pdf";
+import { getBrand } from "@/lib/config/brand";
 
 /* EM34 — award certificate: one landscape page per author. Authors of the winning paper and organizers, once announced. */
 
 type Cert = { award: string; venue: string; venue_short: string | null; starts_on: string | null; ends_on: string | null; title: string; number: number; authors: string[]; announced_at: string };
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const brand = await getBrand();
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return new Response("Not found", { status: 404 });
   const supabase = await createClient();
@@ -32,7 +34,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     y = wrap(page, `"${c.title}"`, { x: 100, y: y - 8, width: 642, size: 18, font: serif, center: true, gap: 6 });
     wrap(page, c.authors.join(", "), { x: 100, y: y - 4, width: 642, size: 11, font: sans, color: MUTED, center: true });
     wrap(page, `${c.venue}${when ? ` - ${when}` : ""}`, { x: 60, y: 92, width: 722, size: 11, font: sans, color: MUTED, center: true });
-    wrap(page, `Paper #${String(c.number).padStart(4, "0")} - announced ${c.announced_at.slice(0, 10)} - issued by Plenary`, { x: 60, y: 72, width: 722, size: 9, font: sans, color: MUTED, center: true });
+    wrap(page, `Paper #${String(c.number).padStart(4, "0")} - announced ${c.announced_at.slice(0, 10)} - issued by ${brand}`, { x: 60, y: 72, width: 722, size: 9, font: sans, color: MUTED, center: true });
   }
   return pdfResponse(await doc.save(), `certificate-${String(c.number).padStart(4, "0")}.pdf`);
 }

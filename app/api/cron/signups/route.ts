@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/send";
 import { site } from "@/lib/config/site";
+import { getBrand } from "@/lib/config/brand";
 
 /*
  * Daily sign-up housekeeping (plan C5 + E3), Vercel cron:
@@ -13,6 +14,7 @@ export const maxDuration = 60;
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { "cache-control": "no-store" } });
 
 export async function GET(req: Request) {
+  const brand = await getBrand();
   const secret = process.env.CRON_SECRET;
   if (!secret) return json({ error: "not_configured" }, 503);
   if (req.headers.get("authorization") !== `Bearer ${secret}`) return json({ error: "unauthorized" }, 401);
@@ -38,7 +40,7 @@ export async function GET(req: Request) {
   if (codeFailed >= 20 && codeFailed > (c.confirmed ?? 0) * 3) alerts.push(`${codeFailed} wrong or expired codes in 24 h (${c.confirmed ?? 0} confirmed).`);
   if (alerts.length) {
     console.error("[alert] sign-up:", alerts.join(" "));
-    if (site.supportEmail) await sendEmail({ to: site.supportEmail, subject: "Plenary sign-up alert", text: `Daily sign-up check:\n\n${alerts.join("\n")}\n\nCheck Supabase Auth logs and the email provider.` });
+    if (site.supportEmail) await sendEmail({ to: site.supportEmail, subject: `${brand} sign-up alert`, text: `Daily sign-up check:\n\n${alerts.join("\n")}\n\nCheck Supabase Auth logs and the email provider.` });
   }
 
   return json({ reminded, deleted: delErr ? null : deleted, funnel: c, alerts: alerts.length });

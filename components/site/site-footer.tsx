@@ -10,6 +10,7 @@ import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 import { LanguageSelect } from "@/components/i18n/language-select";
 import { useSummary } from "@/components/chrome/summary";
 import { barePath } from "@/lib/site/chrome-mode";
+import { BrandName } from "@/lib/i18n/client";
 
 /*
  * The one public footer (review 22 Oct): full on marketing/help/legal pages, a slim bar with "More" on venue and
@@ -72,7 +73,7 @@ function Brand() {
   const s = useSummary();
   return (
     <div className="min-w-0">
-      <div className="font-serif text-[22px] leading-none text-[#F5F6F3]">Plenary</div>
+      <div className="font-serif text-[22px] leading-none text-[#F5F6F3]"><BrandName /></div>
       <p className="mb-0 mt-2 max-w-[34ch] text-[13px] leading-[1.55] text-[#B9C3DA]">{t("Conference submission & review, built for researchers.")}</p>
       {s?.signedIn ? (
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px]">
@@ -131,7 +132,7 @@ function BottomBar() {
   const year = new Date().getFullYear();
   return (
     <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-[#24335C] pt-5 text-[12px] text-[#8F9CC0]">
-      <span>© {year} Plenary · {t("Data hosted in the EU (Frankfurt) · GDPR")}</span>
+      <span>© {year} <BrandName /> · {t("Data hosted in the EU (Frankfurt) · GDPR")}</span>
       <span className="flex flex-wrap items-center gap-3">
         <LanguageSelect id="footer-lang" tone="dark" />
         <BackToTop />
@@ -182,7 +183,7 @@ export function SiteFooter({ size = "full" }: { size?: FooterSize }) {
             <Link href="/help" className={link}>{t("Help")}</Link>
             <Link href="/contact" className={link}>{t("Contact")}</Link>
             <Link href="/legal/privacy" className={link}>{t("Privacy")}</Link>
-            <span className="text-[#8F9CC0]">© {new Date().getFullYear()} Plenary</span>
+            <span className="text-[#8F9CC0]">© {new Date().getFullYear()} <BrandName /></span>
           </span>
         </div>
       </footer>
@@ -194,7 +195,7 @@ export function SiteFooter({ size = "full" }: { size?: FooterSize }) {
       <footer className={shell}>
         <div className={`${inner} flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4 text-[13px]`}>
           <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="font-serif text-[20px] leading-none text-[#F5F6F3]">Plenary</span>
+            <span className="font-serif text-[20px] leading-none text-[#F5F6F3]"><BrandName /></span>
             <StatusPill compact />
             {tz ? <span className="text-[12px] text-[#8F9CC0]">{t("Times shown in your time zone ({tz})", { tz })}</span> : null}
           </span>

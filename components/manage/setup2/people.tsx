@@ -50,7 +50,7 @@ export function PeopleTable({ slug, rows, canMessage, canViewAs }: { slug: strin
   }, [rows, f, q]);
   const filters: [F, string][] = [["all", "Everyone"], ["aes", "AEs"], ["reviewers", "Reviewers"], ["authors", "Authors"], ["session", "Session chairs"], ["staff", "Staff"]];
   const exportCsv = () => {
-    download(`${slug}-people.csv`, csv([["Name", "Plenary ID", "Email", "Institution", "Roles", "Papers", "Reviews"], ...shown.map((p) => [p.name, p.plenaryId, p.email, p.institution, p.roles.join(" "), p.papers, p.reviews])]));
+    download(`${slug}-people.csv`, csv([["Name", t("Plenary ID"), "Email", "Institution", "Roles", "Papers", "Reviews"], ...shown.map((p) => [p.name, p.plenaryId, p.email, p.institution, p.roles.join(" "), p.papers, p.reviews])]));
     start(async () => { await logOrganizerEvent(slug, "data.export", { what: "people", rows: shown.length, filter: f }); });
   };
   return (

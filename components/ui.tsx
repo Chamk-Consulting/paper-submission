@@ -1,11 +1,12 @@
 import Link from "@/components/site/link";
 import type { ComponentProps, ReactNode } from "react";
+import { BrandName } from "@/lib/i18n/client";
 
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <Link href="/" className={`inline-flex items-center gap-2 font-serif text-xl ${light ? "text-white" : "text-navy"}`}>
       <span aria-hidden className="inline-block size-3 rounded-full bg-saffron" />
-      Plenary
+      <BrandName />
     </Link>
   );
 }

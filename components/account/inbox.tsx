@@ -70,7 +70,7 @@ export function InboxList({ rows, selected }: { rows: InboxRow[]; selected: stri
                   <span aria-hidden className={`mt-[7px] size-2 flex-none rounded-full ${r.unread ? "bg-[#F2A93B]" : "bg-transparent"}`} />
                   <span className="min-w-0 flex-auto">
                     <span className="flex justify-between gap-2">
-                      <span className={`truncate text-[14px] ${r.unread ? "font-semibold" : ""}`}>{r.last_from ?? r.venue ?? "Plenary"}</span>
+                      <span className={`truncate text-[14px] ${r.unread ? "font-semibold" : ""}`}>{r.last_from ?? r.venue ?? t.brand}</span>
                       <span suppressHydrationWarning className="whitespace-nowrap font-mono text-[11px] text-[#4A5263]">{when.short(r.last_at)}</span>
                     </span>
                     <span className={`block truncate text-[13px] ${r.unread ? "font-semibold" : ""}`}>{r.unread ? <span className="sr-only">{t("Unread")}: </span> : null}{r.subject}</span>
@@ -101,7 +101,7 @@ export function ThreadView({ row, messages }: { row: InboxRow; messages: ThreadM
   const [err, setErr] = useState<string | null>(null);
   const [tag, bg, ink] = KIND_TAG[row.kind] ?? KIND_TAG.message;
   const last = messages.at(-1);
-  const other = [...messages].reverse().find((m) => !m.is_me)?.sender ?? row.last_from ?? "Plenary";
+  const other = [...messages].reverse().find((m) => !m.is_me)?.sender ?? row.last_from ?? t.brand;
   const cta = [...messages].reverse().find((m) => m.cta_url && m.cta_label);
 
   // Opening a thread marks it read (server action; no local state involved).

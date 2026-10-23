@@ -126,7 +126,7 @@ function TemplateForm({ slug, tpl, sample, contactMissing, sendAs, senderName, s
       <section className={`${ui.card} mt-5`} aria-label={t("Preview")}>
         <p className={ui.kicker}>{t("Preview as {name}, {paper}", { name: `${sample["author.first"]} ${sample["author.last"] ?? ""}`.trim(), paper: sample["paper.id"] })}</p>
         <div className="mt-3 rounded-[6px] border border-[#DADDE3] bg-[#FAFAF8] p-4">
-          <p className="m-0 text-[13px] text-[#4A5263]">{t("From")}: {sendAs ? senderName : "Plenary"}</p>
+          <p className="m-0 text-[13px] text-[#4A5263]">{t("From")}: {sendAs ? senderName : t.brand}</p>
           <p className="m-0 mt-1 font-semibold text-[#0E1B3D]">{render(subject, sample)}</p>
           <div className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-[#1B2232]">{render(body, sample)}</div>
         </div>

@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
+import { getBrand } from "@/lib/config/brand";
 
 /** Web app manifest: makes Plenary installable (home screen / dock) and launch like an app. */
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const brand = await getBrand();
   return {
     id: "/",
-    name: "Plenary — paper submission & review",
-    short_name: "Plenary",
+    name: `${brand} — paper submission & review`,
+    short_name: brand,
     description: "Submit, review and run conferences, workshops and journals.",
     start_url: "/workspace?source=pwa",
     scope: "/",

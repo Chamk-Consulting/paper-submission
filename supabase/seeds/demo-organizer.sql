@@ -4,9 +4,9 @@
 do $$
 declare p uuid;
 begin
-  select id into p from public.persons where given_name = 'Plenary' and family_name = 'Demo Organizer' and user_id is null limit 1;
+  select id into p from public.persons where family_name = 'Demo Organizer' and user_id is null limit 1;
   if p is null then
-    insert into public.persons (given_name, family_name, is_public) values ('Plenary', 'Demo Organizer', false) returning id into p;
+    insert into public.persons (given_name, family_name, is_public) values (public.brand_name(), 'Demo Organizer', false) returning id into p;
   end if;
   insert into public.venue_members (venue_id, person_id, role)
   select v.id, p, 'owner' from public.venues v

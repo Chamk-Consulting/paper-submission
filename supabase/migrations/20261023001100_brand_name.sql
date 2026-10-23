@@ -1,0 +1,5 @@
+-- Applied to the database on 2026-10-23 (migrations platform_brand_name, brand_rename_demo_records). Kept for the record.
+-- The product name shown to people lives in platform_settings.brand_name (now 'Hyper Papers'); public.brand_name() reads it.
+-- The app swaps "Plenary" in every translated string, email, PDF, calendar feed and logo for this value
+-- (lib/config/brand.ts, lib/i18n/t-core.ts). To change the name:  update public.platform_settings set brand_name = '…';
+-- Internal names stay: the plenary_id column, PL- IDs, code and file names.
