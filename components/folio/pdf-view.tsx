@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { PDFDocumentProxy } from "pdfjs-dist";
+import type { PDFDocumentProxy, PDFWorker } from "pdfjs-dist";
 
 async function loadPdfjs() {
   const pdfjs = await import("pdfjs-dist");
@@ -18,6 +18,10 @@ export function PdfView({ url, zoom, onPages }: { url: string | null; zoom: numb
   const [width, setWidth] = useState(0);
   const [error, setError] = useState(false);
   const live = useRef<HTMLDivElement>(null);
+  // One worker for the life of the panel: each new build's document is opened and closed on it,
+  // so closing an old build never stops the one being drawn.
+  const worker = useRef<PDFWorker | null>(null);
+  useEffect(() => () => { worker.current?.destroy(); worker.current = null; }, []);
 
   useEffect(() => {
     const el = scroller.current;
@@ -35,7 +39,8 @@ export function PdfView({ url, zoom, onPages }: { url: string | null; zoom: numb
     (async () => {
       try {
         const pdfjs = await loadPdfjs();
-        const t = pdfjs.getDocument({ url });
+        if (!worker.current) worker.current = new pdfjs.PDFWorker();
+        const t = pdfjs.getDocument({ url, worker: worker.current });
         task = t;
         doc = await t.promise;
         if (cancelled) return;
@@ -66,7 +71,8 @@ export function PdfView({ url, zoom, onPages }: { url: string | null; zoom: numb
         live.current.replaceChildren(next);
         el.scrollTop = keep * el.scrollHeight;
         setError(false);
-      } catch {
+      } catch (e) {
+        console.error("[folio] PDF preview failed", e);
         if (!cancelled) setError(true);
       } finally {
         void task?.destroy();

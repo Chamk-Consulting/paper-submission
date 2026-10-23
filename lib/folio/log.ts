@@ -56,7 +56,7 @@ export function parseLatexLog(log: string, mainFile = "main.tex"): { diagnostics
       // Warnings continue on lines that start with "(pkg)" padding.
       for (let j = i + 1; j < Math.min(lines.length, i + 5) && /^\(\S+\)\s+/.test(lines[j]); j++) msg += ` ${lines[j].replace(/^\(\S+\)\s+/, "")}`;
       const ln = /on input line (\d+)/.exec(msg);
-      if (/There were undefined references|Label\(s\) may have changed|Rerun to get/.test(msg)) continue;
+      if (/There were undefined references|Label\(s\) may have changed|Rerun to get|Shell escape feature is not enabled/.test(msg)) continue;
       push({ severity: "warning", kind: "warning", file: null, line: ln ? Number(ln[1]) : null, message: (m[1] || m[2] ? `${m[1] ?? m[2]}: ` : "") + msg.replace(/\s*on input line \d+\.?/, "") });
     }
   }
