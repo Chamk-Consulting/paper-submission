@@ -155,5 +155,7 @@ export async function markRegistrationPaid(_: AttendState, fd: FormData): Promis
   const { error } = await supabase.rpc("set_registration_paid", { p_registration: id, p_paid: paid });
   if (error) return { error: friendly(error.message) };
   revalidatePath(`/[lang]/manage/${slug}/registrations`, "page");
+  revalidatePath(`/[lang]/manage/${slug}/payments`, "page");
+  revalidatePath(`/[lang]/manage/${slug}/invoices`, "page");
   return { ok: true };
 }

@@ -2,7 +2,7 @@
 
 import {
   Award, Bell, BookOpen, BookOpenCheck, Briefcase, CalendarClock, CalendarCog, CalendarRange,
-  ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, FileCheck,
+  ChartNoAxesColumn, ChevronDown, ChevronsUpDown, CircleHelp, ClipboardCheck, Compass, Contact, CreditCard, ReceiptText, Wallet, FileCheck,
   FileStack, FileText, Files, Filter, Gavel, History, House, Inbox, KeyRound, LayoutDashboard, LifeBuoy,
   Lock, MessageSquare, PanelLeftClose, PanelLeftOpen, PenLine, Plus, Presentation, QrCode, Radio, Scale, ScanSearch,
   CalendarDays, CircleUserRound, Search, Send, Settings, Settings2, ShieldCheck, SlidersHorizontal, Ticket, UserPlus, UserRound, Users,
@@ -50,7 +50,7 @@ const ORG_GROUPS: [string, string, typeof House, string, [string, typeof House][
   ["after", "After acceptance", BookOpenCheck, "finals", [["awards", Award], ["finals", FileCheck], ["proceedings", BookOpen]]],
   ["event", "Running the event", CalendarRange, "program", [["program", CalendarCog], ["registrations", Ticket], ["checkin", QrCode], ["live", Radio]]],
   ["team", "People & email", Users, "people", [["people", Contact], ["committee", UsersRound], ["email", Send]]],
-  ["settings", "Event settings", Settings2, "setup", [["setup", SlidersHorizontal], ["billing", CreditCard], ["audit", History]]],
+  ["settings", "Event settings", Settings2, "setup", [["setup", SlidersHorizontal], ["payments", Wallet], ["invoices", ReceiptText], ["billing", CreditCard], ["audit", History]]],
 ];
 /** Account: who you are and how you get in. Settings: how Plenary behaves for you. */
 const ACCOUNT_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [

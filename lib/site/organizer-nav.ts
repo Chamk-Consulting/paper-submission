@@ -4,7 +4,7 @@ export const ORGANIZER_NAV: [string, string, string][] = [
   ["reviews", "Review progress", "/reviews"], ["decisions", "Decisions", "/decisions"], ["awards", "Awards", "/awards"], ["finals", "Final versions", "/finals"],
   ["program", "Program builder", "/program"], ["registrations", "Registrations", "/registrations"], ["live", "Event day", "/live"], ["checkin", "Badges & check-in", "/checkin"],
   ["proceedings", "Proceedings & reports", "/proceedings"],
-  ["people", "People", "/people"], ["email", "Email center", "/email"], ["setup", "Setup", "/setup"], ["billing", "Billing", "/billing"],
+  ["people", "People", "/people"], ["email", "Email center", "/email"], ["setup", "Setup", "/setup"], ["payments", "Payments", "/payments"], ["invoices", "Invoices", "/invoices"], ["billing", "Billing", "/billing"],
   ["committee", "Committee", "/setup/committee"], ["roles", "My roles & conflicts", "@/manage/roles"], ["audit", "Audit log", "/audit"],
 ];
 /** Organizer items only the event owner sees. */
@@ -18,5 +18,5 @@ export const ORGANIZER_GROUPS: [string, string, string[]][] = [
   ["after", "After acceptance", ["finals", "proceedings"]],
   ["event", "Event", ["program", "registrations", "live", "checkin"]],
   ["team", "Team & email", ["people", "committee", "email"]],
-  ["settings", "Event settings", ["setup", "billing", "roles", "audit"]],
+  ["settings", "Event settings", ["setup", "payments", "invoices", "billing", "roles", "audit"]],
 ];
