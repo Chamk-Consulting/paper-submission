@@ -7,6 +7,7 @@ import { tracksOf, typeOptions } from "@/lib/submission/options";
 import { fmtMonth } from "@/lib/venues/time";
 import { Reveal } from "@/components/motion/reveal";
 import { WizardSkeleton } from "@/components/skeletons";
+import { getSubmissionWindow } from "@/lib/venues/window";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -18,13 +19,13 @@ async function Inner({ params }: P) {
   const { id } = await params;
   const ctx = await requireCtx(id, "type");
   const v = ctx.venue;
-  const t = await getT();
+  const [t, win] = await Promise.all([getT(), getSubmissionWindow(v.id)]);
   return (
     <SubmissionFrame ctx={ctx} step="type" aside={<TypeAside venue={v} type={ctx.sub.paperType} track={ctx.sub.track} />}>
       <TypeForm
         submissionId={id}
         venue={{ id: v.id, acr: v.acr, name: v.name, slug: v.slug, badge: v.acr.replace(/[[\]\s]/g, "").slice(0, 5).toUpperCase(), meta: [v.location, fmtMonth(v.startsOn, t.intl), v.society ? t("by {society}", { society: v.society }) : null].filter(Boolean).join(" · ") }}
-        types={typeOptions(v)} tracks={tracksOf(v)} initialType={ctx.sub.paperType} initialTrack={ctx.sub.track}
+        types={typeOptions(v, win)} tracks={tracksOf(v)} initialType={ctx.sub.paperType} initialTrack={ctx.sub.track}
       />
     </SubmissionFrame>
   );

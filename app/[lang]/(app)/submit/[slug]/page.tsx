@@ -9,6 +9,7 @@ import { loadVenueBySlug } from "@/lib/submission/data";
 import { tracksOf, typeOptions } from "@/lib/submission/options";
 import { fmtMonth } from "@/lib/venues/time";
 import { getT } from "@/lib/i18n/server";
+import { fmtDay, getSubmissionWindow } from "@/lib/venues/window";
 import { Reveal } from "@/components/motion/reveal";
 import { WizardSkeleton } from "@/components/skeletons";
 
@@ -25,8 +26,11 @@ async function Inner({ params, searchParams }: P) {
   if (!me.person) redirect("/create-account/profile");
   const venue = await loadVenueBySlug(slug);
   if (!venue) notFound();
-  const t = await getT();
-  const options = typeOptions(venue);
+  const [t, win] = await Promise.all([getT(), getSubmissionWindow(venue.id)]);
+  const options = typeOptions(venue, win);
+  // Same rule as the database: closed when no type is open (or, without a window, when there's no future deadline).
+  const closed = win ? !win.open : !venue.deadline && venue.kind !== "journal";
+  const closedOn = win && !win.open ? fmtDay(win.closedAt, t.intl) : null;
   const generatedAt = new Date().toISOString();
   const name = `${me.person.given_name} ${me.person.family_name}`;
   return (
@@ -36,15 +40,17 @@ async function Inner({ params, searchParams }: P) {
       rail={<StepRail rail={{ done: { type: false, details: false, authors: false, keywords: false, files: false, conflicts: false, review: false }, current: "type", reachable: 1, base: "" }} />}
       aside={<TypeAside venue={venue} type={type} />}
     >
-      {!venue.deadline && venue.kind !== "journal" ? (
-        <p role="alert" className="mb-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2.5 text-[14px] text-[#5C1A15]">{t("Submissions for {venue} are closed.", { venue: venue.acr })}</p>
+      {closed ? (
+        <p role="alert" className="mb-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2.5 text-[14px] text-[#5C1A15]">
+          {closedOn ? t("Submissions for {venue} closed on {date}.", { venue: venue.acr, date: closedOn }) : t("Submissions for {venue} are closed.", { venue: venue.acr })}
+        </p>
       ) : null}
       <TypeForm
         venue={{ id: venue.id, acr: venue.acr, name: venue.name, slug: venue.slug, badge: venue.acr.replace(/[[\]\s]/g, "").slice(0, 5).toUpperCase(), meta: [venue.location, fmtMonth(venue.startsOn, t.intl), venue.society ? t("by {society}", { society: venue.society }) : null].filter(Boolean).join(" · ") }}
         types={options}
         tracks={tracksOf(venue)}
         initialType={options.find((o) => o.name === type)?.name}
-        closed={!venue.deadline && venue.kind !== "journal"}
+        closed={closed}
       />
     </WizardLayout>
   );

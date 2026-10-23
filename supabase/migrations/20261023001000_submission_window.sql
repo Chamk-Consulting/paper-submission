@@ -1,0 +1,5 @@
+-- Applied to the database on 2026-10-23 (migrations venue_submission_window, submission_window_per_type,
+-- submission_window_proposal_fallback, submission_window_type_details). Kept here for the record.
+-- One rule for "can I submit, and until when": private.type_open_for(venue, type), used by create_draft and by
+-- public.venue_submission_window(venue), which every screen with a Submit button reads (lib/venues/window.ts).
+-- Proposal types follow the proposal dates when the venue has any; everything else follows the paper deadline.

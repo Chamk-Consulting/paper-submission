@@ -389,4 +389,10 @@ export const signup4_it: Record<string, string> = {
   "Language and time zone": "Lingua e fuso orario",
   "Date and time format": "Formato di data e ora",
   "Appearance": "Aspetto",
+  "Submissions closed": "Invii chiusi",
+  "Submissions closed on {date}": "Invii chiusi il {date}",
+  "Submissions for {venue} closed on {date}.": "Gli invii per {venue} si sono chiusi il {date}.",
+  "Closed": "Chiuso",
+  "on {date}": "il {date}",
+  "until {date}": "fino al {date}",
 };

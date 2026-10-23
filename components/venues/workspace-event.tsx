@@ -14,8 +14,9 @@ const ORGANIZER = /^(owner|chair|program_chair|deputy_chair|ceb_chair|publicatio
 const btn = "inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-[4px] px-3.5 text-[14px] font-semibold no-underline";
 const ghost = `${btn} border border-[#B7BDC9] bg-white text-[#121826] hover:bg-[#F7F8F6]`;
 
-export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open, generatedAt, nav }: {
-  v: DirectoryVenue; tags: string[]; where: string; tagline: string | null; mine?: MyEvent; open: boolean; generatedAt: string; nav: [string, string][];
+/** `closedOn`: null = no closed notice; "" = closed with no known date; otherwise the formatted closing day. */
+export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open, closedOn = null, generatedAt, nav }: {
+  v: DirectoryVenue; tags: string[]; where: string; tagline: string | null; mine?: MyEvent; open: boolean; closedOn?: string | null; generatedAt: string; nav: [string, string][];
 }) {
   const t = await getT();
   const [fbg, fink] = v.field ? FIELD_COLOR[v.field] : ["#E6EDFC", "#1F47A8"];
@@ -45,6 +46,7 @@ export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link href={act.href} className={`${btn} ${act.label === "View event" ? "bg-[#0E1B3D] text-white" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>
                 {act.label === "Continue draft" && open ? <Link href={`/submit/${v.slug}`} className={ghost}>{t("New paper")}</Link> : null}
+                {closedOn !== null ? <span className="inline-flex h-10 items-center rounded-[4px] bg-[#EEF0EC] px-3.5 text-[14px] font-semibold text-[#4A5263]">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span> : null}
                 <FollowButton venueId={v.id} slug={v.slug} compact />
                 {organizer ? <Link href={`/manage/${v.slug}`} className={ghost}><Gauge size={15} aria-hidden />{t("Event dashboard")}</Link> : null}
                 <a href={`/venues/${v.slug}/calendar.ics`} className={ghost}><CalendarPlus size={15} aria-hidden />{t("Add deadlines to calendar")}</a>

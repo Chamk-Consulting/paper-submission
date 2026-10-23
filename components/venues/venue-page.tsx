@@ -11,6 +11,7 @@ import { getT } from "@/lib/i18n/server";
 import { getMyEvents } from "@/lib/workspace/events";
 import type { MyEvents } from "@/lib/workspace/event-action";
 import { WorkspaceEventHeader, YourParticipation } from "@/components/venues/workspace-event";
+import { fmtDay, getSubmissionWindow, typeWindow, type SubmissionWindow } from "@/lib/venues/window";
 
 /*
  * One event page, two forms. Public (/venues/[slug]): the navy cover header and the public status card. Workspace
@@ -26,14 +27,15 @@ export async function VenuePage({ slug, mode = "public" }: { slug: string; mode?
   const ws = mode === "workspace";
   const [data, pub, myEvents] = await Promise.all([getVenue(slug), getVenuePublic(slug), ws ? getMyEvents() : Promise.resolve({} as MyEvents)]);
   if (!data) notFound();
-  return <VenueView data={data} pub={pub} myEvents={myEvents} mode={mode} />;
+  const win = await getSubmissionWindow(data.venue.id);
+  return <VenueView data={data} pub={pub} myEvents={myEvents} mode={mode} win={win} />;
 }
 
 type VenueData = NonNullable<Awaited<ReturnType<typeof getVenue>>>;
 type VenuePub = Awaited<ReturnType<typeof getVenuePublic>>;
 
 /** The page itself, from loaded data (the dev preview passes sample data). */
-export async function VenueView({ data, pub, myEvents, mode = "public" }: { data: VenueData; pub: VenuePub; myEvents: MyEvents; mode?: "public" | "workspace" }) {
+export async function VenueView({ data, pub, myEvents, mode = "public", win = null }: { data: VenueData; pub: VenuePub; myEvents: MyEvents; mode?: "public" | "workspace"; win?: SubmissionWindow | null }) {
   const ws = mode === "workspace";
   const t = await getT();
   const { venue: v, details, website, basics, dbTypes } = data;
@@ -53,14 +55,16 @@ export async function VenueView({ data, pub, myEvents, mode = "public" }: { data
     ["program", "Program"], ["organizers", "Organizers"],
   ];
   const mine = myEvents[v.slug];
-  const open = v.kind === "journal" || v.dates.some((d) => (d.kind === "submission" || d.kind === "proposal") && Date.parse(d.startsAt) > Date.parse(generatedAt));
+  // Same rule as the database (lib/venues/window.ts); the date check is only for the dev preview, which has no window.
+  const open = win ? win.open : v.kind === "journal" || v.dates.some((d) => (d.kind === "submission" || d.kind === "proposal") && Date.parse(d.startsAt) > Date.parse(generatedAt));
+  const closedOn = win && !win.open ? fmtDay(win.closedAt, t.intl) : null;
   const programHref = ws ? `/workspace/events/${v.slug}/program` : `/program/${v.slug}`;
 
   return (
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <LiveHeader />
       {ws ? (
-        <WorkspaceEventHeader v={v} tags={tags} where={where} tagline={basics.tagline ?? null} mine={mine} open={open} generatedAt={generatedAt} nav={nav} />
+        <WorkspaceEventHeader v={v} tags={tags} where={where} tagline={basics.tagline ?? null} mine={mine} open={open} closedOn={win && !win.open ? (closedOn ?? "") : null} generatedAt={generatedAt} nav={nav} />
       ) : (
       <section className="bg-white">
         {/* PV02 cover header: the organizers' cover image (or the field artwork) behind the title. */}
@@ -84,7 +88,8 @@ export async function VenueView({ data, pub, myEvents, mode = "public" }: { data
                 {basics.tagline ? <p className="mt-1 text-[16px] italic text-[#D6DCEA]">{basics.tagline}</p> : null}
                 <p className="mt-1.5 text-[15px] text-[#D6DCEA]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t, v.kind === "journal"), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
                 <div className="mt-5 flex flex-wrap gap-2.5">
-                  <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
+                  {open ? <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
+                    : <span aria-disabled="true" className="inline-flex h-11 cursor-not-allowed items-center rounded-[4px] bg-white/15 px-5 text-[15px] font-semibold text-white/80 ring-1 ring-white/30">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span>}
                   <FollowButton venueId={v.id} slug={v.slug} />
                   <Link href={`/venues/${v.slug}/register`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Register to attend")}</Link>
                   <a href={`/venues/${v.slug}/calendar.ics`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Add deadlines to calendar")}</a>
@@ -135,7 +140,15 @@ export async function VenueView({ data, pub, myEvents, mode = "public" }: { data
                         <td className="px-4 py-3"><strong>{ty.name}</strong>{ty.note ? <div className="text-[13px] text-[#4A5263]">{ty.note}</div> : null}</td>
                         <td className="px-4 py-3">{ty.length ?? "—"}</td>
                         <td className="px-4 py-3">{ty.review ?? "—"}</td>
-                        <td className="px-4 py-3 text-right"><Link href={`/submit/${v.slug}?type=${encodeURIComponent(ty.name)}`} className="font-semibold text-[#2F5FD0]">{/workshop|proposal/i.test(ty.name) ? t("Propose →") : t("Submit →")}</Link></td>
+                        <td className="px-4 py-3 text-right">{(() => {
+                          const w = win ? typeWindow(win, ty.name) : { open: true, deadline: null, closedAt: null };
+                          if (!w.open) {
+                            const on = fmtDay(w.closedAt, t.intl);
+                            return <span className="inline-flex flex-col items-end gap-0.5"><span className="rounded-full bg-[#EEF0EC] px-2.5 py-0.5 text-[13px] font-semibold text-[#4A5263]">{t("Closed")}</span>{on ? <span className="text-[12px] text-[#4A5263]">{t("on {date}", { date: on })}</span> : null}</span>;
+                          }
+                          const until = fmtDay(w.deadline, t.intl);
+                          return <span className="inline-flex flex-col items-end gap-0.5"><Link href={`/submit/${v.slug}?type=${encodeURIComponent(ty.name)}`} className="font-semibold text-[#2F5FD0]">{/workshop|proposal/i.test(ty.name) ? t("Propose →") : t("Submit →")}</Link>{until ? <span className="text-[12px] text-[#4A5263]">{t("until {date}", { date: until })}</span> : null}</span>;
+                        })()}</td>
                       </tr>
                     ))}
                   </tbody>
