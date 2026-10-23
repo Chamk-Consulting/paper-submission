@@ -76,7 +76,7 @@ export function VenueMeTabs({ venueId, work, news, deadlines, contacts, now }: {
         <section className="mt-5 rounded-[8px] border border-[#DADDE3] bg-white p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="m-0 font-serif text-[22px] font-normal">{t("Deadlines that apply to you")}</h2>
-            <Link href="/settings/calendar" className="inline-flex h-9 items-center rounded-[4px] border border-[#B7BDC9] px-3 text-[13px] font-medium text-[#121826] no-underline">{t("Add to calendar")}</Link>
+            <Link href="/workspace/settings/calendar" className="inline-flex h-9 items-center rounded-[4px] border border-[#B7BDC9] px-3 text-[13px] font-medium text-[#121826] no-underline">{t("Add to calendar")}</Link>
           </div>
           {deadlines.length ? (
             <ul className="m-0 mt-3 list-none p-0">

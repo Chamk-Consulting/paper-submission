@@ -72,14 +72,14 @@ export function TalksList({ items, generatedAt, init = {} }: { items: TalkRow[];
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="m-0 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]"><span className="text-[#A8600F]">{t("Chairing")}</span> · {x.code} · {x.venueShort}</p>
-                    <Link href={`/chair/${x.sessionId}`} className="mt-1 block font-serif text-[22px] leading-[1.2] text-[#121826] no-underline hover:underline">{x.sessionTitle}</Link>
+                    <Link href={`/workspace/talks/${x.sessionId}`} className="mt-1 block font-serif text-[22px] leading-[1.2] text-[#121826] no-underline hover:underline">{x.sessionTitle}</Link>
                     <p className="m-0 mt-1 text-[14px] text-[#4A5263]">{time}</p>
                   </div>
                   <span className="rounded-[4px] px-2.5 py-1 text-[13px] font-semibold" style={{ background: ok ? "#E1F3EA" : "#FBEFDD", color: ok ? "#14603F" : "#7A4508" }}>{t("{n}/{total} presenters ready", { n: x.ready ?? 0, total: x.total ?? 0 })}</span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Link href={`/chair/${x.sessionId}`} className={`${btn} border border-[#B7BDC9] bg-white font-medium text-[#121826]`}>{t("Run sheet")}</Link>
-                  <Link href={`/chair/${x.sessionId}?view=live`} className={`${btn} bg-[#0E1B3D] font-semibold text-white`}>{t("On the day")}</Link>
+                  <Link href={`/workspace/talks/${x.sessionId}`} className={`${btn} border border-[#B7BDC9] bg-white font-medium text-[#121826]`}>{t("Run sheet")}</Link>
+                  <Link href={`/workspace/talks/${x.sessionId}?view=live`} className={`${btn} bg-[#0E1B3D] font-semibold text-white`}>{t("On the day")}</Link>
                 </div>
               </li>
             );

@@ -28,7 +28,7 @@ async function Inner({ params }: { params: Promise<{ token: string }> }) {
       <Frame signedIn={!!user}>
         <h1 className="m-0 font-serif text-[34px] font-normal">{t("This link isn't valid")}</h1>
         <p className="mt-2 max-w-[620px] text-[#4A5263]">{t("The invitation may have been withdrawn, or the link was copied incompletely. Open the newest email from the editor, or sign in to see your invitations.")}</p>
-        <Link href="/reviews" className={ui.ghost}>{t("Sign in")}</Link>
+        <Link href="/workspace/reviews" className={ui.ghost}>{t("Sign in")}</Link>
       </Frame>
     );
   }
@@ -55,7 +55,7 @@ async function Inner({ params }: { params: Promise<{ token: string }> }) {
             ) : inv.status === "accepted" || inv.status === "submitted" ? (
               <div>
                 <Banner tone="ok">{t("You already accepted this invitation. The review is due {d}.", { d: due })}</Banner>
-                <Link href={`/reviews/${inv.assignment_id}`} className={`${ui.primary} mt-4`}>{t("Sign in to open the review")}</Link>
+                <Link href={`/workspace/reviews/${inv.assignment_id}`} className={`${ui.primary} mt-4`}>{t("Sign in to open the review")}</Link>
               </div>
             ) : inv.status === "declined" ? (
               <Banner tone="info">{t("You declined this invitation. {ae} has been told. Thank you for answering.", { ae })}</Banner>

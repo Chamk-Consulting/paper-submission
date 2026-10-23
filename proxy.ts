@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, negotiate } from "@/lib/i18n/config";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
-import { workspaceFor } from "@/lib/site/workspace-routes";
+import { movedTo, workspaceFor } from "@/lib/site/workspace-routes";
 
 // Thin edge layer: pick the language, refresh the Supabase session, keep signed-out users out of
 // private areas. Real permission checks live in server actions and RLS.
@@ -23,6 +23,14 @@ export default async function proxy(request: NextRequest) {
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
   const locale = explicit ?? (isLocale(cookieLocale) ? cookieLocale : negotiate(request.headers.get("accept-language")));
   const skipLocale = NO_LOCALE.some((r) => r.test(bare));
+
+  // Pages that moved under /workspace: one permanent redirect, whatever the language prefix.
+  const moved = skipLocale ? null : movedTo(bare);
+  if (moved) {
+    const url = request.nextUrl.clone();
+    url.pathname = `${explicit ? `/${explicit}` : ""}${moved}`;
+    return NextResponse.redirect(url, 308);
+  }
 
   // Supabase sends people to the Site URL (e.g. "/?code=…") when the redirect it was given isn't allow-listed.
   // Hand any auth code or token that lands outside /auth/* to the confirm route so the sign-in still completes.

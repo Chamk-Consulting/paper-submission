@@ -52,15 +52,15 @@ const ORG_GROUPS: [string, string, typeof House, string, [string, typeof House][
 ];
 /** Account: who you are and how you get in. Settings: how Plenary behaves for you. */
 const ACCOUNT_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
-  ["/settings/profile", "Profile", UserRound, (p) => p.startsWith("/settings/profile")],
-  ["/settings/reviewing", "Reviewer profile", ClipboardCheck, (p) => p.startsWith("/settings/reviewing")],
-  ["/settings/security", "Security", KeyRound, (p) => p.startsWith("/settings/security")],
-  ["/settings/privacy", "Privacy", Lock, (p) => p.startsWith("/settings/privacy")],
+  ["/workspace/account/profile", "Profile", UserRound, (p) => p.startsWith("/workspace/account/profile")],
+  ["/workspace/account/reviewer", "Reviewer profile", ClipboardCheck, (p) => p.startsWith("/workspace/account/reviewer")],
+  ["/workspace/account/security", "Security", KeyRound, (p) => p.startsWith("/workspace/account/security")],
+  ["/workspace/account/privacy", "Privacy", Lock, (p) => p.startsWith("/workspace/account/privacy")],
 ];
 const SETTINGS_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
-  ["/settings/notifications", "Notifications", Bell, (p) => p.startsWith("/settings/notifications")],
-  ["/settings/calendar", "Calendar", CalendarDays, (p) => p.startsWith("/settings/calendar")],
-  ["/settings/preferences", "Preferences", SlidersHorizontal, (p) => p.startsWith("/settings/preferences")],
+  ["/workspace/settings/notifications", "Notifications", Bell, (p) => p.startsWith("/workspace/settings/notifications")],
+  ["/workspace/settings/calendar", "Calendar", CalendarDays, (p) => p.startsWith("/workspace/settings/calendar")],
+  ["/workspace/settings/preferences", "Preferences", SlidersHorizontal, (p) => p.startsWith("/workspace/settings/preferences")],
 ];
 
 /** Events this person organises (for the switcher), with the role label shown beside the name. */
@@ -101,15 +101,15 @@ function useMiddle(p: string, s: Summary | null) {
   // Rows by role: Papers and Agenda for everyone; Reviews once you've been asked to review; Talks & sessions once you
   // chair a session or have an accepted paper. Counts are only what waits for you.
   const w = s?.work;
-  const reviewer = !!w?.hasReviews || hasRole(s, /^(reviewer|associate_editor)$/) || p.startsWith("/reviews");
-  const talks = !!w?.hasTalks || hasRole(s, /^session_chair$/) || p.startsWith("/chair");
+  const reviewer = !!w?.hasReviews || hasRole(s, /^(reviewer|associate_editor)$/) || p.startsWith("/workspace/reviews");
+  const talks = !!w?.hasTalks || hasRole(s, /^session_chair$/) || p.startsWith("/workspace/talks");
   const myWork: Group = {
     kind: "group", key: "work", label: "My work", icon: ic(Briefcase), def: "subs", toggle: true,
     items: [
       { kind: "leaf", key: "subs", label: "My submissions", icon: ic(FileText), href: "/workspace/submissions", count: w?.papers || undefined, warn: w?.papersSoon, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
-      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "To review", icon: ic(PenLine), href: "/reviews", count: w?.reviews || undefined, warn: w?.reviewsSoon, on: p.startsWith("/reviews") }] : []),
-      ...(talks ? [{ kind: "leaf" as const, key: "chair", label: "Talks & sessions", icon: ic(Presentation), href: "/chair", on: p.startsWith("/chair") }] : []),
-      { kind: "leaf", key: "schedule", label: "Agenda", icon: ic(CalendarClock), href: "/workspace/schedule", on: p.startsWith("/workspace/schedule") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
+      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "To review", icon: ic(PenLine), href: "/workspace/reviews", count: w?.reviews || undefined, warn: w?.reviewsSoon, on: p.startsWith("/workspace/reviews") }] : []),
+      ...(talks ? [{ kind: "leaf" as const, key: "chair", label: "Talks & sessions", icon: ic(Presentation), href: "/workspace/talks", on: p.startsWith("/workspace/talks") }] : []),
+      { kind: "leaf", key: "schedule", label: "Agenda", icon: ic(CalendarClock), href: "/workspace/agenda", on: p.startsWith("/workspace/agenda") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
     ],
   };
   const current = s?.currentEvents ?? [];
@@ -135,11 +135,11 @@ function useMiddle(p: string, s: Summary | null) {
     ],
   } : null;
   const account: Group = {
-    kind: "group", key: "account", label: "Account", icon: ic(CircleUserRound), def: "/settings/profile",
+    kind: "group", key: "account", label: "Account", icon: ic(CircleUserRound), def: "/workspace/account/profile",
     items: ACCOUNT_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
   };
   const settings: Group = {
-    kind: "group", key: "settings", label: "Settings", icon: ic(Settings), def: "/settings/notifications",
+    kind: "group", key: "settings", label: "Settings", icon: ic(Settings), def: "/workspace/settings/notifications",
     items: SETTINGS_ITEMS.map(([href, label, icon, m]) => ({ kind: "leaf" as const, key: href, label, icon: ic(icon), href, on: m(p) })),
   };
   return { myWork, events, admin, account, settings };
@@ -462,7 +462,7 @@ export function NavList({ p, s, onPick, tab }: { p: string; s: Summary | null; o
 function topLeaves(p: string, s: Summary | null): Leaf[] {
   return [
     { kind: "leaf", key: "home", label: "Home", icon: ic(House), href: "/workspace", on: p === "/workspace" },
-    { kind: "leaf", key: "inbox", label: "Inbox", icon: ic(Inbox), href: "/inbox", count: s?.unread, on: p.startsWith("/inbox") },
+    { kind: "leaf", key: "inbox", label: "Inbox", icon: ic(Inbox), href: "/workspace/inbox", count: s?.unread, on: p.startsWith("/workspace/inbox") },
   ];
 }
 

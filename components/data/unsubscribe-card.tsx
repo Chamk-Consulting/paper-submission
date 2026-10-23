@@ -90,7 +90,7 @@ export function UnsubscribeCard({ token, initial }: { token: string; initial: Un
         <span role="status" className={`text-[13px] ${msg.error ? "text-[#B3261E]" : "text-[#14603F]"}`}>{msg.error ? t(msg.error) : msg.ok ?? ""}</span>
       </div>
       <p className="mb-0 mt-5 text-[13px] text-[#4A5263]">
-        {t("No need to sign in on this page. To change every email setting,")} <Link href="/settings/notifications" className="text-[#2F5FD0]">{t("open notification settings")}</Link>.
+        {t("No need to sign in on this page. To change every email setting,")} <Link href="/workspace/settings/notifications" className="text-[#2F5FD0]">{t("open notification settings")}</Link>.
       </p>
     </section>
   );

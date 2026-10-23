@@ -27,3 +27,26 @@ export function workspaceFor(bare: string): string | null {
   if (m) return `/workspace/legal/${m[1]}`;
   return null;
 }
+
+/**
+ * Pages that moved under /workspace (October 2026). Old addresses — bookmarks, emails, calendar feeds, links stored in
+ * the database — answer with a permanent redirect to the new one (proxy.ts), keeping the rest of the path and the query.
+ */
+const MOVED: [RegExp, string][] = [
+  [/^\/settings\/profile\/reviewing$/, "/workspace/account/reviewer"],
+  [/^\/settings\/reviewing$/, "/workspace/account/reviewer"],
+  [/^\/settings\/(profile|security|privacy)(\/.*)?$/, "/workspace/account/$1$2"],
+  [/^\/settings\/(notifications|calendar|preferences)$/, "/workspace/settings/$1"],
+  [/^\/settings$/, "/workspace/account/profile"],
+  [/^\/reviews(\/.*)?$/, "/workspace/reviews$1"],
+  [/^\/inbox(\/.*)?$/, "/workspace/inbox$1"],
+  [/^\/chair(\/.*)?$/, "/workspace/talks$1"],
+  [/^\/workspace\/schedule$/, "/workspace/agenda"],
+];
+export function movedTo(bare: string): string | null {
+  for (const [re, to] of MOVED) {
+    const m = bare.match(re);
+    if (m) return to.replace(/\$(\d)/g, (_, i: string) => m[Number(i)] ?? "");
+  }
+  return null;
+}

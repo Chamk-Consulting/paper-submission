@@ -75,9 +75,9 @@ export function buildDueItems(input: { papers: MyPaper[]; reviews: ReviewRow[]; 
     const venue = r.venue_short;
     const num = r.paper_number ? `#${r.paper_number}` : "";
     if (r.status === "invited") {
-      out.push({ id: `inv-${r.assignment_id}`, role: "reviewer", tag: "INVITATION", title: r.title, venue, detail: num ? ["{num} · reply to the invitation", { num }] : ["Reply to the invitation"], at: r.reply_by, action: "Reply", href: "/reviews" });
+      out.push({ id: `inv-${r.assignment_id}`, role: "reviewer", tag: "INVITATION", title: r.title, venue, detail: num ? ["{num} · reply to the invitation", { num }] : ["Reply to the invitation"], at: r.reply_by, action: "Reply", href: "/workspace/reviews" });
     } else if (r.status === "accepted") {
-      out.push({ id: `rev-${r.assignment_id}`, role: "reviewer", tag: "REVIEW", title: r.title, venue, detail: r.round > 1 ? ["{num} · round {n}", { num, n: r.round }] : [num || "Review"], at: r.due_at, action: "Continue review", href: `/reviews/${r.assignment_id}` });
+      out.push({ id: `rev-${r.assignment_id}`, role: "reviewer", tag: "REVIEW", title: r.title, venue, detail: r.round > 1 ? ["{num} · round {n}", { num, n: r.round }] : [num || "Review"], at: r.due_at, action: "Continue review", href: `/workspace/reviews/${r.assignment_id}` });
     }
   }
   for (const c of coauthor) {
@@ -99,7 +99,7 @@ export function buildDueItems(input: { papers: MyPaper[]; reviews: ReviewRow[]; 
   }
   for (const s of sessions) {
     if (Date.parse(s.ends_at ?? s.starts_at) < now) continue;
-    out.push({ id: `se-${s.session_id}`, role: "chair", tag: "SESSION", title: s.title, venue: s.venue_short, detail: s.talks ? ["{where} · {n} talks", { where: [s.code, s.room].filter(Boolean).join(" · ") || "—", n: s.talks }] : [[s.code, s.room].filter(Boolean).join(" · ") || "Session"], at: s.starts_at, action: "Open session", href: `/chair/${s.session_id}` });
+    out.push({ id: `se-${s.session_id}`, role: "chair", tag: "SESSION", title: s.title, venue: s.venue_short, detail: s.talks ? ["{where} · {n} talks", { where: [s.code, s.room].filter(Boolean).join(" · ") || "—", n: s.talks }] : [[s.code, s.room].filter(Boolean).join(" · ") || "Session"], at: s.starts_at, action: "Open session", href: `/workspace/talks/${s.session_id}` });
   }
   return out.sort((a, b) => (a.at ?? "9999") < (b.at ?? "9999") ? -1 : 1);
 }

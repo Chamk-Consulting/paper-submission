@@ -90,7 +90,7 @@ export function ReviewForm(p: ReviewFormProps) {
     if (missing.length) return;
     startSubmit(async () => {
       const r = await doSave(p.mode === "edit");
-      if (!r.error) router.push(`/reviews/${p.id}/submitted`);
+      if (!r.error) router.push(`/workspace/reviews/${p.id}/submitted`);
     });
   };
 
@@ -109,7 +109,7 @@ export function ReviewForm(p: ReviewFormProps) {
       ) : p.mode === "edit" && overdueDays >= 0 && !left ? (
         <Banner tone="warn">
           {t("Overdue by {n} day(s). {ae} has been told. You can still submit — a late review is better than none.", { n: Math.max(1, overdueDays), ae: p.ae })}{" "}
-          <Link href={`/reviews/${p.id}/extension`} className="font-semibold text-[#3B2A07]">{t("Ask for a short extension")}</Link>
+          <Link href={`/workspace/reviews/${p.id}/extension`} className="font-semibold text-[#3B2A07]">{t("Ask for a short extension")}</Link>
         </Banner>
       ) : p.mode === "submitted" ? (
         <Banner tone="ok">{t("Submitted. You can still change your review until the editor starts the decision; changes are logged.")}</Banner>
@@ -154,7 +154,7 @@ export function ReviewForm(p: ReviewFormProps) {
         <p className="mb-2 mt-1 text-[13px] text-[#4A5263]">{t("Summary, strengths, weaknesses, and specific changes. Don't include your name.")}</p>
         <textarea id="rv-authors" value={d.to_authors} readOnly={!editable} onChange={(e) => set({ to_authors: e.target.value })} rows={14} maxLength={30000}
           className={`${ui.textarea} w-full`} />
-        {p.notesInReview ? <p className="mb-0 mt-1.5 text-[13px] text-[#4A5263]">{t("{n} notes from the viewer are marked for the review.", { n: p.notesInReview })} <Link href={`/reviews/${p.id}/paper`} className="text-[#2F5FD0]">{t("Open notes")}</Link></p> : null}
+        {p.notesInReview ? <p className="mb-0 mt-1.5 text-[13px] text-[#4A5263]">{t("{n} notes from the viewer are marked for the review.", { n: p.notesInReview })} <Link href={`/workspace/reviews/${p.id}/paper`} className="text-[#2F5FD0]">{t("Open notes")}</Link></p> : null}
         <label htmlFor="rv-editor" className="mt-5 block text-[15px] font-medium">{t("Confidential comments to the editor (authors never see these)")}</label>
         <textarea id="rv-editor" value={d.to_editor} readOnly={!editable} onChange={(e) => set({ to_editor: e.target.value })} rows={5} maxLength={10000}
           className={`${ui.textarea} mt-1.5 w-full`} />
@@ -164,7 +164,7 @@ export function ReviewForm(p: ReviewFormProps) {
       {editable ? (
         <div className="flex flex-wrap items-center gap-3">
           {p.mode === "edit" ? (
-            <button type="button" onClick={async () => { const r = await doSave(false); if (!r.error) router.push("/reviews"); }} className={ui.ghost}>{t("Save and close")}</button>
+            <button type="button" onClick={async () => { const r = await doSave(false); if (!r.error) router.push("/workspace/reviews"); }} className={ui.ghost}>{t("Save and close")}</button>
           ) : null}
           <button type="button" onClick={submit} disabled={submitting} className={ui.primary}>{p.mode === "edit" ? t("Submit review") : t("Save changes")}</button>
           <span role="status" className="text-[13px] text-[#4A5263]">{savedLabel}</span>
@@ -188,7 +188,7 @@ export function ReviewForm(p: ReviewFormProps) {
         <p className={kick}>{t("Due")}</p>
         <div className={`mt-1 font-serif text-[28px] leading-none ${left ? "" : "text-[#B3261E]"}`}>{left ?? t("Overdue")}</div>
         <p className="mb-0 mt-1.5 text-[13px] text-[#4A5263]">{fmtDateTime(p.dueAt, t.intl, "Etc/GMT+12")} AoE · {fmtDateTime(p.dueAt, t.intl, tz)} {t("your time")}</p>
-        {p.mode === "edit" ? <Link href={`/reviews/${p.id}/extension`} className="mt-2 block text-[14px] text-[#2F5FD0] no-underline hover:underline">{t("Need more time? →")}</Link> : null}
+        {p.mode === "edit" ? <Link href={`/workspace/reviews/${p.id}/extension`} className="mt-2 block text-[14px] text-[#2F5FD0] no-underline hover:underline">{t("Need more time? →")}</Link> : null}
       </section>
       <section className={box}>
         <p className={kick}>{t("Checklist")}</p>
@@ -201,8 +201,8 @@ export function ReviewForm(p: ReviewFormProps) {
       </section>
       <section className={box}>
         <p className={kick}>{t("Paper")}</p>
-        <Link href={`/reviews/${p.id}/paper`} className={asideLink}>{t("Open in reviewer viewer")}</Link>
-        <Link href={`/reviews/${p.id}/paper?tab=ask`} className={asideLink}>{t("Ask about the paper")}</Link>
+        <Link href={`/workspace/reviews/${p.id}/paper`} className={asideLink}>{t("Open in reviewer viewer")}</Link>
+        <Link href={`/workspace/reviews/${p.id}/paper?tab=ask`} className={asideLink}>{t("Ask about the paper")}</Link>
       </section>
       <section className={box}>
         <p className={kick}>{t("Rules")}</p>

@@ -76,11 +76,11 @@ export function Round2Form({ id, items, initial, readOnly }: {
       </section>
       {readOnly ? null : (
         <div className="flex flex-wrap items-center gap-3">
-          <button type="button" disabled={pending} onClick={() => save(false, "/reviews")} className={ui.ghost}>{t("Save and close")}</button>
-          <button type="button" disabled={pending} onClick={() => { setTried(true); if (ok) save(true, `/reviews/${id}/submitted`); }} className={ui.primary}>{t("Submit round-2 review")}</button>
+          <button type="button" disabled={pending} onClick={() => save(false, "/workspace/reviews")} className={ui.ghost}>{t("Save and close")}</button>
+          <button type="button" disabled={pending} onClick={() => { setTried(true); if (ok) save(true, `/workspace/reviews/${id}/submitted`); }} className={ui.primary}>{t("Submit round-2 review")}</button>
           {tried && !ok ? <span role="alert" className="text-[14px] text-[#B3261E]">{marked < items.length ? t("Check every comment first.") : t("Choose a recommendation.")}</span> : null}
           {err ? <span role="alert" className="text-[14px] text-[#B3261E]">{t(err)}</span> : null}
-          <Link href={`/reviews/${id}/paper`} className="ml-auto text-[14px] text-[#2F5FD0]">{t("Read v2")}</Link>
+          <Link href={`/workspace/reviews/${id}/paper`} className="ml-auto text-[14px] text-[#2F5FD0]">{t("Read v2")}</Link>
         </div>
       )}
     </>

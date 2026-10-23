@@ -149,7 +149,7 @@ export async function saveProfile(_: AccountState, fd: FormData): Promise<Accoun
     }
   }
 
-  page("/settings/profile");
+  page("/workspace/account/profile");
   return saved();
 }
 
@@ -187,7 +187,7 @@ export async function saveReviewing(_: AccountState, fd: FormData): Promise<Acco
     const r = await c.supabase.from("person_topics").insert(add.map((topic) => ({ person_id: c.personId, topic })));
     if (r.error) return { error: friendly(r.error.message) };
   }
-  page("/settings/reviewing");
+  page("/workspace/account/reviewer");
   return saved();
 }
 
@@ -220,7 +220,7 @@ export async function saveAffiliation(_: AccountState, fd: FormData): Promise<Ac
     ? await c.supabase.from("affiliations").update(row).eq("id", v.id).eq("person_id", c.personId)
     : await c.supabase.from("affiliations").insert({ ...row, person_id: c.personId });
   if (error) return { error: friendly(error.message) };
-  page("/settings/profile");
+  page("/workspace/account/profile");
   return saved();
 }
 
@@ -230,7 +230,7 @@ export async function deleteAffiliation(id: string): Promise<AccountState> {
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("affiliations").delete().eq("id", id).eq("person_id", c.personId);
   if (error) return { error: friendly(error.message) };
-  page("/settings/profile");
+  page("/workspace/account/profile");
   return saved();
 }
 
@@ -260,7 +260,7 @@ export async function addConflict(_: AccountState, fd: FormData): Promise<Accoun
     person_id: c.personId, other_person: v.other_person || null, institution: v.other_person ? null : v.institution, reason: v.reason,
   });
   if (error) return { error: friendly(error.message) };
-  page("/settings/reviewing");
+  page("/workspace/account/reviewer");
   return saved();
 }
 
@@ -270,7 +270,7 @@ export async function removeConflict(id: string): Promise<AccountState> {
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("declared_conflicts").delete().eq("id", id).eq("person_id", c.personId);
   if (error) return { error: friendly(error.message) };
-  page("/settings/reviewing");
+  page("/workspace/account/reviewer");
   return saved();
 }
 
@@ -302,7 +302,7 @@ export async function changePassword(_: AccountState, fd: FormData): Promise<Acc
     return { error: /aal2|assurance/i.test(error.message) ? "Enter your authenticator code first — sign out and back in." : MSG.generic };
   }
   await sendSecurityNotice("password_changed", email);
-  page("/settings/security");
+  page("/workspace/account/security");
   return saved();
 }
 
@@ -328,7 +328,7 @@ export async function savePrefs(_: AccountState, fd: FormData): Promise<AccountS
   if (!c) return { error: MSG.signIn };
   const r1 = await c.supabase.from("notification_prefs").upsert({ person_id: c.personId, modes, reminders, updated_at: new Date().toISOString() });
   if (r1.error) return { error: friendly(r1.error.message) };
-  page("/settings/notifications");
+  page("/workspace/settings/notifications");
   return saved();
 }
 
@@ -346,7 +346,7 @@ export async function savePreferences(_: AccountState, fd: FormData): Promise<Ac
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("persons").update({ timezone: tz || null, locale: locale.success ? locale.data : null, ui_prefs: ui }).eq("id", c.personId);
   if (error) return { error: friendly(error.message) };
-  page("/settings/preferences");
+  page("/workspace/settings/preferences");
   return { ...saved(), value: JSON.stringify({ locale: locale.success ? locale.data : "", ui }) };
 }
 
@@ -375,7 +375,7 @@ export async function savePrivacy(_: AccountState, fd: FormData): Promise<Accoun
     const r2 = await c.supabase.from("consents").upsert(changed);
     if (r2.error) return { error: friendly(r2.error.message) };
   }
-  page("/settings/privacy");
+  page("/workspace/account/privacy");
   return saved();
 }
 
@@ -384,7 +384,7 @@ export async function requestData(kind: "export" | "delete"): Promise<AccountSta
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("request_data", { p_kind: kind });
   if (error) return { error: friendly(error.message) };
-  page("/settings/privacy");
+  page("/workspace/account/privacy");
   return { ok: true, value: String(data) };
 }
 
@@ -409,7 +409,7 @@ export async function newFeed(flags: z.infer<typeof flagsSchema>): Promise<FeedR
   const { token, hash } = newToken();
   const { error } = await supabase.rpc("set_calendar_feed", { p_token_hash: hash, p_flags: f.data });
   if (error) return { error: friendly(error.message) };
-  page("/settings/calendar");
+  page("/workspace/settings/calendar");
   return { ...saved(), url: absoluteUrl(`/feed/${token}.ics`) };
 }
 
@@ -421,7 +421,7 @@ async function participant(threadId: string, patch: { read_at?: string | null; a
   if (!c) return { error: MSG.signIn };
   const { error } = await c.supabase.from("inbox_participants").update(patch).eq("thread_id", threadId).eq("person_id", c.personId);
   if (error) return { error: friendly(error.message) };
-  page("/inbox");
+  page("/workspace/inbox");
   return { ok: true };
 }
 export async function markThreadRead(threadId: string, read = true) {
@@ -440,7 +440,7 @@ export async function replyToThread(_: AccountState, fd: FormData): Promise<Acco
   const supabase = await createClient();
   const { error } = await supabase.rpc("reply_thread", { p_thread: threadId, p_body: body });
   if (error) return { error: friendly(error.message) };
-  page("/inbox");
-  page("/inbox/[threadId]");
+  page("/workspace/inbox");
+  page("/workspace/inbox/[threadId]");
   return saved();
 }

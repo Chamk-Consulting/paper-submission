@@ -181,7 +181,7 @@ export function ProgramBoard({ venue, sessions, signedIn, generatedAt }: { venue
             <p className="m-0 mb-2 font-mono text-[11px] tracking-[0.06em] text-[#4A5263]">{t("DOWNLOADS")}</p>
             <div className="flex flex-col gap-1.5">
               <Link href={`/program/${venue.slug}/print`}>{t("Full program (PDF)")}</Link>
-              <Link href="/settings/calendar">{t("Add to my calendar")}</Link>
+              <Link href="/workspace/settings/calendar">{t("Add to my calendar")}</Link>
               <Link href={`/program/${venue.slug}/print?abstracts=1`}>{t("Book of abstracts")}</Link>
             </div>
           </section>

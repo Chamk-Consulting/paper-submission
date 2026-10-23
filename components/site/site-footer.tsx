@@ -77,7 +77,7 @@ function Brand() {
       {s?.signedIn ? (
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px]">
           <Link href="/workspace" className="inline-flex h-9 items-center rounded-[4px] bg-[#F2A93B] px-3.5 font-semibold text-[#0E1B3D] no-underline">{t("My workspace")}</Link>
-          {s.plenaryId ? <Link href="/settings/profile#plenary-id" className={`${link} font-mono`}>{s.plenaryId}</Link> : null}
+          {s.plenaryId ? <Link href="/workspace/account/profile#plenary-id" className={`${link} font-mono`}>{s.plenaryId}</Link> : null}
         </div>
       ) : (
         <div className="mt-4 flex flex-wrap gap-2 text-[13px]">

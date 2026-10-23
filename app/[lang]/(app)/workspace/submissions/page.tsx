@@ -62,7 +62,7 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
             <p className={kicker}>{t("At a glance")}</p>
             <div className="mt-2.5 grid grid-cols-3 gap-2 text-center">
               <div><div className="font-serif text-[28px] leading-none">{papers.length}</div><div className="text-[12px] text-[#4A5263]">{t("papers")}</div></div>
-              <Link href="/reviews" className="text-[#121826] no-underline"><div className={`font-serif text-[28px] leading-none ${due ? "text-[#A8600F]" : ""}`}>{due}</div><div className="text-[12px] text-[#4A5263]">{t("reviews due")}</div></Link>
+              <Link href="/workspace/reviews" className="text-[#121826] no-underline"><div className={`font-serif text-[28px] leading-none ${due ? "text-[#A8600F]" : ""}`}>{due}</div><div className="text-[12px] text-[#4A5263]">{t("reviews due")}</div></Link>
               <div><div className="font-serif text-[28px] leading-none">{ctx.aeRoles}</div><div className="text-[12px] text-[#4A5263]">{t("AE role")}</div></div>
             </div>
           </section>
@@ -82,12 +82,12 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
             )}
           </section>
           <section className={card}>
-            <div className="flex items-baseline justify-between"><p className={kicker}>{t("Inbox")}</p><Link href="/inbox" className="text-[12px] text-[#2F5FD0]">{t("Open inbox")}</Link></div>
+            <div className="flex items-baseline justify-between"><p className={kicker}>{t("Inbox")}</p><Link href="/workspace/inbox" className="text-[12px] text-[#2F5FD0]">{t("Open inbox")}</Link></div>
             {inbox.length ? (
               <ul className="m-0 mt-2 list-none p-0">
                 {inbox.map((m) => (
                   <li key={m.thread_id} className="border-b border-[#EEF0EC] py-2 last:border-0">
-                    <Link href={`/inbox/${m.thread_id}`} className="block text-[14px] text-[#121826] no-underline">
+                    <Link href={`/workspace/inbox/${m.thread_id}`} className="block text-[14px] text-[#121826] no-underline">
                       <span className="flex items-center gap-1.5">{m.unread ? <span aria-label={t("unread")} className="size-2 flex-none rounded-full bg-[#2F5FD0]" /> : null}<span className={`truncate ${m.unread ? "font-semibold" : ""}`}>{m.subject}</span></span>
                       <span className="block truncate text-[12px] text-[#4A5263]">{[m.venue, m.last_from].filter(Boolean).join(" · ")}</span>
                     </Link>
@@ -98,7 +98,7 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
               <p className="mb-0 mt-2 text-[13px] text-[#4A5263]">{t("No messages yet. Chairs and co-authors reach you here.")}</p>
             )}
           </section>
-          <Link href="/settings/calendar" className="box-border inline-flex h-[42px] w-full items-center justify-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Add deadlines to my calendar")}</Link>
+          <Link href="/workspace/settings/calendar" className="box-border inline-flex h-[42px] w-full items-center justify-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Add deadlines to my calendar")}</Link>
         </aside>
       </div>
     </WorkspaceShell>

@@ -36,7 +36,7 @@ export function InvitationForm({ mode, id, token, no, due, ae, email }: Props) {
   const [tried, setTried] = useState(false);
 
   if (state.ok && state.result === "accepted") {
-    const next = encodeURIComponent(`/reviews/${id}`);
+    const next = encodeURIComponent(`/workspace/reviews/${id}`);
     return (
       <div className="rounded-[8px] border border-[#B9E0CB] bg-[#F3FAF6] p-5">
         <h2 className="m-0 font-serif text-[22px] font-normal text-[#14603F]">{t("Thank you — you're reviewing {no}.", { no })}</h2>
@@ -44,8 +44,8 @@ export function InvitationForm({ mode, id, token, no, due, ae, email }: Props) {
           <>
             <p className="mb-0 mt-2 text-[15px]">{t("The PDF and review form are open now. Due {d}; we'll remind you 3 days before.", { d: due })}</p>
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <Link href={`/reviews/${id}`} className={ui.primary}>{t("Open review form")}</Link>
-              <Link href={`/reviews/${id}/paper`} className={ui.ghost}>{t("Read the paper")}</Link>
+              <Link href={`/workspace/reviews/${id}`} className={ui.primary}>{t("Open review form")}</Link>
+              <Link href={`/workspace/reviews/${id}/paper`} className={ui.ghost}>{t("Read the paper")}</Link>
             </div>
           </>
         ) : (
@@ -69,7 +69,7 @@ export function InvitationForm({ mode, id, token, no, due, ae, email }: Props) {
         <p className="mb-0 mt-2 text-[15px] text-[#4A5263]">
           {mode === "token" ? t("{ae} has been told. You don't need an account for this.", { ae }) : t("{ae} has been told, with your suggestion.", { ae })}
         </p>
-        {mode === "signed" ? <Link href="/reviews" className="mt-3 inline-block text-[#2F5FD0]">{t("Back to the review list")}</Link> : null}
+        {mode === "signed" ? <Link href="/workspace/reviews" className="mt-3 inline-block text-[#2F5FD0]">{t("Back to the review list")}</Link> : null}
       </div>
     );
   }

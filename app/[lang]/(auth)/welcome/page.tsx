@@ -54,7 +54,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
           <ul className="m-0 flex max-w-[560px] list-none flex-col gap-2 p-0">
             {[
               { href: "/contact?topic=import", label: "Bring your PaperCept history", s: "Past papers and reviews, from your society’s export or ORCID." },
-              { href: "/settings/profile", label: "Make your profile complete", s: "ORCID, research keywords, other emails — optional, any time." },
+              { href: "/workspace/account/profile", label: "Make your profile complete", s: "ORCID, research keywords, other emails — optional, any time." },
               { href: "/workspace", label: "Look around My workspace", s: "Submissions, reviews and messages, all in one list." },
             ].map((x) => (
               <li key={x.label}>

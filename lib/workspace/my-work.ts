@@ -100,7 +100,7 @@ export async function loadAgenda(rows: EventRow[], now: number): Promise<AgendaI
       if (!(s.saved || s.iChair || s.iPresent) || Date.parse(s.endsAt) < now) continue;
       items.push({
         id: `s:${s.id}`, type: kindOf(s), venueShort: venue.shortName ?? venue.name, venueSlug: venue.slug, timezone: venue.timezone, title: s.title, code: s.code,
-        startsAt: s.startsAt, endsAt: s.endsAt, room: s.room, href: s.iChair ? `/chair/${s.id}` : `/workspace/events/${venue.slug}/program`,
+        startsAt: s.startsAt, endsAt: s.endsAt, room: s.room, href: s.iChair ? `/workspace/talks/${s.id}` : `/workspace/events/${venue.slug}/program`,
       });
     }
   }

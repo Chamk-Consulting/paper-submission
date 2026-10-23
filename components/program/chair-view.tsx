@@ -61,7 +61,7 @@ export function ChairView({ s, slides, view }: { s: ChairSession; slides: Record
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 print:hidden">
           <div role="tablist" className="flex gap-1 rounded-[6px] bg-[#EEF0EC] p-[3px]">
             {([["before", "Before"], ["live", "On the day"]] as const).map(([k, label]) => (
-              <Link key={k} role="tab" aria-selected={view === k} href={k === "live" ? `/chair/${s.id}?view=live` : `/chair/${s.id}`} scroll={false}
+              <Link key={k} role="tab" aria-selected={view === k} href={k === "live" ? `/workspace/talks/${s.id}?view=live` : `/workspace/talks/${s.id}`} scroll={false}
                 className={`inline-flex h-[34px] items-center rounded-[4px] px-3.5 text-[14px] font-semibold no-underline ${view === k ? "bg-white text-[#121826]" : "text-[#4A5263]"}`}>{t(label)}</Link>
             ))}
           </div>

@@ -17,7 +17,7 @@ export const REVIEWER_GUIDES: Guide[] = [
       { h: "4. After you submit", p: ["You get a receipt, and you can choose to add the review to your ORCID record — without naming the paper. You can still edit until the editor starts the decision; every change after submitting is logged and shown to the editor.", "Once your own review is in, you can read the other submitted reviews of the same paper and join the discussion if the venue uses one."] },
       { h: "5. The decision", p: ["The editor recommends and the chairs decide. When the decision is released you see it with all reviews and how your scores compare. If the venue runs a second round, you check each of your comments against the revised paper."] },
     ],
-    next: { href: "/reviews", label: "Open my reviews" },
+    next: { href: "/workspace/reviews", label: "Open my reviews" },
   },
   {
     slug: "blind-review",
@@ -54,7 +54,7 @@ export const REVIEWER_GUIDES: Guide[] = [
       { h: "Handing the review back", p: ["If you can't do it at all, hand it back from the same page. Your draft is deleted and the editor is told at once. Suggesting a replacement reviewer helps a lot."] },
       { h: "After submitting", p: ["Extensions are only for reviews you haven't submitted yet. To change a submitted review, edit it before the editor starts the decision."] },
     ],
-    next: { href: "/reviews", label: "Open my reviews" },
+    next: { href: "/workspace/reviews", label: "Open my reviews" },
   },
   {
     slug: "conflicts",

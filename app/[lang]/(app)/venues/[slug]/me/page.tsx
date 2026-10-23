@@ -54,8 +54,8 @@ async function Inner({ params }: Params) {
 
   const work: WorkRow[] = [
     ...mine.map((p): WorkRow => ({ id: p.id, role: "AUTHOR", title: p.title || t("Untitled draft"), detail: [p.number ? `#${p.number}` : "", p.detail].filter(Boolean).join(" · "), at: null, href: p.href })),
-    ...myReviews.map((r): WorkRow => ({ id: r.assignment_id, role: "REVIEWER", title: r.title, detail: r.status === "invited" ? "Invitation — reply needed" : r.status === "submitted" ? "Review submitted" : "Review in progress", at: r.status === "invited" ? r.reply_by : r.status === "accepted" ? r.due_at : null, href: r.status === "accepted" ? `/reviews/${r.assignment_id}` : "/reviews" })),
-    ...mySessions.map((s): WorkRow => ({ id: s.session_id, role: "CHAIR", title: s.title, detail: [s.code, s.room].filter(Boolean).join(" · ") || "Session", at: s.starts_at, href: `/chair/${s.session_id}` })),
+    ...myReviews.map((r): WorkRow => ({ id: r.assignment_id, role: "REVIEWER", title: r.title, detail: r.status === "invited" ? "Invitation — reply needed" : r.status === "submitted" ? "Review submitted" : "Review in progress", at: r.status === "invited" ? r.reply_by : r.status === "accepted" ? r.due_at : null, href: r.status === "accepted" ? `/workspace/reviews/${r.assignment_id}` : "/workspace/reviews" })),
+    ...mySessions.map((s): WorkRow => ({ id: s.session_id, role: "CHAIR", title: s.title, detail: [s.code, s.room].filter(Boolean).join(" · ") || "Session", at: s.starts_at, href: `/workspace/talks/${s.session_id}` })),
   ];
   const deadlines: DeadlineRow[] = venue.dates.filter((d) => Date.parse(d.startsAt) > now).map((d) => {
     const [who, need] = WHO[d.kind] ?? ["Everyone", []];

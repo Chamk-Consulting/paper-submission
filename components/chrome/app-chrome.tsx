@@ -80,7 +80,7 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
           {s?.name ? (
             <div className="mb-2 rounded-[8px] border border-[#EEF0EC] px-3 py-2.5">
               <div className="truncate font-semibold">{s.name}</div>
-              {s.plenaryId ? <Link href="/settings/profile#plenary-id" className="font-mono text-[12px] text-[#2F5FD0] no-underline">{s.plenaryId} · {t("My Plenary ID")}</Link> : null}
+              {s.plenaryId ? <Link href="/workspace/account/profile#plenary-id" className="font-mono text-[12px] text-[#2F5FD0] no-underline">{s.plenaryId} · {t("My Plenary ID")}</Link> : null}
             </div>
           ) : null}
           <Link href="/workspace/events?intent=submit" onClick={onClose} className="mb-2 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("New submission")}</Link>
@@ -142,7 +142,7 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
                 <Plus size={15} strokeWidth={2.25} aria-hidden />{t("New submission")}
               </Link>
             ) : null}
-            <Link href="/inbox" prefetch={null} aria-label={s?.unread ? `${t("Inbox")} · ${s.unread} ${t("unread")}` : t("Inbox")} title={t("Inbox")}
+            <Link href="/workspace/inbox" prefetch={null} aria-label={s?.unread ? `${t("Inbox")} · ${s.unread} ${t("unread")}` : t("Inbox")} title={t("Inbox")}
               className="relative box-border flex size-10 items-center justify-center rounded-[6px] border border-[#2A3C6E] no-underline hover:bg-[#17285A]">
               <Mail size={18} strokeWidth={1.75} aria-hidden />
               <Count n={s?.unread} dark />

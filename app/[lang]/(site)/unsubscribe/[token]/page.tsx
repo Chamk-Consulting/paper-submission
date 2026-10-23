@@ -23,7 +23,7 @@ async function Inner({ params }: P) {
         <p className="m-0 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{t("Email preferences")}</p>
         <h1 className="mb-0 mt-1 font-serif text-[34px] font-normal leading-[1.15]">{t("This link doesn't work any more")}</h1>
         <p className="mb-0 mt-2 text-[#4A5263]">{t("Unsubscribe links expire after a year. Sign in to choose which emails you get.")}</p>
-        <Link href="/sign-in?next=/settings/notifications" className="mt-5 inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Open notification settings")}</Link>
+        <Link href="/sign-in?next=/workspace/settings/notifications" className="mt-5 inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Open notification settings")}</Link>
       </section>
     );
   }

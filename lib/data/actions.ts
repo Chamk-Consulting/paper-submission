@@ -10,7 +10,7 @@ export async function cancelDeletion(id: string): Promise<{ ok?: boolean; error?
   const supabase = await createClient();
   const { error } = await supabase.rpc("cancel_deletion", { p_id: id });
   if (error) return { error: /nothing to cancel/i.test(error.message) ? "This deletion can no longer be cancelled." : "Something went wrong. Please try again." };
-  revalidatePath("/[lang]/settings/privacy", "page");
-  revalidatePath("/[lang]/settings/privacy/export", "page");
+  revalidatePath("/[lang]/workspace/account/privacy", "page");
+  revalidatePath("/[lang]/workspace/account/privacy/export", "page");
   return { ok: true };
 }

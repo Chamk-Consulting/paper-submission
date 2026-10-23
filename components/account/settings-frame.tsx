@@ -6,13 +6,13 @@ import { getT } from "@/lib/i18n/server";
 
 export type SettingsKey = "profile" | "reviewing" | "security" | "privacy" | "notifications" | "calendar" | "preferences";
 export const SETTINGS_NAV: [SettingsKey, string, string][] = [
-  ["profile", "Profile", "/settings/profile"],
-  ["reviewing", "Reviewer profile", "/settings/reviewing"],
-  ["security", "Security", "/settings/security"],
-  ["privacy", "Privacy", "/settings/privacy"],
-  ["notifications", "Notifications", "/settings/notifications"],
-  ["calendar", "Calendar", "/settings/calendar"],
-  ["preferences", "Preferences", "/settings/preferences"],
+  ["profile", "Profile", "/workspace/account/profile"],
+  ["reviewing", "Reviewer profile", "/workspace/account/reviewer"],
+  ["security", "Security", "/workspace/account/security"],
+  ["privacy", "Privacy", "/workspace/account/privacy"],
+  ["notifications", "Notifications", "/workspace/settings/notifications"],
+  ["calendar", "Calendar", "/workspace/settings/calendar"],
+  ["preferences", "Preferences", "/workspace/settings/preferences"],
 ];
 const SETTINGS_HEAD: Record<SettingsKey, [string, string]> = {
   profile: ["Your profile", "Name, affiliations, research IDs, review topics and conflicts."],
@@ -31,7 +31,7 @@ export async function SettingsFrame({ active, children }: { active: SettingsKey;
   const t = await getT();
   const [title, subtitle] = SETTINGS_HEAD[active];
   return (
-    <div className="mx-auto w-full max-w-[900px]">
+    <div className="w-full">
       <div>
         <p className="m-0 text-[13px] text-[#4A5263]">{t(GROUP[active])}</p>
         <h1 className="mb-0 mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t(title)}</h1>

@@ -201,7 +201,7 @@ export async function sendReminders(input: z.input<typeof remZ>): Promise<OpsRes
   const mailFor = (s: (typeof list)[number]) => {
     const paper = num.get(s.submissionId);
     const vars = { "reviewer.first": s.reviewer.split(" ")[0] || "colleague", "paper.id": paperId(paper?.number ?? null), "paper.title": paper?.title ?? "", "venue.short": venue.short, "venue.name": venue.name,
-      deadline: fmtDue(s.dueAt), link: absUrl(`/reviews/${s.id}`) };
+      deadline: fmtDue(s.dueAt), link: absUrl(`/workspace/reviews/${s.id}`) };
     return { subject: renderTemplate(tpl.subject, vars).text, text: renderTemplate(tpl.body, vars).text };
   };
   if (p.data.test) {
@@ -217,7 +217,7 @@ export async function sendReminders(input: z.input<typeof remZ>): Promise<OpsRes
     if (s.email) mails.push({ to: s.email, subject: m.subject, text: m.text, replyTo: me?.email || undefined });
     if (s.reviewerId) {
       const { error } = await supabase.rpc("notify_people", { p_venue: venue.id, p_people: [s.reviewerId], p_kind: "message", p_subject: m.subject, p_body: m.text.replace(/https?:\/\/\S+/g, "").trim(),
-        p_submission: s.submissionId, p_cta_label: "Open review", p_cta_url: `/reviews/${s.id}` });
+        p_submission: s.submissionId, p_cta_label: "Open review", p_cta_url: `/workspace/reviews/${s.id}` });
       if (!error) inbox++;
     }
   }

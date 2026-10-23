@@ -9,7 +9,7 @@ import { paperNo } from "@/lib/review/shared";
 export async function loadReview(params: Promise<{ id: string }>, sub = "") {
   const { id } = await params;
   const ctx = await getWorkspaceCtx();
-  if (!ctx) redirect(`/sign-in?next=${encodeURIComponent(`/reviews/${id}${sub}`)}`);
+  if (!ctx) redirect(`/sign-in?next=${encodeURIComponent(`/workspace/reviews/${id}${sub}`)}`);
   const [form, t] = await Promise.all([getReviewForm(id), getT()]);
   return { id, ctx, form, t, no: form ? paperNo(form.paper.number) : "", ae: form?.ae ?? t("the editor") };
 }

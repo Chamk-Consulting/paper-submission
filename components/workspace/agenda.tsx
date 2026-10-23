@@ -154,7 +154,7 @@ export function Agenda({ items, events, init = {} }: { items: AgendaRow[]; event
             : <div className="h-[230px]" />}
         </Panel>
         <NextUp items={list} />
-        <Link href="/settings/calendar" className={`${ghostBtn} justify-center gap-2 font-medium no-underline`}><CalendarPlus size={16} aria-hidden />{t("Sync to calendar")}</Link>
+        <Link href="/workspace/settings/calendar" className={`${ghostBtn} justify-center gap-2 font-medium no-underline`}><CalendarPlus size={16} aria-hidden />{t("Sync to calendar")}</Link>
       </aside>
     </div>
   );

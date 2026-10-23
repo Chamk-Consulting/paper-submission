@@ -64,7 +64,7 @@ export function NotYours({ t }: { t: (k: string) => string }) {
     <div className="mt-6 max-w-[620px] rounded-[8px] border border-[#DADDE3] bg-white p-6">
       <h1 className="m-0 font-serif text-[28px] font-normal">{t("Review not found")}</h1>
       <p className="mb-0 mt-2 text-[#4A5263]">{t("This review doesn't exist or isn't assigned to you.")}</p>
-      <Link href="/reviews" className="mt-4 inline-block text-[#2F5FD0]">{t("Back to the review list")}</Link>
+      <Link href="/workspace/reviews" className="mt-4 inline-block text-[#2F5FD0]">{t("Back to the review list")}</Link>
     </div>
   );
 }

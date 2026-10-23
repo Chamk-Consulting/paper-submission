@@ -20,23 +20,23 @@ const GROUPS: { title: string; icon: string; guides: Guide[] }[] = [
     { id: "respond", title: "Respond to reviewers", body: "If the venue has a rebuttal or revision round, the paper’s page shows the reviews and a response form with its own deadline. Answer point by point and keep it polite.", href: "/workspace/submissions", cta: "My submissions" },
   ] },
   { title: "Reviewers", icon: "R", guides: [
-    { id: "accept", title: "Accept or decline", body: "Invitations open with one click, without signing in. Declining early helps chairs find someone else — you can suggest a colleague.", href: "/reviews", cta: "My reviews" },
+    { id: "accept", title: "Accept or decline", body: "Invitations open with one click, without signing in. Declining early helps chairs find someone else — you can suggest a colleague.", href: "/workspace/reviews", cta: "My reviews" },
     { id: "review", title: "Write a helpful review", body: "Summarise the contribution, then strengths, weaknesses and concrete suggestions. Scores should match your text. Margin notes in the viewer are shared with the authors only if you choose.", href: "/help/reviewers/workflow", cta: "Read the reviewer guide" },
     { id: "conflicts", title: "Conflicts of interest", body: "Declare co-authors from the last years, your institution and close collaborators. Plenary detects most conflicts automatically; tell the chairs about any others.", href: "/help/reviewers/conflicts", cta: "Read the guide" },
     { id: "ai-tools", title: "Using AI tools in reviews", body: "Each venue sets an AI policy: language help only, allowed with a declaration, or not allowed. The paper viewer shows the rule and switches the AI panel off where it isn't allowed.", href: "/help/reviewers/ai-tools", cta: "Read the guide" },
     { id: "more-time", title: "More time, or handing a review back", body: "Three extra days are approved at once; a week or two needs the editor. If you can't review at all, hand it back early and suggest someone.", href: "/help/reviewers/extensions", cta: "Read the guide" },
-    { id: "orcid", title: "Get credit on ORCID", body: "Connect ORCID in your account and Plenary can add your completed reviews to your record, without naming the paper.", href: "/settings", cta: "Account settings" },
+    { id: "orcid", title: "Get credit on ORCID", body: "Connect ORCID in your account and Plenary can add your completed reviews to your record, without naming the paper.", href: "/workspace/account/profile", cta: "Account settings" },
   ] },
   { title: "Session chairs", icon: "S", guides: [
-    { id: "run", title: "Run your session", body: "Talks & sessions lists the sessions you chair, their rooms and talks. On the day, mark talks as started, report delays and keep time — attendees see changes live.", href: "/chair", cta: "Talks & sessions" },
-    { id: "noshow", title: "Report a no-show", body: "Mark the talk as no-show from your session page. The program chairs are told at once and the proceedings rules of the venue apply.", href: "/chair", cta: "Talks & sessions" },
-    { id: "presenters", title: "Message presenters", body: "From the session page, write to all presenters at once. Messages land in their Plenary inbox and by email.", href: "/chair", cta: "Talks & sessions" },
+    { id: "run", title: "Run your session", body: "Talks & sessions lists the sessions you chair, their rooms and talks. On the day, mark talks as started, report delays and keep time — attendees see changes live.", href: "/workspace/talks", cta: "Talks & sessions" },
+    { id: "noshow", title: "Report a no-show", body: "Mark the talk as no-show from your session page. The program chairs are told at once and the proceedings rules of the venue apply.", href: "/workspace/talks", cta: "Talks & sessions" },
+    { id: "presenters", title: "Message presenters", body: "From the session page, write to all presenters at once. Messages land in their Plenary inbox and by email.", href: "/workspace/talks", cta: "Talks & sessions" },
   ] },
   { title: "Your account", icon: "Y", guides: [
-    { id: "passkeys", title: "Sign-in and passkeys", body: "Sign in with your email and a password or a one-time code. Add a passkey in Settings to sign in with your fingerprint or face. Plenary never uses PINs.", href: "/settings", cta: "Account settings" },
-    { id: "scripts", title: "Names in other scripts", body: "Add your name in another script (for example 中文 or Ελληνικά) in your profile. Proceedings use the name you choose for papers.", href: "/settings", cta: "Account settings" },
+    { id: "passkeys", title: "Sign-in and passkeys", body: "Sign in with your email and a password or a one-time code. Add a passkey in Settings to sign in with your fingerprint or face. Plenary never uses PINs.", href: "/workspace/account/profile", cta: "Account settings" },
+    { id: "scripts", title: "Names in other scripts", body: "Add your name in another script (for example 中文 or Ελληνικά) in your profile. Proceedings use the name you choose for papers.", href: "/workspace/account/profile", cta: "Account settings" },
     { id: "merge", title: "Merge duplicate accounts", body: "If you have two accounts, write to support from the one you want to keep. We move papers and reviews across after checking both emails.", href: "/contact", cta: "Contact support" },
-    { id: "data", title: "Download your data", body: "Ask for a copy of everything we hold about you from Settings. We email a download link when it’s ready.", href: "/settings", cta: "Account settings" },
+    { id: "data", title: "Download your data", body: "Ask for a copy of everything we hold about you from Settings. We email a download link when it’s ready.", href: "/workspace/account/profile", cta: "Account settings" },
   ] },
 ];
 
@@ -124,7 +124,7 @@ export function HelpCenter({ initialQuery = "", signedIn, hero = false }: { init
                         <span aria-hidden className="text-[#4A5263] transition-transform group-open:rotate-90">›</span>
                       </summary>
                       <p className="mb-3 mt-0 text-[14px] leading-[1.6] text-[#4A5263]">{t(x.body)}</p>
-                      {x.href && x.cta && (signedIn || !["/workspace/submissions", "/reviews", "/chair", "/settings"].includes(x.href))
+                      {x.href && x.cta && (signedIn || !["/workspace/submissions", "/workspace/reviews", "/workspace/talks", "/workspace/account/profile"].includes(x.href))
                         ? <Link href={x.href} className="mb-3 inline-block text-[14px] font-semibold text-[#0E1B3D]">{t(x.cta)} →</Link> : null}
                     </details>
                   </li>
@@ -161,7 +161,7 @@ export function HelpCenter({ initialQuery = "", signedIn, hero = false }: { init
           <p className="mb-0 mt-1 text-[14px] text-[#D6DCEA]">{t("For a question about a paper or decision, message the venue. For problems with Plenary itself, contact support.")}</p>
         </div>
         <div className="flex flex-wrap gap-2.5">
-          <Link href={signedIn ? "/inbox" : "/sign-in?next=/inbox"} className="inline-flex h-11 items-center rounded-[4px] border border-[#3A4C7E] px-4 text-[14px] font-medium text-[#F5F6F3] no-underline hover:bg-[#17285A]">{t("Message the venue")}</Link>
+          <Link href={signedIn ? "/workspace/inbox" : "/sign-in?next=/workspace/inbox"} className="inline-flex h-11 items-center rounded-[4px] border border-[#3A4C7E] px-4 text-[14px] font-medium text-[#F5F6F3] no-underline hover:bg-[#17285A]">{t("Message the venue")}</Link>
           <Link href="/contact" className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-4 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Contact Plenary support")}</Link>
         </div>
       </section>

@@ -35,7 +35,7 @@ export async function setAttendance(talkId: string, attendance: string, note?: s
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_talk_attendance", { p_talk: talkId, p_attendance: a.data, p_note: note?.trim().slice(0, 1000) || null });
   if (error) return { error: friendly(error.message) };
-  revalidatePath("/[lang]/chair", "layout");
+  revalidatePath("/[lang]/workspace/talks", "layout");
   return { ok: true };
 }
 
@@ -46,7 +46,7 @@ export async function updateLive(sessionId: string, status: string, delay: numbe
   const supabase = await createClient();
   const { error } = await supabase.rpc("chair_update", { p_session: sessionId, p_live_status: s.data, p_delay: Math.round(delay), p_note: note?.trim().slice(0, 300) || null });
   if (error) return { error: friendly(error.message) };
-  revalidatePath("/[lang]/chair", "layout");
+  revalidatePath("/[lang]/workspace/talks", "layout");
   return { ok: true };
 }
 

@@ -67,7 +67,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string
       <Greeting first={first} />
       <p className="mt-1.5 text-[#4A5263]">
         {nRev + nFinal + nCo ? <>{t("You have")} {b(nRev, "{n} review", "{n} reviews")}, {b(nFinal, "{n} final version", "{n} final versions")} {t("and")} {b(nCo, "{n} co-author request", "{n} co-author requests")} {t("in the next 14 days.")}</> : t("Nothing is due in the next 14 days.")}
-        {" "}<Link href="/settings/calendar" className="whitespace-nowrap text-[#2F5FD0]">{t("Add deadlines to my calendar →")}</Link>
+        {" "}<Link href="/workspace/settings/calendar" className="whitespace-nowrap text-[#2F5FD0]">{t("Add deadlines to my calendar →")}</Link>
       </p>
 
       <div className="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -80,14 +80,14 @@ async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string
           <section className="rounded-[8px] border border-[#DADDE3] bg-white p-5">
             <div className="flex items-center justify-between">
               <h2 className="m-0 font-serif text-[20px] font-normal">{t("Latest messages")}</h2>
-              <Link href="/inbox" className="text-[13px] font-semibold text-[#2F5FD0]">{t("Inbox →")}</Link>
+              <Link href="/workspace/inbox" className="text-[13px] font-semibold text-[#2F5FD0]">{t("Inbox →")}</Link>
             </div>
             {inbox.length ? (
               <ul className="m-0 mt-2 list-none p-0">
                 {inbox.map((m) => (
                   <li key={m.thread_id} className="flex gap-2.5 border-b border-[#EEF0EC] py-2.5 last:border-b-0">
                     <span aria-hidden className={`mt-2 size-2 flex-none rounded-full ${m.unread ? "bg-[#2F5FD0]" : "bg-transparent"}`} />
-                    <Link href={`/inbox/${m.thread_id}`} className="min-w-0 flex-auto text-[#121826] no-underline hover:underline">
+                    <Link href={`/workspace/inbox/${m.thread_id}`} className="min-w-0 flex-auto text-[#121826] no-underline hover:underline">
                       <span className={`block truncate text-[14px] ${m.unread ? "font-semibold" : ""}`}>{m.subject}</span>
                       <span className="flex justify-between gap-2 text-[12px] text-[#4A5263]"><span className="truncate">{[m.last_from, m.venue].filter(Boolean).join(" · ")}</span><RelTime iso={m.last_at} /></span>
                     </Link>
@@ -101,7 +101,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ notice?: string
               <h2 className="m-0 flex items-center justify-between font-serif text-[20px] font-normal">{t("Finish your profile")}<span className="font-mono text-[13px]">{prof.pct}%</span></h2>
               <span className="mt-2.5 block h-1.5 overflow-hidden rounded-full bg-[#F1D29A]"><span className="block h-full bg-[#A8600F]" style={{ width: `${prof.pct}%` }} /></span>
               <p className="mb-0 mt-2.5 text-[14px]">{prof.needTopics ? t("Add your topics so chairs can match you to papers you’re qualified to review.") : prof.needOrcid ? t("Connect ORCID so your papers and reviews follow you.") : t("Add your affiliation and country so co-authors can find you.")}</p>
-              <Link href="/settings" className="mt-2.5 inline-block text-[14px] font-semibold text-[#7A4508]">{t("Complete profile →")}</Link>
+              <Link href="/workspace/account/profile" className="mt-2.5 inline-block text-[14px] font-semibold text-[#7A4508]">{t("Complete profile →")}</Link>
             </section>
           ) : null}
         </aside>

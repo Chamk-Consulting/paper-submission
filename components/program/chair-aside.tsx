@@ -16,7 +16,7 @@ export function ChairAside({ t, list, current }: { t: T; list: ChairListItem[]; 
         <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
           {list.map((x) => (
             <li key={x.id}>
-              <Link href={`/chair/${x.id}`} aria-current={current?.id === x.id ? "page" : undefined} className={`font-semibold no-underline ${current?.id === x.id ? "text-[#1F47A8]" : "text-[#121826]"}`}>{x.code} · {x.title}</Link>
+              <Link href={`/workspace/talks/${x.id}`} aria-current={current?.id === x.id ? "page" : undefined} className={`font-semibold no-underline ${current?.id === x.id ? "text-[#1F47A8]" : "text-[#121826]"}`}>{x.code} · {x.title}</Link>
               <div className="text-[12px] text-[#4A5263]">{x.venueShort} · {fmtDay(x.startsAt, x.timezone, t.intl)} {fmtTime(x.startsAt, x.timezone, t.intl)} · {t("{n}/{total} ready", { n: x.ready, total: x.total })}</div>
             </li>
           ))}

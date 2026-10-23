@@ -25,5 +25,5 @@ export async function messageChairs(_: ActionState, fd: FormData): Promise<Actio
     if (/not allowed|42501/i.test(error.message + error.code)) return { error: "Only authors of this paper can message the chair." };
     return { error: "Something went wrong. Please try again." };
   }
-  redirect(`/inbox/${data as string}`);
+  redirect(`/workspace/inbox/${data as string}`);
 }

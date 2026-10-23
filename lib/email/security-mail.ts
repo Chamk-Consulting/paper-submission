@@ -83,7 +83,7 @@ export async function sendSecurityNotice(kind: NoticeKind, to: string, detail?: 
   const rows: [string, string][] = [["When", when()], ["Account", to], ...(detail ? ([["Detail", detail]] as [string, string][]) : []), ["Site", host()]];
   const mail = layout({
     subject: n.subject, kicker: "Security notice", kickerInk: "#B3261E", title: n.title, lead: n.lead,
-    button: { label: "Review sign-in & security", href: absoluteUrl("/settings/security") },
+    button: { label: "Review sign-in & security", href: absoluteUrl("/workspace/account/security") },
     rows,
     note: "<strong>Wasn't you?</strong> Reset your password now from the sign-in page and sign out of all other devices under Sign-in &amp; security. Then contact Plenary support.",
     to,

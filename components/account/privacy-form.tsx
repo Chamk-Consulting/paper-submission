@@ -88,7 +88,7 @@ function YourData({ lastExport }: { lastExport: DataRequest | null }) {
       <div className="mt-3.5 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span><strong className="text-[14px]">{t("Download everything")}</strong><span className="block text-[13px] text-[#4A5263]">{t("Papers, reviews you wrote, messages and profile as a ZIP (JSON + PDFs).")}</span></span>
-          <Link href="/settings/privacy/export" className={small}>{status === "ready" ? t("Download ZIP") : status === "preparing" ? t("Preparing…") : t("Request export")}</Link>
+          <Link href="/workspace/account/privacy/export" className={small}>{status === "ready" ? t("Download ZIP") : status === "preparing" ? t("Preparing…") : t("Request export")}</Link>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0EC] pt-3">
           <span><strong className="text-[14px]">{t("Import from PaperCept or another system")}</strong><span className="block text-[13px] text-[#4A5263]">{t("Bring past papers and reviews using your society's export or ORCID.")}</span></span>
@@ -119,7 +119,7 @@ function DeleteAccount({ lastDelete, date }: { lastDelete: DataRequest | null; d
           {lastDelete?.scheduled_for
             ? t("Your account will be deleted on {date}. You can cancel until then.", { date: date(lastDelete.scheduled_for) })
             : t("Your account will be deleted in 30 days. You can cancel until then.")}{" "}
-          <Link href="/settings/privacy/export">{t("Cancel deletion")}</Link>
+          <Link href="/workspace/account/privacy/export">{t("Cancel deletion")}</Link>
         </p>
       ) : confirming ? (
         <div className="mt-3 rounded-[6px] border border-[#F3C3BE] bg-[#FFFBFA] px-3.5 py-3">
@@ -146,7 +146,7 @@ function BlockedNote({ reason }: { reason: string | null }) {
     <div role="alert" className="mt-3 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2.5 text-[13px] text-[#5C1A15]">
       {m ? t("You have {r} reviews in progress and {p} papers under review. Finish or hand these over before deleting.", { r: m[1], p: m[2] })
         : t("You have reviews in progress or papers under review. Finish or hand these over before deleting.")}{" "}
-      <Link href="/reviews">{t("See reviews")}</Link>
+      <Link href="/workspace/reviews">{t("See reviews")}</Link>
     </div>
   );
 }

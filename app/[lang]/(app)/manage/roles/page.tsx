@@ -34,9 +34,9 @@ const DESC: Record<string, string> = {
 
 function roleHref(slug: string, role: string, paperId?: string) {
   if (role === "associate_editor") return `/manage/${slug}/papers`;
-  if (role === "reviewer") return "/reviews";
+  if (role === "reviewer") return "/workspace/reviews";
   if (role === "author") return paperId ? `/submissions/${paperId}` : "/workspace/submissions";
-  if (role === "session_chair") return "/chair";
+  if (role === "session_chair") return "/workspace/talks";
   return `/manage/${slug}`;
 }
 

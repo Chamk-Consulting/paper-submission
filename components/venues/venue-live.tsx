@@ -163,7 +163,7 @@ function MyStatus({ venueId, acr, slug }: { venueId: string; acr: string; slug: 
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-[#7A4508]">{t("REVIEWER")} · {no(r.number)}</span>
             <span className="block text-[13px] text-[#4A5263]">
               {r.status === "invited" ? t("Invitation — reply needed") : r.status === "submitted" ? t("Review submitted") : t("Due {date}", { date: new Date(r.due_at).toLocaleDateString(t.intl, { day: "numeric", month: "short" }) })}
-              {" · "}<Link href={r.status === "accepted" ? `/reviews/${r.id}` : "/reviews"} className="font-semibold text-[#2F5FD0]">{t("Open →")}</Link>
+              {" · "}<Link href={r.status === "accepted" ? `/workspace/reviews/${r.id}` : "/workspace/reviews"} className="font-semibold text-[#2F5FD0]">{t("Open →")}</Link>
             </span>
           </li>
         ))}

@@ -21,7 +21,7 @@ const MAX_TRIES = 5;
 const GENERIC = "Something went wrong. Please try again.";
 const emailSchema = z.string().trim().toLowerCase().email("That doesn’t look like a full email, e.g. name@university.edu").max(254);
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
-const refresh = () => revalidatePath("/[lang]/settings/security", "page");
+const refresh = () => revalidatePath("/[lang]/workspace/account/security", "page");
 
 async function me() {
   const supabase = await createClient();
@@ -134,7 +134,7 @@ export async function changeSignInEmail(_: SecState, fd: FormData): Promise<SecS
   const c = await me();
   if (!c) return { error: "Sign in again to continue." };
   if (parsed.data === c.email) return { error: "That’s already your sign-in email." };
-  const { error } = await c.supabase.auth.updateUser({ email: parsed.data }, { emailRedirectTo: absoluteUrl("/auth/confirm?next=/settings/security") });
+  const { error } = await c.supabase.auth.updateUser({ email: parsed.data }, { emailRedirectTo: absoluteUrl("/auth/confirm?next=/workspace/account/security") });
   if (error) {
     if (/already|registered|exists/i.test(error.message)) return { error: "That email belongs to another Plenary account. If both are yours, use Account help › Merge accounts." };
     if (error.status === 429 || /rate|seconds/i.test(error.message)) return { error: "Please wait a minute before asking again." };
@@ -234,7 +234,7 @@ export async function resendEmailChange(): Promise<SecState> {
   if (!c) return { error: "Sign in again to continue." };
   const pending = await pendingEmailChange();
   if (!pending) return { ok: true };
-  const { error } = await c.supabase.auth.resend({ type: "email_change", email: pending, options: { emailRedirectTo: absoluteUrl("/auth/confirm?next=/settings/security") } });
+  const { error } = await c.supabase.auth.resend({ type: "email_change", email: pending, options: { emailRedirectTo: absoluteUrl("/auth/confirm?next=/workspace/account/security") } });
   if (error) return { error: error.status === 429 || /rate|seconds/i.test(error.message) ? "Please wait a minute before asking again." : GENERIC };
   return { ok: true, info: "Sent again. Confirm from both inboxes." };
 }

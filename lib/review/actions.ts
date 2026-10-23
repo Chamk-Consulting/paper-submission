@@ -56,7 +56,7 @@ export async function saveAvailability(_: ActionState, fd: FormData): Promise<Ac
   };
   const { error } = await supabase.from("persons").update(patch).eq("user_id", auth.user.id);
   if (error) return { error: friendly(error.message) };
-  revalidatePath("/reviews");
+  revalidatePath("/workspace/reviews");
   return { ok: true, savedAt: new Date().toISOString() };
 }
 
@@ -85,7 +85,7 @@ export async function respondInvitation(_: ActionState, fd: FormData): Promise<A
     p_accept: accept, p_coi: !!v.coi, p_reason: accept ? null : v.reason, p_suggestion: accept ? null : v.suggestion ?? null,
   });
   if (error) return { error: friendly(error.message) };
-  revalidatePath("/reviews");
+  revalidatePath("/workspace/reviews");
   return { ok: true, result: String(data) };
 }
 
@@ -115,8 +115,8 @@ export async function saveReview(input: ReviewInput): Promise<ActionState> {
   });
   if (error) return { error: friendly(error.message) };
   const result = String(data);
-  revalidatePath("/reviews");
-  revalidatePath(`/reviews/${v.id}`, "layout");
+  revalidatePath("/workspace/reviews");
+  revalidatePath(`/workspace/reviews/${v.id}`, "layout");
   return { ok: true, result, savedAt: new Date().toISOString() };
 }
 
@@ -137,7 +137,7 @@ export async function addNote(_: ActionState, fd: FormData): Promise<ActionState
   const supabase = await createClient();
   const { error } = await supabase.from("review_notes").insert({ assignment_id: p.data.assignment, page: p.data.page ?? null, body: p.data.body });
   if (error) return { error: friendly(error.message) };
-  revalidatePath(`/reviews/${p.data.assignment}/paper`);
+  revalidatePath(`/workspace/reviews/${p.data.assignment}/paper`);
   return { ok: true };
 }
 export async function setNoteInReview(assignment: string, noteId: string, inReview: boolean): Promise<ActionState> {
@@ -145,7 +145,7 @@ export async function setNoteInReview(assignment: string, noteId: string, inRevi
   const supabase = await createClient();
   const { error } = await supabase.from("review_notes").update({ in_review: inReview }).eq("id", noteId).select("id").single();
   if (error) return { error: friendly(error.message) };
-  revalidatePath(`/reviews/${assignment}/paper`);
+  revalidatePath(`/workspace/reviews/${assignment}/paper`);
   return { ok: true };
 }
 export async function deleteNote(assignment: string, noteId: string): Promise<ActionState> {
@@ -153,7 +153,7 @@ export async function deleteNote(assignment: string, noteId: string): Promise<Ac
   const supabase = await createClient();
   const { error } = await supabase.from("review_notes").delete().eq("id", noteId);
   if (error) return { error: friendly(error.message) };
-  revalidatePath(`/reviews/${assignment}/paper`);
+  revalidatePath(`/workspace/reviews/${assignment}/paper`);
   return { ok: true };
 }
 
@@ -171,8 +171,8 @@ export async function requestExtension(_: ActionState, fd: FormData): Promise<Ac
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("request_extension", { p_assignment: v.id, p_option: v.option, p_message: v.message || null, p_suggestion: v.suggestion || null });
   if (error) return { error: friendly(error.message) };
-  revalidatePath("/reviews");
-  revalidatePath(`/reviews/${v.id}`, "layout");
+  revalidatePath("/workspace/reviews");
+  revalidatePath(`/workspace/reviews/${v.id}`, "layout");
   return { ok: true, result: String(data) };
 }
 export async function acceptCounterOffer(assignment: string, request: string): Promise<ActionState> {
@@ -180,7 +180,7 @@ export async function acceptCounterOffer(assignment: string, request: string): P
   const supabase = await createClient();
   const { error } = await supabase.rpc("accept_counter_offer", { p_request: request });
   if (error) return { error: friendly(error.message) };
-  revalidatePath(`/reviews/${assignment}`, "layout");
+  revalidatePath(`/workspace/reviews/${assignment}`, "layout");
   return { ok: true };
 }
 export async function cancelExtension(assignment: string, request: string): Promise<ActionState> {
@@ -188,7 +188,7 @@ export async function cancelExtension(assignment: string, request: string): Prom
   const supabase = await createClient();
   const { error } = await supabase.rpc("cancel_extension", { p_request: request });
   if (error) return { error: friendly(error.message) };
-  revalidatePath(`/reviews/${assignment}`, "layout");
+  revalidatePath(`/workspace/reviews/${assignment}`, "layout");
   return { ok: true };
 }
 
@@ -200,7 +200,7 @@ export async function postDiscussion(_: ActionState, fd: FormData): Promise<Acti
   const supabase = await createClient();
   const { error } = await supabase.rpc("post_discussion", { p_submission: p.data.submission, p_body: p.data.body });
   if (error) return { error: friendly(error.message) };
-  revalidatePath(`/reviews/${p.data.id}/discussion`);
+  revalidatePath(`/workspace/reviews/${p.data.id}/discussion`);
   return { ok: true, savedAt: new Date().toISOString() };
 }
 

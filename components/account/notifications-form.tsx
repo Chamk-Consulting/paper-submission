@@ -56,7 +56,7 @@ export function NotificationsForm({ prefs }: { prefs: Prefs }) {
         <h2 className={sx.h2}>{t("Email me about…")}</h2>
         <p className={sx.sub + " text-[13px]"}>
           {t("Sent to {email}.", { email: prefs.email })}{" "}
-          <Link href="/settings/security" className="text-[#2F5FD0]">{t("Change it in Security")}</Link>
+          <Link href="/workspace/account/security" className="text-[#2F5FD0]">{t("Change it in Security")}</Link>
           {" · "}{t("Everything also arrives in your Plenary inbox, even when email is off.")}
         </p>
         <div className="mt-2 overflow-x-auto">

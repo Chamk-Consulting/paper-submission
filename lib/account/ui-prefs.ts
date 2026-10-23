@@ -27,7 +27,7 @@ export function parseUi(x: unknown): UiPrefs {
 }
 
 /** Where "start page after sign-in" goes. */
-export const START_HREF: Record<UiPrefs["start"], string> = { home: "/workspace", submissions: "/workspace/submissions", reviews: "/reviews", events: "/workspace/events" };
+export const START_HREF: Record<UiPrefs["start"], string> = { home: "/workspace", submissions: "/workspace/submissions", reviews: "/workspace/reviews", events: "/workspace/events" };
 
 export const UI_KEY = "plenary.ui";
 const SIDE_KEY = "plenary.sideRail";

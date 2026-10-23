@@ -50,7 +50,7 @@ export function InboxList({ rows, selected }: { rows: InboxRow[]; selected: stri
         {FILTERS.map(([k, label]) => {
           const on = f === k;
           return (
-            <Link key={k} href={`${selected ? `/inbox/${selected}` : "/inbox"}${k === "all" ? "" : `?f=${k}`}`} aria-pressed={on} scroll={false}
+            <Link key={k} href={`${selected ? `/workspace/inbox/${selected}` : "/workspace/inbox"}${k === "all" ? "" : `?f=${k}`}`} aria-pressed={on} scroll={false}
               className={`inline-flex h-7 items-center rounded-full border px-2.5 text-[12px] font-semibold no-underline ${on ? "border-[#0E1B3D] bg-[#0E1B3D] text-[#F5F6F3]" : "border-[#DADDE3] bg-white text-[#4A5263] hover:border-[#B7BDC9]"}`}>
               {t(label)}{k === "all" && unread ? ` · ${unread}` : ""}
             </Link>
@@ -65,7 +65,7 @@ export function InboxList({ rows, selected }: { rows: InboxRow[]; selected: stri
             const on = r.thread_id === selected;
             return (
               <li key={r.thread_id}>
-                <Link href={`/inbox/${r.thread_id}${qs}`} aria-current={on ? "page" : undefined} scroll={false}
+                <Link href={`/workspace/inbox/${r.thread_id}${qs}`} aria-current={on ? "page" : undefined} scroll={false}
                   className={`flex gap-2.5 border-b border-l-[3px] border-b-[#EEF0EC] px-3.5 py-3 text-[#121826] no-underline ${on ? "border-l-[#2F5FD0] bg-[#F3F6FD]" : "border-l-transparent bg-white hover:bg-[#FAFBFC]"}`}>
                   <span aria-hidden className={`mt-[7px] size-2 flex-none rounded-full ${r.unread ? "bg-[#F2A93B]" : "bg-transparent"}`} />
                   <span className="min-w-0 flex-auto">

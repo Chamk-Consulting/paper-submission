@@ -72,7 +72,7 @@ export async function messageEditor(_: PolishState, fd: FormData): Promise<Polis
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("message_handling_editor", { p_assignment: p.data.assignmentId, p_subject: p.data.subject ?? "", p_body: p.data.body });
   if (error) return { error: friendly(error.message) };
-  redirect(`/inbox/${data as string}`);
+  redirect(`/workspace/inbox/${data as string}`);
 }
 
 /* ---------------------------------------------------------------- RV03 annotated PDF (file is uploaded from the browser first) */
@@ -81,6 +81,6 @@ export async function setAnnotation(assignmentId: string, path: string | null): 
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_annotated_pdf", { p_assignment: assignmentId, p_path: path });
   if (error) return { error: friendly(error.message) };
-  revalidatePath(`/reviews/${assignmentId}`);
+  revalidatePath(`/workspace/reviews/${assignmentId}`);
   return { ok: true };
 }

@@ -45,7 +45,7 @@ export function ExtensionPanel(p: ExtProps) {
       <section className={`${card} border-[#DADDE3]`}>
         <h2 className={ui.h2}>{t("Review handed back")}</h2>
         <p className="mb-0 mt-2 text-[15px] text-[#4A5263]">{t("{no} is no longer in your list. Thank you for saying so early — it helps the authors get a decision on time.", { no: p.no })}</p>
-        <Link href="/reviews" className={`${ui.ghost} mt-4`}>{t("Back to the review list")}</Link>
+        <Link href="/workspace/reviews" className={`${ui.ghost} mt-4`}>{t("Back to the review list")}</Link>
       </section>
     );
   }
@@ -57,7 +57,7 @@ export function ExtensionPanel(p: ExtProps) {
         <h2 className={`${ui.h2} mt-2`}>{t("You asked for {x}", { x: t(label(ext.option)).toLowerCase() })}</h2>
         <p className="mb-0 mt-2 text-[15px] text-[#4A5263]">{t("Until the editor answers, your due date stays {d}. Editors usually reply within a day. Keep going in the meantime — your draft is safe.", { d: fmtDayYear(p.dueAt, t.intl) })}</p>
         <div className="mt-4 flex flex-wrap gap-2.5">
-          <Link href={`/reviews/${p.id}`} className={ui.primary}>{t("Continue the review")}</Link>
+          <Link href={`/workspace/reviews/${p.id}`} className={ui.primary}>{t("Continue the review")}</Link>
           <button type="button" disabled={busy} onClick={() => run(() => cancelExtension(p.id, ext.id))} className={ui.ghost}>{t("Cancel request")}</button>
         </div>
         {err ? <p role="alert" className="mb-0 mt-2 text-[14px] text-[#B3261E]">{t(err)}</p> : null}
@@ -93,7 +93,7 @@ export function ExtensionPanel(p: ExtProps) {
           <h2 className={`${ui.h2} mt-2`}>{t("New due date: {d}", { d: fmtDayYear(p.dueAt, t.intl) })}</h2>
           {ext?.editor_message ? <p className="mb-0 mt-2 text-[15px] text-[#4A5263]">{p.ae}: “{ext.editor_message}”</p> : null}
           <div className="mt-4 flex flex-wrap gap-2.5">
-            <Link href={`/reviews/${p.id}`} className={ui.primary}>{t("Continue the review")}</Link>
+            <Link href={`/workspace/reviews/${p.id}`} className={ui.primary}>{t("Continue the review")}</Link>
             <button type="button" onClick={() => setAsking(true)} className={ui.ghost}>{t("Ask again")}</button>
           </div>
         </section>
@@ -140,7 +140,7 @@ export function ExtensionPanel(p: ExtProps) {
               className={back ? "inline-flex h-[42px] items-center rounded-[4px] border-0 bg-[#B3261E] px-4 text-[14px] font-semibold text-white disabled:opacity-60" : ui.primary}>
               {back ? t("Hand back {no}", { no: p.no }) : t("Send request")}
             </button>
-            <Link href={`/reviews/${p.id}`} className="text-[14px] text-[#2F5FD0]">{t("Back to the review")}</Link>
+            <Link href={`/workspace/reviews/${p.id}`} className="text-[14px] text-[#2F5FD0]">{t("Back to the review")}</Link>
           </div>
           {state.error ? <p role="alert" className="m-0 text-[14px] text-[#B3261E]">{t(state.error)}</p> : null}
         </form>

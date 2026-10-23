@@ -11,7 +11,7 @@ export async function InboxPage({ threadId }: { threadId: string | null }) {
   const [ctx, rows, t] = await Promise.all([getWorkspaceCtx(), getInbox(), getT()]);
   if (!ctx) redirect(`/sign-in?next=/inbox${threadId ? `/${threadId}` : ""}`);
   const row = threadId ? rows.find((r) => r.thread_id === threadId) ?? null : null;
-  if (threadId && !row) redirect("/inbox");
+  if (threadId && !row) redirect("/workspace/inbox");
   const messages = row ? await getThreadMessages(row.thread_id) : [];
 
   return (
@@ -21,7 +21,7 @@ export async function InboxPage({ threadId }: { threadId: string | null }) {
           <h1 className="m-0 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("Inbox")}</h1>
           <p className="mb-0 mt-1.5 text-[#4A5263]">{t("Messages from venues, editors, co-authors and Plenary.")}</p>
         </div>
-        <Link href="/settings/notifications" className="text-[14px] text-[#2F5FD0]">{t("Email settings →")}</Link>
+        <Link href="/workspace/settings/notifications" className="text-[14px] text-[#2F5FD0]">{t("Email settings →")}</Link>
       </div>
       <div className="mt-[22px] flex min-h-[760px] overflow-hidden rounded-[8px] border border-[#DADDE3] bg-white">
         <InboxList rows={rows} selected={row?.thread_id ?? null} />

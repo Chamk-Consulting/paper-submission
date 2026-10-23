@@ -70,8 +70,8 @@ export async function POST(req: Request) {
   const mails: { to: string; code: string | null; link: string | null }[] = [];
   if (action === "email_change") {
     // Secure email change: one email to the current address, one to the new address.
-    if (d.token_hash) mails.push({ to: p.user.email, code: d.token ?? null, link: confirmLink(d.token_hash, "email_change", "/settings/security") });
-    if (p.user.new_email && d.token_hash_new) mails.push({ to: p.user.new_email, code: d.token_new ?? null, link: confirmLink(d.token_hash_new, "email_change", "/settings/security") });
+    if (d.token_hash) mails.push({ to: p.user.email, code: d.token ?? null, link: confirmLink(d.token_hash, "email_change", "/workspace/account/security") });
+    if (p.user.new_email && d.token_hash_new) mails.push({ to: p.user.new_email, code: d.token_new ?? null, link: confirmLink(d.token_hash_new, "email_change", "/workspace/account/security") });
   } else if (action === "reauthentication") {
     mails.push({ to: p.user.email, code: d.token ?? null, link: null });
   } else {

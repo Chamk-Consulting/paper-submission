@@ -6,7 +6,7 @@ import { site } from "@/lib/config/site";
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return Response.redirect(new URL("/sign-in?next=/settings/calendar", request.url), 303);
+  if (!auth.user) return Response.redirect(new URL("/sign-in?next=/workspace/settings/calendar", request.url), 303);
   const q = new URL(request.url).searchParams;
   const on = (k: string, d: boolean) => (q.has(k) ? q.get(k) === "1" : d);
   const flags = { submissions: on("submissions", true), reviews: on("reviews", true), sessions: on("sessions", true), followed: on("followed", false) };

@@ -105,7 +105,7 @@ export function ContactOrganizers({ venueId, slug, acr }: { venueId: string; slu
   if (state.threadId) {
     return (
       <div role="status" className="mt-3 rounded-[6px] bg-[#E1F3EA] px-3 py-2.5 text-[14px] text-[#14603F]">
-        ✓ {t("Sent. Replies arrive in your inbox.")} <Link href={`/inbox/${state.threadId}`} className="font-semibold text-[#14603F] underline">{t("Open the conversation")}</Link>
+        ✓ {t("Sent. Replies arrive in your inbox.")} <Link href={`/workspace/inbox/${state.threadId}`} className="font-semibold text-[#14603F] underline">{t("Open the conversation")}</Link>
       </div>
     );
   }
