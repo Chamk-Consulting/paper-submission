@@ -41,7 +41,7 @@ export async function WorkspaceSkeleton({ active }: { active: "home" | "submissi
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="m-0 font-mono text-[12px] text-[#4A5263]">{t("Author")}</p>
-                <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("Papers")}</h1>
+                <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("My submissions")}</h1>
                 <p className="mt-1.5 text-[#4A5263]">{t("Every paper you are an author on, grouped by venue. One venue can hold several of your papers, each at its own stage.")}</p>
               </div>
               <span className="inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D]">{t("+ New submission")}</span>

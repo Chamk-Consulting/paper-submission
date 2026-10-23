@@ -58,7 +58,7 @@ async function Inner({ searchParams }: { searchParams: Promise<{ q?: string; t?:
               );
             })}
           </nav>
-          <div className="mt-4 flex max-w-[900px] flex-col gap-2.5">
+          <div className="mt-4 flex flex-col gap-2.5">
             {shown.length === 0 ? (
               <p className="m-0 rounded-[8px] border border-[#DADDE3] bg-white px-4 py-5 text-[14px] text-[#4A5263]">
                 {t("No results. Try fewer words, a paper number like #1234, or a Plenary ID.")}

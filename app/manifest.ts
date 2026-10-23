@@ -23,7 +23,7 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icons/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
     ],
     shortcuts: [
-      { name: "My papers", short_name: "Papers", url: "/workspace/submissions?source=pwa", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+      { name: "My submissions", short_name: "Submissions", url: "/workspace/submissions?source=pwa", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
       { name: "Find a call for papers", short_name: "Venues", url: "/venues?source=pwa", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
     ],
   };

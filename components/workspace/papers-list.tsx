@@ -108,7 +108,7 @@ export function PapersList({ papers, next = {}, init = {} }: { papers: MyPaper[]
   };
 
   return (
-    <section aria-label={t("Papers")} className="mt-6 flex flex-col gap-3">
+    <section aria-label={t("My submissions")} className="mt-6 flex flex-col gap-3">
       <Toolbar id="pp" q={q} setQ={setQ} sort={sort} setSort={setSort} sorts={SORTS} shown={list.length} total={papers.length} onClear={clear} active={active}
         placeholder="Search by title, ID, event or co-author" noun={["1 paper", "{n} papers"]}
         extra={<EventSelect value={event} onChange={setEvent} events={events} />} />

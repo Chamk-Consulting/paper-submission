@@ -17,7 +17,7 @@ import { certificateVenues } from "@/lib/reviewpolish/data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t("Reviews") };
+  return { title: t("To review") };
 }
 
 type Search = { tab?: string; q?: string; event?: string; sort?: string; week?: string };
@@ -61,8 +61,8 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
 
   return (
     <WorkspaceShell ctx={ctx} active="reviews">
-      <Head kicker={t("Reviewer")} title={t("Reviews")} sub={t("Invitations to review, reviews in progress and everything you have submitted.")}
-        right={<Link href="/settings/reviewing" className="text-[14px] text-[#2F5FD0] no-underline hover:underline">{t("Edit my review topics →")}</Link>} />
+      <Head kicker={t("Reviewer")} title={t("To review")} sub={t("Invitations to review, reviews in progress and everything you have submitted.")}
+        right={<Link href="/settings/reviewing" className="text-[14px] text-[#2F5FD0] no-underline hover:underline">{t("Reviewer profile →")}</Link>} />
       <Cols
         main={<ReviewsList rows={rows} init={sp} />}
         aside={

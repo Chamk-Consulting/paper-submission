@@ -69,7 +69,7 @@ export function InvitationForm({ mode, id, token, no, due, ae, email }: Props) {
         <p className="mb-0 mt-2 text-[15px] text-[#4A5263]">
           {mode === "token" ? t("{ae} has been told. You don't need an account for this.", { ae }) : t("{ae} has been told, with your suggestion.", { ae })}
         </p>
-        {mode === "signed" ? <Link href="/reviews" className="mt-3 inline-block text-[#2F5FD0]">{t("Back to Reviews")}</Link> : null}
+        {mode === "signed" ? <Link href="/reviews" className="mt-3 inline-block text-[#2F5FD0]">{t("Back to the review list")}</Link> : null}
       </div>
     );
   }

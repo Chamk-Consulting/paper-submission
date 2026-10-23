@@ -17,7 +17,7 @@ async function Inner() {
   const now = Date.parse(generatedAt);
   const list = rows.filter((r) => r.following && !r.past).sort(byNext(now));
   return (
-    <div className="max-w-[900px]">
+    <div>
       <EventsHead title="Following" line="Events you watch. Their next deadline is counted down here, so a call for papers never slips past you." />
       <FollowingList rows={list} generatedAt={generatedAt} />
     </div>

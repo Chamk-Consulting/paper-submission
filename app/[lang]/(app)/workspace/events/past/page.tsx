@@ -16,7 +16,7 @@ async function Inner() {
   if (!signedIn) redirect("/sign-in?next=/workspace/events/past");
   const list = rows.filter((r) => r.past).sort((a, b) => (b.v.endsOn ?? b.v.startsOn ?? "").localeCompare(a.v.endsOn ?? a.v.startsOn ?? ""));
   return (
-    <div className="max-w-[900px]">
+    <div>
       <EventsHead title="Past events" line="Events that have ended — keep your certificates, final papers and receipts in one place." />
       <PastList rows={list} />
     </div>

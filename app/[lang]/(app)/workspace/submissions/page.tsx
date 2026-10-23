@@ -16,7 +16,7 @@ import { LocalWhen } from "@/components/reviewpolish/local-when";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t("Papers") };
+  return { title: t("My submissions") };
 }
 
 const card = "rounded-[8px] border border-[#DADDE3] bg-white px-4 py-3.5";
@@ -40,7 +40,7 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="m-0 font-mono text-[12px] text-[#4A5263]">{t("Author")}</p>
-          <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("Papers")}</h1>
+          <h1 className="mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t("My submissions")}</h1>
           <p className="mt-1.5 text-[#4A5263]">{t("Every paper you are an author on, grouped by venue. One venue can hold several of your papers, each at its own stage.")}</p>
         </div>
         <Link href="/workspace/events?intent=submit" className="inline-flex h-[42px] items-center rounded-[4px] bg-[#F2A93B] px-[18px] text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("+ New submission")}</Link>

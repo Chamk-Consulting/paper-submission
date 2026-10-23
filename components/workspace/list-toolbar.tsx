@@ -37,7 +37,7 @@ export function Toolbar<S extends string>({ id, q, setQ, sort, setSort, sorts, s
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-wrap items-center gap-2">
         {search ? (
-          <div role="search" className="flex h-10 min-w-[220px] flex-[1_1_320px] items-center gap-2 rounded-[6px] border border-[#B7BDC9] bg-white px-3 focus-within:border-[#2F5FD0]">
+          <div role="search" className="flex h-10 min-w-[220px] max-w-[560px] flex-[1_1_320px] items-center gap-2 rounded-[6px] border border-[#B7BDC9] bg-white px-3 focus-within:border-[#2F5FD0]">
             <Search size={16} strokeWidth={1.75} aria-hidden className="flex-none text-[#4A5263]" />
             <label htmlFor={`${id}-q`} className="sr-only">{t("Search")}</label>
             <input id={`${id}-q`} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t(placeholder)}

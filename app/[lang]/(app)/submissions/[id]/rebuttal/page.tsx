@@ -34,7 +34,7 @@ async function Inner({ params }: P) {
   const paper = ctx.files.find((f) => f.role === "paper" && f.current);
   return (
     <WorkspaceShell ctx={ws} active="submissions">
-      <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("Papers")}</Link> / <Link href={base} className="text-[#121826] underline">{no4(ctx.sub.number)}</Link> / {t("Rebuttal")}</p>
+      <p className="m-0 text-[14px] text-[#4A5263]"><Link href="/workspace/submissions" className="text-[#121826] underline">{t("My submissions")}</Link> / <Link href={base} className="text-[#121826] underline">{no4(ctx.sub.number)}</Link> / {t("Rebuttal")}</p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 className="m-0 font-serif text-[34px] font-normal leading-[1.15]">{t("Respond to the reviews · {no}", { no: no4(ctx.sub.number) })}</h1>

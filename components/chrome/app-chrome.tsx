@@ -206,7 +206,7 @@ function SideMenuLive() {
   return <SideMenu p={barePath(usePathname() ?? "/")} s={s} tab={tab} />;
 }
 
-/** Signed-in areas: the side menu pinned to the left edge, the page centred in the rest (1120 px; organiser pages
+/** Signed-in areas: the side menu pinned to the left edge, the page centred in the rest (1216 px of content, the same as Events › Explore; organiser pages
  * mark themselves wide with [data-wide-frame] and get 1360 px; pages with their own full-width bands mark [data-bleed]). */
 export function AppFrame({ children }: { children: ReactNode }) {
   const s = useSummary();
@@ -215,8 +215,8 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <Suspense fallback={<SideMenu p="" s={s} />}>
         <SideMenuLive />
       </Suspense>
-      <main id="main-content" className="app-frame box-border min-w-0 flex-auto px-5 pb-12 pt-8 sm:px-10">
-        <div className="frame-box mx-auto w-full max-w-[1120px]"><WorkspaceLinks>{children}</WorkspaceLinks></div>
+      <main id="main-content" className="app-frame box-border min-w-0 flex-auto px-5 pb-12 pt-7 sm:px-8">
+        <div className="frame-box mx-auto w-full max-w-[1216px]"><WorkspaceLinks>{children}</WorkspaceLinks></div>
       </main>
       {s?.signedIn ? <InstallPrompt /> : null}
       {s?.signedIn ? <UiSync /> : null}

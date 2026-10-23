@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("Talks & sessions") };
 }
 
-type Search = { when?: string; role?: string };
+type Search = { when?: string; role?: string; q?: string; event?: string };
 
 async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
   const ctx = await getWorkspaceCtx();

@@ -114,7 +114,7 @@ function MySubmissions({ papers, t }: { papers: MyPaper[]; t: Awaited<ReturnType
   return (
     <section className="rounded-[8px] border border-[#DADDE3] bg-white" aria-labelledby="mysub-h">
       <div className="flex items-center justify-between px-5 py-4">
-        <h2 id="mysub-h" className="m-0 font-serif text-[22px] font-normal">{t("My papers")}</h2>
+        <h2 id="mysub-h" className="m-0 font-serif text-[22px] font-normal">{t("My submissions")}</h2>
         <Link href="/workspace/submissions" className="text-[13px] font-semibold text-[#2F5FD0]">{t("View all {n} →", { n: papers.length })}</Link>
       </div>
       {papers.length ? (

@@ -17,7 +17,7 @@ async function Inner() {
   const now = Date.parse(generatedAt);
   const list = rows.filter((r) => !r.past && (!!r.mine || !!r.reg)).sort(byNext(now));
   return (
-    <div className="max-w-[900px]">
+    <div>
       <EventsHead title="My events" line="Events you take part in — as author, reviewer, chair, organiser or attendee — with what each one needs from you next." />
       <MyEventsList rows={list} generatedAt={generatedAt} />
     </div>

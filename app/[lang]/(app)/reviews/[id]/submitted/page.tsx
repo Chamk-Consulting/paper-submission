@@ -87,7 +87,7 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
             <section className={box}>
               <p className={kick}>{t("Invitations waiting")}</p>
               <div className="mt-1 font-serif text-[28px] leading-none">{waiting}</div>
-              <Link href="/reviews" className={asideLink}>{t("Back to Reviews")}</Link>
+              <Link href="/reviews" className={asideLink}>{t("Back to the review list")}</Link>
             </section>
           </>
         }

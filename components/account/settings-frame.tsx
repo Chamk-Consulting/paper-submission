@@ -7,7 +7,7 @@ import { getT } from "@/lib/i18n/server";
 export type SettingsKey = "profile" | "reviewing" | "security" | "privacy" | "notifications" | "calendar" | "preferences";
 export const SETTINGS_NAV: [SettingsKey, string, string][] = [
   ["profile", "Profile", "/settings/profile"],
-  ["reviewing", "Reviewing", "/settings/reviewing"],
+  ["reviewing", "Reviewer profile", "/settings/reviewing"],
   ["security", "Security", "/settings/security"],
   ["privacy", "Privacy", "/settings/privacy"],
   ["notifications", "Notifications", "/settings/notifications"],
@@ -16,7 +16,7 @@ export const SETTINGS_NAV: [SettingsKey, string, string][] = [
 ];
 const SETTINGS_HEAD: Record<SettingsKey, [string, string]> = {
   profile: ["Your profile", "Name, affiliations, research IDs, review topics and conflicts."],
-  reviewing: ["Reviewing", "Topics you can review, languages, how busy you are, and conflicts of interest."],
+  reviewing: ["Reviewer profile", "Topics you can review, languages, how busy you are, and conflicts of interest."],
   security: ["Sign-in & security", "Email addresses, password, passkey, two-step sign-in and devices."],
   notifications: ["Notifications", "Which emails you get, and when."],
   calendar: ["Calendar", "Your deadlines, reviews and sessions in Google, Outlook or Apple Calendar."],
@@ -31,7 +31,7 @@ export async function SettingsFrame({ active, children }: { active: SettingsKey;
   const t = await getT();
   const [title, subtitle] = SETTINGS_HEAD[active];
   return (
-    <>
+    <div className="mx-auto w-full max-w-[900px]">
       <div>
         <p className="m-0 text-[13px] text-[#4A5263]">{t(GROUP[active])}</p>
         <h1 className="mb-0 mt-1.5 font-serif text-[40px] font-normal leading-[1.1] tracking-[-0.01em]">{t(title)}</h1>
@@ -47,8 +47,8 @@ export async function SettingsFrame({ active, children }: { active: SettingsKey;
             </Link>
           ))}
         </nav>
-        <div className="flex w-full min-w-0 max-w-[900px] flex-auto flex-col gap-[18px]">{children}</div>
+        <div className="flex w-full min-w-0 flex-auto flex-col gap-[18px]">{children}</div>
       </div>
-    </>
+    </div>
   );
 }

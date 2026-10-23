@@ -3,7 +3,7 @@
 import Link from "@/components/site/link";
 import { useState } from "react";
 import { useT } from "@/lib/i18n/client";
-import { Chips, useUrlState } from "@/components/workspace/list-toolbar";
+import { Chips, EventSelect, NoMatch, Toolbar, matchWords, useUrlState } from "@/components/workspace/list-toolbar";
 import type { TalkItem } from "@/lib/workspace/my-work";
 
 /* My work › Talks & sessions: talks you give and sessions you chair, by date. Chips only (short list, fixed order). */
@@ -13,7 +13,10 @@ export type TalkRow = TalkItem & { when: string };
 
 const btn = "inline-flex h-10 items-center rounded-[4px] px-3.5 text-[14px] no-underline";
 
-export function TalksList({ items, generatedAt, init = {} }: { items: TalkRow[]; generatedAt: string; init?: { when?: string; role?: string } }) {
+/** Search and the Event filter appear once there is more than a handful. */
+const SEARCH_FROM = 6;
+
+export function TalksList({ items, generatedAt, init = {} }: { items: TalkRow[]; generatedAt: string; init?: { when?: string; role?: string; q?: string; event?: string } }) {
   const t = useT();
   const now = Date.parse(generatedAt);
   const isPast = (x: TalkRow) => Date.parse(x.endsAt) < now;
@@ -21,10 +24,15 @@ export function TalksList({ items, generatedAt, init = {} }: { items: TalkRow[];
   const nUp = items.length - nPast;
   const [when, setWhen] = useState<"upcoming" | "past">(init.when === "past" && nPast ? "past" : nUp || !nPast ? "upcoming" : "past");
   const [role, setRole] = useState<"present" | "chair" | "all">(init.role === "present" || init.role === "chair" ? init.role : "all");
-  useUrlState({ when, role }, { when: "upcoming", role: "all" });
+  const [q, setQ] = useState(init.q ?? "");
+  const [event, setEvent] = useState(init.event ?? "");
+  useUrlState({ when, role, q, event }, { when: "upcoming", role: "all", q: "", event: "" });
+  const events = [...new Map(items.map((x) => [x.venueSlug, x.venueShort])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const searchable = items.length >= SEARCH_FROM;
 
-  const inWhen = items.filter((x) => (when === "past" ? isPast(x) : !isPast(x)));
-  const list = inWhen.filter((x) => role === "all" || x.kind === role);
+  const inWhen = items.filter((x) => (when === "past" ? isPast(x) : !isPast(x)) && (!event || x.venueSlug === event));
+  const list = inWhen.filter((x) => (role === "all" || x.kind === role) && matchWords([x.title, x.sessionTitle, x.code, x.venueShort, x.room ?? "", x.number ? `#${x.number}` : ""].join(" "), q));
+  const clear = () => { setQ(""); setEvent(""); setRole("all"); };
   if (when === "past") list.reverse();
   const roles = ([["present", "Presenting", inWhen.filter((x) => x.kind === "present").length], ["chair", "Chairing", inWhen.filter((x) => x.kind === "chair").length]] as ["present" | "chair", string, number][]).filter((x) => x[2] > 0);
 
@@ -37,6 +45,11 @@ export function TalksList({ items, generatedAt, init = {} }: { items: TalkRow[];
   }
   return (
     <div className="flex flex-col gap-3">
+      {searchable ? (
+        <Toolbar id="ts" q={q} setQ={setQ} sort="date" setSort={() => {}} sorts={[["date", "Date"]]} shown={list.length} total={inWhen.length}
+          onClear={clear} active={!!q.trim() || !!event || role !== "all"} placeholder="Search by title, session, room or event" noun={["1 item", "{n} items"]}
+          extra={<EventSelect value={event} onChange={setEvent} events={events} />} />
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         {nPast && nUp ? (
           <div role="tablist" aria-label={t("When")} className="inline-flex rounded-[6px] border border-[#DADDE3] bg-white p-0.5">
@@ -48,7 +61,7 @@ export function TalksList({ items, generatedAt, init = {} }: { items: TalkRow[];
         ) : null}
         <Chips items={roles} value={role} onChange={setRole} all={inWhen.length} label="Role" />
       </div>
-      {!list.length ? <p className="m-0 rounded-[8px] border border-[#DADDE3] bg-white p-5 text-[14px] text-[#4A5263]">{t("Nothing here.")}</p> : null}
+      {!list.length ? (searchable && (q.trim() || event) ? <NoMatch onClear={clear} text="Nothing matches." /> : <p className="m-0 rounded-[8px] border border-[#DADDE3] bg-white p-5 text-[14px] text-[#4A5263]">{t("Nothing here.")}</p>) : null}
       <ul className={`m-0 flex list-none flex-col gap-3 p-0 ${when === "past" ? "opacity-85" : ""}`}>
         {list.map((x) => {
           const time = `${x.when} · ${x.room ?? t("Room to be announced")}`;

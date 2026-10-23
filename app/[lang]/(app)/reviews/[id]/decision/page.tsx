@@ -111,7 +111,7 @@ async function Inner({ params }: { params: Promise<{ id: string }> }) {
               <p className={kick}>{t("Credit")}</p>
               <p className="mb-1 mt-1.5 text-[14px]">{a.orcid_push ? `✓ ${t("Added to your ORCID record")}` : t("Not sent to ORCID")}</p>
               {a.status === "submitted" ? <a href={`/api/reviews/certificate/${form.venue.slug}`} className={asideLink}>{t("Download certificate")}</a> : null}
-              <Link href="/reviews" className={asideLink}>{t("Back to Reviews")}</Link>
+              <Link href="/reviews" className={asideLink}>{t("Back to the review list")}</Link>
             </section>
           </>
         }

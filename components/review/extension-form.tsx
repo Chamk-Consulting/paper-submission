@@ -45,7 +45,7 @@ export function ExtensionPanel(p: ExtProps) {
       <section className={`${card} border-[#DADDE3]`}>
         <h2 className={ui.h2}>{t("Review handed back")}</h2>
         <p className="mb-0 mt-2 text-[15px] text-[#4A5263]">{t("{no} is no longer in your list. Thank you for saying so early — it helps the authors get a decision on time.", { no: p.no })}</p>
-        <Link href="/reviews" className={`${ui.ghost} mt-4`}>{t("Back to Reviews")}</Link>
+        <Link href="/reviews" className={`${ui.ghost} mt-4`}>{t("Back to the review list")}</Link>
       </section>
     );
   }

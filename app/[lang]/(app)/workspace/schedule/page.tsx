@@ -13,7 +13,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("Agenda") };
 }
 
-type Search = { event?: string; type?: string };
+type Search = { view?: string; month?: string; day?: string; q?: string; event?: string; type?: string; clash?: string };
+
+/** Minutes from midnight in the event's time zone. */
+function minutesIn(iso: string, tz: string) {
+  const p = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: tz }).formatToParts(new Date(iso));
+  return Number(p.find((x) => x.type === "hour")?.value ?? 0) * 60 + Number(p.find((x) => x.type === "minute")?.value ?? 0);
+}
 
 /** My work › Agenda: your timetable across events (talks, sessions you chair or saved, deadlines), from today on. */
 async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
@@ -22,11 +28,14 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
   const items: AgendaRow[] = (await loadAgenda(ev.rows, Date.parse(ev.generatedAt))).map((x) => ({
     ...x, day: dayKey(x.startsAt, x.timezone), dayLabel: fmtDay(x.startsAt, x.timezone, t.intl),
     time: `${fmtTime(x.startsAt, x.timezone, t.intl)}${x.endsAt ? `–${fmtTime(x.endsAt, x.timezone, t.intl)}` : ""}`, tzl: tzLabel(x.timezone, new Date(x.startsAt)),
+    startMin: minutesIn(x.startsAt, x.timezone),
+    // a session crossing midnight ends at the bottom of the grid
+    endMin: x.endsAt ? (dayKey(x.endsAt, x.timezone) === dayKey(x.startsAt, x.timezone) ? minutesIn(x.endsAt, x.timezone) : 24 * 60) : minutesIn(x.startsAt, x.timezone) + 30,
   }));
   const live = ev.rows.filter((r) => !r.past && (r.mine || r.reg));
   const events: [string, string][] = live.map((r) => [r.v.slug, r.v.acr]);
   return (
-    <div className="max-w-[900px]">
+    <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="m-0 font-serif text-[36px] font-normal leading-[1.1] tracking-[-0.01em]">{t("Agenda")}</h1>

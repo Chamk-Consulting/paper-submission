@@ -53,7 +53,7 @@ const ORG_GROUPS: [string, string, typeof House, string, [string, typeof House][
 /** Account: who you are and how you get in. Settings: how Plenary behaves for you. */
 const ACCOUNT_ITEMS: [string, string, typeof House, (p: string) => boolean][] = [
   ["/settings/profile", "Profile", UserRound, (p) => p.startsWith("/settings/profile")],
-  ["/settings/reviewing", "Reviewing", ClipboardCheck, (p) => p.startsWith("/settings/reviewing")],
+  ["/settings/reviewing", "Reviewer profile", ClipboardCheck, (p) => p.startsWith("/settings/reviewing")],
   ["/settings/security", "Security", KeyRound, (p) => p.startsWith("/settings/security")],
   ["/settings/privacy", "Privacy", Lock, (p) => p.startsWith("/settings/privacy")],
 ];
@@ -106,8 +106,8 @@ function useMiddle(p: string, s: Summary | null) {
   const myWork: Group = {
     kind: "group", key: "work", label: "My work", icon: ic(Briefcase), def: "subs", toggle: true,
     items: [
-      { kind: "leaf", key: "subs", label: "Papers", icon: ic(FileText), href: "/workspace/submissions", count: w?.papers || undefined, warn: w?.papersSoon, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
-      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "Reviews", icon: ic(PenLine), href: "/reviews", count: w?.reviews || undefined, warn: w?.reviewsSoon, on: p.startsWith("/reviews") }] : []),
+      { kind: "leaf", key: "subs", label: "My submissions", icon: ic(FileText), href: "/workspace/submissions", count: w?.papers || undefined, warn: w?.papersSoon, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
+      ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "To review", icon: ic(PenLine), href: "/reviews", count: w?.reviews || undefined, warn: w?.reviewsSoon, on: p.startsWith("/reviews") }] : []),
       ...(talks ? [{ kind: "leaf" as const, key: "chair", label: "Talks & sessions", icon: ic(Presentation), href: "/chair", on: p.startsWith("/chair") }] : []),
       { kind: "leaf", key: "schedule", label: "Agenda", icon: ic(CalendarClock), href: "/workspace/schedule", on: p.startsWith("/workspace/schedule") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },
     ],
