@@ -11,10 +11,6 @@
     {
       "path": "/api/cron/signups",
       "schedule": "30 4 * * *"
-    },
-    {
-      "path": "/api/cron/folio-tex",
-      "schedule": "15 2 * * *"
     }
   ]
 }

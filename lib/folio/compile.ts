@@ -44,19 +44,43 @@ export function safePath(p: string): boolean {
   return /^[A-Za-z0-9._/-]{1,240}$/.test(p) && !p.startsWith("/") && !p.split("/").some((s) => s === ".." || s === "");
 }
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { Snapshot } from "@vercel/sandbox";
+import { expiresIn, sign } from "@/lib/auth/signing";
+
 let snapshotCache: { id: string; at: number } | null = null;
-/** The TeX Live snapshot: the never-expiring copy the daily cron records, else the one set in the environment. */
-async function texSnapshot(): Promise<string | undefined> {
+let refreshing = false;
+
+/**
+ * The TeX Live snapshot builds start from: the never-expiring copy recorded in folio_settings, else
+ * FOLIO_TEX_SNAPSHOT. Snapshots made by hand expire after 7 days, so when the one in use has an expiry date
+ * this makes a copy without one (in the background) and records it, signed by the server.
+ */
+async function texSnapshot(supabase: SupabaseClient): Promise<string | undefined> {
   if (snapshotCache && Date.now() - snapshotCache.at < 10 * 60 * 1000) return snapshotCache.id;
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  const { data } = await createAdminClient().from("folio_settings").select("value").eq("key", "tex_snapshot").maybeSingle();
-  const id = data?.value ?? process.env.FOLIO_TEX_SNAPSHOT;
-  if (id) snapshotCache = { id, at: Date.now() };
+  const { data } = await supabase.rpc("folio_tex_snapshot");
+  const id = (data as string | null) ?? process.env.FOLIO_TEX_SNAPSHOT;
+  if (id) {
+    snapshotCache = { id, at: Date.now() };
+    if (!refreshing) { refreshing = true; void keepForever(supabase, id).finally(() => { refreshing = false; }); }
+  }
   return id;
 }
 
-async function sandboxFor(paperId: string): Promise<Sandbox> {
-  const snapshotId = await texSnapshot();
+async function keepForever(supabase: SupabaseClient, id: string) {
+  try {
+    const snap = await Snapshot.get({ snapshotId: id });
+    if (!snap.expiresAt) return;
+    const sb = await Sandbox.create({ source: { type: "snapshot", snapshotId: id }, persistent: false, timeout: 10 * 60 * 1000, networkPolicy: "deny-all" });
+    const copy = await sb.snapshot({ expiration: 0 });
+    const exp = expiresIn(10);
+    await supabase.rpc("folio_set_tex_snapshot", { p_id: copy.snapshotId, p_expires: exp, p_sig: sign(`folio_tex_snapshot:${copy.snapshotId}`, exp) });
+    snapshotCache = { id: copy.snapshotId, at: Date.now() };
+  } catch { /* try again on a later build */ }
+}
+
+async function sandboxFor(supabase: SupabaseClient, paperId: string): Promise<Sandbox> {
+  const snapshotId = await texSnapshot(supabase);
   if (!snapshotId) throw new Error("compile_off");
   const name = `folio-${paperId}`;
   const create = () =>
@@ -86,7 +110,7 @@ async function sandboxFor(paperId: string): Promise<Sandbox> {
   }
 }
 
-export async function compileProject(opts: {
+export async function compileProject(supabase: SupabaseClient, opts: {
   paperId: string;
   files: CompileFile[];
   main: string;
@@ -94,7 +118,7 @@ export async function compileProject(opts: {
   mode: "draft" | "full";
 }): Promise<CompileResult> {
   const t0 = Date.now();
-  const sb = await sandboxFor(opts.paperId);
+  const sb = await sandboxFor(supabase, opts.paperId);
   const dir = `${WORK}/${opts.paperId}`;
   // Write only what changed since the last build (a manifest of hashes lives next to the project).
   let manifest: Record<string, string> = {};
