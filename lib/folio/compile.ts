@@ -142,15 +142,17 @@ export async function compileProject(supabase: SupabaseClient, opts: {
   // Draft builds: one pass when nothing else changed; full builds: run bibliography and repeat until stable.
   const args = [
     engineFlag, "-interaction=nonstopmode", "-file-line-error", "-synctex=1", "-no-shell-escape",
-    ...(opts.mode === "draft" ? ["-bibtex-cond", "-max-repeat=3"] : ["-bibtex", "-max-repeat=5"]),
+    opts.mode === "draft" ? "-bibtex-cond" : "-bibtex",
     "-f", opts.main,
   ];
   const env = { openin_any: "p", openout_any: "p", shell_escape: "f", max_print_line: "1000", error_line: "254", half_error_line: "238" };
   let status: CompileResult["status"] = "ok";
   let exit = 0;
+  let runOutput = "";
   try {
     const res = await sb.runCommand({ cmd: "latexmk", args, cwd: dir, env, timeoutMs: BUILD_LIMIT_MS });
     exit = res.exitCode;
+    if (exit !== 0) runOutput = (await res.output("both").catch(() => "")).slice(-3000);
     if (exit === 137 || Date.now() - t0 > BUILD_LIMIT_MS) status = "timeout";
   } catch {
     status = "timeout";
@@ -165,5 +167,5 @@ export async function compileProject(supabase: SupabaseClient, opts: {
   const log = logBuf ? Buffer.from(logBuf).toString("latin1") : "";
   const { diagnostics, pages } = parseLatexLog(log, opts.main);
   if (status !== "timeout" && (exit !== 0 || !pdf || diagnostics.some((d) => d.severity === "error"))) status = "error";
-  return { status, pdf, synctex, diagnostics, pages, ms: Date.now() - t0, logTail: log.slice(-6000) };
+  return { status, pdf, synctex, diagnostics, pages, ms: Date.now() - t0, logTail: log ? log.slice(-6000) : runOutput };
 }
