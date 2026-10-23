@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import Link from "@/components/site/link";
 import { useT } from "@/lib/i18n/client";
 import { ORGANIZER_NAV, OWNER_ONLY } from "@/lib/site/organizer-nav";
@@ -260,55 +261,87 @@ function GroupRow({ g, depth, open, onFold, last, onPick, t }: {
 }
 
 /** A small panel beside the icon bar (or above the bottom row), listing a group's pages. Closes on Escape, outside click. */
-function Flyout({ anchor, onClose, title, children, above }: { anchor: DOMRect; onClose: () => void; title: string; children: ReactNode; above?: boolean }) {
+function Flyout({ anchor, onClose, title, children, above, onEnter, onLeave, focusFirst = true }: { anchor: DOMRect; onClose: () => void; title: string; children: ReactNode; above?: boolean; onEnter?: () => void; onLeave?: () => void; focusFirst?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const out = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) onClose(); };
     const esc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     const id = window.setTimeout(() => document.addEventListener("mousedown", out), 0);
     document.addEventListener("keydown", esc);
-    ref.current?.querySelector<HTMLElement>("a,button")?.focus();
+    if (focusFirst) ref.current?.querySelector<HTMLElement>("a,button")?.focus();
     return () => { window.clearTimeout(id); document.removeEventListener("mousedown", out); document.removeEventListener("keydown", esc); };
-  }, [onClose]);
+  }, [onClose, focusFirst]);
   const rtl = typeof document !== "undefined" && document.documentElement.dir === "rtl";
   const top = Math.max(68, Math.min(anchor.top, window.innerHeight - 340));
   const pos = above
     ? { bottom: window.innerHeight - anchor.top + 6, ...(rtl ? { right: window.innerWidth - anchor.right } : { left: anchor.left }) }
     : { top, ...(rtl ? { right: window.innerWidth - anchor.left + 8 } : { left: anchor.right + 8 }) };
-  return (
-    <div ref={ref} role="dialog" aria-label={title}
+  // Rendered on <body> above everything (header, sticky toolbars, save bars, dialogs' backdrops of the page):
+  // inside the sticky side menu it would be trapped under later layers.
+  return createPortal(
+    <div ref={ref} role="dialog" aria-label={title} onMouseEnter={onEnter} onMouseLeave={onLeave}
       style={{ position: "fixed", ...pos }}
-      className="z-50 w-[248px] rounded-[8px] border border-[#DADDE3] bg-white p-2 text-[#121826] shadow-[0_12px_32px_rgba(18,24,38,.16)]">
+      className="z-[2147483000] w-[248px] rounded-[8px] border border-[#DADDE3] bg-white p-2 text-[#121826] shadow-[0_12px_32px_rgba(18,24,38,.16)]">
       <p className="m-0 px-3 pb-1.5 pt-1 font-mono text-[11px] uppercase tracking-[0.06em] text-[#4A5263]">{title}</p>
       <div className="flex max-h-[300px] flex-col gap-px overflow-y-auto">{children}</div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
-/** Icon-bar button: a page opens directly; a group opens its flyout. */
+/** A name label beside an icon-bar button while it is hovered or focused, on the top layer. */
+function RailTip({ anchor, text }: { anchor: DOMRect; text: string }) {
+  const rtl = document.documentElement.dir === "rtl";
+  return createPortal(
+    <span role="tooltip" style={{ position: "fixed", top: anchor.top + anchor.height / 2, ...(rtl ? { right: window.innerWidth - anchor.left + 8 } : { left: anchor.right + 8 }) }}
+      className="pointer-events-none z-[2147483000] -translate-y-1/2 whitespace-nowrap rounded-[6px] bg-[#0E1B3D] px-2.5 py-1 text-[13px] font-medium text-white shadow-[0_6px_16px_rgba(18,24,38,.25)]">
+      {text}
+    </span>,
+    document.body,
+  );
+}
+
+/** Icon-bar button: a page opens directly (name shown on hover); a group opens its panel on hover or click. */
 function RailItem({ n, onPick, t }: { n: MenuNode; onPick?: () => void; t: (k: string) => string }) {
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const [tip, setTip] = useState<DOMRect | null>(null);
+  const [byHover, setByHover] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
   const on = hasOn(n);
   const cls = `relative mx-auto flex size-10 items-center justify-center rounded-[6px] border-0 no-underline ${on ? rowOn : `bg-transparent ${rowOff}`}`;
+  const later = (f: () => void, ms: number) => { window.clearTimeout(timer.current); timer.current = window.setTimeout(f, ms); };
+  useEffect(() => () => window.clearTimeout(timer.current), []);
   if (n.kind === "leaf") {
+    const show = (e: { currentTarget: HTMLElement }) => setTip(e.currentTarget.getBoundingClientRect());
     return (
-      <Link href={n.href} onClick={onPick} title={t(n.label)} aria-current={n.on ? "page" : undefined} className={cls}>
-        {n.icon}<span className="sr-only">{t(n.label)}</span>
-        {n.count ? <span aria-hidden className="absolute end-1.5 top-1.5 size-2 rounded-full bg-[#F2A93B]" /> : null}
-      </Link>
+      <>
+        <Link href={n.href} onClick={() => { setTip(null); onPick?.(); }} aria-current={n.on ? "page" : undefined} className={cls}
+          onMouseEnter={show} onMouseLeave={() => setTip(null)} onFocus={show} onBlur={() => setTip(null)}>
+          {n.icon}<span className="sr-only">{t(n.label)}</span>
+          {n.count ? <span aria-hidden className="absolute end-1.5 top-1.5 size-2 rounded-full bg-[#F2A93B]" /> : null}
+        </Link>
+        {tip ? <RailTip anchor={tip} text={n.count ? `${t(n.label)} · ${n.count}` : t(n.label)} /> : null}
+      </>
     );
   }
+  const close = () => { window.clearTimeout(timer.current); setAnchor(null); };
   const flat = (g: Group, depth: number): ReactNode[] => g.items.flatMap((x) => x.kind === "leaf"
-    ? [<Link key={`${g.key}/${x.key}`} href={x.href} onClick={() => { setAnchor(null); onPick?.(); }} aria-current={x.on ? "page" : undefined}
+    ? [<Link key={`${g.key}/${x.key}`} href={x.href} onClick={() => { close(); onPick?.(); }} aria-current={x.on ? "page" : undefined}
         className={`${rowBase} h-[34px] ${depth ? "ps-7" : ""} ${x.on ? rowOn : rowOff}`}>{depth ? null : x.icon}<span className="truncate">{t(x.label)}</span></Link>]
     : [<p key={x.key} className="m-0 mt-1 flex items-center gap-2 px-3 py-1 text-[13px] font-semibold text-[#4A5263]">{x.icon}<span className="truncate">{t(x.label)}</span></p>, ...flat(x, depth + 1)]);
   return (
     <>
-      <button type="button" title={t(n.label)} aria-haspopup="dialog" aria-expanded={!!anchor}
-        onClick={(e) => setAnchor(anchor ? null : e.currentTarget.getBoundingClientRect())} className={`${cls} cursor-pointer`}>
+      <button type="button" aria-label={t(n.label)} aria-haspopup="dialog" aria-expanded={!!anchor}
+        onClick={(e) => { window.clearTimeout(timer.current); setByHover(false); setAnchor(anchor && !byHover ? null : e.currentTarget.getBoundingClientRect()); }}
+        onMouseEnter={(e) => { const r = e.currentTarget.getBoundingClientRect(); later(() => { setByHover(true); setAnchor(r); }, 120); }}
+        onMouseLeave={() => later(() => setAnchor(null), 250)} className={`${cls} cursor-pointer`}>
         {n.icon}<span className="sr-only">{t(n.label)}</span>
       </button>
-      {anchor ? <Flyout anchor={anchor} onClose={() => setAnchor(null)} title={t(n.label)}>{flat(n, 0)}</Flyout> : null}
+      {anchor ? (
+        <Flyout anchor={anchor} onClose={close} title={t(n.label)} onEnter={() => window.clearTimeout(timer.current)} onLeave={() => later(() => setAnchor(null), 250)} focusFirst={!byHover}>
+          {flat(n, 0)}
+        </Flyout>
+      ) : null}
     </>
   );
 }

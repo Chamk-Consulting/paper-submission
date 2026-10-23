@@ -95,7 +95,7 @@ export function MyEventsList({ rows, generatedAt }: { rows: EventRow[]; generate
         <Chips items={counts} value={k} onChange={setK} all={rows.length} />
       </div>
       {!shown.length ? <NoMatch onClear={clear} /> : null}
-      <div className="grid items-start gap-3.5 xl:grid-cols-2">
+      <div className="grid items-start gap-3.5 xl:grid-cols-2 xl:[&>*:last-child:nth-child(odd)]:col-span-2">
       {shown.map((r) => {
         const v = r.v;
         const st = statusOf(v, now, tz, t, t.intl);
@@ -179,7 +179,7 @@ export function FollowingList({ rows, generatedAt }: { rows: EventRow[]; generat
       {groups.map(([title, list]) => list.length ? (
         <section key={title} aria-label={t(title)}>
           <h2 className="m-0 mb-2.5 text-[14px] font-semibold text-[#4A5263]">{t(title)} <span className="font-normal">· {list.length}</span></h2>
-          <ul className="m-0 grid list-none items-start gap-2.5 p-0 xl:grid-cols-2">
+          <ul className="m-0 grid list-none items-start gap-2.5 p-0 xl:grid-cols-2 xl:[&>*:last-child:nth-child(odd)]:col-span-2">
             {list.map(({ r, open }) => (
               <li key={r.v.slug} className={card}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -231,7 +231,7 @@ export function PastList({ rows }: { rows: EventRow[] }) {
         return (
           <section key={y} aria-label={y}>
             <h2 className="m-0 mb-2.5 text-[14px] font-semibold text-[#4A5263]">{y} <span className="font-normal">· {list.length}</span></h2>
-            <ul className="m-0 grid list-none items-start gap-2.5 p-0 xl:grid-cols-2">
+            <ul className="m-0 grid list-none items-start gap-2.5 p-0 xl:grid-cols-2 xl:[&>*:last-child:nth-child(odd)]:col-span-2">
               {list.map((r) => <PastCard key={r.v.slug} r={r} took={yours(r)} />)}
             </ul>
           </section>
