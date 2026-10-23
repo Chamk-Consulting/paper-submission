@@ -9,7 +9,8 @@ import { getWorkspaceCtx } from "@/lib/workspace/data";
 import { loadMyChairedSessions } from "@/lib/program/data";
 import { getEventRows } from "@/lib/workspace/events-pages";
 import { loadTalksAndSessions } from "@/lib/workspace/my-work";
-import { TalksList } from "@/components/workspace/talks-list";
+import { TalksList, type TalkRow } from "@/components/workspace/talks-list";
+import { fmtDay, fmtTime } from "@/lib/program/time";
 import { getT } from "@/lib/i18n/server";
 
 /* Canvas CH01, widened: talks I give and sessions I chair or co-chair, soonest first. */
@@ -25,7 +26,9 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
   const ctx = await getWorkspaceCtx();
   if (!ctx) redirect("/sign-in?next=/chair");
   const [ev, list, t, sp] = await Promise.all([getEventRows(), loadMyChairedSessions(), getT(), searchParams]);
-  const items = await loadTalksAndSessions(ctx.me.person?.id, ev.rows);
+  const items: TalkRow[] = (await loadTalksAndSessions(ctx.me.person?.id, ev.rows)).map((x) => ({
+    ...x, when: `${fmtDay(x.startsAt, x.timezone, t.intl)} ${fmtTime(x.startsAt, x.timezone, t.intl)}–${fmtTime(x.endsAt, x.timezone, t.intl)}`,
+  }));
   const now = Date.parse(ev.generatedAt);
   const live = list.find((x) => Date.parse(x.startsAt) <= now && Date.parse(x.endsAt) >= now);
 

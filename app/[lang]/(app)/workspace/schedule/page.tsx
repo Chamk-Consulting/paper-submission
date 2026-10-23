@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { Reveal } from "@/components/motion/reveal";
-import { Agenda } from "@/components/workspace/agenda";
+import { Agenda, type AgendaRow } from "@/components/workspace/agenda";
+import { dayKey, fmtDay, fmtTime, tzLabel } from "@/lib/program/time";
 import { getEventRows } from "@/lib/workspace/events-pages";
 import { loadAgenda } from "@/lib/workspace/my-work";
 
@@ -18,7 +19,10 @@ type Search = { event?: string; type?: string };
 async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
   const [ev, t, sp] = await Promise.all([getEventRows(), getT(), searchParams]);
   if (!ev.signedIn) redirect("/sign-in?next=/workspace/schedule");
-  const items = await loadAgenda(ev.rows, Date.parse(ev.generatedAt));
+  const items: AgendaRow[] = (await loadAgenda(ev.rows, Date.parse(ev.generatedAt))).map((x) => ({
+    ...x, day: dayKey(x.startsAt, x.timezone), dayLabel: fmtDay(x.startsAt, x.timezone, t.intl),
+    time: `${fmtTime(x.startsAt, x.timezone, t.intl)}${x.endsAt ? `–${fmtTime(x.endsAt, x.timezone, t.intl)}` : ""}`, tzl: tzLabel(x.timezone, new Date(x.startsAt)),
+  }));
   const live = ev.rows.filter((r) => !r.past && (r.mine || r.reg));
   const events: [string, string][] = live.map((r) => [r.v.slug, r.v.acr]);
   return (

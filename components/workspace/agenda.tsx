@@ -3,9 +3,11 @@
 import Link from "@/components/site/link";
 import { useState } from "react";
 import { useT } from "@/lib/i18n/client";
-import { dayKey, fmtDay, fmtTime, tzLabel } from "@/lib/program/time";
 import { Chips, selectCls, useUrlState } from "@/components/workspace/list-toolbar";
 import type { AgendaItem } from "@/lib/workspace/my-work";
+
+/** Dates and times are formatted on the server (one source, so the page never disagrees with itself on load). */
+export type AgendaRow = AgendaItem & { day: string; dayLabel: string; time: string; tzl: string };
 
 /* My work › Agenda: one timetable across events, always in time order. Chips for event and type; "Today" and a day
    picker jump down the list instead of sorting it. */
@@ -19,7 +21,7 @@ const TYPES: [Type, string, string, string][] = [
 ];
 const TAG: Record<Type, [string, string, string]> = { talk: ["My talk", "#E6EDFC", "#1F47A8"], chair: ["Chairing", "#FBEFDD", "#7A4508"], saved: ["Saved", "#EEF0EC", "#4A5263"], deadline: ["Deadline", "#FDECEA", "#B3261E"] };
 
-export function Agenda({ items, events, init = {} }: { items: AgendaItem[]; events: [string, string][]; init?: { event?: string; type?: string } }) {
+export function Agenda({ items, events, init = {} }: { items: AgendaRow[]; events: [string, string][]; init?: { event?: string; type?: string } }) {
   const t = useT();
   const [event, setEvent] = useState<string>(events.some(([k]) => k === init.event) ? init.event! : "all");
   const [type, setType] = useState<Type | "all">(TYPES.some(([k]) => k === init.type) ? (init.type as Type) : "all");
@@ -27,11 +29,10 @@ export function Agenda({ items, events, init = {} }: { items: AgendaItem[]; even
 
   const inEvent = items.filter((x) => event === "all" || x.venueSlug === event);
   const list = inEvent.filter((x) => type === "all" || x.type === type);
-  const days: { key: string; first: AgendaItem; items: AgendaItem[] }[] = [];
+  const days: { key: string; label: string; items: AgendaRow[] }[] = [];
   for (const x of list) {
-    const k = dayKey(x.startsAt, x.timezone);
-    const d = days.find((y) => y.key === k);
-    if (d) d.items.push(x); else days.push({ key: k, first: x, items: [x] });
+    const d = days.find((y) => y.key === x.day);
+    if (d) d.items.push(x); else days.push({ key: x.day, label: x.dayLabel, items: [x] });
   }
   const evChips = events.map(([k, l]) => [k, l, items.filter((x) => x.venueSlug === k).length] as [string, string, number]).filter((x) => x[2] > 0);
   const typeChips = TYPES.map(([k, l]) => [k, l, inEvent.filter((x) => x.type === k).length] as [Type, string, number]).filter((x) => x[2] > 0);
@@ -57,7 +58,7 @@ export function Agenda({ items, events, init = {} }: { items: AgendaItem[]; even
           {days.length > 1 ? (
             <select aria-label={t("Go to day")} value="" onChange={(e) => e.target.value && jump(e.target.value)} className={selectCls}>
               <option value="">{t("Go to day…")}</option>
-              {days.map((d) => <option key={d.key} value={d.key}>{fmtDay(d.first.startsAt, d.first.timezone, t.intl)}</option>)}
+              {days.map((d) => <option key={d.key} value={d.key}>{d.label}</option>)}
             </select>
           ) : null}
           <p aria-live="polite" className="m-0 ms-auto text-[13px] text-[#4A5263]">{list.length === 1 ? t("1 item") : t("{n} items", { n: list.length })}</p>
@@ -67,8 +68,8 @@ export function Agenda({ items, events, init = {} }: { items: AgendaItem[]; even
       </div>
       {!list.length ? <p className="m-0 rounded-[8px] border border-[#DADDE3] bg-white p-5 text-[14px] text-[#4A5263]">{t("Nothing here.")}</p> : null}
       {days.map((d) => (
-        <section key={d.key} id={`day-${d.key}`} aria-label={fmtDay(d.first.startsAt, d.first.timezone, t.intl)} className="scroll-mt-[190px]">
-          <h2 className="m-0 mb-2 text-[14px] font-semibold text-[#4A5263]">{fmtDay(d.first.startsAt, d.first.timezone, t.intl)} <span className="font-normal">· {d.items.length}</span></h2>
+        <section key={d.key} id={`day-${d.key}`} aria-label={d.label} className="scroll-mt-[190px]">
+          <h2 className="m-0 mb-2 text-[14px] font-semibold text-[#4A5263]">{d.label} <span className="font-normal">· {d.items.length}</span></h2>
           <ul className="m-0 flex list-none flex-col overflow-hidden rounded-[8px] border border-[#DADDE3] bg-white p-0">
             {d.items.map((x) => {
               const [tag, bg, ink] = TAG[x.type];
@@ -76,8 +77,8 @@ export function Agenda({ items, events, init = {} }: { items: AgendaItem[]; even
                 <li key={x.id} className="border-b border-[#EEF0EC] last:border-b-0">
                   <Link href={x.href} className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-3 px-4 py-3 text-[#121826] no-underline hover:bg-[#FBFBF9]">
                     <span className="font-mono text-[13px] text-[#121826]">
-                      {fmtTime(x.startsAt, x.timezone, t.intl)}{x.endsAt ? `–${fmtTime(x.endsAt, x.timezone, t.intl)}` : ""}
-                      <span className="block text-[11px] text-[#4A5263]">{tzLabel(x.timezone, new Date(x.startsAt))}</span>
+                      {x.time}
+                      <span className="block text-[11px] text-[#4A5263]">{x.tzl}</span>
                     </span>
                     <span className="min-w-0">
                       <span className="flex flex-wrap items-center gap-1.5">

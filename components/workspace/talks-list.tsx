@@ -3,18 +3,20 @@
 import Link from "@/components/site/link";
 import { useState } from "react";
 import { useT } from "@/lib/i18n/client";
-import { fmtDay, fmtTime } from "@/lib/program/time";
 import { Chips, useUrlState } from "@/components/workspace/list-toolbar";
 import type { TalkItem } from "@/lib/workspace/my-work";
 
 /* My work › Talks & sessions: talks you give and sessions you chair, by date. Chips only (short list, fixed order). */
 
+/** `when` is formatted on the server so the page never disagrees with itself on load. */
+export type TalkRow = TalkItem & { when: string };
+
 const btn = "inline-flex h-10 items-center rounded-[4px] px-3.5 text-[14px] no-underline";
 
-export function TalksList({ items, generatedAt, init = {} }: { items: TalkItem[]; generatedAt: string; init?: { when?: string; role?: string } }) {
+export function TalksList({ items, generatedAt, init = {} }: { items: TalkRow[]; generatedAt: string; init?: { when?: string; role?: string } }) {
   const t = useT();
   const now = Date.parse(generatedAt);
-  const isPast = (x: TalkItem) => Date.parse(x.endsAt) < now;
+  const isPast = (x: TalkRow) => Date.parse(x.endsAt) < now;
   const nPast = items.filter(isPast).length;
   const nUp = items.length - nPast;
   const [when, setWhen] = useState<"upcoming" | "past">(init.when === "past" && nPast ? "past" : nUp || !nPast ? "upcoming" : "past");
@@ -49,7 +51,7 @@ export function TalksList({ items, generatedAt, init = {} }: { items: TalkItem[]
       {!list.length ? <p className="m-0 rounded-[8px] border border-[#DADDE3] bg-white p-5 text-[14px] text-[#4A5263]">{t("Nothing here.")}</p> : null}
       <ul className={`m-0 flex list-none flex-col gap-3 p-0 ${when === "past" ? "opacity-85" : ""}`}>
         {list.map((x) => {
-          const time = `${fmtDay(x.startsAt, x.timezone, t.intl)} ${fmtTime(x.startsAt, x.timezone, t.intl)}–${fmtTime(x.endsAt, x.timezone, t.intl)} · ${x.room ?? t("Room to be announced")}`;
+          const time = `${x.when} · ${x.room ?? t("Room to be announced")}`;
           if (x.kind === "chair") {
             const ok = (x.total ?? 0) > 0 && x.ready === x.total;
             return (
