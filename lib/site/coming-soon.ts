@@ -25,3 +25,8 @@ export const SOON_HREFS: Record<string, SoonKey> = {
 
 export const isSoon = (k: SoonKey) => COMING_SOON.has(k);
 export const isSoonHref = (href: string) => !!SOON_HREFS[href] && COMING_SOON.has(SOON_HREFS[href]);
+
+/** Public site pages switched off for now (same idea: the real page stays, a "Coming soon" panel shows instead). */
+export type PublicSoonKey = "pricing";
+export const PUBLIC_SOON: ReadonlySet<PublicSoonKey> = new Set<PublicSoonKey>(["pricing"]);
+export const isPublicSoon = (k: PublicSoonKey) => PUBLIC_SOON.has(k);

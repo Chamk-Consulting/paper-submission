@@ -5,6 +5,7 @@ import { Turnstile } from "@/components/site/turnstile";
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
+import { isPublicSoon } from "@/lib/site/coming-soon";
 import { PageHero } from "@/components/site/page-hero";
 import { sendContact, type ContactState } from "@/lib/site/actions";
 import { contact, CONTACT_TOPICS, SALES_KINDS, SALES_ROLES, SALES_SIZES, SALES_SYSTEMS } from "@/lib/config/contact";
@@ -247,12 +248,12 @@ export function ContactPage({ initialTab, email, signedIn, tone = "navy" }: { in
                   ))}
                 </ol>
               </section>
-              <section className="rounded-[8px] bg-[#0E1B3D] p-5 text-[#F5F6F3]">
+              {isPublicSoon("pricing") ? null : <section className="rounded-[8px] bg-[#0E1B3D] p-5 text-[#F5F6F3]">
                 <p className="m-0 font-serif text-[20px]">{t("Prefer to look first?")}</p>
                 <p className="mb-0 mt-1 text-[14px] text-[#D6DCEA]">{t("See plans and what each includes.")}</p>
                 <Link href="/pricing" className="mt-3 inline-flex h-10 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline">{t("See pricing")}</Link>
                 <p className="mb-0 mt-3 text-[13px] text-[#D6DCEA]">{t("Or write directly to {email}", { email: contact.salesEmail })}</p>
-              </section>
+              </section>}
             </aside>
           </>
         )}

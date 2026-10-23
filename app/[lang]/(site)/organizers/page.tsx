@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getT } from "@/lib/i18n/server";
 import { PageHero, heroBtn } from "@/components/site/page-hero";
 import { SiteHeader } from "@/components/site/site-header";
+import { isPublicSoon } from "@/lib/site/coming-soon";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -107,7 +108,7 @@ export default async function Organizers() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/manage/new" className="inline-flex h-12 items-center rounded-[4px] bg-[#0E1B3D] px-5 text-[16px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("Create an event")}</Link>
-            <Link href="/pricing" className="inline-flex h-12 items-center rounded-[4px] border border-[#0E1B3D] px-5 text-[16px] font-medium text-[#0E1B3D] no-underline">{t("See pricing")}</Link>
+            {isPublicSoon("pricing") ? null : <Link href="/pricing" className="inline-flex h-12 items-center rounded-[4px] border border-[#0E1B3D] px-5 text-[16px] font-medium text-[#0E1B3D] no-underline">{t("See pricing")}</Link>}
           </div>
         </section>
       </main>
