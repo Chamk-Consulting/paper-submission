@@ -213,7 +213,7 @@ function LeafRow({ l, depth, onPick, t }: { l: Leaf; depth: number; onPick?: () 
   return (
     <Link href={l.href} onClick={onPick} aria-current={l.on ? "page" : undefined} prefetch={depth === 0 ? null : undefined}
       className={`${rowBase} ${depth ? "h-[34px]" : "h-9"} ${l.on ? rowOn : rowOff}`}>
-      {depth > 1 ? null : l.icon}<span className="min-w-0 truncate">{t(l.label)}</span>{l.soon ? <span className="ms-auto rounded-full bg-[#EEF0EC] px-1.5 text-[11px] font-medium text-[#4A5263] rail:hidden">{t("Soon")}</span> : null}<Count n={l.count} warn={l.warn} />
+      {depth > 1 ? null : l.icon}<span className="min-w-0 truncate">{t(l.label)}</span>{l.soon || isSoonHref(l.href) ? <span className="ms-auto rounded-full bg-[#EEF0EC] px-1.5 text-[11px] font-medium text-[#4A5263] rail:hidden">{t("Soon")}</span> : <Count n={l.count} warn={l.warn} />}
     </Link>
   );
 }

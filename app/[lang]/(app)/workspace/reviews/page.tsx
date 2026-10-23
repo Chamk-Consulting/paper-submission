@@ -14,6 +14,8 @@ import { daysUntil, fmtDay, paperNo } from "@/lib/review/shared";
 import { relDay, nowMs } from "@/lib/review/format";
 import { getT } from "@/lib/i18n/server";
 import { certificateVenues } from "@/lib/reviewpolish/data";
+import { isSoon } from "@/lib/site/coming-soon";
+import { ComingSoonPage } from "@/components/account/coming-soon";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -108,6 +110,8 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
 
 /** Canvas RV01-Reviews. */
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
+  // Switched off for now (lib/site/coming-soon.ts); the page below is kept as is.
+  if (isSoon("reviews")) return <Reveal fallback={<ReviewSkeleton variant="list" />}><ComingSoonPage active="reviews" next="/workspace/reviews" /></Reveal>;
   return (
     <Reveal fallback={<ReviewSkeleton variant="list" />}>
       <Inner searchParams={searchParams} />

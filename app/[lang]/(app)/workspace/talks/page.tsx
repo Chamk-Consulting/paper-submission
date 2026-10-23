@@ -12,6 +12,8 @@ import { loadTalksAndSessions } from "@/lib/workspace/my-work";
 import { TalksList, type TalkRow } from "@/components/workspace/talks-list";
 import { fmtDay, fmtTime } from "@/lib/program/time";
 import { getT } from "@/lib/i18n/server";
+import { isSoon } from "@/lib/site/coming-soon";
+import { ComingSoonPage } from "@/components/account/coming-soon";
 
 /* Canvas CH01, widened: talks I give and sessions I chair or co-chair, soonest first. */
 
@@ -53,6 +55,8 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
 }
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
+  // Switched off for now (lib/site/coming-soon.ts); the page below is kept as is.
+  if (isSoon("talks")) return <Reveal fallback={<ChairSkeleton />}><ComingSoonPage active="talks" next="/workspace/talks" /></Reveal>;
   return (
     <Reveal fallback={<ChairSkeleton />}>
       <Inner searchParams={searchParams} />

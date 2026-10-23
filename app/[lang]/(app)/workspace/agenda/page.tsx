@@ -7,6 +7,8 @@ import { Agenda, type AgendaRow } from "@/components/workspace/agenda";
 import { dayKey, fmtDay, fmtTime, tzLabel } from "@/lib/program/time";
 import { getEventRows } from "@/lib/workspace/events-pages";
 import { loadAgenda } from "@/lib/workspace/my-work";
+import { isSoon } from "@/lib/site/coming-soon";
+import { ComingSoonPage } from "@/components/account/coming-soon";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -55,5 +57,7 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
 }
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {
+  // Switched off for now (lib/site/coming-soon.ts); the page below is kept as is.
+  if (isSoon("agenda")) return <Reveal fallback={null}><ComingSoonPage active="agenda" next="/workspace/agenda" /></Reveal>;
   return <Reveal fallback={null}><Inner searchParams={searchParams} /></Reveal>;
 }
