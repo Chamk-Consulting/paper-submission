@@ -109,6 +109,7 @@ function useMiddle(p: string, s: Summary | null) {
     kind: "group", key: "work", label: "My work", icon: ic(Briefcase), def: "subs", toggle: true,
     items: [
       { kind: "leaf", key: "subs", label: "My submissions", icon: ic(FileText), href: "/workspace/submissions", count: w?.papers || undefined, warn: w?.papersSoon, on: p.startsWith("/workspace/submissions") || p.startsWith("/submissions/") || p.startsWith("/submit/") },
+      { kind: "leaf", key: "folio", label: "Write (Folio)", icon: ic(PenLine), href: "/folio", on: p === "/folio" || p.startsWith("/folio/") },
       ...(reviewer ? [{ kind: "leaf" as const, key: "reviews", label: "To review", icon: ic(PenLine), href: "/workspace/reviews", count: w?.reviews || undefined, warn: w?.reviewsSoon, on: p.startsWith("/workspace/reviews") }] : []),
       ...(talks ? [{ kind: "leaf" as const, key: "chair", label: "Talks & sessions", icon: ic(Presentation), href: "/workspace/talks", on: p.startsWith("/workspace/talks") }] : []),
       { kind: "leaf", key: "schedule", label: "Agenda", icon: ic(CalendarClock), href: "/workspace/agenda", on: p.startsWith("/workspace/agenda") || /^\/workspace\/events\/[^/]+\/program\/my-schedule/.test(p) },

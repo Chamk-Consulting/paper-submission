@@ -439,6 +439,7 @@ export const it: Dict = {
   "Move {name} up": "Sposta {name} in alto",
   "Multi-agent systems": "Sistemi multi-agente",
   "My submissions": "I miei invii",
+  "Write (Folio)": "Scrivi (Folio)",
   "My workspace": "La mia area di lavoro",
   "Name as it appears on your papers": "Nome come compare nei tuoi articoli",
   "Name in other scripts": "Nome in altre scritture",

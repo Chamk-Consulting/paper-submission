@@ -440,6 +440,7 @@ export const fr: Dict = {
   "Move {name} up": "Monter {name}",
   "Multi-agent systems": "Systèmes multi-agents",
   "My submissions": "Mes soumissions",
+  "Write (Folio)": "Rédiger (Folio)",
   "My workspace": "Mon espace de travail",
   "Name as it appears on your papers": "Nom tel qu’il figure sur vos articles",
   "Name in other scripts": "Nom dans d’autres écritures",
