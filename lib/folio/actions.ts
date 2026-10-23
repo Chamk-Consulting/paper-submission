@@ -4,7 +4,7 @@ import * as Y from "yjs";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getLocale } from "@/lib/i18n/server";
+import { isLocale } from "@/lib/i18n/config";
 import { templateByKey } from "@/lib/folio/templates";
 import { toBytea } from "@/lib/folio/bytes";
 
@@ -19,7 +19,8 @@ async function me() {
 /** New paper from a starter template: the paper row, its files, and each text file's first Yjs update. */
 export async function createFolioPaper(formData: FormData) {
   const { supabase, personId } = await me();
-  const lang = await getLocale();
+  const raw = String(formData.get("lang") ?? "en");
+  const lang = isLocale(raw) ? raw : "en";
   if (!personId) redirect(`/${lang}/sign-in?next=/folio`);
   const tpl = templateByKey(String(formData.get("template") ?? "ieee-conference"));
   const title = String(formData.get("title") ?? "").trim().slice(0, 300) || "Untitled paper";

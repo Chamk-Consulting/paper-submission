@@ -28,7 +28,8 @@ async function Papers() {
   );
 }
 
-export default function Page() {
+export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
   return (
     <main className="mx-auto flex max-w-[960px] flex-col gap-6 px-5 py-8">
       <header>
@@ -37,6 +38,7 @@ export default function Page() {
         <p className="m-0 mt-1 text-[14px] text-[#4A5263]">LaTeX with a live PDF, co-authors editing at the same time, and every change saved.</p>
       </header>
       <form action={createFolioPaper} className="rounded-[8px] border border-[#DADDE3] bg-white p-4">
+        <input type="hidden" name="lang" value={lang} />
         <h2 className="m-0 text-[16px] font-semibold">Start a paper</h2>
         <label className="mt-3 block text-[13px]">Title
           <input name="title" placeholder="Untitled paper" maxLength={300} className="mt-1 h-9 w-full rounded-[4px] border border-[#B7BDC9] px-2 text-[14px]" />
