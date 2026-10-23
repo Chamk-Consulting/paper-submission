@@ -31,12 +31,14 @@ async function Inner({ params, searchParams }: P) {
   // Same rule as the database: closed when no type is open (or, without a window, when there's no future deadline).
   const closed = win ? !win.open : !venue.deadline && venue.kind !== "journal";
   const closedOn = win && !win.open ? fmtDay(win.closedAt, t.intl) : null;
+  // The pill counts down to the soonest deadline among the types still open (e.g. proposals after papers closed).
+  const nextDeadline = win?.types.filter((x) => x.open && x.deadline).map((x) => x.deadline as string).sort()[0] ?? venue.deadline;
   const generatedAt = new Date().toISOString();
   const name = `${me.person.given_name} ${me.person.family_name}`;
   return (
     <WizardLayout
       header={<WizardHeader initials={initialsOf(name, me.email)} />}
-      band={<TitleBand crumb={t("New submission")} title={t("New submission")} venue={venue} generatedAt={generatedAt} closedOn={closed ? (closedOn ?? "") : undefined} />}
+      band={<TitleBand crumb={t("New submission")} title={t("New submission")} venue={{ ...venue, deadline: nextDeadline }} generatedAt={generatedAt} closedOn={closed ? (closedOn ?? "") : undefined} />}
       rail={<StepRail rail={{ done: { type: false, details: false, authors: false, keywords: false, files: false, conflicts: false, review: false }, current: "type", reachable: 1, base: "" }} />}
       aside={<TypeAside venue={venue} type={type} />}
     >
