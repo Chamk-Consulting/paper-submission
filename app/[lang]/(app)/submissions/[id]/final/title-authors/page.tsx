@@ -22,8 +22,9 @@ async function Inner({ params }: P) {
   const authors = ctx.authors.map((a) => ({
     name: a.name,
     institution: a.institution,
-    tag: a.personId === presenter ? t("Presenter") : a.corresponding ? t("Corresponding") : regs.find((r) => r.personId === a.personId)?.registered ? t("Registered") : null,
+    tag: a.personId === presenter ? t("Presenter") : a.corresponding ? t("Corresponding") : regs.find((r) => r.personId === a.personId)?.registered ? t("Registered") : !a.hasAccount ? t("No account yet") : null,
   }));
+  const noAccount = ctx.authors.filter((a) => !a.hasAccount && !a.isYou).map((a) => a.name);
   return (
     <FlowFrame ctx={ctx} crumb={t("Final version")} title={t("Final version")} due={{ at: f.due, kind: "due" }} flow={await finalFlow(f, 1)}
       aside={
@@ -38,6 +39,7 @@ async function Inner({ params }: P) {
     >
       <section className={card}>
         <h2 className={h2}>{t("Final title and authors")}</h2>
+        {noAccount.length ? <p className="mt-2 rounded-[6px] bg-[#FBEFDD] px-3 py-2 text-[14px] text-[#3B2A07]">{t("{names} haven't created an account yet. They can still be listed; they need one to register or present.", { names: noAccount.join(", ") })}</p> : null}
         <p className="mt-1 text-[#4A5263]">{t("This is exactly how the paper appears in the program and the proceedings. Check spelling, accents and order.")}</p>
         <TitleLockForm id={id} title={final?.finalTitle ?? ctx.sub.title} authors={authors} locked={!!final?.lockedAt} />
       </section>

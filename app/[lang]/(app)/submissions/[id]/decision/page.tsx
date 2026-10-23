@@ -56,6 +56,7 @@ async function Inner({ params }: P) {
           <section className={asideCard}>
             <ul className="m-0 flex list-none flex-col gap-2.5 p-0 text-[15px]">
               {paper ? <li><OpenViewer id={id} files={[paper]} tab="translate" label={t("Translate the paper")} className="p-0 text-left text-[#2F5FD0] underline-offset-2 hover:underline" /></li> : null}
+              <li><a href={`/submissions/${id}/decision-letter.pdf`} className="text-[#2F5FD0]">{t("Download decision letter (PDF)")}</a></li>
               <li><PrintButton label={t("Print or save letter and reviews (PDF)")} className="p-0 text-left text-[#2F5FD0] hover:underline" /></li>
               {/* TODO(inbox): link to the chair thread once IN01 lands. */}
               <li><Link href={`/submissions/${id}/message?about=decision`} className="text-[#2F5FD0]">{t("Question about the decision? Message the chair")}</Link></li>

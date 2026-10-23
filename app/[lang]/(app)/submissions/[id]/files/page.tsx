@@ -6,6 +6,7 @@ import { asideCard, kicker } from "@/components/submission/shell";
 import { parsePageLimit } from "@/lib/submission/pdf-check";
 import { Reveal } from "@/components/motion/reveal";
 import { WizardSkeleton } from "@/components/skeletons";
+import { pageLimitFor } from "@/lib/venues/window";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -17,8 +18,7 @@ async function Inner({ params }: P) {
   const { id } = await params;
   const ctx = await requireCtx(id, "files");
   const t = await getT();
-  const type = ctx.venue.details.types?.find((ty) => ty.name === ctx.sub.paperType);
-  const limitText = type?.length ?? ctx.venue.pageLimit;
+  const limitText = await pageLimitFor(ctx.venue, ctx.sub.paperType);
   const lim = parsePageLimit(limitText);
   const paper = ctx.files.find((f) => f.role === "paper" && f.current);
   const pages = paper?.pages ?? 0;

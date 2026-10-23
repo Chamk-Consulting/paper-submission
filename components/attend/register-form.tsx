@@ -37,13 +37,17 @@ function PayButtons({ cardReady, disabled }: { cardReady: boolean; disabled: boo
   );
 }
 
-export function RegisterForm({ slug, venueId, opts, cardReady }: { slug: string; venueId: string; opts: RegistrationOptions; cardReady: boolean }) {
+/** `preselect`: a paper id from the final-version flow (?paper=…), chosen first when it is one of yours and not yet covered. */
+export function RegisterForm({ slug, venueId, opts, cardReady, preselect = null }: { slug: string; venueId: string; opts: RegistrationOptions; cardReady: boolean; preselect?: string | null }) {
   const t = useT();
   const [state, action] = useActionState<AttendState, FormData>(registerAttendee, {});
   const sellable = opts.tickets.filter((x) => x.price_cents !== null);
   const [ticket, setTicket] = useState<number>(sellable[0]?.index ?? 0);
   const free = opts.papers.filter((p) => !p.covered_by);
-  const [papers, setPapers] = useState<string[]>(free.slice(0, opts.papers_per_registration).map((p) => p.id));
+  const [papers, setPapers] = useState<string[]>(() => {
+    const first = preselect && free.some((p) => p.id === preselect) ? [preselect] : [];
+    return [...first, ...free.map((p) => p.id).filter((id) => id !== preselect)].slice(0, opts.papers_per_registration);
+  });
   const [extras, setExtras] = useState<Record<number, number>>({});
   const cur = opts.tickets.find((x) => x.index === ticket) ?? null;
   const covers = cur?.covers ?? 0;

@@ -15,7 +15,7 @@ import { RegisterStatus } from "@/components/attend/register-status";
 
 /* Canvas RG01 — register to attend: ticket, papers covered, extras, invoice details, pay. */
 
-type P = { params: Promise<{ slug: string }>; searchParams: Promise<{ done?: string; card?: string }> };
+type P = { params: Promise<{ slug: string }>; searchParams: Promise<{ done?: string; card?: string; paper?: string }> };
 
 export async function generateMetadata({ params }: P): Promise<Metadata> {
   const t = await getT();
@@ -34,7 +34,7 @@ const CARD_NOTE: Record<string, string> = {
 async function Inner({ params, searchParams }: P) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const ctx = await getWorkspaceCtx();
-  if (!ctx) redirect(`/sign-in?next=/venues/${slug}/register`);
+  if (!ctx) redirect(`/sign-in?next=${encodeURIComponent(`/venues/${slug}/register${sp.paper ? `?paper=${sp.paper}` : ""}`)}`);
   const t = await getT();
   const v = await getVenue(slug);
   if (!v) notFound();
@@ -56,7 +56,7 @@ async function Inner({ params, searchParams }: P) {
       </p>
       {opts.mine
         ? <RegisterStatus slug={slug} reg={opts.mine} justDone={sp.done === "1"} cardReady={card} cardNote={sp.card ? CARD_NOTE[sp.card] ?? null : null} />
-        : <RegisterForm slug={slug} venueId={venue.id} opts={opts} cardReady={card} />}
+        : <RegisterForm slug={slug} venueId={venue.id} opts={opts} cardReady={card} preselect={sp.paper && /^[0-9a-f-]{36}$/i.test(sp.paper) ? sp.paper : null} />}
     </WorkspaceShell>
   );
 }

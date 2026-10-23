@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { checkPdf } from "@/lib/submission/pdf-check";
 import { loadSubmission } from "@/lib/submission/data";
 import { mdToPlain, wordCount } from "@/lib/rich-text/plain";
+import { pageLimitFor } from "@/lib/venues/window";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string>; ok?: boolean; savedAt?: string };
 
@@ -151,9 +152,8 @@ export async function finishUpload(input: { submissionId: string; role: (typeof 
   if (input.role === "paper" || input.mime === "application/pdf") {
     const { data: blob, error } = await supabase.storage.from("papers").download(input.path);
     if (error || !blob) return { error: "We couldn't read the uploaded file. Try again." };
-    const type = ctx.venue.details.types?.find((t) => t.name === ctx.sub.paperType);
     const result = await checkPdf(new Uint8Array(await blob.arrayBuffer()), {
-      pageLimit: type?.length ?? ctx.venue.pageLimit,
+      pageLimit: await pageLimitFor(ctx.venue, ctx.sub.paperType),
       doubleBlind: ctx.venue.doubleBlind,
       names: ctx.authors.flatMap((a) => a.name.split(/\s+/).filter((p) => p.length >= 4)),
       institutions: ctx.authors.map((a) => a.institution ?? "").filter(Boolean),

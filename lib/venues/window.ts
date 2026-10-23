@@ -46,3 +46,14 @@ export function fmtDay(iso: string | null, intl: string): string | null {
 }
 
 export const blindLabel = (b: string | null) => (b === "double" ? "Double-blind" : b === "single" ? "Single-blind" : b === "open" ? "Open review" : null);
+
+/**
+ * Page limit for a paper type, as text the PDF check understands ("6 + 2 pages"): the organizers' type in the database
+ * first, then the old seeded list, then the venue's general limit.
+ */
+export async function pageLimitFor(venue: { id: string; pageLimit: string | null; details: { types?: { name: string; length?: string }[] } }, paperType: string): Promise<string | null> {
+  const w = await getSubmissionWindow(venue.id);
+  const ty = w?.types.find((x) => x.name === paperType);
+  if (ty?.pages) return `${ty.pages}${ty.extraPages ? ` + ${ty.extraPages}` : ""} pages`;
+  return venue.details.types?.find((x) => x.name === paperType)?.length ?? venue.pageLimit;
+}

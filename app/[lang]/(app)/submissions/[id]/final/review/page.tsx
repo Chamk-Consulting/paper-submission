@@ -42,7 +42,11 @@ async function Inner({ params }: P) {
             </li>
           ))}
         </ul>
-        {!done.copyright || !done.registration ? <p className="mt-3 text-[14px] text-[#4A5263]">{t("You can submit now; the paper is complete once the copyright is signed and one author is registered.")}</p> : null}
+        {!ready ? (
+          <p className="mt-3 rounded-[6px] bg-[#FBEFDD] px-3 py-2 text-[14px] text-[#3B2A07]">{t("Before you can submit: {items}.", { items: [!done.pdf ? t("upload a camera-ready PDF that passes the checks") : null, !done.title ? t("lock the title and authors") : null].filter(Boolean).join(t(" and ")) })}</p>
+        ) : !done.copyright || !done.registration ? (
+          <p className="mt-3 text-[14px] text-[#4A5263]">{t("You can submit now; the paper is complete once the copyright is signed and one author is registered.")}</p>
+        ) : null}
         {final?.submittedAt ? null : <FinalSubmitForm id={id} ready={ready} />}
       </section>
     </FlowFrame>

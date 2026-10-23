@@ -13,7 +13,7 @@ const TWO_STEP_GUARDED = [...PROTECTED_PREFIXES, "/create-account/password", "/c
 // user_metadata.onb by /auth/continue) is sent to that step first, then back to the page it asked for.
 const ONBOARDING_GUARDED = [...PROTECTED_PREFIXES, "/welcome"];
 // Route handlers live outside app/[lang] and are never rewritten.
-const NO_LOCALE = [/^\/(?:robots\.txt|sitemap\.xml)$/, /^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/receipt\.pdf$/];
+const NO_LOCALE = [/^\/(?:robots\.txt|sitemap\.xml)$/, /^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/(?:receipt|decision-letter)\.pdf$/];
 
 export default async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

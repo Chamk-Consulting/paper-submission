@@ -67,6 +67,8 @@ async function Inner({ params }: P) {
     : null;
   const [label, bg, ink, line] = STAGE[sub.stage] ?? STAGE.submitted;
   const paper = files.find((f) => f.role === "paper" && f.current);
+  // The PDF that matters now: the final version once there is one, otherwise the submitted paper.
+  const latestPdf = files.find((f) => f.role === "final" && f.current) ?? files.find((f) => f.role === "revision" && f.current) ?? paper;
   const me = authors.find((a) => a.isYou);
   const no = sub.number ? `#${String(sub.number).padStart(4, "0")}` : t("Draft");
   const name = ctx.me.person ? `${ctx.me.person.given_name} ${ctx.me.person.family_name}` : ctx.me.email;
@@ -74,10 +76,19 @@ async function Inner({ params }: P) {
   const final = venue.dates.find((d) => d.kind === "final");
   const order = ["submitted", "review", "decision", "final", "done"];
   const at = Math.max(0, order.indexOf(sub.stage === "revise" ? "decision" : sub.stage));
-  const deadlinePassed = !venue.deadline && venue.kind !== "journal";
+  // The deadline this paper was submitted under (an event can have several calls; the next one is not this paper's).
+  const subDates = venue.dates.filter((d) => d.kind === "submission").map((d) => d.startsAt).sort();
+  const paperDeadline = sub.stage === "draft" || !sub.submittedAt ? venue.deadline
+    : subDates.find((d) => Date.parse(d) >= Date.parse(sub.submittedAt as string)) ?? subDates.filter((d) => Date.parse(d) <= Date.parse(sub.submittedAt as string)).pop() ?? null;
+  const deadlinePassed = paperDeadline ? !isFuture(paperDeadline) : venue.kind !== "journal" && !venue.deadline;
+  const beforeDecision = sub.stage === "submitted" || sub.stage === "review";
+  const finalDue = final ? (isFuture(final.startsAt) ? t("due {date}", { date: short(final.startsAt) }) : t("deadline passed")) : "";
+  const afterAccept = (ok: boolean) => (ok ? "" : sub.stage === "final" ? finalDue : sub.stage === "done" ? "" : t("after acceptance"));
+  // Status line: computed from the dates when the paper waits for its final version, so it never goes stale.
+  const detail = sub.stage === "final" && final ? (isFuture(final.startsAt) ? t("Final version due {date}", { date: short(final.startsAt) }) : t("Final version deadline passed")) : sub.stageDetail;
   const pipe = [
     { title: t("Submitted"), d: sub.submittedAt ? short(sub.submittedAt) : "—", done: sub.stage !== "draft" },
-    { title: t("Deadline"), d: venue.deadline ? short(venue.deadline) : t("passed"), done: deadlinePassed && sub.stage !== "draft" },
+    { title: t("Deadline"), d: paperDeadline ? short(paperDeadline) : t("passed"), done: deadlinePassed && sub.stage !== "draft" },
     { title: t("Review"), d: "", done: at >= 2 },
     { title: t("Decision"), d: notif ? short(notif.startsAt) : "", done: at >= 2 && sub.stage !== "review" },
     { title: t("Final version"), d: final ? short(final.startsAt) : "", done: at >= 4 },
@@ -131,8 +142,8 @@ async function Inner({ params }: P) {
             </section>
           ) : null}
           <section className="rounded-[8px] border border-[#DADDE3] bg-white px-[22px] py-5">
-            <div className="flex flex-wrap items-center gap-3"><span className="rounded-[2px] px-2.5 py-1 font-mono text-[12px] font-medium tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(label)}</span>{sub.stageDetail ? <span className="text-[15px] text-[#4A5263]">{/^Step (\d+) of 7$/.test(sub.stageDetail) ? t("Step {n} of 7", { n: sub.stageDetail.split(" ")[1] }) : t(sub.stageDetail)}</span> : null}</div>
-            <p className="mt-3 text-[16px]">{t(line)}{notif && sub.stage !== "withdrawn" ? ` ${t("Decisions are expected on {date}.", { date: short(notif.startsAt) })}` : ""}</p>
+            <div className="flex flex-wrap items-center gap-3"><span className="rounded-[2px] px-2.5 py-1 font-mono text-[12px] font-medium tracking-[0.04em]" style={{ background: bg, color: ink }}>{t(label)}</span>{detail ? <span className="text-[15px] text-[#4A5263]">{/^Step (\d+) of 7$/.test(detail) ? t("Step {n} of 7", { n: detail.split(" ")[1] }) : t(detail)}</span> : null}</div>
+            <p className="mt-3 text-[16px]">{t(line)}{notif && beforeDecision && isFuture(notif.startsAt) ? ` ${t("Decisions are expected on {date}.", { date: short(notif.startsAt) })}` : ""}</p>
             {sub.stage === "draft" ? <Link href={`/submissions/${id}/review`} className="mt-3 inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-4 font-semibold text-[#0E1B3D] no-underline">{t("Continue the submission →")}</Link> : null}
             {sub.stage !== "withdrawn" && sub.stage !== "draft" ? (
               <ol className="m-0 mt-5 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-4 lg:grid-cols-7">
@@ -150,9 +161,9 @@ async function Inner({ params }: P) {
             {info && info.reviews.submitted > 0
               ? tile("Reviews", decision ? "Released" : "In progress", decision ? "" : "shown after the decision", decision ? "#18744F" : "#2F5FD0")
               : tile("Reviews", "Not yet", "after the deadline", "#DADDE3")}
-            {tile("PDF check", paper ? (paper.check.status === "failed" ? "Problems" : "Passed") : "No PDF", paper?.pages != null ? t("{n} pages", { n: paper.pages }) : "", paper ? (paper.check.status === "failed" ? "#B3261E" : "#18744F") : "#DADDE3")}
-            {tile("Copyright", sub.copyrightCheck === "ok" ? "Signed" : "Not yet", "after acceptance", sub.copyrightCheck === "ok" ? "#18744F" : "#DADDE3")}
-            {tile("Registration", sub.registrationCheck === "ok" ? "Done" : "Not yet", "after acceptance", sub.registrationCheck === "ok" ? "#18744F" : "#DADDE3")}
+            {tile("PDF check", latestPdf ? (latestPdf.check.status === "failed" ? "Problems" : "Passed") : "No PDF", latestPdf ? [latestPdf.role === "final" ? t("final version") : latestPdf.role === "revision" ? t("revised version") : "", latestPdf.pages != null ? t("{n} pages", { n: latestPdf.pages }) : ""].filter(Boolean).join(" · ") : "", latestPdf ? (latestPdf.check.status === "failed" ? "#B3261E" : "#18744F") : "#DADDE3")}
+            {tile("Copyright", sub.copyrightCheck === "ok" ? "Signed" : "Not yet", afterAccept(sub.copyrightCheck === "ok"), sub.copyrightCheck === "ok" ? "#18744F" : sub.stage === "final" ? "#A8600F" : "#DADDE3")}
+            {tile("Registration", sub.registrationCheck === "ok" ? "Done" : "Not yet", afterAccept(sub.registrationCheck === "ok"), sub.registrationCheck === "ok" ? "#18744F" : sub.stage === "final" ? "#A8600F" : "#DADDE3")}
           </div>
           <section className="rounded-[8px] border border-[#DADDE3] bg-white px-[22px] py-5">
             <h2 className="m-0 font-serif text-[22px] font-normal">{t("History")}</h2>
@@ -203,6 +214,7 @@ async function Inner({ params }: P) {
             <div className="flex flex-col gap-2">
               {editable ? <Link href={sub.stage === "draft" ? `${base}/details` : `${base}/edit`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{sub.stage === "draft" ? t("Continue editing") : t("Edit submission (until the deadline)")}</Link> : null}
               {decision ? <Link href={`${base}/decision`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Decision & reviews")}</Link> : null}
+              {decision ? <a href={`/submissions/${id}/decision-letter.pdf`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Download decision letter (PDF)")}</a> : null}
               {rebuttalOpen ? <Link href={`${base}/rebuttal`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Respond to the reviews")}</Link> : null}
               {sub.stage === "final" || sub.stage === "done" ? <Link href={`${base}/final`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Final version")}</Link> : null}
               {sub.stage !== "draft" ? <Link href={`${base}/message`} className="flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[15px] text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Message the program chair")}</Link> : null}

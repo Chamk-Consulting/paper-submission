@@ -46,7 +46,7 @@ async function Inner({ params, searchParams }: P) {
         </>
       }
     >
-      <WithdrawReasonForm id={id} reason={sp.reason} note={sp.note} />
+      <WithdrawReasonForm id={id} reason={sp.reason} note={sp.note} stage={ctx.sub.stage} />
     </FlowFrame>
   );
 }

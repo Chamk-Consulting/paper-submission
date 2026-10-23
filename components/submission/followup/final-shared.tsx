@@ -32,7 +32,11 @@ export async function finalFlow(f: FF, current: number): Promise<Flow> {
   const labels = [t("Camera-ready PDF"), t("Title & authors"), t("Copyright"), t("Registration & presenter"), t("Review & submit")];
   return {
     name: t("Final version"), mark: 40 + current,
-    steps: labels.map((label, i) => ({ label, href: `${base}/${PATHS[i]}`, state: i === current ? "current" : f.done[KEYS[i]] ? "done" : "todo" })),
+    // A step opens from the bar only when what it needs is done — the same rule as each step's Continue button.
+    steps: labels.map((label, i) => {
+      const reachable = i === 0 || i <= current || (i === 1 ? f.done.pdf : i === 4 ? f.done.pdf && f.done.title : f.done.title);
+      return { label, href: reachable ? `${base}/${PATHS[i]}` : undefined, state: i === current ? "current" : f.done[KEYS[i]] ? "done" : "todo" };
+    }),
     note: t("Your progress is saved. Come back any time before the deadline."),
   };
 }

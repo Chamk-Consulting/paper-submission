@@ -52,6 +52,8 @@ async function Inner({ params }: P) {
     );
   }
   if (sub.stage === "draft" || !sub.number) redirect(`/submissions/${id}/review`);
+  // The confirmation is for the moment of submitting; once review has started the status page is the right place.
+  if (sub.stage !== "submitted") redirect(`/submissions/${id}`);
   const no = `#${String(sub.number).padStart(4, "0")}`;
   const invites = authors.filter((a) => !a.hasAccount);
   const name = ctx.me.person ? `${ctx.me.person.given_name} ${ctx.me.person.family_name}` : ctx.me.email;

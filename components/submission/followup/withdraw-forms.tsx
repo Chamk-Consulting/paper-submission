@@ -12,7 +12,7 @@ import { WITHDRAW_REASONS } from "@/lib/submission/followup-shared";
 
 const dangerBtn = "inline-flex h-12 items-center justify-center rounded-[4px] border-0 bg-[#B3261E] px-5 text-[16px] font-semibold text-white hover:bg-[#9A1F18] disabled:opacity-60";
 
-export function WithdrawReasonForm({ id, reason: initial, note }: { id: string; reason?: string; note?: string }) {
+export function WithdrawReasonForm({ id, reason: initial, note, stage = "submitted" }: { id: string; reason?: string; note?: string; stage?: string }) {
   const t = useT();
   const [state, action, pending] = useActionState<ActionState, FormData>(startWithdraw, {});
   const [reason, setReason] = useState(initial ?? "");
@@ -21,7 +21,9 @@ export function WithdrawReasonForm({ id, reason: initial, note }: { id: string; 
       <input type="hidden" name="submissionId" value={id} />
       <div role="note" className="flex gap-3 rounded-[8px] border border-[#F3C3BE] bg-[#FDECEA] px-4 py-3.5 text-[15px] text-[#5C1A15]">
         <span aria-hidden className="flex size-6 flex-none items-center justify-center rounded-full bg-[#B3261E] text-[13px] font-bold text-white">!</span>
-        <p className="m-0"><strong>{t("Withdrawing can't be undone.")}</strong> {t("The paper leaves review at once. To submit again you would start a new submission, which is not possible after the deadline.")}</p>
+        <p className="m-0"><strong>{t("Withdrawing can't be undone.")}</strong> {["decision", "final", "done"].includes(stage)
+          ? t("The paper is accepted: withdrawing removes it from the program and the proceedings, and the organizers are told at once.")
+          : t("The paper leaves review at once. To submit again you would start a new submission, which is not possible after the deadline.")}</p>
       </div>
       <section className={`${card} mt-6`}>
         <h2 className={h2}>{t("Why are you withdrawing?")}</h2>

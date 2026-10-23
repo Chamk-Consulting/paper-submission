@@ -19,7 +19,8 @@ async function Inner({ params }: P) {
   const t = await getT();
   const { ctx, final, regs } = f;
   const covered = regs.find((r) => r.coversPaper);
-  const regUrl = ctx.venue.details.website || `/venues/${ctx.venue.slug}`;
+  const external = (ctx.venue.details as { registration_url?: string }).registration_url ?? null;
+  const regUrl = external || `/venues/${ctx.venue.slug}/register?paper=${ctx.sub.id}`;
   const regDue = f.info?.dates.registration ?? null;
   return (
     <FlowFrame ctx={ctx} crumb={t("Final version")} title={t("Final version")} due={{ at: f.due, kind: "due" }} flow={await finalFlow(f, 3)}
@@ -40,9 +41,9 @@ async function Inner({ params }: P) {
         ) : (
           <>
             <p className="mt-3 rounded-[6px] bg-[#FBEFDD] px-3 py-2 text-[15px] text-[#3B2A07]">{t("No author registration covers this paper yet.")}</p>
-            <p className="mt-3 text-[15px]">{t("Register on the conference site with paper ID {no} — we link it automatically.", { no: no4(ctx.sub.number) })}</p>
+            <p className="mt-3 text-[15px]">{external ? t("Register on the conference site with paper ID {no} — we link it automatically.", { no: no4(ctx.sub.number) }) : t("Register for {venue}; paper {no} is already selected on the form.", { venue: ctx.venue.acr, no: no4(ctx.sub.number) })}</p>
             {regDue ? <p className="mt-1 text-[14px] text-[#4A5263]">{t("Author registration deadline: {date}", { date: new Date(regDue).toLocaleDateString(t.intl, { day: "numeric", month: "short", year: "numeric" }) })}</p> : null}
-            <a href={regUrl} target={regUrl.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="mt-3 inline-flex h-10 items-center rounded-[4px] bg-[#0E1B3D] px-4 text-[15px] font-semibold text-white no-underline">{t("Go to registration")} ↗</a>
+            <a href={regUrl} target={regUrl.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="mt-3 inline-flex h-10 items-center rounded-[4px] bg-[#0E1B3D] px-4 text-[15px] font-semibold text-white no-underline">{t("Go to registration")}{external ? " ↗" : " →"}</a>
           </>
         )}
       </section>

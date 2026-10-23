@@ -10,6 +10,7 @@ import { absUrl, sendMany, textToHtml } from "@/lib/email/send";
 import { dropOptedOut } from "@/lib/email/optouts";
 import type { ActionState } from "@/lib/submission/actions";
 import { wordCount } from "@/lib/rich-text/plain";
+import { pageLimitFor } from "@/lib/venues/window";
 
 /* Server actions for the author follow-up flows (SB10–SB15, CA01). Messages are English keys, translated by the forms. */
 
@@ -192,9 +193,8 @@ export async function finishFollowupUpload(input: { submissionId: string; role: 
   if (input.mime === "application/pdf" && input.role !== "supplementary") {
     const { data: blob, error } = await supabase.storage.from("papers").download(input.path);
     if (error || !blob) return { error: MSG.upload };
-    const type = ctx.venue.details.types?.find((t) => t.name === ctx.sub.paperType);
     const result = await checkPdf(new Uint8Array(await blob.arrayBuffer()), {
-      pageLimit: type?.length ?? ctx.venue.pageLimit,
+      pageLimit: await pageLimitFor(ctx.venue, ctx.sub.paperType),
       doubleBlind: input.role === "revision" || input.role === "highlighted" ? ctx.venue.doubleBlind : false,
       names: ctx.authors.flatMap((a) => a.name.split(/\s+/).filter((p) => p.length >= 4)),
       institutions: ctx.authors.map((a) => a.institution ?? "").filter(Boolean),

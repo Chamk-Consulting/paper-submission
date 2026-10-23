@@ -9,6 +9,7 @@ import { CheckList, FollowupUpload } from "@/components/submission/followup/bits
 import { OpenViewer } from "@/components/submission/followup/open-viewer";
 import { Reveal } from "@/components/motion/reveal";
 import { FlowSkeleton } from "@/components/skeletons/author";
+import { pageLimitFor } from "@/lib/venues/window";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -23,7 +24,7 @@ async function Inner({ params }: P) {
   const { ctx, files } = f;
   const base = `/submissions/${id}`;
   const original = ctx.files.find((x) => x.role === "paper" && x.current);
-  const limit = ctx.venue.details.types?.find((x) => x.name === ctx.sub.paperType)?.length ?? ctx.venue.pageLimit;
+  const limit = await pageLimitFor(ctx.venue, ctx.sub.paperType);
   const sub = "mb-2 mt-5 flex flex-wrap items-baseline gap-2";
   const viewerFiles = [files.revision, files.highlighted, original].filter((x): x is NonNullable<typeof x> => !!x);
   return (

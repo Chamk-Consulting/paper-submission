@@ -40,7 +40,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     ["Authors", authors.map((a) => `${a.position}. ${a.name}${a.corresponding ? " (corresponding)" : ""}`).join("; ")],
     ["Keywords", sub.keywords.join(", ")],
     ["Files", files.filter((f) => f.current || f.role !== "paper").map((f) => `${f.name} (${(f.size / 1048576).toFixed(1)} MB)`).join("; ")],
-    ["Status", sub.stage === "withdrawn" ? "Withdrawn" : "Submitted — editable until the deadline"],
+    ["Status", ({ withdrawn: "Withdrawn", submitted: "Submitted - editable until the deadline", review: "Under review", decision: "Accepted", final: "Accepted - final version due", done: "Accepted - final version complete", rejected: "Not accepted", revise: "Revision requested" } as Record<string, string>)[sub.stage] ?? "Submitted"],
   ];
   for (const [k, v] of rows) { page.drawText(k, { x: 60, y, size: 10, font: bold, color: muted }); y -= 14; line(v || "—", 11, sans, navy, 4); y -= 6; }
   y -= 10;

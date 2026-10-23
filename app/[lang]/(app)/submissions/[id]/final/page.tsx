@@ -10,6 +10,7 @@ import { OpenViewer } from "@/components/submission/followup/open-viewer";
 import { commentsOf, loadPaperReviews } from "@/lib/submission/followup-data";
 import { Reveal } from "@/components/motion/reveal";
 import { FlowSkeleton } from "@/components/skeletons/author";
+import { pageLimitFor } from "@/lib/venues/window";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -26,8 +27,8 @@ async function Inner({ params }: P) {
   const comments = commentsOf(await loadPaperReviews(id));
   const firstPerReviewer = comments.filter((c) => c.no === 1);
   const { fails } = checkSummary(pdf);
-  const type = ctx.venue.details.types?.find((x) => x.name === ctx.sub.paperType);
-  const limit = type?.length ?? ctx.venue.pageLimit;
+  // Final versions may use the extra pages too, so the limit shown is the full "N + extra" of the type.
+  const limit = await pageLimitFor(ctx.venue, ctx.sub.paperType);
   return (
     <FlowFrame ctx={ctx} crumb={t("Final version")} title={t("Final version")} due={{ at: f.due, kind: "due" }} flow={await finalFlow(f, 0)}
       aside={
