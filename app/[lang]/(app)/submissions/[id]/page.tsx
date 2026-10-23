@@ -13,6 +13,8 @@ import { fmtMonth } from "@/lib/venues/time";
 import { Reveal } from "@/components/motion/reveal";
 import { StatusSkeleton } from "@/components/skeletons";
 import { TestBanner } from "@/components/submission/test-banner";
+import { SubmissionContent } from "@/components/submission/submission-content";
+import { pageLimitFor } from "@/lib/venues/window";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -52,11 +54,12 @@ async function Inner({ params }: P) {
   const { sub, venue, authors, files, editable } = ctx;
   const short = (iso: string) => shortAt(iso, t.intl);
   const supabase = await createClient();
-  const [{ data: hist }, decision, info, revision] = await Promise.all([
+  const [{ data: hist }, decision, info, revision, pageLimit] = await Promise.all([
     supabase.rpc("submission_history", { p_submission: id }),
     loadDecision(id),
     sub.stage === "draft" ? Promise.resolve(null) : loadInfo(id),
     sub.stage === "revise" ? loadRevision(id) : Promise.resolve(null),
+    pageLimitFor(venue, sub.paperType),
   ]);
   const myConfirmation = info?.authors.find((a) => a.isMe)?.confirmation;
   const rebuttalClose = info?.rebuttal ? info.dates.rebuttal_close ?? null : null;
@@ -170,6 +173,7 @@ async function Inner({ params }: P) {
             {tile("Copyright", sub.copyrightCheck === "ok" ? "Signed" : "Not yet", afterAccept(sub.copyrightCheck === "ok"), sub.copyrightCheck === "ok" ? "#18744F" : sub.stage === "final" ? "#A8600F" : "#DADDE3")}
             {tile("Registration", sub.registrationCheck === "ok" ? "Done" : "Not yet", afterAccept(sub.registrationCheck === "ok"), sub.registrationCheck === "ok" ? "#18744F" : sub.stage === "final" ? "#A8600F" : "#DADDE3")}
           </div>
+          <SubmissionContent ctx={ctx} t={t} pageLimit={pageLimit} editHref={editable ? (sub.stage === "draft" ? `${base}/details` : `${base}/edit`) : null} />
           <section className="rounded-[8px] border border-[#DADDE3] bg-white px-[22px] py-5">
             <h2 className="m-0 font-serif text-[22px] font-normal">{t("History")}</h2>
             <ul className="m-0 mt-3 list-none p-0">

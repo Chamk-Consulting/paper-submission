@@ -22,6 +22,8 @@ export type Submission = {
   stage: string; stageDetail: string | null; draftStep: number; declarations: { original?: boolean; preprint?: boolean; student_award?: boolean };
   keywords: string[]; ownKeywords: string[]; conflictsOkAt: string | null; submittedAt: string | null; updatedAt: string; withdrawnAt: string | null;
   pdfCheck: string; copyrightCheck: string; registrationCheck: string;
+  /** What the authors agreed to on the last step (agree to the terms, one author will present). */
+  confirmations: { agree?: boolean; present?: boolean; at?: string };
   /** EM13 test paper: organizer only, never numbered or counted. */
   isTest: boolean; testSubmittedAt: string | null;
 };
@@ -103,7 +105,7 @@ export async function loadSubmission(id: string): Promise<Ctx | null> {
     id: s.id, venueId: s.venue_id, number: s.number, title: s.title, abstract: s.abstract, shortTitle: s.short_title, paperType: s.paper_type, track: s.track,
     stage: s.stage, stageDetail: s.stage_detail, draftStep: s.draft_step ?? 1, declarations: s.declarations ?? {}, keywords: s.keywords ?? [], ownKeywords: s.own_keywords ?? [],
     conflictsOkAt: s.conflicts_ok_at, submittedAt: s.submitted_at, updatedAt: s.updated_at, withdrawnAt: s.withdrawn_at,
-    pdfCheck: s.pdf_check, copyrightCheck: s.copyright_check, registrationCheck: s.registration_check,
+    pdfCheck: s.pdf_check, copyrightCheck: s.copyright_check, registrationCheck: s.registration_check, confirmations: s.confirmations ?? {},
     isTest: !!s.is_test, testSubmittedAt: (s.test_submitted_at as string) ?? null,
   };
   const authors: Author[] = ((authorRows ?? []) as Record<string, unknown>[]).map((a) => ({
