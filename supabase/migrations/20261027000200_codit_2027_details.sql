@@ -1,6 +1,6 @@
 -- CoDIT 2027: submission types and windows from the PaperCept submission wizard (27 Oct 2026), the rest from codit2027.com.
 -- PaperCept deadlines are 23:59:59 Pacific Time; codit2027.com says Anywhere on Earth. Stored as Pacific Time (where papers are submitted).
--- NOT YET APPLIED: waiting for approval in the session of 27 Oct 2026.
+-- Applied 27 Oct 2026 after approval.
 do $$
 declare v uuid := 'b45f99c5-a7cb-4660-b7e1-2cc13272c47f';
 begin
