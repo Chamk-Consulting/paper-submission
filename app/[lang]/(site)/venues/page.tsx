@@ -8,7 +8,7 @@ import { DirectorySkeleton } from "@/components/skeletons";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return {
-    title: t("Venue directory"),
+    title: t("Event directory"),
     description: t("Find conferences, journals and awards with open calls for papers — deadlines in your time zone."),
   };
 }

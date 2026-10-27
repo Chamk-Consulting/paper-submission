@@ -78,7 +78,7 @@ export async function DirectorySkeleton() {
       <Skeleton>
         <section className="bg-[#0E1B3D] text-[#F5F6F3]">
           <div className="mx-auto max-w-[1280px] px-5 pb-0 pt-10 sm:px-8">
-            <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Venue directory")}</p>
+            <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Event directory")}</p>
             <h1 className="mt-2 font-serif text-[36px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[48px]">{t("Find your next call for papers")}</h1>
             <Line dark size={16} w="min(520px, 90%)" className="mt-2" />
             <div className="mt-[22px] flex h-[52px] items-center gap-2.5 rounded-[6px] bg-white px-3.5 text-[16px] text-[#6B7385]">

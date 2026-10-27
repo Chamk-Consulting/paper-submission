@@ -221,7 +221,7 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
       ) : (
       <section className="bg-[#0E1B3D] text-[#F5F6F3]">
         <div className="mx-auto max-w-[1280px] px-5 pb-0 pt-10 sm:px-8">
-          <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Venue directory")}</p>
+          <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Event directory")}</p>
           <h1 className="mt-2 font-serif text-[36px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[48px]">{t("Find your next call for papers")}</h1>
           <p className="mt-2 text-[16px] text-[#B9C3DA]">
             {current.length} {current.length === 1 ? t("conference, journal or award") : t("conferences, journals and awards")} · {t("deadlines in")} <strong className="text-[#F5F6F3]">{tz === "UTC" ? t("your time zone") : `${cityOf(tz)} (${tz})`}</strong>, {t("AoE alongside")}

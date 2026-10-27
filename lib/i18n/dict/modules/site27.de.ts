@@ -1,5 +1,6 @@
 /* site27 slice (one-event home, PIN, sign-in and sign-up switches) — de. English text is the key. */
 export const site27_de: Record<string, string> = {
+  "Event directory": "Veranstaltungsverzeichnis",
   "PIN recognised.": "PIN erkannt.",
   "A PIN is a number from 1000 up, like 1024.": "Eine PIN ist eine Zahl ab 1000, zum Beispiel 1024.",
   "Enter your email or your PIN.": "Geben Sie Ihre E-Mail-Adresse oder Ihre PIN ein.",
