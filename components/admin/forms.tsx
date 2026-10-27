@@ -113,7 +113,7 @@ export function SiteFlagsForm({ flags, events }: { flags: SiteFlagsValue; events
         </select>
       </label>
       <label className={box}><input type="checkbox" name="single" defaultChecked={flags.singleEvent} className="mt-1" />
-        <span>{t("One-event site: the home page opens the home event, and the top bar hides the directory, organizer and pricing links")}</span></label>
+        <span>{t("Events-only site: the home page opens the list of all events (with search), and the top bar hides the organizer and pricing links")}</span></label>
       <label className={box}><input type="checkbox" name="signinCode" defaultChecked={flags.signinEmailCode} className="mt-1" />
         <span>{t("Sign in with an emailed code (as well as the password)")}</span></label>
       <label className={box}><input type="checkbox" name="signupCode" defaultChecked={flags.signupEmailCode} className="mt-1" />

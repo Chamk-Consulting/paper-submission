@@ -15,7 +15,7 @@ export const site27_de: Record<string, string> = {
   "Public site and sign-in": "Öffentliche Website und Anmeldung",
   "Home event": "Startveranstaltung",
   "None — the home page is the directory": "Keine — die Startseite ist das Verzeichnis",
-  "One-event site: the home page opens the home event, and the top bar hides the directory, organizer and pricing links": "Website für eine Veranstaltung: Die Startseite öffnet die Startveranstaltung, und die obere Leiste blendet Verzeichnis, Veranstalter- und Preislinks aus",
+  "Events-only site: the home page opens the list of all events (with search), and the top bar hides the organizer and pricing links": "Nur Veranstaltungen: Die Startseite öffnet die Liste aller Veranstaltungen (mit Suche), und die obere Leiste blendet Veranstalter- und Preislinks aus",
   "Sign in with an emailed code (as well as the password)": "Anmeldung mit einem per E-Mail gesendeten Code (zusätzlich zum Passwort)",
   "New accounts confirm their email with a code first (off: name, email and password, then straight in)": "Neue Konten bestätigen zuerst ihre E-Mail mit einem Code (aus: Name, E-Mail und Passwort, dann direkt hinein)",
   "Saved. The public site follows the new settings within a minute.": "Gespeichert. Die öffentliche Website übernimmt die neuen Einstellungen innerhalb einer Minute.",

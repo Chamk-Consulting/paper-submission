@@ -34,8 +34,8 @@ async function siteFlags(): Promise<SiteFlags> {
     return flagsCache?.flags ?? DEFAULT_FLAGS;
   }
 }
-// Public pages that open the home event when the site runs as one event.
-const SINGLE_EVENT_ENTRY = new Set(["/", "/events", "/venues", "/organizers", "/pricing"]);
+// Public pages that open the events list (with search) when the site runs in events-only mode.
+const SINGLE_EVENT_ENTRY = new Set(["/", "/organizers", "/pricing"]);
 
 export default async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -131,12 +131,12 @@ export default async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
-  // One-event site: the home page (and the directory, organizer and pricing pages) open the event itself.
+  // Events-only site: the home page (and the organizer and pricing pages) open the list of all events, with search.
   if (SINGLE_EVENT_ENTRY.has(bare)) {
     const f = await siteFlags();
-    if (f.singleEvent && f.homeEvent) {
+    if (f.singleEvent) {
       const url = request.nextUrl.clone();
-      url.pathname = `${prefix}${user ? "/workspace" : ""}/events/${f.homeEvent}`;
+      url.pathname = `${prefix}/events`;
       return NextResponse.redirect(url, 307);
     }
   }

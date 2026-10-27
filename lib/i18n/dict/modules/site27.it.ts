@@ -15,7 +15,7 @@ export const site27_it: Record<string, string> = {
   "Public site and sign-in": "Sito pubblico e accesso",
   "Home event": "Evento principale",
   "None — the home page is the directory": "Nessuno — la home è l’elenco",
-  "One-event site: the home page opens the home event, and the top bar hides the directory, organizer and pricing links": "Sito di un solo evento: la home apre l’evento principale e la barra in alto nasconde i link a elenco, organizzatori e prezzi",
+  "Events-only site: the home page opens the list of all events (with search), and the top bar hides the organizer and pricing links": "Solo eventi: la home apre l’elenco di tutti gli eventi (con ricerca) e la barra in alto nasconde i link a organizzatori e prezzi",
   "Sign in with an emailed code (as well as the password)": "Accesso con un codice via email (oltre alla password)",
   "New accounts confirm their email with a code first (off: name, email and password, then straight in)": "I nuovi account confermano prima l’email con un codice (disattivato: nome, email e password, poi subito dentro)",
   "Saved. The public site follows the new settings within a minute.": "Salvato. Il sito pubblico segue le nuove impostazioni entro un minuto.",
