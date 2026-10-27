@@ -38,7 +38,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
       width={440}
       aside={
         <NavyAside label={t("Account set-up progress")} kicker={t("Creating your account")} title={first ? t("Last step, {name}.", { name: first }) : t("Last step.")}>
-          <SetupSteps doneLabel={t("Done")} steps={signupSteps(t, 4, { 1: [p?.display_name, me.email].filter(Boolean).join(" · "), 2: confirmedAt ? t("Confirmed {time}.", { time: time(confirmedAt, t.intl) }) : t("Confirmed."), 3: t("Saved."), 4: t("Name on papers and affiliation — then you get your Plenary ID and go back to where you started.") })} />
+          <SetupSteps doneLabel={t("Done")} steps={signupSteps(t, 4, { 1: [p?.display_name, me.email].filter(Boolean).join(" · "), 2: confirmedAt ? t("Confirmed {time}.", { time: time(confirmedAt, t.intl) }) : t("Confirmed."), 3: t("Saved."), 4: t("Name on papers and affiliation — then you get your PIN and go back to where you started.") })} />
           <ShieldNote><strong className="text-[#F5F6F3]">{t("Your email is never shown to other users.")}</strong> {t("Chairs and co-authors see your name and affiliation. During blind review, reviewers see none of it.")}</ShieldNote>
         </NavyAside>
       }

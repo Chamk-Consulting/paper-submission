@@ -131,7 +131,7 @@ export function ExtensionPanel(p: ExtProps) {
               <div className={ui.warn}>{t("Handing back can't be undone. Your draft ({d}) is deleted and the editor finds another reviewer.", { d: p.draftSummary })}</div>
               <label className={ui.label}>
                 {t("Suggest a replacement (optional)")}
-                <input name="suggestion" maxLength={300} placeholder={t("Name, email or Plenary ID")} className={ui.input} />
+                <input name="suggestion" maxLength={300} placeholder={t("Name, email or PIN")} className={ui.input} />
               </label>
             </>
           ) : null}

@@ -21,7 +21,7 @@ import { clearRecovery, hasRecovery, markRecovery } from "@/lib/auth/recovery-co
 
 export type ForgotState = { fieldErrors?: { identifier?: string[] }; message?: string };
 
-const askSchema = z.object({ identifier: z.string().trim().min(1, "Enter the email, phone, Plenary ID or alias you use for Plenary.").max(254) });
+const askSchema = z.object({ identifier: z.string().trim().min(1, "Enter the email, phone, PIN or alias you use for Plenary.").max(254) });
 
 async function sendRecovery(email: string) {
   const supabase = await createClient();
@@ -38,9 +38,9 @@ export async function startPasswordReset(_: ForgotState, formData: FormData): Pr
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
   const raw = parsed.data.identifier;
   const kind = detectIdentifier(raw).kind;
-  if (kind === "none") return { fieldErrors: { identifier: ["Enter the email, phone, Plenary ID or alias you use for Plenary."] } };
+  if (kind === "none") return { fieldErrors: { identifier: ["Enter the email or PIN you use for Plenary."] } };
   if (kind === "id" && plenaryIdSignIn()) {
-    // Plenary ID: look up the email server-side; the code page carries the ID, never the email.
+    // PIN: look up the email server-side; the code page carries the ID, never the email.
     const { email, id } = await accountEmailFor(raw);
     if (id) {
       if (email && (await sendRecovery(email)) === "rate") return { message: "Please wait a minute before asking for another code." };
@@ -49,8 +49,8 @@ export async function startPasswordReset(_: ForgotState, formData: FormData): Pr
   }
   if (kind !== "email") {
     // TODO(auth): alias and phone lookup.
-    const what = { id: "Plenary ID", alias: "alias", phone: "phone number", pin: "PaperCept PIN" }[kind as string] ?? "that";
-    return { fieldErrors: { identifier: [kind === "pin" ? "Plenary doesn’t use PaperCept PINs. Use your email." : `Resetting with a ${what} isn’t available yet — use your email for now.`] } };
+    const what = { id: "PIN", alias: "alias", phone: "phone number" }[kind as string] ?? "that";
+    return { fieldErrors: { identifier: [`Resetting with a ${what} isn’t available yet — use your email or PIN.`] } };
   }
   const email = raw.toLowerCase();
   if ((await sendRecovery(email)) === "rate") return { message: "Please wait a minute before asking for another code." };

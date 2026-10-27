@@ -41,7 +41,7 @@ export function NotPublished({ t, venue }: { t: T; venue: ProgramVenue }) {
     <div className="mx-auto box-border w-full max-w-[720px] px-5 py-16 text-center">
       <h2 className="m-0 font-serif text-[28px] font-normal">{t("The program isn’t published yet")}</h2>
       <p className="mt-2 text-[#4A5263]">{t("{name} will publish its program here once sessions are scheduled.", { name: venue.shortName ?? venue.name })}</p>
-      <Link href={`/venues/${venue.slug}`} className="mt-4 inline-block">{t("Back to the venue page")}</Link>
+      <Link href={`/events/${venue.slug}`} className="mt-4 inline-block">{t("Back to the venue page")}</Link>
     </div>
   );
 }

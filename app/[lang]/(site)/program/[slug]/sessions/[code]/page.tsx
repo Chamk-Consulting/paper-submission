@@ -43,7 +43,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <PublicHeader signedIn={signedIn} />
       <ProgramHero t={t} venue={venue}
-        crumbs={[[acr, `/venues/${venue.slug}`], [t("Program"), `/program/${venue.slug}`], [fmtDay(s.startsAt, tz, t.intl), null], [s.code, null]]}
+        crumbs={[[acr, `/events/${venue.slug}`], [t("Program"), `/program/${venue.slug}`], [fmtDay(s.startsAt, tz, t.intl), null], [s.code, null]]}
         title={<><span className="mb-2 block"><span className="rounded-[2px] px-2 py-0.5 align-middle font-mono text-[11px] font-medium uppercase tracking-[0.04em]" style={{ background: kb, color: ki }}>{t(kl)} · {s.code}</span></span>{s.title}</>}
         sub={<>
           {fmtTime(s.startsAt, tz, t.intl)}–{fmtTime(s.endsAt, tz, t.intl)} · {s.room ?? t("Room to be announced")}
@@ -73,7 +73,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
                 {room.equipment ? <li>{room.equipment}</li> : null}
               </ul>
             ) : null}
-            <Link href={`/venues/${venue.slug}#program`} className="mt-2 inline-block">{t("Venue map & travel")}</Link>
+            <Link href={`/events/${venue.slug}#program`} className="mt-2 inline-block">{t("Venue map & travel")}</Link>
           </section>
           <SessionAwards venueId={venue.id} submissionIds={s.talks.map((x) => x.submissionId).filter((x): x is string => !!x)} />
           <section className="rounded-[8px] border border-[#DADDE3] bg-white px-[18px] py-4 text-[14px]">

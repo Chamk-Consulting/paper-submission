@@ -77,7 +77,7 @@ export function DueNext({ items, now }: { items: DueItem[]; now: number }) {
           })}
         </ul>
       ) : (
-        <p className="m-0 px-5 py-10 text-center text-[#4A5263]">{t("Nothing due in this role.")} <Link href="/venues" className="text-[#2F5FD0]">{t("Browse open calls")}</Link></p>
+        <p className="m-0 px-5 py-10 text-center text-[#4A5263]">{t("Nothing due in this role.")} <Link href="/events" className="text-[#2F5FD0]">{t("Browse open calls")}</Link></p>
       )}
     </section>
   );

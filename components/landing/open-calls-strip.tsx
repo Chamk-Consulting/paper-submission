@@ -14,7 +14,7 @@ export async function OpenCallsStrip() {
       </Suspense>
       <div className="flex justify-between border-t border-[#DADDE3] bg-[#F5F6F3] px-5 py-2.5 text-[13px]">
         <span className="font-mono text-[#4A5263]">{t("Closes in · your time zone")}</span>
-        <Link href="/venues" className="font-semibold text-[#2F5FD0]">{t("Browse all venues →")}</Link>
+        <Link href="/events" className="font-semibold text-[#2F5FD0]">{t("Browse all venues →")}</Link>
       </div>
     </div>
   );

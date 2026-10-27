@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, negotiate } from "@/lib/i18n/config";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 import { movedTo, workspaceFor } from "@/lib/site/workspace-routes";
+import { DEFAULT_FLAGS, parseFlags, type SiteFlags } from "@/lib/config/site-flags-core";
 
 // Thin edge layer: pick the language, refresh the Supabase session, keep signed-out users out of
 // private areas. Real permission checks live in server actions and RLS.
@@ -14,6 +15,27 @@ const TWO_STEP_GUARDED = [...PROTECTED_PREFIXES, "/create-account/password", "/c
 const ONBOARDING_GUARDED = [...PROTECTED_PREFIXES, "/welcome"];
 // Route handlers live outside app/[lang] and are never rewritten.
 const NO_LOCALE = [/^\/(?:robots\.txt|sitemap\.xml)$/, /^\/api\//, /^\/feed\//, /^\/auth\//, /^\/sign-up$/, /^\/venues\/[^/]+\/calendar\.ics$/, /^\/submissions\/[^/]+\/(?:receipt|decision-letter)\.pdf$/];
+
+// Site switches (lib/config/site-flags.ts), kept for a minute per server instance so most requests don't ask the database.
+let flagsCache: { at: number; flags: SiteFlags } | null = null;
+async function siteFlags(): Promise<SiteFlags> {
+  if (flagsCache && Date.now() - flagsCache.at < 60_000) return flagsCache.flags;
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/site_flags`, {
+      method: "POST",
+      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, "content-type": "application/json" },
+      body: "{}",
+      signal: AbortSignal.timeout(1500),
+    });
+    const flags = res.ok ? parseFlags(await res.json()) : flagsCache?.flags ?? DEFAULT_FLAGS;
+    flagsCache = { at: Date.now(), flags };
+    return flags;
+  } catch {
+    return flagsCache?.flags ?? DEFAULT_FLAGS;
+  }
+}
+// Public pages that open the home event when the site runs as one event.
+const SINGLE_EVENT_ENTRY = new Set(["/", "/events", "/venues", "/organizers", "/pricing"]);
 
 export default async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -32,6 +54,16 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // The public event page is /events/<slug> (it used to be /venues/<slug>): old links keep working.
+  if (!skipLocale) {
+    const old = bare.match(/^\/venues(\/[^/]+(?:\/archive)?)?$/);
+    if (old) {
+      const url = request.nextUrl.clone();
+      url.pathname = `${explicit ? `/${explicit}` : ""}/events${old[1] ?? ""}`;
+      return NextResponse.redirect(url, 308);
+    }
+  }
+
   // Supabase sends people to the Site URL (e.g. "/?code=…") when the redirect it was given isn't allow-listed.
   // Hand any auth code or token that lands outside /auth/* to the confirm route so the sign-in still completes.
   if (!bare.startsWith("/auth/")) {
@@ -44,10 +76,13 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // Visible URLs stay unprefixed (/venues); the page renders from /[lang]/venues. /fr/venues also works and is remembered.
+  // Visible URLs stay unprefixed (/events); the page renders from /[lang]/... /fr/events also works and is remembered.
+  // /events/<slug> is drawn by the venue pages (app/[lang]/(site)/venues).
+  const eventsPath = /^\/events(\/[^/]+(?:\/archive)?)?$/.test(bare);
+  const pagePath = eventsPath ? bare.replace(/^\/events/, "/venues") : bare;
   const target = request.nextUrl.clone();
-  if (!skipLocale && !explicit) target.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
-  const make = () => (skipLocale || explicit ? NextResponse.next({ request }) : NextResponse.rewrite(target, { request }));
+  if (!skipLocale && (!explicit || eventsPath)) target.pathname = `/${locale}${pagePath === "/" ? "" : pagePath}`;
+  const make = () => (skipLocale || (explicit && !eventsPath) ? NextResponse.next({ request }) : NextResponse.rewrite(target, { request }));
   let response = make();
 
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
@@ -96,6 +131,16 @@ export default async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
+  // One-event site: the home page (and the directory, organizer and pricing pages) open the event itself.
+  if (SINGLE_EVENT_ENTRY.has(bare)) {
+    const f = await siteFlags();
+    if (f.singleEvent && f.homeEvent) {
+      const url = request.nextUrl.clone();
+      url.pathname = `${prefix}${user ? "/workspace" : ""}/events/${f.homeEvent}`;
+      return NextResponse.redirect(url, 307);
+    }
+  }
+
   // Signed in: public pages and sign-in pages open their workspace version (lib/site/workspace-routes.ts).
   // A sign-in page with ?next=/somewhere goes there instead, so "sign in to continue" links still land right.
   const inWorkspace = user ? workspaceFor(bare) : null;

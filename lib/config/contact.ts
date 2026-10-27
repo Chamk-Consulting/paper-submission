@@ -21,7 +21,7 @@ export const contact = {
 
 /** CT01 support topics: id, label, hint. */
 export const CONTACT_TOPICS = [
-  ["signin", "Signing in", "Include the email or Plenary ID you sign in with. Never the code itself."],
+  ["signin", "Signing in", "Include the email or PIN you sign in with. Never the code itself."],
   ["submit", "Submitting a paper", "Add the paper number (#1234) if you have one, and the step where it went wrong."],
   ["review", "Reviewing", "Tell us the venue. We can’t reveal or change review content — the chairs can."],
   ["event", "Running an event", "Chairs and society staff: name the event and your role."],

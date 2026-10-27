@@ -303,7 +303,7 @@ async function notifyCommittee(venueId: string, slug: string): Promise<{ sent: n
   const list = (tpls ?? []) as { venue_id: string | null; subject: string; body: string }[];
   const tpl = list.find((x) => x.venue_id === venueId) ?? list.find((x) => !x.venue_id);
   const short = (venue.short_name as string) || (venue.name as string);
-  const vars = { "venue.short": short, "venue.name": venue.name as string, "venue.contact": (venue.contact_email as string) ?? "", link: absUrl(`/venues/${slug}`) };
+  const vars = { "venue.short": short, "venue.name": venue.name as string, "venue.contact": (venue.contact_email as string) ?? "", link: absUrl(`/events/${slug}`) };
   const subject = renderTemplate(tpl?.subject ?? `Submissions are open — ${short}`, vars).text;
   const body = renderTemplate(tpl?.body ?? `Submissions for ${short} are now open.\n\n[link]`, vars).text;
   await supabase.rpc("notify_people", { p_venue: venueId, p_people: ids, p_kind: "venue", p_subject: subject, p_body: body, p_cta_label: "Open event", p_cta_url: `/manage/${slug}` });
@@ -316,6 +316,6 @@ async function notifyCommittee(venueId: string, slug: string): Promise<{ sent: n
 /** "Send test to me" style check used by the go-live page: emails the signed-in organizer the public link. */
 export async function sendGoLiveTest(slug: string, email: string): Promise<ManageState> {
   if (!slugSchema.safeParse(slug).success || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Bad request." };
-  const r = await sendEmail({ to: email, subject: "Plenary go-live test", text: `This is a test from the go-live review.\n\nPublic page: ${absUrl(`/venues/${slug}`)}` });
+  const r = await sendEmail({ to: email, subject: "Plenary go-live test", text: `This is a test from the go-live review.\n\nPublic page: ${absUrl(`/events/${slug}`)}` });
   return r.ok ? { ok: true, info: "Test email sent." } : r.skipped ? { info: "Email isn’t configured yet — nothing was sent." } : { error: r.error ?? "Couldn’t send." };
 }

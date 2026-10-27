@@ -41,7 +41,7 @@ async function Inner({ params }: P) {
     ? { text: decision.revisionDueAt ? t("Submit a revision that answers the reviewers. It is due by the date below.") : t("Submit a revision that answers the reviewers."), cta: t("Start revision"), href: `${base}/revision` }
     : decision.decision === "accept_oral" || decision.decision === "accept_poster"
       ? { text: t("Upload the camera-ready PDF, lock the title and authors, sign the copyright form and register one author."), cta: t("Start final version"), href: `${base}/final` }
-      : { text: t("You can revise the paper using the reviews and submit it to another venue."), cta: t("Find another venue"), href: "/venues" };
+      : { text: t("You can revise the paper using the reviews and submit it to another venue."), cta: t("Find another venue"), href: "/events" };
   return (
     <FlowFrame
       ctx={ctx} crumb={t("Decision")} title={t("Decision and reviews")}

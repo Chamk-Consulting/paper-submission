@@ -10,6 +10,7 @@ import { resolveOnboarding, stepHref } from "@/lib/auth/onboarding";
 import { absoluteUrl, safeNext } from "@/lib/config/site";
 import { detectIdentifier } from "@/lib/auth/identifier";
 import { accountEmailFor, maskEmail, plenaryIdSignIn } from "@/lib/auth/plenary-id";
+import { getSiteFlags } from "@/lib/config/site-flags";
 
 export type SignInState = {
   step?: "email" | "sent";
@@ -36,7 +37,7 @@ async function continueTo(supabase: Awaited<ReturnType<typeof createClient>>, ne
 }
 
 /**
- * Turns whatever was typed into the account email. A Plenary ID is looked up server-side (signed request,
+ * Turns whatever was typed into the account email. A PIN is looked up server-side (signed request,
  * lib/auth/plenary-id.ts); `lookedUp` marks that case so the caller never shows the full email back.
  * TODO(auth): alias and phone lookup.
  */
@@ -51,16 +52,16 @@ async function resolveEmail(identifier: string): Promise<{ email: string | null;
 }
 
 function notYet(kind: string): SignInState {
-  const what = { id: "Plenary ID", alias: "alias", phone: "phone number", pin: "PaperCept PIN" }[kind] ?? "that";
+  const what = { id: "PIN", alias: "alias", phone: "phone number" }[kind] ?? "that";
   return {
     fieldErrors: {
-      identifier: [kind === "pin" ? "Plenary doesn’t use PaperCept PINs to sign in. Use your email." : `Signing in with a ${what} isn’t available yet — use your email for now.`],
+      identifier: [kind === "none" ? "Enter your email or your PIN." : `Signing in with a ${what} isn’t available yet — use your email or PIN.`],
     },
   };
 }
 
 const passwordSchema = z.object({
-  identifier: z.string().trim().min(1, "Enter your email, phone, Plenary ID or alias").max(254),
+  identifier: z.string().trim().min(1, "Enter your email or your PIN").max(254),
   password: z.string().min(1, "Enter your password").max(128),
   remember: z.string().optional(),
   next: z.string().optional(),
@@ -96,16 +97,17 @@ export async function signInWithPassword(_: SignInState, formData: FormData): Pr
 }
 
 const codeRequestSchema = z.object({
-  identifier: z.string().trim().min(1, "Enter your email, phone, Plenary ID or alias").max(254),
+  identifier: z.string().trim().min(1, "Enter your email or your PIN").max(254),
   next: z.string().optional(),
 });
 
 /** "Email me a link": sends a sign-in link + 6-digit code. Never creates an account. */
 export async function sendSignInCode(_: SignInState, formData: FormData): Promise<SignInState> {
+  if (!(await getSiteFlags()).signinEmailCode) return { message: "Sign-in codes are switched off. Sign in with your password, or reset it." };
   const parsed = codeRequestSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
   const { email, kind, lookedUp } = await resolveEmail(parsed.data.identifier);
-  // Unknown Plenary ID: the same code step as a real one, so nobody can test which IDs exist.
+  // Unknown PIN: the same code step as a real one, so nobody can test which IDs exist.
   if (!email && lookedUp) return { step: "sent", sentKind: kind, email: parsed.data.identifier.trim().toUpperCase(), mode: "signin" };
   if (!email) return notYet(kind);
 
@@ -122,7 +124,7 @@ export async function sendSignInCode(_: SignInState, formData: FormData): Promis
   // Rate limited means a code went out moments ago: still show the code step, with a note.
   const limited = !!error && (error.status === 429 || /rate limit|seconds|too many/i.test(error.message));
   // Same answer whether or not the account exists.
-  // For a Plenary ID the form carries the ID, never the email (verify and resend look it up again).
+  // For a PIN the form carries the ID, never the email (verify and resend look it up again).
   return { step: "sent", sentTo: lookedUp ? maskEmail(email) : email, sentKind: kind, email: lookedUp ? parsed.data.identifier.trim().toUpperCase() : email, mode: "signin", notice: limited ? "A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute." : undefined };
 }
 

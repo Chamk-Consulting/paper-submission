@@ -33,7 +33,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <div className="print:hidden"><PublicHeader signedIn /></div>
       <ProgramHero t={t} venue={venue}
-        crumbs={[[acr, `/venues/${venue.slug}`], [t("Program"), `/program/${venue.slug}`], [t("My schedule"), null]]}
+        crumbs={[[acr, `/events/${venue.slug}`], [t("Program"), `/program/${venue.slug}`], [t("My schedule"), null]]}
         title={<><span className="mb-1 block font-mono text-[12px] tracking-[0.06em] text-[#F2A93B]">{acr.toUpperCase()}{name ? ` · ${t("SIGNED IN AS {name}", { name: name.toUpperCase() })}` : ""}</span>{t("My schedule")}</>}
         sub={t("Sessions you saved, plus everything you present or chair — those are added automatically.")}
         actions={<>

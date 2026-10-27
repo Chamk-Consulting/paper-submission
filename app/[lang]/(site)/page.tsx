@@ -68,7 +68,7 @@ export default async function Landing() {
           <p className="mt-7 max-w-[56ch] text-[20px] leading-[1.55] text-[#B9C3DA]">{t("Plenary runs the whole life of a technical conference — call for papers, double-blind review, invited sessions, the program and the proceedings — in one workspace that authors, reviewers and chairs can find their way around.")}</p>
           <div className="mt-9 flex flex-wrap items-center gap-6">
             <a href="#start" className={`px-5 py-3 text-[15px] ${saffronBtn}`}>{t("Host your next conference")}</a>
-            <Link href="/venues" className="text-[15px] font-medium text-[#F5F6F3] underline">{t("Find a call for papers →")}</Link>
+            <Link href="/events" className="text-[15px] font-medium text-[#F5F6F3] underline">{t("Find a call for papers →")}</Link>
           </div>
 
           <figure className="m-0 mt-16 rounded-[8px] bg-[#17285A] p-7">

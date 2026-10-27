@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { absoluteUrl, supabaseEnv } from "@/lib/config/site";
 
 const LOCALES = ["en", "fr", "it", "de"] as const;
-const PAGES = ["", "/venues", "/pricing", "/organizers", "/help", "/help/reviewers", "/contact", "/legal/terms", "/legal/privacy", "/legal/cookies", "/legal/security", "/legal/accessibility"];
+const PAGES = ["", "/events", "/pricing", "/organizers", "/help", "/help/reviewers", "/contact", "/legal/terms", "/legal/privacy", "/legal/cookies", "/legal/security", "/legal/accessibility"];
 
 async function publishedVenues(): Promise<{ slug: string; updated_at: string | null }[]> {
   "use cache";

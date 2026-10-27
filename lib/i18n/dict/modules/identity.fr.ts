@@ -73,7 +73,7 @@ export const identity_fr: Record<string, string> = {
   "Type it now — connecting ORCID later will verify it.": "Saisissez-le maintenant — la connexion ORCID le vérifiera plus tard.",
   "Type to search the ROR registry, or keep your own wording.": "Tapez pour chercher dans le registre ROR, ou gardez votre propre formulation.",
   "Ukrainian": "Ukrainien",
-  "Used to match your papers, fill author lists and find conflicts. All optional except your Plenary ID.": "Servent à retrouver vos articles, remplir les listes d’auteurs et détecter les conflits. Tous facultatifs sauf votre identifiant Plenary.",
+  "Used to match your papers, fill author lists and find conflicts. All optional except your PIN.": "Servent à retrouver vos articles, remplir les listes d’auteurs et détecter les conflits. Tous facultatifs sauf votre PIN.",
   "Verified through ORCID.": "Vérifié via ORCID.",
   "Web of Science ResearcherID": "ResearcherID Web of Science",
   "Website": "Site web",

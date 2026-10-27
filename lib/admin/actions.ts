@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
@@ -76,6 +76,22 @@ export async function setRequireApproval(_: AdminState, fd: FormData): Promise<A
   const { error } = await supabase.rpc("admin_set_require_approval", { p_on: on });
   if (error) return fail(error.message);
   return done(on ? "New events now wait for approval before opening." : "Events can open without approval.");
+}
+
+/** Site switches: home event, one-event public site, sign-in code, sign-up code (public.admin_set_site_flags). */
+export async function setSiteFlags(_: AdminState, fd: FormData): Promise<AdminState> {
+  const home = String(fd.get("home") ?? "").trim();
+  if (home && !/^[a-z0-9-]{2,80}$/.test(home)) return { error: "Choose an event from the list." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_site_flags", {
+    p_home_event: home || null,
+    p_single_event: fd.get("single") === "on" && !!home,
+    p_signin_email_code: fd.get("signinCode") === "on",
+    p_signup_email_code: fd.get("signupCode") === "on",
+  });
+  if (error) return fail(error.message);
+  updateTag("site-flags");
+  return done("Saved. The public site follows the new settings within a minute.");
 }
 
 export async function lockPerson(_: AdminState, fd: FormData): Promise<AdminState> {

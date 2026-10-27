@@ -11,7 +11,7 @@ export function CopyIdButton({ id }: { id: string }) {
   return (
     <button
       type="button"
-      aria-label={t("Copy Plenary ID")}
+      aria-label={t("Copy PIN")}
       onClick={async () => {
         try { await navigator.clipboard.writeText(id); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* clipboard blocked */ }
       }}

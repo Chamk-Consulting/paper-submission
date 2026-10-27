@@ -181,7 +181,7 @@ export function ProfileForm({
         </ul>
       </details>
 
-      <button type="submit" disabled={pending} className={`mt-[22px] h-12 ${ui.primary}`}>{pending ? t("Saving…") : t("Finish and get my Plenary ID")}</button>
+      <button type="submit" disabled={pending} className={`mt-[22px] h-12 ${ui.primary}`}>{pending ? t("Saving…") : t("Finish and get my PIN")}</button>
       <p className={`mt-3 text-center text-[13px] ${ui.muted}`}>{t("Last step — takes about a minute. You can change it any time.")}</p>
     </form>
   );

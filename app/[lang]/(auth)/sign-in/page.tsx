@@ -9,6 +9,7 @@ import { venueDeadline, venueSlugFrom } from "@/lib/auth/venue-deadline";
 import { LocalDeadline } from "@/components/auth/deadline-bits";
 import { getT } from "@/lib/i18n/server";
 import { AuthFormSkeleton } from "@/components/skeletons";
+import { getSiteFlags } from "@/lib/config/site-flags";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -44,7 +45,8 @@ async function Panel({ searchParams }: { searchParams: Promise<Search> }) {
   // the old in-panel sign-up form is gone: ?tab=create goes to the real sign-up page
   if (tab === "create") redirect(`/create-account${next ? `?next=${encodeURIComponent(next)}` : ""}`);
   const prefill = typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email.trim().toLowerCase().slice(0, 254) : "";
-  return <SignInPanel next={next} senderDomain={senderDomain()} initialIdentifier={prefill} />;
+  const flags = await getSiteFlags();
+  return <SignInPanel next={next} senderDomain={senderDomain()} initialIdentifier={prefill} codeSignIn={flags.signinEmailCode} />;
 }
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {

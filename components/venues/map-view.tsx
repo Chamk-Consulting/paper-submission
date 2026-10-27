@@ -186,7 +186,7 @@ export function MapView({ rows, tz }: { rows: Row[]; now: number; tz: string }) 
               <p className="mt-2.5 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-2.5 py-2 text-[12px] text-[#3B2A07]">{t("Travelling? Check visa rules early — accepted authors can request an invitation letter from their paper page.")}</p>
             ) : null}
             <div className="mt-3 flex gap-2">
-              <Link href={`/venues/${sel.slug}`} className="inline-flex h-9 flex-auto items-center justify-center rounded-[4px] bg-[#0E1B3D] text-[13px] font-semibold text-white no-underline">{t("View call")}</Link>
+              <Link href={`/events/${sel.slug}`} className="inline-flex h-9 flex-auto items-center justify-center rounded-[4px] bg-[#0E1B3D] text-[13px] font-semibold text-white no-underline">{t("View call")}</Link>
               {sel.region && REGION_KEY[sel.region] ? (
                 <button type="button" onClick={() => setKey(REGION_KEY[sel.region!])} className="h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[13px] font-medium text-[#121826]">{t("Zoom to region")}</button>
               ) : null}

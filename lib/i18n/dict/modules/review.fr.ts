@@ -161,7 +161,7 @@ export const review_fr: Record<string, string> = {
   "My submitted review": "Mon évaluation soumise",
   "NOT POSSIBLE": "IMPOSSIBLE",
   "Name and email": "Nom et e-mail",
-  "Name, email or Plenary ID": "Nom, e-mail ou identifiant Plenary",
+  "Name, email or PIN": "Nom, e-mail ou PIN",
   "Names are visible in this event": "Les noms sont visibles dans cet événement",
   "Need more time?": "Besoin de plus de temps ?",
   "Need more time? →": "Besoin de plus de temps ? →",

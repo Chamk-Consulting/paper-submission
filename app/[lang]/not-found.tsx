@@ -17,7 +17,7 @@ export default async function NotFound() {
     <div className="chrome-body">
     <SystemPage icon="?" tone="neutral" code={t("ERROR 404")} title={t("We can’t find that page")}
       body={t("The link may be old, or the venue may have moved its pages. Your work is safe.")}
-      primary={{ href: "/venues", label: t("Find a venue") }} secondary={{ href: "/workspace", label: t("My workspace") }} footer />
+      primary={{ href: "/events", label: t("Find a venue") }} secondary={{ href: "/workspace", label: t("My workspace") }} footer />
     </div>
     </>
   );

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { T } from "@/lib/i18n/translate";
 import { ui } from "@/components/manage/ui";
 import type { AdminPerson, AdminTab, AdminVenue, AuditRow, MaintenanceWindow, Overview, SupportItem } from "@/lib/admin/data";
-import { ApprovalToggle, CancelMaintenance, LockForm, MaintenanceForm, PersonAction, ReplyForm, VenueDecision } from "@/components/admin/forms";
+import { ApprovalToggle, SiteFlagsForm, type SiteFlagsValue, CancelMaintenance, LockForm, MaintenanceForm, PersonAction, ReplyForm, VenueDecision } from "@/components/admin/forms";
 
 type TT = T & { intl: string };
 
@@ -117,11 +117,12 @@ export function SupportView({ t, items, selected, now }: { t: TT; items: Support
 }
 
 /* ---------------------------------------------------------------- venues */
-export function VenuesView({ t, venues, requireApproval }: { t: TT; venues: AdminVenue[]; requireApproval: boolean }) {
+export function VenuesView({ t, venues, requireApproval, flags }: { t: TT; venues: AdminVenue[]; requireApproval: boolean; flags: SiteFlagsValue }) {
   return (
     <>
       <Title t={t} title="Venue approvals" sub="New events are checked before they can open submissions: real organizer, real conference." />
-      <div className={`${ui.card} mt-5 px-[18px]! py-3.5!`}><ApprovalToggle on={requireApproval} /></div>
+      <div className={`${ui.card} mt-5 px-[18px]! py-3.5!`}><SiteFlagsForm flags={flags} events={venues.map((v) => ({ slug: v.slug, name: v.short_name ?? v.name })).sort((a, b) => a.name.localeCompare(b.name))} /></div>
+      <div className={`${ui.card} mt-4 px-[18px]! py-3.5!`}><ApprovalToggle on={requireApproval} /></div>
       <section className="mt-4 overflow-hidden rounded-[8px] border border-[#DADDE3] bg-white">
         <div className="overflow-x-auto">
           <table className={ui.table}>
@@ -153,14 +154,14 @@ const ROLE: Record<string, string> = { owner: "Owner", chair: "General chair", p
 export function PeopleView({ t, q, people }: { t: TT; q: string; people: AdminPerson[] }) {
   return (
     <>
-      <Title t={t} title="Find a person" sub="Look up by email, Plenary ID or ORCID. Paper contents and reviews are never shown here." />
+      <Title t={t} title="Find a person" sub="Look up by email, PIN or ORCID. Paper contents and reviews are never shown here." />
       <form action="/admin" method="get" className="mt-5 flex max-w-[640px] gap-2.5">
         <input type="hidden" name="tab" value="people" />
         <label htmlFor="adm-q" className="sr-only">{t("Search people")}</label>
-        <input id="adm-q" name="q" type="search" defaultValue={q} placeholder={t("Email, PL-0000-0000 or ORCID")} className={`${ui.input} min-w-0 flex-auto`} />
+        <input id="adm-q" name="q" type="search" defaultValue={q} placeholder={t("Email, PIN or ORCID")} className={`${ui.input} min-w-0 flex-auto`} />
         <button type="submit" className={ui.primary}>{t("Find")}</button>
       </form>
-      {q.trim().length >= 3 && people.length === 0 ? <p className="mt-4 text-[#4A5263]">{t("Nobody matches “{q}”. Use the full email, Plenary ID or ORCID.", { q })}</p> : null}
+      {q.trim().length >= 3 && people.length === 0 ? <p className="mt-4 text-[#4A5263]">{t("Nobody matches “{q}”. Use the full email, PIN or ORCID.", { q })}</p> : null}
       <div className="mt-4 flex max-w-[860px] flex-col gap-4">
         {people.map((p) => {
           const primary = p.emails.find((e) => e.primary) ?? p.emails[0];

@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import { getMe } from "@/lib/auth/me";
 import { getBrand } from "@/lib/config/brand";
 
-// PR09 "Save badge" as PDF: the signed-in person's Plenary ID card (business-card size, 85 × 55 mm).
+// PR09 "Save badge" as PDF: the signed-in person's PIN card (business-card size, 85 × 55 mm).
 export async function GET() {
   const brand = await getBrand();
   const me = await getMe();

@@ -21,7 +21,7 @@ export async function OpenCallsPanel() {
       </div>
       <div className="mt-3.5 flex flex-wrap justify-between gap-3">
         <span className="font-mono text-[12px] text-[#B9C3DA]">{t("Saffron = closes within 7 days.")}</span>
-        <Link href="/venues" className="text-[14px] font-medium text-[#F2A93B]">{t("Browse all venues →")}</Link>
+        <Link href="/events" className="text-[14px] font-medium text-[#F2A93B]">{t("Browse all venues →")}</Link>
       </div>
       <div className="mt-10 grid grid-cols-3 gap-4 border-t border-[#24335C] pt-6">
         <div><div className="text-[14px] font-semibold">{t("One account")}</div><div className="mt-0.5 text-[13px] text-[#B9C3DA]">{t("Every venue, every role.")}</div></div>

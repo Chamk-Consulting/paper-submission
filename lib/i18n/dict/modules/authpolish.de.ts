@@ -84,7 +84,7 @@ export const authpolish_de: Record<string, string> = {
   "To accept, confirm you have no conflict of interest and agree to the reviewing rules. Declining takes a reason and, if you like, the name of someone better placed.": "Zum Annehmen bestätigen Sie, dass kein Interessenkonflikt besteht, und stimmen den Regeln zu. Zum Ablehnen nennen Sie einen Grund und, wenn Sie möchten, jemand Geeigneteren.",
   "Use another account": "Anderes Konto verwenden",
   "Use summaries to orient yourself, never instead of reading.": "Nutzen Sie Zusammenfassungen zur Orientierung, nie statt des Lesens.",
-  "Use × to remove your account from this device. We only keep your name, Plenary ID and a hidden email here — never a password.": "Mit × entfernen Sie Ihr Konto von diesem Gerät. Hier speichern wir nur Name, Plenary ID und eine verdeckte E-Mail — nie ein Passwort.",
+  "Use × to remove your account from this device. We only keep your name, PIN and a hidden email here — never a password.": "Mit × entfernen Sie Ihr Konto von diesem Gerät. Hier speichern wir nur Name, PIN und eine verdeckte E-Mail — nie ein Passwort.",
   "Using AI tools in reviews": "KI-Tools in Gutachten nutzen",
   "Using the AI panel responsibly": "Das KI-Panel verantwortungsvoll nutzen",
   "What Plenary does for you": "Was Plenary für Sie tut",

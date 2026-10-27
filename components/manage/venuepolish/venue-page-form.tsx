@@ -78,7 +78,7 @@ export function VenuePageForm({ venueId, slug, initial, canEdit }: { venueId: st
           <h2 id="vp-h" className={`${ui.h2} mt-1`}>{t("Attending, travel and gallery")}</h2>
           <p className={`${ui.hint} mt-1`}>{t("Shown on your venue page next to the fee table above. You can change this at any time, even after submissions open.")}</p>
         </div>
-        <Link href={`/venues/${slug}#attending`} className="text-[14px] text-[#2F5FD0] underline">{t("View venue page ↗")}</Link>
+        <Link href={`/events/${slug}#attending`} className="text-[14px] text-[#2F5FD0] underline">{t("View venue page ↗")}</Link>
       </div>
 
       <fieldset disabled={dis} className="m-0 mt-5 border-0 p-0">

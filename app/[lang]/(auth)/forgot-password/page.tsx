@@ -27,7 +27,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
           <SetupSteps
             doneLabel={t("Done")}
             steps={[
-              { title: t("Find your account"), text: t("Email, phone, Plenary ID or alias."), state: "current" },
+              { title: t("Find your account"), text: t("Email or PIN."), state: "current" },
               { title: t("Check your email"), text: t("A link and a code, valid for 15 minutes."), state: "next" },
               { title: t("Choose a new password"), text: t("Then you go straight back to where you were."), state: "next" },
             ]}

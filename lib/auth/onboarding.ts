@@ -1,4 +1,5 @@
 import "server-only";
+import { getSiteFlags } from "@/lib/config/site-flags";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { randomBytes } from "node:crypto";
 import { safeNext } from "@/lib/config/site";
@@ -56,7 +57,9 @@ export async function resolveOnboarding(supabase: SupabaseClient, opts: { sync?:
   // (by whoever signed up with this address, e.g. straight through the Supabase API) is replaced by a random one.
   // The inbox owner then chooses their own at the password step. One-shot: keyed to the exact confirmation time,
   // which nobody can know in advance.
-  if (opts.sync !== false && !facts.needsTwoStep && process.env.SIGNUP_PASSWORD_FIRST !== "1" && user.email_confirmed_at) {
+  // Not for accounts opened without an email code while that switch is off: their password was chosen at sign-up.
+  const noCode = facts.meta.signup_flow === "password_no_code" && !(await getSiteFlags()).signupEmailCode;
+  if (opts.sync !== false && !facts.needsTwoStep && !noCode && process.env.SIGNUP_PASSWORD_FIRST !== "1" && user.email_confirmed_at) {
     const fresh = Date.now() - Date.parse(user.email_confirmed_at) < 30 * 60_000;
     if (fresh && facts.meta.secured_for !== user.email_confirmed_at) {
       const { error } = await supabase.auth.updateUser({

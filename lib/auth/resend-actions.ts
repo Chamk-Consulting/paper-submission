@@ -12,7 +12,7 @@ const isRate = (e: { status?: number; message: string }) => e.status === 429 || 
 
 /** PR04 "Resend code" on the sign-in code step: a new link + code (never creates an account). */
 export async function resendSignInCode(identifier: string, next?: string): Promise<ResendState> {
-  // The code step carries a Plenary ID instead of the email when the person signed in with their ID.
+  // The code step carries a PIN instead of the email when the person signed in with their ID.
   const { email, id } = await accountEmailFor(identifier);
   if (id && !email) return { ok: true }; // unknown ID: same answer as a real one
   if (!email || !z.string().email().max(254).safeParse(email).success) return { ok: false, message: "That email doesn’t look right." };

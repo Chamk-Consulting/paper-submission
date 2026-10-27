@@ -31,7 +31,7 @@ function checkEmail(v: string, tried: boolean): EmailCheck {
  * Step 1 of 4: name, email and terms. The password is chosen after the email code (step 3), unless the
  * rollback switch (SIGNUP_PASSWORD_FIRST=1) asks for the old order, where it is chosen here.
  */
-export function CreateAccountForm({ next, venue, withPassword = false }: { next?: string; venue?: string; withPassword?: boolean }) {
+export function CreateAccountForm({ next, venue, withPassword = false, noCode = false }: { next?: string; venue?: string; withPassword?: boolean; noCode?: boolean }) {
   const [state, action, pending] = useActionState(startSignup, {} as StartState);
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
@@ -120,9 +120,9 @@ export function CreateAccountForm({ next, venue, withPassword = false }: { next?
         {agreeErr ? <p className={`ml-7 mt-1.5 ${ui.error}`}>{t("Please agree to continue.")}</p> : null}
 
         <Turnstile />
-        <button type="submit" disabled={pending} className={`mt-[18px] ${ui.primary}`}>{pending ? t("Sending your code…") : withPassword ? t("Create account") : t("Continue")}</button>
+        <button type="submit" disabled={pending} className={`mt-[18px] ${ui.primary}`}>{pending ? (noCode ? t("Creating your account…") : t("Sending your code…")) : withPassword ? t("Create account") : t("Continue")}</button>
       </form>
-      <p className={`mt-3 text-[13px] ${ui.muted}`}>{withPassword ? t("Next, we'll email you a code to confirm your address.") : t("Next, we'll email you a code. After it, you choose your password.")}</p>
+      <p className={`mt-3 text-[13px] ${ui.muted}`}>{noCode ? t("Next, your profile: affiliation and ORCID. You get your PIN at once.") : withPassword ? t("Next, we'll email you a code to confirm your address.") : t("Next, we'll email you a code. After it, you choose your password.")}</p>
       <p className={`mt-[22px] text-[14px] ${ui.muted}`}>{t("Used PaperCept before?")} <Link href="/contact?topic=import" className={ui.link}>{t("Bring your history")}</Link> {t("after you sign up.")}</p>
     </>
   );

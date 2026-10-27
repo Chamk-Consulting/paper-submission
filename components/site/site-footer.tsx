@@ -21,8 +21,8 @@ import { BrandName } from "@/lib/i18n/client";
 export type FooterSize = "full" | "compact" | "minimal";
 
 const COLUMNS: { title: string; links: [string, string][] }[] = [
-  { title: "Product", links: [["/venues", "Open calls"], ["/organizers", "For organisers"], ["/pricing", "Pricing"], ["/manage/new", "Host a conference"]] },
-  { title: "Authors & reviewers", links: [["/venues", "Submit a paper"], ["/help/reviewers", "Reviewer guides"], ["/help", "Help & guides"], ["/contact?topic=import", "Bring your PaperCept history"]] },
+  { title: "Product", links: [["/events", "Open calls"], ["/organizers", "For organisers"], ["/pricing", "Pricing"], ["/manage/new", "Host a conference"]] },
+  { title: "Authors & reviewers", links: [["/events", "Submit a paper"], ["/help/reviewers", "Reviewer guides"], ["/help", "Help & guides"], ["/contact?topic=import", "Bring your PaperCept history"]] },
   { title: "Support", links: [["/contact", "Contact"], ["/maintenance", "System status"], ["/legal/security", "Security"], ["/legal/accessibility", "Accessibility"]] },
   { title: "Legal", links: [["/legal/privacy", "Privacy"], ["/legal/terms", "Terms"], ["/legal/cookies", "Cookies"]] },
 ];
@@ -107,7 +107,7 @@ function Columns() {
     <div className="grid gap-8 md:grid-cols-[1.4fr_repeat(4,1fr)]">
       <Brand />
       {COLUMNS.map((c) => (
-        <nav key={c.title} aria-label={t(c.title)}>
+        <nav key={c.title} aria-label={t(c.title)} className={c.title === "Product" ? "single-hide" : undefined}>
           {/* desktop: always open */}
           <div className="hidden md:block">
             <h2 className="mb-3 mt-0 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#8F9CC0]">{t(c.title)}</h2>

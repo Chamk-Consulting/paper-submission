@@ -194,7 +194,7 @@ async function Inner({ params }: P) {
             <p className={kicker}>{t("Paper")}</p>
             <dl className="m-0 grid grid-cols-[84px_1fr] gap-y-1.5 text-[14px]">
               <dt className="text-[#4A5263]">ID</dt><dd className="m-0">{no}</dd>
-              <dt className="text-[#4A5263]">{t("Venue")}</dt><dd className="m-0"><Link href={`/venues/${venue.slug}`} className="text-[#2F5FD0] underline">{venue.acr}</Link></dd>
+              <dt className="text-[#4A5263]">{t("Venue")}</dt><dd className="m-0"><Link href={`/events/${venue.slug}`} className="text-[#2F5FD0] underline">{venue.acr}</Link></dd>
               <dt className="text-[#4A5263]">{t("Type")}</dt><dd className="m-0">{t(sub.paperType)}{venue.reviewMode ? ` · ${t(venue.reviewMode).toLowerCase()}` : ""}</dd>
               <dt className="text-[#4A5263]">{t("Track")}</dt><dd className="m-0">{sub.track ? t(sub.track) : "—"}</dd>
               <dt className="text-[#4A5263]">{t("Keywords")}</dt><dd className="m-0">{sub.keywords.map((k) => t(k)).join(", ") || "—"}</dd>

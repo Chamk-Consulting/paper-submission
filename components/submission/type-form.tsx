@@ -28,13 +28,13 @@ export function TypeForm({ venue, types, tracks, initialType, initialTrack, subm
       <section className={card}>
         <div className="flex items-baseline justify-between gap-3">
           <h2 className={h2}>{t("Venue")}</h2>
-          {submissionId ? null : <Link href="/venues" className="text-[15px] text-[#2F5FD0] underline">{t("Change venue")}</Link>}
+          {submissionId ? null : <Link href="/events" className="text-[15px] text-[#2F5FD0] underline">{t("Change venue")}</Link>}
         </div>
         <div className="mt-4 flex items-center gap-3.5">
           <span aria-hidden className="flex size-11 flex-none items-center justify-center rounded-[6px] bg-[#E6EDFC] font-mono text-[12px] font-semibold text-[#1F47A8]">{venue.badge}</span>
           <div className="min-w-0">
             <div className="font-semibold">{venue.acr}</div>
-            <div className="text-[14px] text-[#4A5263]">{venue.meta} · <Link href={`/venues/${venue.slug}`} className="text-[#2F5FD0] underline">{t("Call for papers")}</Link></div>
+            <div className="text-[14px] text-[#4A5263]">{venue.meta} · <Link href={`/events/${venue.slug}`} className="text-[#2F5FD0] underline">{t("Call for papers")}</Link></div>
           </div>
         </div>
       </section>
@@ -73,7 +73,7 @@ export function TypeForm({ venue, types, tracks, initialType, initialTrack, subm
 
       {state.error ? <p role="alert" className="mt-4 rounded-[6px] border border-[#F3C3BE] bg-[#FDECEA] px-3 py-2 text-[14px] text-[#5C1A15]">{t(state.error)}</p> : null}
       <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-[#DADDE3] pt-6">
-        {submissionId ? <button type="submit" name="intent" value="exit" className={ghostBtn}>{t("Save and exit")}</button> : <Link href={`/venues/${venue.slug}`} className={ghostBtn}>{t("Cancel")}</Link>}
+        {submissionId ? <button type="submit" name="intent" value="exit" className={ghostBtn}>{t("Save and exit")}</button> : <Link href={`/events/${venue.slug}`} className={ghostBtn}>{t("Cancel")}</Link>}
         <button type="submit" name="intent" value="next" disabled={pending || closed} className={primaryBtn}>{pending ? t("Saving…") : t("Continue to details →")}</button>
       </div>
       <p className="sr-only" aria-live="polite">{chosen ? t("Selected {name}", { name: chosen.name }) : ""}</p>

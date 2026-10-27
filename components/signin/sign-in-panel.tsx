@@ -1,5 +1,5 @@
 "use client";
-import { Globe, KeyRound, Landmark, Mail } from "lucide-react";
+import { Globe, Landmark, Mail } from "lucide-react";
 
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
@@ -55,7 +55,6 @@ function Banner({ tone = "bad", children }: { tone?: "bad" | "info"; children: R
   );
 }
 
-const KeyIcon = () => <KeyRound size={16} strokeWidth={1.75} aria-hidden />;
 const MailIcon = () => <Mail size={16} strokeWidth={1.75} aria-hidden />;
 const OrcidIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden><circle cx="9" cy="9" r="8.5" fill="#A6CE39" /><text x="9" y="12.5" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="9" fontWeight="700" fill="#FFFFFF">iD</text></svg>
@@ -63,7 +62,7 @@ const OrcidIcon = () => (
 const InstitutionIcon = () => <Landmark size={18} strokeWidth={1.75} aria-hidden />;
 const GoogleIcon = () => <Globe size={18} strokeWidth={1.75} aria-hidden />;
 
-export function SignInPanel({ next, senderDomain = "[sender domain]", initialIdentifier = "" }: { next?: string; senderDomain?: string; initialIdentifier?: string }) {
+export function SignInPanel({ next, senderDomain = "[sender domain]", initialIdentifier = "", codeSignIn = true }: { next?: string; senderDomain?: string; initialIdentifier?: string; codeSignIn?: boolean }) {
   const tab = "signin" as const;
   const [identifier, setIdentifier] = useState(initialIdentifier);
   const [showPass, setShowPass] = useState(false);
@@ -118,12 +117,12 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
           <form action={pwAction} noValidate>
             <input type="hidden" name="next" value={next ?? ""} />
             <div className="mt-6 flex flex-col gap-1.5">
-              <label htmlFor="pr-id" className={LABEL}>{t("Email, phone, Plenary ID or alias")}</label>
+              <label htmlFor="pr-id" className={LABEL}>{t("Email or PIN")}</label>
               <div className="box-border flex h-12 items-center gap-2.5 rounded-[4px] border-2 bg-white px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ borderColor: idErrors?.length ? "#B3261E" : tone.border }}>
                 <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[4px] font-mono text-[11px] font-semibold" style={{ background: tone.iconBg, color: tone.iconInk }}>{d.icon}</span>
                 <input
                   id="pr-id" name="identifier" type="text" autoComplete="username webauthn" autoCapitalize="none" spellCheck={false}
-                  placeholder="name@uni.edu · +234… · PL-4821-0937 · a.researcher"
+                  placeholder="name@uni.edu · 1024"
                   value={identifier} onChange={(e) => setIdentifier(e.target.value)}
                   aria-describedby="pr-id-hint pr-id-err" aria-invalid={idErrors?.length ? true : undefined}
                   className="h-10 min-w-0 flex-auto border-0 bg-transparent text-[16px] text-[#121826] outline-none"
@@ -132,12 +131,6 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
               </div>
               <span id="pr-id-hint" className="text-[13px]" style={{ color: tone.hint }}>{t(d.hint)}</span>
               <FieldError id="pr-id-err" errors={idErrors} />
-              {d.kind === "pin" ? (
-                <Link href="/contact?topic=import" className="mt-1 flex items-center gap-3 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3 py-2.5 text-[13px] text-[#3B2A07] no-underline">
-                  <span className="flex-auto"><strong>{t("Looks like a PaperCept PIN.")}</strong> {t("It can’t sign you in here, but it can bring your history across.")}</span>
-                  <span className="whitespace-nowrap font-semibold text-[#7A4508]">{t("Bring history →")}</span>
-                </Link>
-              ) : null}
             </div>
 
             <div className="mt-4 flex flex-col gap-1.5">
@@ -160,14 +153,14 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
             <button type="submit" disabled={pwPending} className={`mt-4 ${PRIMARY}`}>{pwPending ? t("Signing in…") : t("Sign in")}</button>
           </form>
 
-          <div className="mt-2.5 grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => comingSoon("Passkey")} className={`h-10 text-[13px] ${SECONDARY}`}><KeyIcon />{t("Use a passkey")}</button>
-            <form action={codeAction}>
+          {/* Sign-in code by email: switchable (Admin › Venues › Public site and sign-in). */}
+          {codeSignIn ? (
+            <form action={codeAction} className="mt-2.5">
               <input type="hidden" name="identifier" value={identifier} />
               <input type="hidden" name="next" value={next ?? ""} />
-              <button type="submit" disabled={codePending} className={`h-10 w-full text-[13px] ${SECONDARY}`}><MailIcon />{codePending ? t("Sending…") : t("Email me a link")}</button>
+              <button type="submit" disabled={codePending} className={`h-10 w-full text-[13px] ${SECONDARY}`}><MailIcon />{codePending ? t("Sending…") : t("Email me a sign-in code instead")}</button>
             </form>
-          </div>
+          ) : null}
 
           <div className={`my-[22px] flex items-center gap-3 text-[13px] ${MUTED}`}>
             <span className="h-px flex-auto bg-[#DADDE3]" />{t("or continue with")}<span className="h-px flex-auto bg-[#DADDE3]" />
@@ -178,7 +171,7 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
             <button type="button" onClick={() => comingSoon("Institution")} className={`h-11 text-[14px] ${SECONDARY}`}><InstitutionIcon />{t("Institution")}</button>
             <button type="button" onClick={() => comingSoon("Google")} className={`h-11 text-[14px] ${SECONDARY}`}><GoogleIcon />Google</button>
           </div>
-          <p className={`mt-5 text-[14px] ${MUTED}`}>{t("Had a PIN on another conference system?")} <Link href="/contact?topic=import" className={LINK}>{t("Bring your history")}</Link></p>
+          <p className={`mt-5 text-[14px] ${MUTED}`}>{t("Used PaperCept before?")} <Link href="/contact?topic=import" className={LINK}>{t("Bring your history")}</Link></p>
         </>
       ) : null}
     </div>

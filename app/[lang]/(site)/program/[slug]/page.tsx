@@ -29,7 +29,7 @@ async function Inner({ params }: { params: Promise<Params> }) {
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <PublicHeader signedIn={signedIn} />
       <ProgramHero t={t} venue={venue} sessions={sessions}
-        crumbs={[[t("Venues"), "/venues"], [acr, `/venues/${venue.slug}`], [t("Program"), null]]}
+        crumbs={[[t("Venues"), "/events"], [acr, `/events/${venue.slug}`], [t("Program"), null]]}
         title={t("Program · {name}", { name: acr })} />
       <main className="mx-auto box-border w-full max-w-[1280px] flex-auto px-4 pb-16 pt-5 sm:px-8">
         {sessions.length ? <ProgramBoard venue={venue} sessions={sessions} signedIn={signedIn} generatedAt={new Date().toISOString()} /> : <NotPublished t={t} venue={venue} />}

@@ -81,7 +81,7 @@ async function Inner({ params }: Params) {
         {roleNames.length ? <> · {t("your roles:")} {roleNames.map((r, i) => <span key={r}>{i ? ", " : ""}<strong className="text-[#121826]">{r}</strong></span>)}</> : <> · {t("you have no role here yet")}</>}
       </p>
       <div className="mt-4 flex flex-wrap gap-2.5">
-        <Link href={`/venues/${slug}`} className="inline-flex h-10 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Public venue page")}</Link>
+        <Link href={`/events/${slug}`} className="inline-flex h-10 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 text-[14px] font-medium text-[#121826] no-underline hover:bg-[#F7F8F6]">{t("Public venue page")}</Link>
         {venue.dates.some((d) => d.kind === "submission" && Date.parse(d.startsAt) > now) || venue.kind === "journal"
           ? <Link href={`/submit/${slug}`} className="inline-flex h-10 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit to this venue")}</Link> : null}
       </div>

@@ -230,6 +230,8 @@ html.lang-leaving body { opacity: 0.55; transition: opacity var(--dur-base) var(
 /* <html data-auth="in|out"> is set from the session cookie before the first paint; both header variants are in the HTML. */
 html:not([data-auth="in"]) .auth-in { display: none !important; }
 html[data-auth="in"] .auth-out { display: none !important; }
+/* <html data-single="1">: the public site is one event (lib/config/site-flags.ts) — directory, organizer and pricing links are hidden. */
+html[data-single="1"] .single-hide { display: none !important; }
 /* Pages written as full-screen columns sit under the 60 px header: keep them exactly one screen tall. */
 .chrome-body .min-h-dvh { min-height: calc(100dvh - 60px); }
 /* public pages: the page fills the space above the shared footer instead of pushing it below the fold */

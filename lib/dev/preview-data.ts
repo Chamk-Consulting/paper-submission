@@ -35,7 +35,7 @@ export const PREVIEW_MINE: MyEvents = {
 };
 
 export const PREVIEW_SUMMARY = {
-  signedIn: true, name: "Quinn Tester", initials: "QT", plenaryId: "PL-8120-8561", unread: 3, submissionCount: 29, isAdmin: true, organizerOf: "pdc-2027",
+  signedIn: true, name: "Quinn Tester", initials: "QT", plenaryId: "1042", unread: 3, submissionCount: 29, isAdmin: true, organizerOf: "pdc-2027",
   venues: [
     { slug: "pdc-2027", name: "Plenary Demo Conference 2027", shortName: "PDC 2027", roles: ["reviewer", "session_chair", "owner", "program_chair"] },
     { slug: "pdj", name: "Plenary Demo Journal", shortName: "PDJ", roles: ["reviewer", "chair"] },

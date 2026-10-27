@@ -212,7 +212,7 @@ function ConflictEditor({ onDone }: { onDone: () => void }) {
       </div>
       {mode === "person" ? (
         <div className="relative">
-          <label className={sx.label}>{t("Email or Plenary ID")}
+          <label className={sx.label}>{t("Email or PIN")}
             <input value={pick ? pick.display_name : q} onChange={(e) => search(e.target.value)} autoComplete="off" role="combobox" aria-expanded={!pick && hits.length > 0} aria-controls="coi-hits" className={sx.input} />
           </label>
           <input type="hidden" name="other_person" value={pick?.person_id ?? ""} />
@@ -227,7 +227,7 @@ function ConflictEditor({ onDone }: { onDone: () => void }) {
               ))}
             </ul>
           ) : null}
-          {!pick && q.trim().length >= 3 && !hits.length ? <span className={sx.help}>{t("No match yet. Try their exact email or Plenary ID.")}</span> : null}
+          {!pick && q.trim().length >= 3 && !hits.length ? <span className={sx.help}>{t("No match yet. Try their exact email or PIN.")}</span> : null}
         </div>
       ) : (
         <label className={sx.label}>{t("Institution")}<input name="institution" className={sx.input} /></label>

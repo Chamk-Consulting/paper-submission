@@ -209,10 +209,10 @@ export function IdentifiersSection({ p, state, form }: { p: Profile; state: Acco
   return (
     <section className={sx.card}>
       <h2 className={sx.h2}>{t("Identifiers")}</h2>
-      <p className={sx.sub + " text-[13px]"}>{t("Used to match your papers, fill author lists and find conflicts. All optional except your Plenary ID.")}</p>
+      <p className={sx.sub + " text-[13px]"}>{t("Used to match your papers, fill author lists and find conflicts. All optional except your PIN.")}</p>
       <div className="mt-3.5 grid gap-3.5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <div className="text-[14px] font-medium">{t("Plenary ID")}</div>
+          <div className="text-[14px] font-medium">{t("PIN")}</div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[17px]">{p.plenary_id ?? "—"}</span>
             {p.plenary_id ? <CopyButton text={p.plenary_id} /> : null}

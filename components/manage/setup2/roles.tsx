@@ -66,7 +66,7 @@ export function ConflictsCard({ rows }: { rows: ConflictRow[] }) {
             <label className="flex items-center gap-2"><input type="radio" name="kind" value="person" defaultChecked className="accent-[#0E1B3D]" />{t("A person")}</label>
             <label className="flex items-center gap-2"><input type="radio" name="kind" value="institution" className="accent-[#0E1B3D]" />{t("An institution")}</label>
           </fieldset>
-          <label className={ui.label}>{t("Email, Plenary ID or institution")}
+          <label className={ui.label}>{t("Email, PIN or institution")}
             <input name="who" className={ui.input} maxLength={200} />
             <FieldError state={state} name="who" />
           </label>

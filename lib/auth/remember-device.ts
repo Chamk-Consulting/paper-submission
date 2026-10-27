@@ -5,7 +5,7 @@ import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 import { JUST_SIGNED_IN_COOKIE, encodeAccount, maskEmail } from "@/lib/auth/device-accounts";
 
 /**
- * After a successful sign-in, hand the account summary (name, masked email, Plenary ID) to the browser
+ * After a successful sign-in, hand the account summary (name, masked email, PIN) to the browser
  * so the sign-in page can offer "Welcome back" next time (PR03). Only with "preferences" consent;
  * the browser moves it into device storage and deletes the cookie (components/auth/remember-account.tsx).
  */

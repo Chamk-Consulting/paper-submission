@@ -97,7 +97,7 @@ export function ContactOrganizers({ venueId, slug, acr }: { venueId: string; slu
   if (!f.signedIn) {
     return (
       <>
-        <Link href={`/sign-in?next=${encodeURIComponent(`/venues/${slug}#contact`)}`} className="mt-3 flex h-10 items-center justify-center rounded-[4px] border border-[#B7BDC9] bg-white text-[14px] font-semibold text-[#121826] no-underline">{t("Sign in to contact organizers")}</Link>
+        <Link href={`/sign-in?next=${encodeURIComponent(`/events/${slug}#contact`)}`} className="mt-3 flex h-10 items-center justify-center rounded-[4px] border border-[#B7BDC9] bg-white text-[14px] font-semibold text-[#121826] no-underline">{t("Sign in to contact organizers")}</Link>
         <p className="mt-2 text-[13px] text-[#4A5263]">{t("No account? Use the")} <Link href="/contact" className="text-[#2F5FD0] underline">{t("contact form")}</Link>.</p>
       </>
     );

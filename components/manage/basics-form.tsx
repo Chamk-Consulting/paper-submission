@@ -58,7 +58,7 @@ export function BasicsForm({ v, status, last, canEdit }: { v: BasicsValues; stat
           </div>
         </section>
       </fieldset>
-      <p className="m-0 text-[14px]"><Link href={`/venues/${v.slug}`} target="_blank">{t("Preview venue page")} ↗</Link></p>
+      <p className="m-0 text-[14px]"><Link href={`/events/${v.slug}`} target="_blank">{t("Preview venue page")} ↗</Link></p>
       <SaveBar state={state} status={status} last={last} readOnly={!canEdit} />
     </form>
   );

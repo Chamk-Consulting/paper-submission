@@ -15,7 +15,7 @@ const FEATURES: [string, string, string, string][] = [
   ["ASSIGNMENT", "Match by topic, block conflicts", "AE load bars, topic match, automatic conflict detection with overrides that need a reason and a second approver.", "/manage/new"],
   ["REVIEW", "Reviewers who say yes", "One-click invitations without sign-in, a blind viewer with margin notes, discussion when reviewers disagree.", "/help#accept"],
   ["DECISIONS", "See the whole picture", "Scores, spread and AE recommendations in one table, with a live acceptance-rate meter. Release when ready.", "/manage/new"],
-  ["PROGRAM", "Clash-free in minutes", "Place papers in rooms and slots; presenter and chair clashes are flagged before you publish.", "/venues"],
+  ["PROGRAM", "Clash-free in minutes", "Place papers in rooms and slots; presenter and chair clashes are flagged before you publish.", "/events"],
   ["TRUST", "A firewall for chairs’ own papers", "Chairs who submit are handled by a deputy. Every sensitive action is in an audit log nobody can edit.", "/help#conflicts"],
 ];
 

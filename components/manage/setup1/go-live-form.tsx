@@ -38,7 +38,7 @@ export function GoLiveForm({ slug, checks, committee, canOpen, live, liveSince, 
         {state.info ? <p className={`mb-0 mt-3 ${ui.ok}`}>{t(state.info)}</p> : null}
         <div className="mt-5 flex flex-wrap gap-2">
           <Link href={`/manage/${slug}`} className={ui.navy}>{t("Go to dashboard")}</Link>
-          <Link href={`/venues/${slug}`} className={ui.ghost}>{t("View public page")}</Link>
+          <Link href={`/events/${slug}`} className={ui.ghost}>{t("View public page")}</Link>
         </div>
       </section>
     );
@@ -66,7 +66,7 @@ export function GoLiveForm({ slug, checks, committee, canOpen, live, liveSince, 
       <section className={ui.card}>
         <h2 className={ui.h2}>{t("Try it yourself")}</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <Link href={`/venues/${slug}`} target="_blank" className="rounded-[8px] border border-[#DADDE3] px-4 py-3 text-[#121826] no-underline hover:bg-[#F7F8F6]"><strong className="block">{t("Public page")}</strong><span className="text-[13px] text-[#4A5263]">{t("As visitors see it")} ↗</span></Link>
+          <Link href={`/events/${slug}`} target="_blank" className="rounded-[8px] border border-[#DADDE3] px-4 py-3 text-[#121826] no-underline hover:bg-[#F7F8F6]"><strong className="block">{t("Public page")}</strong><span className="text-[13px] text-[#4A5263]">{t("As visitors see it")} ↗</span></Link>
           <Link href={`/manage/${slug}/setup/emails`} className="rounded-[8px] border border-[#DADDE3] px-4 py-3 text-[#121826] no-underline hover:bg-[#F7F8F6]"><strong className="block">{t("Email previews")}</strong><span className="text-[13px] text-[#4A5263]">{t("Confirmation, reminders")}</span></Link>
         </div>
         {testPanel ? <div id="test">{testPanel}</div> : null}

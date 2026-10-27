@@ -26,7 +26,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     ],
     shortcuts: [
       { name: "My submissions", short_name: "Submissions", url: "/workspace/submissions?source=pwa", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
-      { name: "Find a call for papers", short_name: "Venues", url: "/venues?source=pwa", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+      { name: "Find a call for papers", short_name: "Venues", url: "/events?source=pwa", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
     ],
   };
 }

@@ -40,7 +40,7 @@ export function LostEmailForm({ name, email }: { name: string; email: string }) 
       <p className="mt-1.5 text-[14px] text-[#4A5263]">{t("For example, you changed university and the old address is closed. Tell us who you are and where to move the account.")}</p>
       <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
         <label className={ui.label}>{t("Full name")}<input name="name" required minLength={2} maxLength={200} defaultValue={name} autoComplete="name" className={ui.input} /></label>
-        <label className={ui.label}>{t("Plenary ID (if you know it)")}<input name="plenaryId" maxLength={20} placeholder="PL-0000-0000" className={`${ui.input} font-mono`} /></label>
+        <label className={ui.label}>{t("PIN (if you know it)")}<input name="plenaryId" maxLength={20} placeholder="1024" className={`${ui.input} font-mono`} /></label>
         <label className={ui.label}>{t("Old email (no longer works)")}<input name="oldEmail" type="email" maxLength={254} placeholder="name@old-university.edu" className={ui.input} /></label>
         <label className={ui.label}>{t("New email")}<input name="newEmail" type="email" required maxLength={254} defaultValue={email} autoComplete="email" placeholder="name@new-university.edu" className={ui.input} /></label>
       </div>

@@ -171,7 +171,7 @@ export const public_de: Record<string, string> = {
   "In {n} day · {date}": "In {n} Tag · {date}",
   "In {n} days · {date}": "In {n} Tagen · {date}",
   "Inbox →": "Postfach →",
-  "Include the email or Plenary ID you sign in with. Never the code itself.": "Nennen Sie die E-Mail oder Plenary-ID, mit der Sie sich anmelden. Nie den Code selbst.",
+  "Include the email or PIN you sign in with. Never the code itself.": "Nennen Sie die E-Mail oder PIN, mit der Sie sich anmelden. Nie den Code selbst.",
   "Indexed in {list}": "Indexiert in {list}",
   "Institution or society": "Institution oder Gesellschaft",
   "Invitation — reply needed": "Einladung – Antwort nötig",

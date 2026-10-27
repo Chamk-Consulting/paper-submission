@@ -28,7 +28,7 @@ function fromB64Url(s: string): string {
 function valid(x: unknown): x is DeviceAccount {
   const a = x as DeviceAccount;
   return !!a && typeof a.name === "string" && typeof a.email === "string" && (a.id === null || typeof a.id === "string")
-    && a.name.length <= 160 && a.email.length <= 260 && (a.id === null || /^PL-\d{4}-\d{4}$/.test(a.id));
+    && a.name.length <= 160 && a.email.length <= 260 && (a.id === null || /^[1-9]\d{3,8}$/.test(a.id));
 }
 
 export function encodeAccount(a: DeviceAccount): string {
@@ -53,7 +53,7 @@ export function parseAccounts(raw: string | null): DeviceAccount[] {
   }
 }
 
-/** Newest first, one entry per person (by Plenary ID, else masked email). */
+/** Newest first, one entry per person (by PIN, else masked email). */
 export function mergeAccount(list: DeviceAccount[], a: DeviceAccount): DeviceAccount[] {
   const key = (x: DeviceAccount) => x.id ?? x.email;
   return [a, ...list.filter((x) => key(x) !== key(a))].slice(0, MAX_DEVICE_ACCOUNTS);

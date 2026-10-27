@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { ui } from "@/components/manage/ui";
 import {
-  cancelMaintenance, closeSupport, decideVenue, lockPerson, personAction, replySupport, scheduleMaintenance, setRequireApproval, type AdminState,
+  cancelMaintenance, closeSupport, decideVenue, lockPerson, personAction, replySupport, scheduleMaintenance, setRequireApproval, setSiteFlags, type AdminState,
 } from "@/lib/admin/actions";
 
 function Status({ s }: { s: AdminState }) {
@@ -92,6 +92,33 @@ export function ApprovalToggle({ on }: { on: boolean }) {
         {t("New events must be approved before they open submissions")}
       </button>
       <Status s={s} />
+    </form>
+  );
+}
+
+export type SiteFlagsValue = { homeEvent: string | null; singleEvent: boolean; signinEmailCode: boolean; signupEmailCode: boolean };
+
+/** Site switches: which event the home page opens, one-event public site, sign-in and sign-up codes. */
+export function SiteFlagsForm({ flags, events }: { flags: SiteFlagsValue; events: { slug: string; name: string }[] }) {
+  const t = useT();
+  const [s, act, pending] = useActionState(setSiteFlags, {});
+  const box = "flex items-start gap-2 text-[14px] text-[#121826]";
+  return (
+    <form action={act} className="flex flex-col gap-3">
+      <h2 className="m-0 text-[16px] font-semibold">{t("Public site and sign-in")}</h2>
+      <label className="flex flex-wrap items-center gap-2 text-[14px]">{t("Home event")}
+        <select name="home" defaultValue={flags.homeEvent ?? ""} className="h-9 min-w-[240px] rounded-[4px] border border-[#B7BDC9] bg-white px-2 text-[14px]">
+          <option value="">{t("None — the home page is the directory")}</option>
+          {events.map((e) => <option key={e.slug} value={e.slug}>{e.name}</option>)}
+        </select>
+      </label>
+      <label className={box}><input type="checkbox" name="single" defaultChecked={flags.singleEvent} className="mt-1" />
+        <span>{t("One-event site: the home page opens the home event, and the top bar hides the directory, organizer and pricing links")}</span></label>
+      <label className={box}><input type="checkbox" name="signinCode" defaultChecked={flags.signinEmailCode} className="mt-1" />
+        <span>{t("Sign in with an emailed code (as well as the password)")}</span></label>
+      <label className={box}><input type="checkbox" name="signupCode" defaultChecked={flags.signupEmailCode} className="mt-1" />
+        <span>{t("New accounts confirm their email with a code first (off: name, email and password, then straight in)")}</span></label>
+      <div className="flex flex-wrap items-center gap-3"><button type="submit" disabled={pending} className={small}>{pending ? t("Saving…") : t("Save")}</button><Status s={s} /></div>
     </form>
   );
 }

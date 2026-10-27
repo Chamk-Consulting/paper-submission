@@ -22,7 +22,7 @@ export async function TypeAside({ venue, type, track }: { venue: WizardVenue; ty
         <h3 className="m-0 text-[17px] font-semibold">{t("Have these ready")}</h3>
         <ul className="mb-0 mt-2.5 flex flex-col gap-1.5 pl-5 text-[15px]">
           <li>{t("Title and abstract (up to 250 words)")}</li>
-          <li>{t("Co-authors' emails or Plenary IDs")}</li>
+          <li>{t("Co-authors' emails or PINs")}</li>
           <li>{t("3–5 keywords")}</li>
           <li>{t("PDF in the venue template")}</li>
         </ul>

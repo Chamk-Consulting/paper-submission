@@ -15,8 +15,8 @@ export function workspaceFor(bare: string): string | null {
   if (bare === "/" || bare === "/organizers" || bare === "/pricing") return "/workspace";
   if (SIGN_IN_PAGES.has(bare)) return "/workspace";
   if (bare === "/account-help") return "/workspace/help";
-  if (bare === "/venues") return "/workspace/events";
-  let m = bare.match(/^\/venues\/([^/]+)(\/archive)?$/);
+  if (bare === "/events" || bare === "/venues") return "/workspace/events";
+  let m = bare.match(/^\/(?:events|venues)\/([^/]+)(\/archive)?$/);
   if (m) return `/workspace/events/${m[1]}${m[2] ?? ""}`;
   m = bare.match(/^\/program\/([^/]+)(\/my-schedule|\/papers\/[^/]+|\/sessions\/[^/]+)?$/);
   if (m) return `/workspace/events/${m[1]}/program${m[2] ?? ""}`;

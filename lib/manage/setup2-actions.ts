@@ -36,10 +36,10 @@ export async function inviteCommittee(_: ManageState, fd: FormData): Promise<Man
   const role = String(fd.get("role") ?? "");
   if (!(INVITE_ROLES as readonly string[]).includes(role)) return { fieldErrors: { role: "Choose a role." } };
   const raw = String(fd.get("recipients") ?? "").split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
-  if (!raw.length) return { fieldErrors: { recipients: "Enter at least one email or Plenary ID." } };
+  if (!raw.length) return { fieldErrors: { recipients: "Enter at least one email or PIN." } };
   if (raw.length > 50) return { fieldErrors: { recipients: "Invite at most 50 people at a time." } };
   const bad = raw.filter((r) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r) && !/^pl-\d{4}-\d{4}$/i.test(r));
-  if (bad.length) return { fieldErrors: { recipients: `Not an email or Plenary ID: ${bad.slice(0, 3).join(", ")}` } };
+  if (bad.length) return { fieldErrors: { recipients: `Not an email or PIN: ${bad.slice(0, 3).join(", ")}` } };
 
   const supabase = await createClient();
   const me = await getMe();
@@ -55,7 +55,7 @@ export async function inviteCommittee(_: ManageState, fd: FormData): Promise<Man
     if (!email) {
       const { data: found } = await supabase.rpc("find_person", { p_query: r });
       personId = ((found as { person_id: string }[] | null)?.[0]?.person_id) ?? null;
-      if (!personId) { errors.push(`${r}: no account with this Plenary ID`); continue; }
+      if (!personId) { errors.push(`${r}: no account with this PIN`); continue; }
     }
     const { token, hash } = newToken();
     const { error } = await supabase.rpc("invite_member", { p_venue: v.id, p_email: email, p_person: personId, p_role: role, p_token_hash: hash, p_load_cap: null, p_message: null });
@@ -292,7 +292,7 @@ export async function addDeclaredConflict(_: ManageState, fd: FormData): Promise
   if (parsed.data.kind === "person") {
     const { data: found } = await supabase.rpc("find_person", { p_query: parsed.data.who });
     other = ((found as { person_id: string }[] | null)?.[0]?.person_id) ?? null;
-    if (!other) return { fieldErrors: { who: "No account found — use their email or Plenary ID, or declare their institution." } };
+    if (!other) return { fieldErrors: { who: "No account found — use their email or PIN, or declare their institution." } };
   } else institution = parsed.data.who;
   const { error } = await supabase.from("declared_conflicts").insert({ person_id: me.person.id, other_person: other, institution, reason: parsed.data.reason, until_year: parsed.data.until_year ? Number(parsed.data.until_year) : null });
   if (error) return { error: friendlyDb(error.message) };

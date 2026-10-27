@@ -19,6 +19,7 @@ import { PwaLayer } from "@/components/pwa/pwa-layer";
 import { CookieConsent } from "@/components/consent/cookie-consent";
 import { RememberAccount } from "@/components/auth/remember-account";
 import { UI_FLAG } from "@/lib/account/ui-prefs";
+import { getSiteFlags } from "@/lib/config/site-flags";
 
 const AUTH_FLAG = `try{document.documentElement.dataset.auth=/(?:^|;\\s*)sb-[a-z0-9]+-auth-token(?:\\.0)?=/.test(document.cookie)?"in":"out"}catch(e){}`;
 
@@ -56,9 +57,9 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  const [locale, brand] = await Promise.all([getLocale(), getBrand()]);
+  const [locale, brand, flags] = await Promise.all([getLocale(), getBrand(), getSiteFlags()]);
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-single={flags.singleEvent ? "1" : undefined} suppressHydrationWarning>
       <head>
         {/* Before the first paint: signed-in or not, from the session cookie, so the shared header shows the right side at once. */}
         <script dangerouslySetInnerHTML={{ __html: AUTH_FLAG }} />

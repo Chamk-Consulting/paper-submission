@@ -345,7 +345,7 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
             <div className="mt-3.5 flex flex-col gap-3">
               {list.slice(0, shown).map((v) => (
                 <ViewTransition key={v.id} enter={VT.cardIn} exit={VT.cardOut} update={VT.cardMove} default="none">
-                  <VenueCard v={v} following={follows.followed.includes(v.id)} onFollow={() => follows.toggle(v.id, ws ? "/workspace/events" : "/venues")} ws={ws} mine={mine?.[v.slug]} intent={intent} />
+                  <VenueCard v={v} following={follows.followed.includes(v.id)} onFollow={() => follows.toggle(v.id, ws ? "/workspace/events" : "/events")} ws={ws} mine={mine?.[v.slug]} intent={intent} />
                 </ViewTransition>
               ))}
               {list.length === 0 ? (
@@ -380,7 +380,7 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
   // At most three tags on a card (field + these two): review mode and page limit live on the event page.
   const tags = [v.format ? t(FORMAT_LABEL[v.format]) : null, v.indexedIn.length ? v.indexedIn.slice(0, 2).join(" · ") : null].filter(Boolean) as string[];
   const where = v.kind === "journal" ? t("Online") : [v.city, v.country].filter(Boolean).join(", ") || v.location || "";
-  const href = ws ? `/workspace/events/${v.slug}` : `/venues/${v.slug}`;
+  const href = ws ? `/workspace/events/${v.slug}` : `/events/${v.slug}`;
   const act = ws ? (intent && isOpenCall(v) ? { label: "Submit a paper", href: `/submit/${v.slug}` } : primaryAction(v.slug, mine, isOpenCall(v))) : null;
   const roles = mine ? roleChips(mine.roles) : [];
   return (

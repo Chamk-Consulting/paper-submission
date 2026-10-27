@@ -8,6 +8,7 @@ import { AdminInvoices, AdminPayments, AdminPayouts } from "@/components/admin/m
 import { emailConfigured } from "@/lib/email/send";
 import { AdminShell, PeopleView, StatusView, SupportView, VenuesView } from "@/components/admin/views";
 import { SignupFunnel } from "@/components/admin/signup-funnel";
+import { getSiteFlags } from "@/lib/config/site-flags";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -26,7 +27,7 @@ async function Inner({ searchParams }: { searchParams: Promise<SP> }) {
   const name = me.person?.display_name || me.email;
   let body;
   if (tab === "support") body = <SupportView t={t} items={await loadSupport()} selected={sp.id ?? null} now={now} />;
-  else if (tab === "venues") body = <VenuesView t={t} venues={await loadVenues()} requireApproval={overview.require_venue_approval} />;
+  else if (tab === "venues") body = <VenuesView t={t} venues={await loadVenues()} requireApproval={overview.require_venue_approval} flags={await getSiteFlags()} />;
   else if (tab === "people") body = <PeopleView t={t} q={sp.q ?? ""} people={await findPeople(sp.q ?? "")} />;
   else if (tab === "payments") body = <AdminPayments rows={await loadAdminPayments()} />;
   else if (tab === "invoices") {

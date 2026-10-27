@@ -3,7 +3,7 @@ import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 
 /**
  * Results signed by the web app and checked by the database (private.signed): extra emails and
- * Plenary-ID sign-in. The secret is PLENARY_SIGNING_SECRET in Vercel and private.app_secrets('signing')
+ * PIN sign-in. The secret is PLENARY_SIGNING_SECRET in Vercel and private.app_secrets('signing')
  * in the database — the same value.
  */
 export function signingReady(): boolean {

@@ -16,10 +16,10 @@ export function ForgotForm({ initial = "" }: { initial?: string }) {
   return (
     <form action={action} noValidate>
       <div className="mt-[22px] flex flex-col gap-1.5">
-        <label htmlFor="pr10-id" className={ui.label}>{t("Email, phone, Plenary ID or alias")}</label>
+        <label htmlFor="pr10-id" className={ui.label}>{t("Email or PIN")}</label>
         <input
           id="pr10-id" name="identifier" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false}
-          placeholder="name@uni.edu · PL-4821-0937 · a.researcher"
+          placeholder="name@uni.edu · 1024"
           value={id} onChange={(e) => setId(e.target.value)}
           aria-invalid={err ? true : undefined} aria-describedby={err ? "pr10-id-err" : undefined}
           className={`${ui.input} h-12`}

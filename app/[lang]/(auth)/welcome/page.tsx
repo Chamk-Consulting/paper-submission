@@ -48,7 +48,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
                 <>{[venue.label, venue.city].filter(Boolean).join(" · ")}{venue.label || venue.city ? " · " : ""}{t("deadline {when}", { when: venue.aoe })}<span className="block">{t("That's")} <LocalDeadline iso={venue.iso} /> {t("for you")}.</span></>
               ) : venue ? t("No upcoming deadline listed — check the venue page.") : hasNext ? t("We’ll take you straight back.") : t("Conferences, workshops and journals with open calls.")}
             </div>
-            <Link href={hasNext ? dest : venue ? `/venues/${venue.slug}` : "/venues"} className={`mt-4 h-[46px] ${ui.primary}`}>{hasNext ? t("Start your submission") : venue ? t("Open the venue") : t("Browse open calls")}</Link>
+            <Link href={hasNext ? dest : venue ? `/events/${venue.slug}` : "/events"} className={`mt-4 h-[46px] ${ui.primary}`}>{hasNext ? t("Start your submission") : venue ? t("Open the venue") : t("Browse open calls")}</Link>
           </div>
           <p className="mb-2.5 mt-7 font-mono text-[11px] uppercase tracking-[0.06em] text-[#B9C3DA]">{t("When you have a minute")}</p>
           <ul className="m-0 flex max-w-[560px] list-none flex-col gap-2 p-0">
@@ -72,7 +72,7 @@ async function Content({ searchParams }: { searchParams: Promise<Search> }) {
         <span aria-hidden>✓</span>{t("ACCOUNT READY · 4 OF 4")}
       </div>
       <h1 className={`mt-3.5 ${ui.h1}`}>{t("Welcome to Plenary")}</h1>
-      <p className={`mt-2 ${ui.muted}`}>{t("This is your Plenary ID. Share it with co-authors and chairs so they can find you.")}</p>
+      <p className={`mt-2 ${ui.muted}`}>{t("This is your PIN. Share it with co-authors and chairs so they can find you.")}</p>
 
       <PlenaryIdCard className="mt-[18px]" name={name} affiliation={me.affiliation?.institution ?? null} id={id} orcid={p?.orcid ?? null} />
 

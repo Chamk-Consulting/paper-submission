@@ -37,7 +37,7 @@ export function AccountMenu({ name, initials, plenaryId }: { name: string; initi
             <div className="truncate font-semibold">{name}</div>
             {plenaryId ? <div className="font-mono text-[12px] text-[#4A5263]">{plenaryId}</div> : null}
           </div>
-          <Link role="menuitem" href="/workspace/account/profile#plenary-id" className={item}>{t("My Plenary ID")}</Link>
+          <Link role="menuitem" href="/workspace/account/profile#plenary-id" className={item}>{t("My PIN")}</Link>
           <Link role="menuitem" href="/workspace/account/profile" className={item}>{t("Account")}</Link>
           <InstallMenuItem className={`${item} w-full border-0 bg-transparent text-left`} />
           <form action={signOut} onSubmit={() => clearSummary()} className="border-t border-[#EEF0EC]">

@@ -13,6 +13,7 @@ import { recordSignIn } from "@/lib/auth/sign-in-log";
 import { resolveOnboarding, stepHref } from "@/lib/auth/onboarding";
 import { noteStep, overLimit } from "@/lib/auth/attempts";
 import { expiresIn, sign, signingReady } from "@/lib/auth/signing";
+import { getSiteFlags } from "@/lib/config/site-flags";
 
 export type ExistingKind = "complete" | "no_profile" | "secondary";
 export type StartState = {
@@ -79,7 +80,9 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
   const parsed = startSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
   const { firstName, lastName, email, password = "", confirm = "", next, venue } = parsed.data;
-  const legacy = passwordFirst();
+  // Site switch "sign-up code" off: name, email and password, and the account opens without an emailed code.
+  const noCode = !(await getSiteFlags()).signupEmailCode;
+  const legacy = passwordFirst() || noCode;
 
   if (legacy) {
     const rules = scorePassword(password, email);
@@ -102,7 +105,7 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
     if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { ...meta, password_set_at: new Date().toISOString() }, emailRedirectTo: absoluteUrl(`/auth/confirm?next=${encodeURIComponent(continueHref(next))}`) },
+      options: { data: { ...meta, password_set_at: new Date().toISOString(), ...(noCode ? { signup_flow: "password_no_code" } : {}) }, emailRedirectTo: absoluteUrl(`/auth/confirm?next=${encodeURIComponent(continueHref(next))}`) },
     });
     if (error) {
       const code = error.code ?? "";
@@ -114,6 +117,21 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
       return { message: "We couldn’t create your account. Check your email address and try again." };
     }
     if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) return { exists: { email } };
+    if (noCode) {
+      // Confirmed by the server (signed request, only for an account made moments ago), then signed in.
+      if (!data.session) {
+        const exp = expiresIn(5);
+        await supabase.rpc("confirm_signup_without_code", { p_email: email, p_expires: exp, p_sig: sign(`signup-noconfirm|${email}`, exp) });
+        const { error: e3 } = await supabase.auth.signInWithPassword({ email, password });
+        if (e3) {
+          console.error("[signup] no-code sign-in failed:", e3.status, e3.code, e3.message);
+          return { message: "Your account was created, but we couldn’t sign you in. Sign in with your email and password." };
+        }
+      }
+      await noteStep(supabase, "confirmed");
+      await recordSignIn(supabase, "password");
+      redirect(continueHref(next));
+    }
     await noteStep(supabase, "code_sent");
     redirect(verifyUrl(email, next, venue, `${firstName} ${lastName}`));
   }
@@ -316,7 +334,7 @@ const profileSchema = z.object({
   next: z.string().optional(),
 });
 
-/** PR08 "Finish and get my Plenary ID". */
+/** PR08 "Finish and get my PIN". */
 export async function saveProfile(_: ProfileState, formData: FormData): Promise<ProfileState> {
   const parsed = profileSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };

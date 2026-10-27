@@ -23,7 +23,7 @@ import { BrandName } from "@/lib/i18n/client";
  */
 
 const NAVY = "#0E1B3D";
-const PUBLIC_NAV: [string, string][] = [["/venues", "Venues"], ["/organizers", "For organizers"], ["/pricing", "Pricing"], ["/help", "Help"], ["/contact", "Contact"]];
+const PUBLIC_NAV: [string, string][] = [["/events", "Events"], ["/organizers", "For organizers"], ["/pricing", "Pricing"], ["/help", "Help"], ["/contact", "Contact"]];
 const SIGNED_IN_NAV: [string, string][] = [["/workspace", "My workspace"], ["/workspace/events", "Find events"], ["/workspace/help", "Help"]];
 
 function Count({ n, dark }: { n?: number; dark?: boolean }) {
@@ -81,7 +81,7 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
           {s?.name ? (
             <div className="mb-2 rounded-[8px] border border-[#EEF0EC] px-3 py-2.5">
               <div className="truncate font-semibold">{s.name}</div>
-              {s.plenaryId ? <Link href="/workspace/account/profile#plenary-id" className="font-mono text-[12px] text-[#2F5FD0] no-underline">{s.plenaryId} · {t("My Plenary ID")}</Link> : null}
+              {s.plenaryId ? <Link href="/workspace/account/profile#plenary-id" className="font-mono text-[12px] text-[#2F5FD0] no-underline">{s.plenaryId} · {t("My PIN")}</Link> : null}
             </div>
           ) : null}
           <Link href="/workspace/events?intent=submit" onClick={onClose} className="mb-2 flex h-11 items-center justify-center gap-2 rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("New submission")}</Link>
@@ -89,11 +89,11 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
         </div>
         <div className="auth-out flex flex-col gap-0.5 px-3 py-4">
           {PUBLIC_NAV.map(([href, label]) => (
-            <Link key={href} href={href} aria-current={isOn(p, href) ? "page" : undefined} className={`${pub} ${isOn(p, href) ? "bg-[#E6EDFC] font-semibold" : ""}`}>{t(label)}</Link>
+            <Link key={href} href={href} aria-current={isOn(p, href) ? "page" : undefined} className={`single-hide ${pub} ${isOn(p, href) ? "bg-[#E6EDFC] font-semibold" : ""}`}>{t(label)}</Link>
           ))}
           <div className="mt-3 flex flex-col gap-2 border-t border-[#EEF0EC] pt-4">
             <Link href={`/sign-in?next=${encodeURIComponent(p)}`} className="flex h-11 items-center justify-center rounded-[4px] border border-[#B7BDC9] text-[15px] font-semibold text-[#121826] no-underline">{t("Sign in")}</Link>
-            <Link href="/manage/new" className="flex h-11 items-center justify-center rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("Host a conference")}</Link>
+            <Link href="/manage/new" className="single-hide flex h-11 items-center justify-center rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("Host a conference")}</Link>
           </div>
         </div>
         <div className="mt-auto border-t border-[#EEF0EC] px-6 py-4">
@@ -116,7 +116,7 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
         <Link href="/" className="auth-out flex flex-none items-center gap-2.5 no-underline" aria-label={t("Plenary home")}><Logo /></Link>
         <Link href="/workspace" prefetch={null} className="auth-in flex flex-none items-center gap-2.5 no-underline" aria-label={t("My workspace")}><Logo /></Link>
 
-        <nav aria-label={t("Primary")} className="auth-out hidden gap-6 lg:flex">
+        <nav aria-label={t("Primary")} className="auth-out single-hide hidden gap-6 lg:flex">
           {PUBLIC_NAV.map(([href, label]) => <Link key={href} href={href} aria-current={isOn(p, href) ? "page" : undefined} className={link(isOn(p, href))}>{t(label)}</Link>)}
         </nav>
         {variant === "site" ? (
@@ -135,7 +135,7 @@ function Header({ p, s, variant, onMenu }: { p: string; s: Summary | null; varia
           <LanguageSelect id="hdr-lang" tone="dark" className="hidden lg:inline-flex" />
           <span className="auth-out flex items-center gap-3">
             <Link href={`/sign-in?next=${encodeURIComponent(p === "/" ? "/workspace" : p)}`} className="px-2 py-2.5 text-[14px] font-medium text-[#F5F6F3] no-underline">{t("Sign in")}</Link>
-            <Link href="/manage/new" className="hidden sm:inline-flex h-9 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Host a conference")}</Link>
+            <Link href="/manage/new" className="single-hide hidden sm:inline-flex h-9 items-center rounded-[4px] bg-[#F2A93B] px-3.5 text-[14px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Host a conference")}</Link>
           </span>
           <span className="auth-in flex items-center gap-2.5 sm:gap-3">
             {variant === "site" ? (

@@ -1,6 +1,6 @@
 import { RIBBON, type Badge } from "@/lib/attend/badge";
 
-/* BD01 badge (A6 proportions): venue band, name, affiliation, Plenary ID, QR, role ribbon. The QR svg is generated
+/* BD01 badge (A6 proportions): venue band, name, affiliation, PIN, QR, role ribbon. The QR svg is generated
    server-side by the qrcode package from our own token, so injecting it is safe. */
 export function BadgeCard({ badge, qr, venue, dates, t, print = false }: {
   badge: Badge; qr: string; venue: string; dates: string; t: (k: string) => string; print?: boolean;

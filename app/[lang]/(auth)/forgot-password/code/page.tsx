@@ -16,8 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
 type Search = { email?: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PID_RE = /^PL-\d{4}-\d{4}$/;
-/** The email, or a Plenary ID when the person reset with their ID (the email is never put in the address). */
+const PID_RE = /^[1-9]\d{3,8}$/;
+/** The email, or a PIN when the person reset with their ID (the email is never put in the address). */
 const who = (raw?: string) => { const v = (raw ?? "").trim(); return PID_RE.test(v.toUpperCase()) ? v.toUpperCase() : v.toLowerCase(); };
 
 async function Left({ searchParams }: { searchParams: Promise<Search> }) {

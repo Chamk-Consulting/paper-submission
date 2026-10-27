@@ -79,7 +79,7 @@ export function AccountChooser({ accounts, onPick, onOther, onRemove }: {
         </li>
       </ul>
       <p className="mt-5 rounded-[6px] bg-[#EEF0EC] px-3.5 py-2.5 text-[13px] text-[#4A5263]">
-        <strong className="text-[#121826]">{t("On a shared computer?")}</strong> {t("Use × to remove your account from this device. We only keep your name, Plenary ID and a hidden email here — never a password.")}
+        <strong className="text-[#121826]">{t("On a shared computer?")}</strong> {t("Use × to remove your account from this device. We only keep your name, PIN and a hidden email here — never a password.")}
       </p>
     </>
   );

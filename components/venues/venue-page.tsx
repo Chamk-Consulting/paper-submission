@@ -73,8 +73,8 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
           <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,27,61,0.92)_0%,rgba(14,27,61,0.74)_50%,rgba(14,27,61,0.3)_100%)]" />
         <div className="relative mx-auto max-w-[1280px] px-5 pb-10 pt-7 sm:px-8 lg:min-h-[380px]">
           <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#D6DCEA]">
-            <Link href="/venues" className="text-[#F5F6F3] underline">{t("Venues")}</Link>
-            {v.field ? <> / <Link href="/venues" className="text-[#F5F6F3] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
+            <Link href="/events" className="text-[#F5F6F3] underline">{t("Venues")}</Link>
+            {v.field ? <> / <Link href="/events" className="text-[#F5F6F3] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
           </nav>
           <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex min-w-0 gap-5">

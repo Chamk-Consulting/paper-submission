@@ -12,7 +12,7 @@ export function signupSteps(t: T, current: 1 | 2 | 3 | 4, texts: Partial<Record<
     { title: t("Your name and email"), text: t("So co-authors and chairs can find you.") },
     { title: t("Confirm your email"), text: t("A code by email, valid for 15 minutes.") },
     { title: t("Choose a password"), text: t("Only after the code, so only you can set it.") },
-    { title: t("Your research profile"), text: t("Name on papers and affiliation — then you get your Plenary ID.") },
+    { title: t("Your research profile"), text: t("Name on papers and affiliation — then you get your PIN.") },
   ];
   return base.map((s, i) => {
     const n = (i + 1) as 1 | 2 | 3 | 4;

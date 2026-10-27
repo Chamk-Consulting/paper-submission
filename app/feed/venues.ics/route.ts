@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         ends_at: d.kind === "conference" ? d.endsAt : null,
         location: d.kind === "conference" ? v.location : null,
         description: v.name,
-        url: `/venues/${v.slug}`,
+        url: `/events/${v.slug}`,
       })),
   );
   const name = slugs.length === 1 ? `${pick[0]?.acr ?? brand} deadlines` : `${brand} venue deadlines`;

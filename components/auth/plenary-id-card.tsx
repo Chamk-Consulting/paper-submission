@@ -9,7 +9,7 @@ function initials(name: string) {
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
 }
 
-/** The Plenary ID card: name, affiliation, ID with copy, QR (ID only) and badge download. Welcome page and Settings › Profile. */
+/** The PIN card: name, affiliation, ID with copy, QR (ID only) and badge download. Welcome page and Settings › Profile. */
 export async function PlenaryIdCard({ name, affiliation, id, orcid, className = "" }: { name: string; affiliation: string | null; id: string | null; orcid?: string | null; className?: string }) {
   const t = await getT();
   const qrSvg = id ? await QRCode.toString(id, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#0E1B3D", light: "#FFFFFF" } }) : null;
@@ -39,7 +39,7 @@ export async function PlenaryIdCard({ name, affiliation, id, orcid, className = 
           {orcid ? <div className={`font-mono text-[12px] ${ui.muted}`}>ORCID {orcid}</div> : null}
         </div>
         {qrSvg ? (
-          <figure role="img" aria-label={t("QR code for Plenary ID {id}", { id: id ?? "" })} className="m-0 flex-none rounded-[6px] border border-[#DADDE3] bg-white p-1.5 text-center">
+          <figure role="img" aria-label={t("QR code for PIN {id}", { id: id ?? "" })} className="m-0 flex-none rounded-[6px] border border-[#DADDE3] bg-white p-1.5 text-center">
             <div className="size-[105px] [&>svg]:size-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
             <figcaption className={`mt-1 text-[12px] ${ui.muted}`}>{t("ID only")}</figcaption>
           </figure>

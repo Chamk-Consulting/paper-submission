@@ -146,7 +146,7 @@ function MySubmissions({ papers, t }: { papers: MyPaper[]; t: Awaited<ReturnType
           </table>
         </div>
       ) : (
-        <p className="m-0 border-t border-[#EEF0EC] px-5 py-8 text-center text-[#4A5263]">{t("No papers yet.")} <Link href="/venues" className="text-[#2F5FD0]">{t("Find a call for papers")}</Link></p>
+        <p className="m-0 border-t border-[#EEF0EC] px-5 py-8 text-center text-[#4A5263]">{t("No papers yet.")} <Link href="/events" className="text-[#2F5FD0]">{t("Find a call for papers")}</Link></p>
       )}
     </section>
   );

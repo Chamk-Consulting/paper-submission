@@ -12,7 +12,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
   if (!data) return new Response("Not found", { status: 404 });
   const { venue } = data;
   const now = stamp(new Date().toISOString());
-  const url = absoluteUrl(`/venues/${venue.slug}`);
+  const url = absoluteUrl(`/events/${venue.slug}`);
   const events = venue.dates.map((d) => {
     const lines = [`BEGIN:VEVENT`, `UID:${d.id}@plenary`, `DTSTAMP:${now}`, `SUMMARY:${esc(`${venue.acr} · ${d.label}`)}`, `URL:${url}`, `DESCRIPTION:${esc(`${venue.name}\n${url}`)}`];
     if (d.kind === "conference") {

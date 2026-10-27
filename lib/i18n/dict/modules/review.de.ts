@@ -161,7 +161,7 @@ export const review_de: Record<string, string> = {
   "My submitted review": "Mein eingereichtes Gutachten",
   "NOT POSSIBLE": "NICHT MÖGLICH",
   "Name and email": "Name und E-Mail",
-  "Name, email or Plenary ID": "Name, E-Mail oder Plenary-ID",
+  "Name, email or PIN": "Name, E-Mail oder PIN",
   "Names are visible in this event": "Namen sind bei dieser Veranstaltung sichtbar",
   "Need more time?": "Brauchen Sie mehr Zeit?",
   "Need more time? →": "Mehr Zeit nötig? →",

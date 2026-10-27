@@ -146,7 +146,7 @@ export function InviteForm({ slug, canGrant }: { slug: string; canGrant: boolean
       {!canGrant ? <p className={`${ui.hint} mt-2`}>{t("Only owners and program chairs grant roles (A3).")}</p> : (
         <form action={action} className="mt-4 grid gap-4 sm:grid-cols-[2fr_1fr_auto] sm:items-end">
           <input type="hidden" name="slug" value={slug} />
-          <label className={ui.label}>{t("Emails or Plenary IDs")}
+          <label className={ui.label}>{t("Emails or PINs")}
             <input name="recipients" placeholder={t("one or more, separated by commas")} className={ui.input} />
             <FieldError state={state} name="recipients" />
           </label>

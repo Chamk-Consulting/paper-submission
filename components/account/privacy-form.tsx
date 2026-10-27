@@ -14,7 +14,7 @@ import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 const VISIBILITY: ["public" | "signed_in" | "venues_only", string, string][] = [
   ["public", "Anyone", "Name, affiliation, topics and published papers."],
   ["signed_in", "Signed-in researchers", "So co-authors and editors can find you. Recommended."],
-  ["venues_only", "Only venues I work with", "Co-authors must use your exact email or Plenary ID."],
+  ["venues_only", "Only venues I work with", "Co-authors must use your exact email or PIN."],
 ];
 const small = "inline-flex h-8 items-center whitespace-nowrap rounded-[4px] border border-[#B7BDC9] bg-white px-3 text-[13px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#F7F8F6] disabled:opacity-60";
 const box = "flex cursor-pointer items-start gap-3 rounded-[6px] border border-[#DADDE3] bg-white px-3.5 py-3 text-left";

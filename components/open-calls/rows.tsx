@@ -33,7 +33,7 @@ export function OpenCallRows({ calls, generatedAt, tone }: { calls: OpenCall[]; 
             <div className="col-span-12 flex min-w-0 items-start gap-3 sm:col-span-6">
               <span className="relative mt-0.5 hidden h-[40px] w-[56px] flex-none overflow-hidden rounded-[4px] sm:block"><VenueCoverImage cover={c.cover} field={c.field} alt="" /></span>
               <div className="min-w-0">
-              <Link href={`/venues/${c.slug}`} className={`font-semibold no-underline hover:underline ${s.name}`}>{c.name}</Link>
+              <Link href={`/events/${c.slug}`} className={`font-semibold no-underline hover:underline ${s.name}`}>{c.name}</Link>
               <div className={`mt-0.5 text-[13px] ${s.sub}`}>
                 <span className={`mr-1.5 rounded-[2px] px-1.5 py-px font-mono text-[11px] uppercase ${s.tag}`}>{c.shortName ?? t(KIND_LABEL[c.kind as keyof typeof KIND_LABEL] ?? c.kind)}</span>
                 {t(c.label)}{c.extended ? ` · ${t("extended")}` : ""}
@@ -58,7 +58,7 @@ export function OpenCallsEmpty({ tone }: { tone: Tone }) {
   return (
     <div className={`px-5 py-7 text-[14px] ${s.empty}`}>
       <p className="m-0 font-semibold">{t("No open calls right now.")}</p>
-      <p className="m-0 mt-1">{t("New calls for papers appear here as soon as a venue publishes its deadlines.")} <Link href="/venues" className={tone === "dark" ? "text-[#F2A93B]" : "text-[#2F5FD0]"}>{t("Browse all venues →")}</Link></p>
+      <p className="m-0 mt-1">{t("New calls for papers appear here as soon as a venue publishes its deadlines.")} <Link href="/events" className={tone === "dark" ? "text-[#F2A93B]" : "text-[#2F5FD0]"}>{t("Browse all venues →")}</Link></p>
     </div>
   );
 }
@@ -69,7 +69,7 @@ export function OpenCallsError({ tone }: { tone: Tone }) {
   return (
     <div role="status" className={`px-5 py-7 text-[14px] ${s.empty}`}>
       <p className="m-0 font-semibold">{t("Open calls couldn't load.")}</p>
-      <p className="m-0 mt-1">{t("Refresh the page in a moment, or")} <Link href="/venues" className={tone === "dark" ? "text-[#F2A93B]" : "text-[#2F5FD0]"}>{t("browse all venues")}</Link>.</p>
+      <p className="m-0 mt-1">{t("Refresh the page in a moment, or")} <Link href="/events" className={tone === "dark" ? "text-[#F2A93B]" : "text-[#2F5FD0]"}>{t("browse all venues")}</Link>.</p>
     </div>
   );
 }

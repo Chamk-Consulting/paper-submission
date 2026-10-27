@@ -172,7 +172,7 @@ export function CalendarView({ rows, now, tz }: { rows: Row[]; now: number; tz: 
                   </div>
                   {e.type === "mine" ? <div className="mt-[3px] text-[14px] font-semibold">{e.what}</div> : <div className="mt-[3px] text-[14px] font-semibold">{e.acr} <span className="font-normal text-[#4A5263]">· {e.what}</span></div>}
                   {e.when ? <div className="text-[12px] text-[#4A5263]">{e.when}</div> : null}
-                  <div className="mt-1.5 text-[13px]">{e.type === "mine" ? (e.href ? <Link href={e.href} className="font-semibold text-[#2F5FD0]">{t("Open →")}</Link> : null) : <Link href={`/venues/${e.slug}`} className="font-semibold text-[#2F5FD0]">{t("View call →")}</Link>}</div>
+                  <div className="mt-1.5 text-[13px]">{e.type === "mine" ? (e.href ? <Link href={e.href} className="font-semibold text-[#2F5FD0]">{t("Open →")}</Link> : null) : <Link href={`/events/${e.slug}`} className="font-semibold text-[#2F5FD0]">{t("View call →")}</Link>}</div>
                 </li>
               );
             })}

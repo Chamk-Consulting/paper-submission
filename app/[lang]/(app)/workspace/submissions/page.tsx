@@ -67,12 +67,12 @@ async function Inner({ searchParams }: { searchParams: Promise<Search> }) {
             </div>
           </section>
           <section className={card}>
-            <div className="flex items-baseline justify-between"><p className={kicker}>{t("Following · next deadlines")}</p><Link href="/venues?view=calendar" className="text-[12px] text-[#2F5FD0]">{t("Calendar")}</Link></div>
+            <div className="flex items-baseline justify-between"><p className={kicker}>{t("Following · next deadlines")}</p><Link href="/events?view=calendar" className="text-[12px] text-[#2F5FD0]">{t("Calendar")}</Link></div>
             {follows.length ? (
               <ul className="m-0 mt-2 list-none p-0">
                 {follows.map((f) => (
                   <li key={f.venueId} className="flex items-baseline justify-between gap-3 border-b border-[#EEF0EC] py-2 text-[14px] last:border-0">
-                    <span className="min-w-0"><Link href={`/venues/${f.slug}`} className="font-semibold text-[#121826] no-underline">{f.short}</Link><span className="block truncate text-[12px] text-[#4A5263]">{f.label}</span></span>
+                    <span className="min-w-0"><Link href={`/events/${f.slug}`} className="font-semibold text-[#121826] no-underline">{f.short}</Link><span className="block truncate text-[12px] text-[#4A5263]">{f.label}</span></span>
                     <LocalWhen at={f.at} className="flex-none font-mono text-[12px] text-[#4A5263]" />
                   </li>
                 ))}

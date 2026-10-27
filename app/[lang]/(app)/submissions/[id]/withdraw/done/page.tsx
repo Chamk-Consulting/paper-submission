@@ -58,7 +58,7 @@ async function Inner({ params, searchParams }: P) {
       ]} />
       <div className="mt-6 flex flex-wrap gap-3">
         <Link href="/workspace/submissions" className={primaryBtn}>{t("Back to My workspace")}</Link>
-        <Link href="/venues" className={ghostBtn}>{t("Find another venue")}</Link>
+        <Link href="/events" className={ghostBtn}>{t("Find another venue")}</Link>
       </div>
     </FlowFrame>
   );

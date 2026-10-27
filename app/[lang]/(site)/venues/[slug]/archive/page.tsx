@@ -26,7 +26,7 @@ async function Archive({ params }: { params: Promise<Params> }) {
   const [data, t] = await Promise.all([getVenueArchive(slug), getT()]);
   if (!data) {
     // A venue that isn't over yet has no archive: send people to its live page.
-    if (await getVenue(slug)) redirect(`/venues/${slug}`);
+    if (await getVenue(slug)) redirect(`/events/${slug}`);
     notFound();
   }
   const { archive: a, sessions, awards } = data;
@@ -46,7 +46,7 @@ async function Archive({ params }: { params: Promise<Params> }) {
       <section className="bg-white">
         <div className="mx-auto max-w-[1280px] px-5 pb-7 pt-6 sm:px-8">
           <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#4A5263]">
-            <Link href="/venues?view=past" className="text-[#121826] underline">{t("Past venues")}</Link> / {a.acr}
+            <Link href="/events?view=past" className="text-[#121826] underline">{t("Past venues")}</Link> / {a.acr}
           </nav>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="rounded-[2px] bg-[#EEF0EC] px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.04em] text-[#4A5263]">{t("Archive")}</span>
@@ -139,7 +139,7 @@ async function Archive({ params }: { params: Promise<Params> }) {
             </ol>
           ) : <p className="mt-3 text-[14px] text-[#4A5263]">{t("The paper list for this edition isn't available.")}</p>}
         </section>
-        <p className="mt-2 text-[12px] text-[#4A5263]">{t("Figures come from the organizers or the imported records.")} <Link href={`/venues/${a.slug}`} className="text-[#2F5FD0] underline">{t("Venue page")}</Link></p>
+        <p className="mt-2 text-[12px] text-[#4A5263]">{t("Figures come from the organizers or the imported records.")} <Link href={`/events/${a.slug}`} className="text-[#2F5FD0] underline">{t("Venue page")}</Link></p>
       </main>
     </div>
   );

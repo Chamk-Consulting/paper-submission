@@ -91,7 +91,7 @@ export async function saveDetails(_: ActionState, fd: FormData): Promise<ActionS
 /* SB03 — authors. */
 export async function lookupPerson(query: string): Promise<{ found?: { personId: string; name: string; institution: string | null; plenaryId: string | null }; error?: string }> {
   const q = query.trim();
-  if (!q) return { error: "Enter an email or Plenary ID." };
+  if (!q) return { error: "Enter an email or PIN." };
   if (/^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(q)) return { error: "Adding by ORCID iD isn't available yet — use their email." }; // TODO(orcid)
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("find_person", { p_query: q });

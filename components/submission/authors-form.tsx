@@ -38,7 +38,7 @@ export function AuthorsForm({ id, initial }: { id: string; initial: Row[] }) {
         return;
       }
       if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(query)) setNewPerson({ email: query.toLowerCase(), givenName: "", familyName: "", institution: "" });
-      else setMsg(t("No one with that Plenary ID. Check it, or add them by email."));
+      else setMsg(t("No one with that PIN. Check it, or add them by email."));
     });
   }
 
@@ -91,9 +91,9 @@ export function AuthorsForm({ id, initial }: { id: string; initial: Row[] }) {
 
       <section className={`${card} mt-6`}>
         <h2 className={h2}>{t("Add a co-author")}</h2>
-        <label htmlFor="sb3-q" className="mt-4 block font-medium">{t("Email or Plenary ID")}</label>
+        <label htmlFor="sb3-q" className="mt-4 block font-medium">{t("Email or PIN")}</label>
         <div className="mt-1.5 flex gap-2">
-          <input id="sb3-q" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); find(); } }} placeholder="colleague@uni.edu · PL-1234-5678" className={`${field} h-12 flex-auto text-[16px]`} />
+          <input id="sb3-q" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); find(); } }} placeholder="colleague@uni.edu · PIN 1024" className={`${field} h-12 flex-auto text-[16px]`} />
           <button type="button" onClick={find} disabled={looking} className="h-12 rounded-[4px] bg-[#0E1B3D] px-4 text-[15px] font-semibold text-white disabled:opacity-60">{looking ? t("Finding…") : t("Add")}</button>
         </div>
         {msg ? <p role="status" className="mt-2 text-[14px] text-[#7A4508]">{msg}</p> : <p className="mt-2 text-[14px] text-[#4A5263]">{t("People with a Plenary account are found by email or ID. Anyone else gets an invitation when you submit.")}</p>}

@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { sendEmail } from "@/lib/email/send";
 import { authMail } from "@/lib/email/auth-mail";
 import { absoluteUrl, safeNext, site } from "@/lib/config/site";
+import { getSiteFlags } from "@/lib/config/site-flags";
 
 /*
  * Supabase Auth "Send Email" hook: Supabase hands every auth email (sign-in code, sign-up, reset, invite,
@@ -12,7 +13,7 @@ import { absoluteUrl, safeNext, site } from "@/lib/config/site";
  */
 
 type Payload = {
-  user: { email: string; new_email?: string; user_metadata?: { given_name?: string } };
+  user: { email: string; new_email?: string; user_metadata?: { given_name?: string; signup_flow?: string } };
   email_data: { token?: string; token_hash?: string; redirect_to?: string; email_action_type: string; site_url?: string; token_new?: string; token_hash_new?: string };
 };
 
@@ -61,6 +62,11 @@ export async function POST(req: Request) {
   try { p = JSON.parse(raw); } catch { return fail(400, "Bad payload"); }
   const d = p.email_data;
   const action = d.email_action_type;
+  // Sign-up without an email code (site switch off): the server confirms the account itself, so no email goes out.
+  if (action === "signup" && p.user.user_metadata?.signup_flow === "password_no_code" && !(await getSiteFlags()).signupEmailCode) {
+    console.info("[auth-email] signup without code: not sent");
+    return Response.json({});
+  }
   const next = nextFrom(d.redirect_to);
   // token_hash type for verifyOtp: links use the same names Supabase does.
   const linkType = action === "magiclink" || action === "email" ? "email" : action;

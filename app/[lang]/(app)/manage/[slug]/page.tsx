@@ -136,7 +136,7 @@ async function Inner({ params }: P) {
 
   return (
     <ManagePage ctx={ctx} active="dashboard" crumb={<>{t("Organizer")} · {ctx.label}</>} title={t("Event dashboard")} sub={sub || undefined}
-      actions={v.is_published ? <Link href={`/venues/${slug}`} className={`${ui.ghost} h-[34px]! text-[13px]!`}>{t("Public page")}</Link> : null}>
+      actions={v.is_published ? <Link href={`/events/${slug}`} className={`${ui.ghost} h-[34px]! text-[13px]!`}>{t("Public page")}</Link> : null}>
       <div className="flex flex-col gap-4">
         <section className={`${ui.card} overflow-x-auto`} aria-label={t("Event phases")}>
           <ol className="m-0 flex min-w-[820px] list-none p-0">
