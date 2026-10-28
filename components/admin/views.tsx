@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { T } from "@/lib/i18n/translate";
 import { ui } from "@/components/manage/ui";
 import type { AdminPerson, AdminTab, AdminVenue, AuditRow, MaintenanceWindow, Overview, SupportItem } from "@/lib/admin/data";
-import { ApprovalToggle, SiteFlagsForm, type SiteFlagsValue, CancelMaintenance, LockForm, MaintenanceForm, PersonAction, ReplyForm, VenueDecision } from "@/components/admin/forms";
+import { ApprovalToggle, PasswordRulesForm, SiteFlagsForm, type SiteFlagsValue, CancelMaintenance, LockForm, MaintenanceForm, PersonAction, ReplyForm, VenueDecision } from "@/components/admin/forms";
 
 type TT = T & { intl: string };
 
@@ -122,6 +122,7 @@ export function VenuesView({ t, venues, requireApproval, flags }: { t: TT; venue
     <>
       <Title t={t} title="Venue approvals" sub="New events are checked before they can open submissions: real organizer, real conference." />
       <div className={`${ui.card} mt-5 px-[18px]! py-3.5!`}><SiteFlagsForm flags={flags} events={venues.map((v) => ({ slug: v.slug, name: v.short_name ?? v.name })).sort((a, b) => a.name.localeCompare(b.name))} /></div>
+      <div className={`${ui.card} mt-5 px-[18px]! py-3.5!`}><PasswordRulesForm policy={flags.passwordPolicy} /></div>
       <div className={`${ui.card} mt-4 px-[18px]! py-3.5!`}><ApprovalToggle on={requireApproval} /></div>
       <section className="mt-4 overflow-hidden rounded-[8px] border border-[#DADDE3] bg-white">
         <div className="overflow-x-auto">

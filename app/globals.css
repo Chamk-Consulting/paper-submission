@@ -172,7 +172,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled), a[class*="rounded"], [role="tab"], [role="radio"] { transition: transform var(--dur-fast) var(--ease-standard), background-color var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast); }
 button:not(:disabled):active, a[class*="rounded"]:active { transform: scale(0.98); }
 
-/* language switch: dim while the page reloads in the new language */
 
 /* skeleton shimmer: one shared light sweep (background fixed to the viewport, so every bar moves together) */
 @keyframes sk-shimmer { from { background-position: -100vw 0; } to { background-position: 100vw 0; } }
@@ -192,16 +191,16 @@ button:not(:disabled):active, a[class*="rounded"]:active { transform: scale(0.98
 @keyframes sk-wait { from { opacity: 0; } to { opacity: 1; } }
 @keyframes reveal-in { from { opacity: 0.55; } to { opacity: 1; } }
 .reveal-wait, .reveal-in { display: contents; }
-.reveal-wait > * { animation: sk-wait 200ms var(--ease-standard) 700ms both; }
-.reveal-wait .sk, .reveal-wait .sk-dark { animation: sk-shimmer 1.6s var(--ease-standard) 900ms infinite; }
-.reveal-in > * { animation: reveal-in 140ms var(--ease-standard) both; }
+.reveal-wait > * { animation: sk-wait 120ms var(--ease-standard) 150ms both; }
+.reveal-wait .sk, .reveal-wait .sk-dark { animation: sk-shimmer 1.6s var(--ease-standard) 300ms infinite; }
+/* content shows at once: a fade from half-transparent read as a flicker on slower connections */
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*), ::view-transition-new(*) { animation-name: vt-out !important; animation-duration: var(--dur-fast) !important; }
   ::view-transition-new(*) { animation-name: vt-in !important; }
   ::view-transition-group(*) { animation: none !important; }
   .sk, .sk-dark { animation: none; background-image: none; }
-  .reveal-wait > * { animation: sk-wait 1ms linear 700ms both; }
+  .reveal-wait > * { animation: sk-wait 1ms linear 150ms both; }
   .reveal-wait .sk, .reveal-wait .sk-dark, .reveal-in > * { animation: none; }
   .nav-progress[data-state] { transition: opacity var(--dur-fast) !important; }
   button:not(:disabled):active, a[class*="rounded"]:active { transform: none; }

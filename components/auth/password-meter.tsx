@@ -3,7 +3,8 @@
 import { Check, Circle, LoaderCircle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n/client";
-import { scorePassword } from "@/lib/auth/password-rules";
+import { policyText, scorePassword } from "@/lib/auth/password-rules";
+import { usePasswordPolicy } from "@/components/auth/password-policy";
 
 /* One strength bar + rule checklist for every password form (sign-up, reset, Security page), so the rules read
    the same everywhere and match the server (lib/auth/password-rules.ts + lib/auth/pwned.ts). */
@@ -14,7 +15,8 @@ const LABELS = ["—", "Too weak", "Could be stronger", "Good", "Strong"];
 export type LeakState = "idle" | "checking" | "clean" | "leaked" | "unknown";
 
 /** Looks the password up in known leaks once it meets the other rules (k-anonymity: only 5 hash characters leave the browser). */
-export function useLeakCheck(pw: string, eligible: boolean): LeakState {
+export function useLeakCheck(pw: string, wanted: boolean): LeakState {
+  const eligible = wanted && usePasswordPolicy().checkLeaks;
   const [res, setRes] = useState<{ pw: string; state: LeakState } | null>(null);
   useEffect(() => {
     if (!eligible) return;
@@ -45,7 +47,9 @@ type Mark = "ok" | "bad" | "todo" | "wait";
  */
 export function PasswordMeter({ pw, email, current, flag, leak, id }: { pw: string; email: string; current?: string; flag: boolean; leak: LeakState; id: string }) {
   const t = useT();
-  const r = scorePassword(pw, email, current);
+  const policy = usePasswordPolicy();
+  const r = scorePassword(pw, email, current, policy);
+  const txt = policyText(policy);
   const same = current !== undefined && !!current && !!pw && !r.different;
   const sc = leak === "leaked" || same ? Math.min(r.sc, 1) : r.sc;
   // Rules met by typing more (length, mix) stay grey until a submit; rules a password breaks for good (common,
@@ -53,9 +57,9 @@ export function PasswordMeter({ pw, email, current, flag, leak, id }: { pw: stri
   const m = (pass: boolean): Mark => (pass ? "ok" : flag ? "bad" : "todo");
   const hard = (pass: boolean): Mark => (pass ? "ok" : pw ? "bad" : "todo");
   const rules: [Mark, string, string?][] = [
-    [m(r.long), "At least 8 characters"],
-    [m(r.mixed), "Letters and at least one number", r.mixed ? undefined : "Or a phrase of 12+ characters"],
-    [!r.notCommon ? hard(false) : leak === "leaked" ? "bad" : leak === "checking" ? "wait" : leak === "clean" || leak === "unknown" ? "ok" : m(false), "Not a common or leaked password",
+    [m(r.long), txt.length],
+    ...(txt.mix ? [[m(r.mixed), txt.mix, r.mixed ? undefined : txt.mixHint] as [Mark, string, string?]] : []),
+    [!r.notCommon ? hard(false) : !policy.checkLeaks ? m(r.notCommon && !!pw) : leak === "leaked" ? "bad" : leak === "checking" ? "wait" : leak === "clean" || leak === "unknown" ? "ok" : m(false), policy.checkLeaks ? "Not a common or leaked password" : "Not a common password",
       leak === "leaked" ? "Found in a known data leak — choose another" : leak === "unknown" ? "Couldn’t check leaks right now; we check again when you save" : undefined],
     [hard(r.notEmail), "Doesn’t contain your name or email"],
     ...(current !== undefined ? [[same ? "bad" : m(!!current && !!pw && r.different), "Different from your current password", current ? undefined : "Type your current password first"] as [Mark, string, string?]] : []),

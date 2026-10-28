@@ -1,3 +1,4 @@
+import { PasswordPolicyProvider } from "@/components/auth/password-policy";
 import { KeepFormValues } from "@/components/site/keep-form-values";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
@@ -69,7 +70,9 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <body className="min-h-dvh bg-[#F5F6F3] antialiased">
         <Suspense fallback={null}><NavProgress /></Suspense>
         <I18nProvider locale={locale} dict={DICTS[locale]} brand={brand}>
+          <PasswordPolicyProvider policy={flags.passwordPolicy}>
           {children}
+          </PasswordPolicyProvider>
           <PwaLayer />
           <CookieConsent />
           <RememberAccount />

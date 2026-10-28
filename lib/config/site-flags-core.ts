@@ -1,3 +1,5 @@
+import { DEFAULT_POLICY, parsePolicy, type PasswordPolicy } from "@/lib/auth/password-rules";
+
 /** Site switches: the shape and parser, shared by server pages and proxy.ts (see lib/config/site-flags.ts). */
 export type SiteFlags = {
   homeEvent: string | null; singleEvent: boolean; signinEmailCode: boolean; signupEmailCode: boolean;
@@ -5,11 +7,14 @@ export type SiteFlags = {
   signinPassword: boolean; signinPasskey: boolean; signinOrcid: boolean; signinInstitution: boolean; signinGoogle: boolean;
   /** Language picker and other languages (on by default). Off: English only, no picker. */
   languages: boolean;
+  /** Password rules for sign-up, reset and change (Admin › Venues › Password rules). */
+  passwordPolicy: PasswordPolicy;
 };
 export const DEFAULT_FLAGS: SiteFlags = {
   homeEvent: null, singleEvent: false, signinEmailCode: true, signupEmailCode: true,
   signinPassword: true, signinPasskey: false, signinOrcid: true, signinInstitution: false, signinGoogle: false,
   languages: true,
+  passwordPolicy: DEFAULT_POLICY,
 };
 
 export function parseFlags(raw: unknown): SiteFlags {
@@ -26,6 +31,7 @@ export function parseFlags(raw: unknown): SiteFlags {
     signinInstitution: flag("signin_institution", false),
     signinGoogle: flag("signin_google", false),
     languages: flag("languages", true),
+    passwordPolicy: parsePolicy(r),
   };
   // Someone must always be able to get in.
   if (!f.signinPassword && !f.signinEmailCode) f.signinPassword = true;

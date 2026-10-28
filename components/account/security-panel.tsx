@@ -1,5 +1,6 @@
 "use client";
 
+import { usePasswordPolicy } from "@/components/auth/password-policy";
 import Link from "@/components/site/link";
 import { useActionState, useState, useTransition } from "react";
 import { useT } from "@/lib/i18n/client";
@@ -43,7 +44,8 @@ export function SecurityPanel({ email, device, providers, events, plus }: { emai
   const [pw2, setPw2] = useState("");
   const [cur, setCur] = useState("");
   const [tried, setTried] = useState(false);
-  const score = scorePassword(pw, email, cur);
+  const policy = usePasswordPolicy();
+  const score = scorePassword(pw, email, cur, policy);
   const leak = useLeakCheck(pw, score.long && score.mixed && score.notCommon && score.notEmail);
   const canSave = !!cur && score.ok && pw === pw2 && leak !== "leaked" && leak !== "checking";
   const [outState, setOut] = useState<AccountState | null>(null);

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePasswordPolicy } from "@/components/auth/password-policy";
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
 import { saveNewPassword, type NewPasswordState } from "@/lib/auth/reset-actions";
@@ -22,7 +23,8 @@ export function NewPasswordFlow({ email, acceptedAt }: { email: string; accepted
   const masked = maskEmail(email);
   const done = !!state.done;
 
-  const r = scorePassword(pw, email);
+  const policy = usePasswordPolicy();
+  const r = scorePassword(pw, email, undefined, policy);
   const mismatch = pw2.length > 0 && pw2 !== pw;
   const matchOk = pw2.length > 0 && pw2 === pw;
   const triedOrServer = tried || !!state.fieldErrors?.password;

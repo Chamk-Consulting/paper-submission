@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { newToken } from "@/lib/tokens";
-import { isPwnedPassword } from "@/lib/auth/pwned";
+import { isLeakedIfChecked, serverPolicy } from "@/lib/auth/password-policy-server";
 import { scorePassword } from "@/lib/auth/password-rules";
 import { notifyEvents } from "@/lib/account/data";
 import { absoluteUrl, supabaseEnv } from "@/lib/config/site";
@@ -30,7 +30,7 @@ const MSG = {
   reason: "Say briefly why (at least 2 characters).",
   conflictTarget: "Pick a person or type an institution.",
   wrongPassword: "Your current password is not right.",
-  weakPassword: "Use at least 8 characters with letters and a number (or a phrase of 12+ characters), not a common password and not your email.",
+  weakPassword: "Choose a password that meets all the rules shown under it.",
   samePassword: "Choose a password different from your current one.",
   leakedPassword: "That password has appeared in a data leak. Choose another.",
   passwordMismatch: "The two passwords don't match yet.",
@@ -284,9 +284,9 @@ export async function changePassword(_: AccountState, fd: FormData): Promise<Acc
   const email = c.user.email ?? "";
   if (!current) return { fieldErrors: { current: MSG.wrongPassword } };
   if (next === current) return { fieldErrors: { next: MSG.samePassword } };
-  if (!scorePassword(next, email, current).ok) return { fieldErrors: { next: MSG.weakPassword } };
+  if (!scorePassword(next, email, current, await serverPolicy()).ok) return { fieldErrors: { next: MSG.weakPassword } };
   if (next !== confirm) return { fieldErrors: { confirm: MSG.passwordMismatch } };
-  if (await isPwnedPassword(next)) return { fieldErrors: { next: MSG.leakedPassword } };
+  if (await isLeakedIfChecked(next)) return { fieldErrors: { next: MSG.leakedPassword } };
   // Check the current password on a throwaway client so the signed-in session (and its two-step level) is kept.
   const probe = createSupabaseClient(supabaseEnv.url(), supabaseEnv.publishableKey(), { auth: { persistSession: false, autoRefreshToken: false } });
   const check = await probe.auth.signInWithPassword({ email, password: current });

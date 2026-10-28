@@ -79,6 +79,20 @@ export async function setRequireApproval(_: AdminState, fd: FormData): Promise<A
 }
 
 /** Site switches: home event, events-only public site, ways to sign in, sign-up code (public.admin_set_site_flags). */
+/** Password rules for sign-up, reset and change (public.admin_set_password_rules). */
+export async function setPasswordRules(_: AdminState, fd: FormData): Promise<AdminState> {
+  const min = Number(fd.get("min")), phrase = Number(fd.get("phrase") || 0);
+  const mix = String(fd.get("mix") ?? "");
+  if (!Number.isInteger(min) || min < 6 || min > 64) return { error: "Shortest length must be 6 to 64 characters." };
+  if (!Number.isInteger(phrase) || phrase < 0 || phrase > 128) return { error: "Phrase length must be 0 (off) to 128." };
+  if (!["none", "letters_number", "three_kinds"].includes(mix)) return { error: "Choose what a password must contain." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_password_rules", { p_min_length: min, p_mix: mix, p_phrase_length: phrase, p_check_leaks: fd.get("leaks") === "on" });
+  if (error) return fail(error.message);
+  updateTag("site-flags");
+  return done("Saved. Password forms use the new rules within a minute; existing passwords keep working.");
+}
+
 export async function setSiteFlags(_: AdminState, fd: FormData): Promise<AdminState> {
   const home = String(fd.get("home") ?? "").trim();
   if (home && !/^[a-z0-9-]{2,80}$/.test(home)) return { error: "Choose an event from the list." };

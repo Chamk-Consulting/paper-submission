@@ -8,7 +8,7 @@ import { detectIdentifier } from "@/lib/auth/identifier";
 import { accountEmailFor, plenaryIdSignIn } from "@/lib/auth/plenary-id";
 import { sendSecurityNotice } from "@/lib/email/security-mail";
 import { scorePassword } from "@/lib/auth/password-rules";
-import { isPwnedPassword } from "@/lib/auth/pwned";
+import { isLeakedIfChecked, serverPolicy } from "@/lib/auth/password-policy-server";
 import { clearRecovery, hasRecovery, markRecovery } from "@/lib/auth/recovery-cookie";
 
 /*
@@ -97,10 +97,10 @@ export async function saveNewPassword(_: NewPasswordState, formData: FormData): 
     return { message: "This reset session has expired. Ask for a new code to continue." };
   }
 
-  const r = scorePassword(password, data.user.email ?? "");
+  const r = scorePassword(password, data.user.email ?? "", undefined, await serverPolicy());
   if (!r.ok) return { fieldErrors: { password: ["Choose a password that meets all the rules."] } };
   if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
-  if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
+  if (await isLeakedIfChecked(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
 
   const { error } = await supabase.auth.updateUser({ password, data: { password_set_at: new Date().toISOString(), secured_for: data.user.email_confirmed_at ?? null } });
   if (error) {

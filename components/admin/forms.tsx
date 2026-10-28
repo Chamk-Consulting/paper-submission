@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { ui } from "@/components/manage/ui";
 import {
-  cancelMaintenance, closeSupport, decideVenue, lockPerson, personAction, replySupport, scheduleMaintenance, setRequireApproval, setSiteFlags, type AdminState,
+  cancelMaintenance, closeSupport, decideVenue, lockPerson, personAction, replySupport, scheduleMaintenance, setRequireApproval, setPasswordRules, setSiteFlags, type AdminState,
 } from "@/lib/admin/actions";
 
 function Status({ s }: { s: AdminState }) {
@@ -92,6 +92,33 @@ export function ApprovalToggle({ on }: { on: boolean }) {
         {t("New events must be approved before they open submissions")}
       </button>
       <Status s={s} />
+    </form>
+  );
+}
+
+/** Password rules: shortest length, what it must contain, the long-phrase exception, leaked passwords. */
+export function PasswordRulesForm({ policy }: { policy: import("@/lib/auth/password-rules").PasswordPolicy }) {
+  const t = useT();
+  const [s, act, pending] = useActionState(setPasswordRules, {});
+  const field = "h-9 rounded-[4px] border border-[#B7BDC9] bg-white px-2 text-[14px]";
+  return (
+    <form action={act} className="flex flex-col gap-3">
+      <h2 className="m-0 text-[16px] font-semibold">{t("Password rules")}</h2>
+      <p className="m-0 text-[13px] text-[#4A5263]">{t("Used when people create an account, reset or change a password. Existing passwords keep working.")}</p>
+      <label className="flex flex-wrap items-center gap-2 text-[14px]">{t("Shortest length")}
+        <input type="number" name="min" min={6} max={64} defaultValue={policy.minLength} className={`${field} w-20`} /> {t("characters")}</label>
+      <label className="flex flex-wrap items-center gap-2 text-[14px]">{t("Must contain")}
+        <select name="mix" defaultValue={policy.mix} className={field}>
+          <option value="none">{t("Nothing more")}</option>
+          <option value="letters_number">{t("Letters and a number")}</option>
+          <option value="three_kinds">{t("3 of: lowercase, uppercase, number, symbol")}</option>
+        </select></label>
+      <label className="flex flex-wrap items-center gap-2 text-[14px]">{t("Or a phrase of at least")}
+        <input type="number" name="phrase" min={0} max={128} defaultValue={policy.phraseLength} className={`${field} w-20`} /> {t("characters (0 = no phrase exception)")}</label>
+      <label className="flex items-start gap-2 text-[14px] text-[#121826]"><input type="checkbox" name="leaks" defaultChecked={policy.checkLeaks} className="mt-1" />
+        <span>{t("Refuse passwords found in known data leaks")}</span></label>
+      <p className="m-0 text-[13px] text-[#4A5263]">{t("Common passwords and passwords containing the person’s email are always refused. Keep Supabase’s own minimum length (Authentication › Providers › Email) at or below the shortest length here.")}</p>
+      <div className="flex flex-wrap items-center gap-3"><button type="submit" disabled={pending} className={small}>{pending ? t("Saving…") : t("Save")}</button><Status s={s} /></div>
     </form>
   );
 }

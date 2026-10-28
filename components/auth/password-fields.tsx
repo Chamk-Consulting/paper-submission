@@ -1,8 +1,9 @@
 "use client";
+import { usePasswordPolicy } from "@/components/auth/password-policy";
 import { Eye, EyeOff } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { scorePassword } from "@/lib/auth/password-rules";
+import { policyText, scorePassword } from "@/lib/auth/password-rules";
 import { PasswordMeter, useLeakCheck } from "@/components/auth/password-meter";
 import { ui } from "@/components/auth/split-layout";
 import { useT } from "@/lib/i18n/client";
@@ -31,7 +32,8 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
 
-  const r = scorePassword(pw, email);
+  const policy = usePasswordPolicy();
+  const r = scorePassword(pw, email, undefined, policy);
   const mismatch = pw2.length > 0 && pw2 !== pw;
   const matchOk = pw2.length > 0 && pw2 === pw;
   const flag = tried || !!serverErrors?.password;
@@ -44,7 +46,7 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
   return (
     <>
       <div className="mt-3.5 flex flex-col gap-1.5">
-        <FieldLabel htmlFor={`${idPrefix}-new`} required info={<>{t("At least 8 characters with letters and a number — or a phrase of 12+ characters, which is easy to remember.")} {t("Don’t reuse a password from another site — we check it against known leaks.")}</>}>{t("Password")}</FieldLabel>
+        <FieldLabel htmlFor={`${idPrefix}-new`} required info={<>{policyText(policy).summary} {t("Don’t reuse a password from another site — we check it against known leaks.")}</>}>{t("Password")}</FieldLabel>
         <div className="flex overflow-hidden rounded-[4px] bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ border: pwBad ? "2px solid #B3261E" : r.ok && leak !== "checking" ? "2px solid #14603F" : "1px solid #B7BDC9" }}>
           <input
             id={`${idPrefix}-new`} name="password" aria-required="true" type={show ? "text" : "password"} autoComplete="new-password" maxLength={128}

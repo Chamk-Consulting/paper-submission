@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { absoluteUrl, safeNext } from "@/lib/config/site";
 import { scorePassword } from "@/lib/auth/password-rules";
-import { isPwnedPassword } from "@/lib/auth/pwned";
+import { isLeakedIfChecked, serverPolicy } from "@/lib/auth/password-policy-server";
 import { turnstileOk } from "@/lib/site/turnstile";
 import { refuseIfLocked } from "@/lib/auth/lock-check";
 import { recordSignIn } from "@/lib/auth/sign-in-log";
@@ -85,7 +85,7 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
   const legacy = passwordFirst() || noCode;
 
   if (legacy) {
-    const rules = scorePassword(password, email);
+    const rules = scorePassword(password, email, undefined, await serverPolicy());
     if (!rules.ok) return { fieldErrors: { password: ["Choose a password that meets all the rules."] } };
     if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
   }
@@ -102,7 +102,7 @@ export async function startSignup(_: StartState, formData: FormData): Promise<St
   const meta = { given_name: firstName, family_name: lastName, consent_at: new Date().toISOString() };
 
   if (legacy) {
-    if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
+    if (await isLeakedIfChecked(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
     const { data, error } = await supabase.auth.signUp({
       email, password,
       options: { data: { ...meta, password_set_at: new Date().toISOString(), ...(noCode ? { signup_flow: "password_no_code" } : {}) }, emailRedirectTo: absoluteUrl(`/auth/confirm?next=${encodeURIComponent(continueHref(next))}`) },
@@ -245,9 +245,9 @@ export async function saveChosenPassword(_: PasswordState, formData: FormData): 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user?.email) return { message: "Your session ended. Sign in again with a code to choose your password." };
   const { password, confirm } = p.data;
-  if (!scorePassword(password, auth.user.email).ok) return { fieldErrors: { password: ["Choose a password that meets all the rules."] } };
+  if (!scorePassword(password, auth.user.email, undefined, await serverPolicy()).ok) return { fieldErrors: { password: ["Choose a password that meets all the rules."] } };
   if (password !== confirm) return { fieldErrors: { confirm: ["The two passwords don't match yet."] } };
-  if (await isPwnedPassword(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
+  if (await isLeakedIfChecked(password)) return { fieldErrors: { password: ["That password has appeared in a data breach. Choose another."] } };
 
   const { error } = await supabase.auth.updateUser({ password, data: { password_set_at: new Date().toISOString(), onb: "profile" } });
   if (error) {
