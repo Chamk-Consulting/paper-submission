@@ -1,4 +1,5 @@
-import { BadgeCheck, CalendarClock, CalendarPlus, CalendarRange, ExternalLink, Gauge, Ticket, UserRound } from "lucide-react";
+import { EventMoreMenu } from "@/components/venues/event-actions";
+import { BadgeCheck, CalendarClock, CalendarRange, ExternalLink, Gauge, Ticket, UserRound } from "lucide-react";
 import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { CountdownCard, DeadlineStrip, FollowButton } from "@/components/venues/venue-live";
@@ -51,8 +52,8 @@ export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open
                 {closedOn !== null ? <span className="inline-flex h-10 items-center rounded-[4px] bg-[#EEF0EC] px-3.5 text-[14px] font-semibold text-[#4A5263]">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span> : null}
                 <FollowButton venueId={v.id} slug={v.slug} compact />
                 {organizer ? <Link href={`/manage/${v.slug}`} className={ghost}><Gauge size={15} aria-hidden />{t("Event dashboard")}</Link> : null}
-                <a href={`/venues/${v.slug}/calendar.ics`} className={ghost}><CalendarPlus size={15} aria-hidden />{t("Add deadlines to calendar")}</a>
                 {v.website ? <a href={v.website} target="_blank" rel="noopener noreferrer" className={ghost}>{t("Official website")}<ExternalLink size={14} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a> : null}
+                <EventMoreMenu slug={v.slug} ws kind={v.kind} align="start" onPage />
               </div>
             </div>
           </div>

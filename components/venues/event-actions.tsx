@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n/client";
  * The extra actions of an event, behind one "More" button: details, dates, program, registration, calendar file,
  * copy link. Shared by the event cards (directory) and the event page header, so they offer the same things.
  */
-export function EventMoreMenu({ slug, ws, kind, tone = "light", align = "end" }: { slug: string; ws?: boolean; kind: string; tone?: "light" | "dark"; align?: "start" | "end" }) {
+export function EventMoreMenu({ slug, ws, kind, tone = "light", align = "end", onPage = false, size = "sm", up = false }: { slug: string; ws?: boolean; kind: string; tone?: "light" | "dark"; align?: "start" | "end"; onPage?: boolean; size?: "sm" | "lg"; up?: boolean }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -27,8 +27,9 @@ export function EventMoreMenu({ slug, ws, kind, tone = "light", align = "end" }:
   const base = ws ? `/workspace/events/${slug}` : `/events/${slug}`;
   const meeting = kind !== "journal";
   const items: { icon: React.ReactNode; label: string; href?: string; file?: boolean; onClick?: () => void }[] = [
-    { icon: <ClipboardList size={15} aria-hidden />, label: "Event details", href: base },
-    { icon: <CalendarRange size={15} aria-hidden />, label: "Important dates", href: `${base}#dates` },
+    // On the event page itself: no "Event details", and the sections are anchors on the same page.
+    ...(onPage ? [] : [{ icon: <ClipboardList size={15} aria-hidden />, label: "Event details", href: base }]),
+    { icon: <CalendarRange size={15} aria-hidden />, label: "Important dates", href: onPage ? "#dates" : `${base}#dates`, file: onPage },
     ...(meeting ? [
       { icon: <Mic size={15} aria-hidden />, label: "Program", href: ws ? `/workspace/events/${slug}/program` : `/program/${slug}` },
       { icon: <Ticket size={15} aria-hidden />, label: "Register to attend", href: `/venues/${slug}/register` },
@@ -49,11 +50,11 @@ export function EventMoreMenu({ slug, ws, kind, tone = "light", align = "end" }:
   return (
     <div ref={box} className="relative inline-block text-left">
       <button type="button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}
-        className={`inline-flex h-full min-h-[34px] items-center gap-1 rounded-[4px] border px-2.5 text-[13px] font-semibold ${btn}`}>
+        className={`inline-flex items-center gap-1 rounded-[4px] border ${size === "lg" ? "h-11 px-4 text-[15px] font-medium" : "h-full min-h-[34px] px-2.5 text-[13px] font-semibold"} ${btn}`}>
         {t("More")}<ChevronDown size={14} aria-hidden className={open ? "rotate-180" : ""} />
       </button>
       {open ? (
-        <div role="menu" className={`absolute z-30 mt-1 min-w-[230px] rounded-[6px] border border-[#DADDE3] bg-white p-1 shadow-[0_8px_24px_rgba(14,27,61,0.16)] ${align === "end" ? "right-0" : "left-0"}`}>
+        <div role="menu" className={`absolute z-30 ${up ? "bottom-full mb-1" : "mt-1"} min-w-[230px] rounded-[6px] border border-[#DADDE3] bg-white p-1 shadow-[0_8px_24px_rgba(14,27,61,0.16)] ${align === "end" ? "right-0" : "left-0"}`}>
           {items.map((it) => it.onClick ? (
             <button key={it.label} type="button" role="menuitem" onClick={it.onClick} className={row}>{it.icon}{t(it.label)}</button>
           ) : it.file ? (

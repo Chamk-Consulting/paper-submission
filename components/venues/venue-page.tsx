@@ -1,4 +1,4 @@
-import { WebsiteButton } from "@/components/venues/event-actions";
+import { EventMoreMenu, WebsiteButton } from "@/components/venues/event-actions";
 import { ExternalLink } from "lucide-react";
 import Link from "@/components/site/link";
 import { notFound } from "next/navigation";
@@ -93,10 +93,10 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
                   {open && v.submitUrl ? <a href={v.submitUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-1.5 rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}<ExternalLink size={15} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a>
                     : open ? <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
                     : <span aria-disabled="true" className="inline-flex h-11 cursor-not-allowed items-center rounded-[4px] bg-white/15 px-5 text-[15px] font-semibold text-white/80 ring-1 ring-white/30">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span>}
-                  <FollowButton venueId={v.id} slug={v.slug} />
-                  <Link href={`/venues/${v.slug}/register`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Register to attend")}</Link>
-                  <a href={`/venues/${v.slug}/calendar.ics`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Add deadlines to calendar")}</a>
                   {website ? <WebsiteButton url={website} tone="dark" size="lg" /> : null}
+                  {v.kind !== "journal" ? <Link href={`/venues/${v.slug}/register`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Register to attend")}</Link> : null}
+                  <FollowButton venueId={v.id} slug={v.slug} />
+                  <EventMoreMenu slug={v.slug} kind={v.kind} tone="dark" size="lg" align="start" onPage up />
                 </div>
               </div>
             </div>
