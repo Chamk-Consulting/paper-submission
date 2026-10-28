@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n/client";
  * The extra actions of an event, behind one "More" button: details, dates, program, registration, calendar file,
  * copy link. Shared by the event cards (directory) and the event page header, so they offer the same things.
  */
-export function EventMoreMenu({ slug, ws, kind, tone = "light", align = "end", onPage = false, size = "sm", up = false }: { slug: string; ws?: boolean; kind: string; tone?: "light" | "dark"; align?: "start" | "end"; onPage?: boolean; size?: "sm" | "lg"; up?: boolean }) {
+export function EventMoreMenu({ slug, ws, kind, tone = "light", align = "end", onPage = false, size = "sm", up = false, extra = [] }: { slug: string; ws?: boolean; kind: string; tone?: "light" | "dark"; align?: "start" | "end"; onPage?: boolean; size?: "sm" | "lg"; up?: boolean; extra?: { label: string; href: string; icon?: React.ReactNode }[] }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -27,6 +27,7 @@ export function EventMoreMenu({ slug, ws, kind, tone = "light", align = "end", o
   const base = ws ? `/workspace/events/${slug}` : `/events/${slug}`;
   const meeting = kind !== "journal";
   const items: { icon: React.ReactNode; label: string; href?: string; file?: boolean; onClick?: () => void }[] = [
+    ...extra.map((x) => ({ icon: x.icon ?? null, label: x.label, href: x.href })),
     // On the event page itself: no "Event details", and the sections are anchors on the same page.
     ...(onPage ? [] : [{ icon: <ClipboardList size={15} aria-hidden />, label: "Event details", href: base }]),
     { icon: <CalendarRange size={15} aria-hidden />, label: "Important dates", href: onPage ? "#dates" : `${base}#dates`, file: onPage },

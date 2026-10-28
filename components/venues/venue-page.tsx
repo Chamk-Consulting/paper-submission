@@ -36,6 +36,9 @@ export async function VenuePage({ slug, mode = "public" }: { slug: string; mode?
 type VenueData = NonNullable<Awaited<ReturnType<typeof getVenue>>>;
 type VenuePub = Awaited<ReturnType<typeof getVenuePublic>>;
 
+/** Sections switched off for now (page and "On this page" bar). Remove an id to show it again. */
+const HIDDEN_SECTIONS = new Set(["policies", "publication", "attending", "travel", "program", "organizers"]);
+
 /** The page itself, from loaded data (the dev preview passes sample data). */
 export async function VenueView({ data, pub, myEvents, mode = "public", win = null }: { data: VenueData; pub: VenuePub; myEvents: MyEvents; mode?: "public" | "workspace"; win?: SubmissionWindow | null }) {
   const ws = mode === "workspace";
@@ -56,6 +59,7 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
     ...(pub?.info.gallery?.length ? ([["gallery", "Gallery"]] as [string, string][]) : []),
     ["program", "Program"], ["organizers", "Organizers"],
   ];
+  const shown = nav.filter(([id]) => !HIDDEN_SECTIONS.has(id));
   const mine = myEvents[v.slug];
   // Same rule as the database (lib/venues/window.ts); the date check is only for the dev preview, which has no window.
   const open = win ? win.open : v.kind === "journal" || v.dates.some((d) => (d.kind === "submission" || d.kind === "proposal") && Date.parse(d.startsAt) > Date.parse(generatedAt));
@@ -66,7 +70,7 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
     <div className="flex min-h-dvh flex-col bg-[#F5F6F3] text-[15px] leading-[1.5] text-[#121826]">
       <LiveHeader />
       {ws ? (
-        <WorkspaceEventHeader v={v} tags={tags} where={where} tagline={basics.tagline ?? null} mine={mine} open={open} closedOn={win && !win.open ? (closedOn ?? "") : null} generatedAt={generatedAt} nav={nav} />
+        <WorkspaceEventHeader v={v} tags={tags} where={where} tagline={basics.tagline ?? null} mine={mine} open={open} closedOn={win && !win.open ? (closedOn ?? "") : null} generatedAt={generatedAt} nav={shown} />
       ) : (
       <section className="bg-white">
         {/* PV02 cover header: the organizers' cover image (or the field artwork) behind the title. */}
@@ -94,7 +98,6 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
                     : open ? <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
                     : <span aria-disabled="true" className="inline-flex h-11 cursor-not-allowed items-center rounded-[4px] bg-white/15 px-5 text-[15px] font-semibold text-white/80 ring-1 ring-white/30">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span>}
                   {website ? <WebsiteButton url={website} tone="dark" size="lg" /> : null}
-                  {v.kind !== "journal" ? <Link href={`/venues/${v.slug}/register`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Register to attend")}</Link> : null}
                   <FollowButton venueId={v.id} slug={v.slug} />
                   <EventMoreMenu slug={v.slug} kind={v.kind} tone="dark" size="lg" align="start" onPage up />
                 </div>
@@ -111,7 +114,7 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
         </div>
         <nav aria-label={t("On this page")} className="sticky top-[60px] z-10 border-y border-[#DADDE3] bg-white">
           <div className="mx-auto flex max-w-[1280px] gap-6 overflow-x-auto px-5 text-[15px] sm:px-8">
-            {nav.map(([id, label]) => <a key={id} href={`#${id}`} className="flex-none py-3.5 text-[#4A5263] no-underline hover:text-[#121826]">{t(label)}</a>)}
+            {shown.map(([id, label]) => <a key={id} href={`#${id}`} className="flex-none py-3.5 text-[#4A5263] no-underline hover:text-[#121826]">{t(label)}</a>)}
           </div>
         </nav>
       </section>
@@ -162,6 +165,7 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
             <p className="mt-4 text-[14px] text-[#4A5263]"><strong className="text-[#121826]">{t("No separate PDF test.")}</strong> {t("Your PDF is checked for fonts, page size, margins and names when you upload it, with the page number of any problem.")}</p>
           </section>
 
+{!HIDDEN_SECTIONS.has("policies") ? (<>
           <section id="policies" aria-labelledby="policies-h" className={section}>
             <h2 id="policies-h" className={h2}>{t("Policies")}</h2>
             <p className="mt-1 text-[14px] text-[#4A5263]">{t("Read these before you submit. Each one is shown again at the step where it applies.")}</p>
@@ -176,7 +180,9 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
               </div>
             ) : <p className="mt-4 text-[14px] text-[#4A5263]">{t("Policies will be published with the call.")}</p>}
           </section>
+          </>) : null}
 
+{!HIDDEN_SECTIONS.has("publication") ? (<>
           <section id="publication" aria-labelledby="publication-h" className={section}>
             <h2 id="publication-h" className={h2}>{t("Publication")}</h2>
             <dl className="m-0 mt-4 grid grid-cols-1 gap-x-6 gap-y-2 rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4 text-[14px] sm:grid-cols-[160px_1fr]">
@@ -186,11 +192,13 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
               {details.publication?.journal ? <><dt className="text-[#4A5263]">{t("Journal option")}</dt><dd className="m-0">{details.publication.journal}</dd></> : null}
             </dl>
           </section>
+          </>) : null}
 
-          {pub && !online ? <AttendingSection pub={pub} acr={v.acr} /> : null}
-          {pub && !online ? <TravelSection pub={pub} name={v.acr} fallbackPlace={basics.venueAddress ?? v.location ?? ([v.city, v.country].filter(Boolean).join(", ") || null)} hotelsNote={basics.hotels} /> : null}
+          {pub && !online && !HIDDEN_SECTIONS.has("attending") ? <AttendingSection pub={pub} acr={v.acr} /> : null}
+          {pub && !online && !HIDDEN_SECTIONS.has("travel") ? <TravelSection pub={pub} name={v.acr} fallbackPlace={basics.venueAddress ?? v.location ?? ([v.city, v.country].filter(Boolean).join(", ") || null)} hotelsNote={basics.hotels} /> : null}
           {pub ? <GallerySection pub={pub} /> : null}
 
+{!HIDDEN_SECTIONS.has("program") ? (<>
           <section id="program" aria-labelledby="program-h" className={section}>
             <h2 id="program-h" className={h2}>{t("Program")}</h2>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-[8px] border border-[#DADDE3] bg-white px-4 py-4">
@@ -202,7 +210,9 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
               <FollowButton venueId={v.id} slug={v.slug} />
             </div>
           </section>
+          </>) : null}
 
+{!HIDDEN_SECTIONS.has("organizers") ? (<>
           <section id="organizers" aria-labelledby="organizers-h" className={section}>
             <h2 id="organizers-h" className={h2}>{t("Organizers")}</h2>
             {organizers.length ? (
@@ -218,6 +228,7 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
               </div>
             ) : <p className="mt-4 text-[14px] text-[#4A5263]">{t("Organizers will be listed here.")}</p>}
           </section>
+          </>) : null}
           <p className="mt-2 text-[12px] text-[#4A5263]">{t("Venue content is provided by its organizers.")}</p>
         </main>
 

@@ -435,9 +435,9 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
           )}
           {v.website ? <WebsiteButton url={v.website} /> : null}
           <EventMoreMenu slug={v.slug} ws={ws} kind={v.kind} />
-          <button type="button" onClick={onFollow} aria-pressed={following} aria-label={following ? t("Unfollow {venue}", { venue: v.acr }) : t("Follow {venue}", { venue: v.acr })} className="h-[34px] rounded-[4px] px-2.5 text-[13px] font-semibold"
+          <button type="button" onClick={onFollow} aria-pressed={following} aria-label={following ? t("Unfollow {venue}", { venue: v.acr }) : t("Follow {venue}", { venue: v.acr })} title={following ? t("Following — click to stop deadline reminders") : t("Follow for deadline reminders")} className="h-[34px] w-[34px] rounded-[4px] text-[16px] leading-none"
             style={{ color: following ? "#7A4508" : "#121826", background: following ? "#FFF6E6" : "#FFFFFF", border: `1px solid ${following ? "#F1D29A" : "#B7BDC9"}` }}>
-            {following ? t("★ Following") : t("☆ Follow")}
+            <span aria-hidden>{following ? "★" : "☆"}</span>
           </button>
         </div>
       </div>

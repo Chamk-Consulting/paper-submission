@@ -1,5 +1,5 @@
 import { EventMoreMenu } from "@/components/venues/event-actions";
-import { BadgeCheck, CalendarClock, CalendarRange, ExternalLink, Gauge, Ticket, UserRound } from "lucide-react";
+import { BadgeCheck, CalendarClock, CalendarRange, ExternalLink, FilePlus, Gauge, Ticket, UserRound } from "lucide-react";
 import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { CountdownCard, DeadlineStrip, FollowButton } from "@/components/venues/venue-live";
@@ -48,12 +48,13 @@ export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open
                 {act.external
                   ? <a href={act.href} target="_blank" rel="noopener noreferrer" className={`${btn} bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]`}>{t(act.label)}<ExternalLink size={14} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a>
                   : <Link href={act.href} className={`${btn} ${act.label === "View event" ? "bg-[#0E1B3D] text-white" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>}
-                {act.label === "Continue draft" && open ? <Link href={`/submit/${v.slug}`} className={ghost}>{t("New paper")}</Link> : null}
                 {closedOn !== null ? <span className="inline-flex h-10 items-center rounded-[4px] bg-[#EEF0EC] px-3.5 text-[14px] font-semibold text-[#4A5263]">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span> : null}
                 <FollowButton venueId={v.id} slug={v.slug} compact />
-                {organizer ? <Link href={`/manage/${v.slug}`} className={ghost}><Gauge size={15} aria-hidden />{t("Event dashboard")}</Link> : null}
                 {v.website ? <a href={v.website} target="_blank" rel="noopener noreferrer" className={ghost}>{t("Official website")}<ExternalLink size={14} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a> : null}
-                <EventMoreMenu slug={v.slug} ws kind={v.kind} align="start" onPage />
+                <EventMoreMenu slug={v.slug} ws kind={v.kind} align="start" onPage extra={[
+                  ...(organizer ? [{ label: "Event dashboard", href: `/manage/${v.slug}`, icon: <Gauge size={15} aria-hidden /> }] : []),
+                  ...(act.label === "Continue draft" && open ? [{ label: "New paper", href: `/submit/${v.slug}`, icon: <FilePlus size={15} aria-hidden /> }] : []),
+                ]} />
               </div>
             </div>
           </div>
