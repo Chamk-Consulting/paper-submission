@@ -3,13 +3,13 @@ export type SiteFlags = {
   homeEvent: string | null; singleEvent: boolean; signinEmailCode: boolean; signupEmailCode: boolean;
   /** Ways in offered on the sign-in page. Defaults: password, email code/link and ORCID on; the rest off. */
   signinPassword: boolean; signinPasskey: boolean; signinOrcid: boolean; signinInstitution: boolean; signinGoogle: boolean;
-  /** Language picker and other languages. Off (the default for now): English only, no picker. */
+  /** Language picker and other languages (on by default). Off: English only, no picker. */
   languages: boolean;
 };
 export const DEFAULT_FLAGS: SiteFlags = {
   homeEvent: null, singleEvent: false, signinEmailCode: true, signupEmailCode: true,
   signinPassword: true, signinPasskey: false, signinOrcid: true, signinInstitution: false, signinGoogle: false,
-  languages: false,
+  languages: true,
 };
 
 export function parseFlags(raw: unknown): SiteFlags {
@@ -25,7 +25,7 @@ export function parseFlags(raw: unknown): SiteFlags {
     signinOrcid: flag("signin_orcid", true),
     signinInstitution: flag("signin_institution", false),
     signinGoogle: flag("signin_google", false),
-    languages: flag("languages", false),
+    languages: flag("languages", true),
   };
   // Someone must always be able to get in.
   if (!f.signinPassword && !f.signinEmailCode) f.signinPassword = true;

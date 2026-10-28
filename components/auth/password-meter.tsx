@@ -53,8 +53,8 @@ export function PasswordMeter({ pw, email, current, flag, leak, id }: { pw: stri
   const m = (pass: boolean): Mark => (pass ? "ok" : flag ? "bad" : "todo");
   const hard = (pass: boolean): Mark => (pass ? "ok" : pw ? "bad" : "todo");
   const rules: [Mark, string, string?][] = [
-    [m(r.long), "At least 12 characters"],
-    [m(r.mixed), "Mix of letters, numbers and symbols", r.mixed ? undefined : "At least 3 of: lowercase, uppercase, number, symbol — or 16+ characters"],
+    [m(r.long), "At least 8 characters"],
+    [m(r.mixed), "Letters and at least one number", r.mixed ? undefined : "Or a phrase of 12+ characters"],
     [!r.notCommon ? hard(false) : leak === "leaked" ? "bad" : leak === "checking" ? "wait" : leak === "clean" || leak === "unknown" ? "ok" : m(false), "Not a common or leaked password",
       leak === "leaked" ? "Found in a known data leak — choose another" : leak === "unknown" ? "Couldn’t check leaks right now; we check again when you save" : undefined],
     [hard(r.notEmail), "Doesn’t contain your name or email"],

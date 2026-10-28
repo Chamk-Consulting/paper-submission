@@ -1,6 +1,6 @@
 -- Sign-in method switches (28 Oct 2026). Which ways in the sign-in page offers. Defaults: password, email code/link
 -- and ORCID on; passkey, institution (SSO) and Google off. At least one of password and email code stays on.
--- Also: languages (the language picker and other languages; off = English only for now).
+-- Also: languages (the language picker and other languages; on by default; off = English only).
 
 alter table public.platform_settings
   add column if not exists signin_password boolean not null default true,
@@ -8,7 +8,7 @@ alter table public.platform_settings
   add column if not exists signin_orcid boolean not null default true,
   add column if not exists signin_institution boolean not null default false,
   add column if not exists signin_google boolean not null default false,
-  add column if not exists languages boolean not null default false;
+  add column if not exists languages boolean not null default true;
 
 create or replace function public.site_flags()
 returns jsonb language sql stable security definer set search_path = '' as $$
@@ -32,7 +32,7 @@ drop function if exists public.admin_set_site_flags(text, boolean, boolean, bool
 create or replace function public.admin_set_site_flags(
   p_home_event text, p_single_event boolean, p_signin_email_code boolean, p_signup_email_code boolean,
   p_signin_password boolean default true, p_signin_passkey boolean default false, p_signin_orcid boolean default true,
-  p_signin_institution boolean default false, p_signin_google boolean default false, p_languages boolean default false)
+  p_signin_institution boolean default false, p_signin_google boolean default false, p_languages boolean default true)
 returns void language plpgsql security definer set search_path = '' as $$
 begin
   perform private.require_admin();
@@ -52,7 +52,7 @@ begin
     signin_orcid = coalesce(p_signin_orcid, false),
     signin_institution = coalesce(p_signin_institution, false),
     signin_google = coalesce(p_signin_google, false),
-    languages = coalesce(p_languages, false),
+    languages = coalesce(p_languages, true),
     updated_at = now()
   where id;
   perform private.admin_log('settings.site_flags', null, null, null, null, jsonb_build_object(

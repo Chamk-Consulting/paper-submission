@@ -30,7 +30,7 @@ const MSG = {
   reason: "Say briefly why (at least 2 characters).",
   conflictTarget: "Pick a person or type an institution.",
   wrongPassword: "Your current password is not right.",
-  weakPassword: "Use at least 12 characters with a mix of letters, numbers and symbols (or 16+ characters), not a common password and not your email.",
+  weakPassword: "Use at least 8 characters with letters and a number (or a phrase of 12+ characters), not a common password and not your email.",
   samePassword: "Choose a password different from your current one.",
   leakedPassword: "That password has appeared in a data leak. Choose another.",
   passwordMismatch: "The two passwords don't match yet.",

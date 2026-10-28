@@ -44,7 +44,7 @@ export function PasswordFields({ email, tried, serverErrors, idPrefix = "pw", on
   return (
     <>
       <div className="mt-3.5 flex flex-col gap-1.5">
-        <FieldLabel htmlFor={`${idPrefix}-new`} required info={<>{t("At least 12 characters with a mix of letters, numbers and symbols — or a phrase of 16+ characters, which is easy to remember and hard to guess.")} {t("Don’t reuse a password from another site — we check it against known leaks.")}</>}>{t("Password")}</FieldLabel>
+        <FieldLabel htmlFor={`${idPrefix}-new`} required info={<>{t("At least 8 characters with letters and a number — or a phrase of 12+ characters, which is easy to remember.")} {t("Don’t reuse a password from another site — we check it against known leaks.")}</>}>{t("Password")}</FieldLabel>
         <div className="flex overflow-hidden rounded-[4px] bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ border: pwBad ? "2px solid #B3261E" : r.ok && leak !== "checking" ? "2px solid #14603F" : "1px solid #B7BDC9" }}>
           <input
             id={`${idPrefix}-new`} name="password" aria-required="true" type={show ? "text" : "password"} autoComplete="new-password" maxLength={128}
