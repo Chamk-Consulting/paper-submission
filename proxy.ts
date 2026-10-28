@@ -43,8 +43,15 @@ export default async function proxy(request: NextRequest) {
   const explicit = isLocale(first) ? first : null;
   const bare = explicit ? pathname.slice(first.length + 1) || "/" : pathname;
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
-  const locale = explicit ?? (isLocale(cookieLocale) ? cookieLocale : negotiate(request.headers.get("accept-language")));
   const skipLocale = NO_LOCALE.some((r) => r.test(bare));
+  // Languages switched off (Admin › Venues): English only. /fr/… and the like open the English page.
+  const english = !skipLocale && !(await siteFlags()).languages;
+  if (english && explicit && explicit !== "en") {
+    const url = request.nextUrl.clone();
+    url.pathname = bare;
+    return NextResponse.redirect(url, 307);
+  }
+  const locale = english ? "en" : explicit ?? (isLocale(cookieLocale) ? cookieLocale : negotiate(request.headers.get("accept-language")));
 
   // Pages that moved under /workspace: one permanent redirect, whatever the language prefix.
   const moved = skipLocale ? null : movedTo(bare);

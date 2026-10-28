@@ -11,7 +11,7 @@ import { CookieSettingsLink } from "@/components/consent/cookie-consent";
 export function TopBar() {
   const t = useT();
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="auth-bar flex flex-wrap items-center justify-between gap-3">
       <Logo />
       <div className="flex items-center gap-4 text-[14px]">
         <LanguageSelect id="auth-lang" />
@@ -24,10 +24,10 @@ export function TopBar() {
 export function Footer() {
   const t = useT();
   return (
-    <div className="flex flex-wrap justify-between gap-3 text-[13px] text-[#4A5263]">
+    <div className="auth-bar mt-6 flex flex-wrap justify-between gap-x-3 gap-y-2 text-[13px] text-[#4A5263]">
       {/* TODO(ops): link to a real status page. */}
       <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#18744F]" />{t("All systems normal")}</span>
-      <span className="flex flex-wrap gap-4">
+      <span className="flex flex-wrap gap-x-4 gap-y-1">
         <Link href="/contact" className="text-[#4A5263]">{t("Contact")}</Link>
         <Link href="/legal/privacy" className="text-[#4A5263]">{t("Privacy")}</Link>
         <Link href="/legal/terms" className="text-[#4A5263]">{t("Terms")}</Link>

@@ -9,7 +9,7 @@ export const helpKicker = "m-0 font-mono text-[11px] uppercase tracking-[0.06em]
 
 /** The three AH02 tabs sit in the shared sign-in frame ((auth)/layout.tsx): navy band, tabs, two columns. */
 export function HelpPage({ children }: { children: ReactNode }) {
-  return <div className="mx-auto flex w-full max-w-[1200px] flex-auto flex-col pt-6">{children}</div>;
+  return <div className="ah-wide mx-auto flex w-full max-w-[1200px] flex-auto flex-col pt-6">{children}</div>;
 }
 
 export function HelpBody({ t, tab, children, aside }: { t: TT; tab: HelpTab | null; children: ReactNode; aside?: ReactNode }) {

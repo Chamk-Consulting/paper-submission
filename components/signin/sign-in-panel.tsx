@@ -3,7 +3,9 @@ import { Mail } from "lucide-react";
 import { OtherWays, type SignInMethods } from "@/components/signin/other-ways";
 
 import Link from "@/components/site/link";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
+import { CodeBoxes } from "@/components/auth/code-boxes";
+import { EMAIL_CODE_LENGTH } from "@/lib/auth/code-length";
 import { detectIdentifier, type Detected } from "@/lib/auth/identifier";
 import {
   sendSignInCode,
@@ -98,7 +100,7 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
     <div className="w-full max-w-[420px]">
       <div role="tablist" aria-label={t("Account")} className="flex gap-1 rounded-[6px] bg-[#E9EBE6] p-1">
         <span role="tab" aria-selected className={tabBtn(true) + " flex items-center justify-center"}>{t("Sign in")}</span>
-        <Link href={`/create-account${next ? `?next=${encodeURIComponent(next)}` : ""}`} role="tab" aria-selected={false} className={tabBtn(false) + " flex items-center justify-center no-underline"}>{t("Create account")}</Link>
+        <Link prefetch href={`/create-account${next ? `?next=${encodeURIComponent(next)}` : ""}`} role="tab" aria-selected={false} className={tabBtn(false) + " flex items-center justify-center no-underline"}>{t("Create account")}</Link>
       </div>
 
       {sent ? (
@@ -140,7 +142,7 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
             <div className="mt-4 flex flex-col gap-1.5">
               <div className="flex items-baseline justify-between">
                 <label htmlFor="pr-pass1" className={LABEL}>{t("Password")}</label>
-                <Link href="/forgot-password" className={`text-[13px] ${LINK}`}>{t("Forgot password?")}</Link>
+                <Link prefetch href="/forgot-password" className={`text-[13px] ${LINK}`}>{t("Forgot password?")}</Link>
               </div>
               <div className="flex overflow-hidden rounded-[4px] border bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ borderColor: pwState.fieldErrors?.password?.length ? "#B3261E" : "#B7BDC9" }}>
                 <input id="pr-pass1" name="password" type={showPass ? "text" : "password"} autoComplete="current-password" aria-describedby="pr-pass-err"
@@ -181,6 +183,8 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
 function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; next?: string; onBack: () => void; senderDomain: string }) {
   const t = useT();
   const [vState, vAction, vPending] = useActionState(verifyCode, state);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [tries, setTries] = useState(0);
   const byEmail = state.sentKind === "email";
   const lead = byEmail ? t("We sent a link and a code to") : t("We sent a link and a code to your account email");
   return (
@@ -189,14 +193,13 @@ function CodeStep({ state, next, onBack, senderDomain }: { state: SignInState; n
       <h1 className={`mt-2.5 ${H1}`}>{t("Check your inbox")}</h1>
       <p className={`mt-2.5 ${MUTED}`}>{lead} <strong className={INK}>{state.sentTo}</strong>. {t("It expires in 15 minutes. On another device? Enter the code from the same email.")}</p>
       {state.notice ? <p role="status" className="mt-4 rounded-[6px] border border-[#F1D29A] bg-[#FFF6E6] px-3.5 py-2.5 text-[14px] text-[#3B2A07]">{t(state.notice)}</p> : null}
-      <form action={vAction} noValidate>
+      <form ref={formRef} action={vAction} noValidate>
         <input type="hidden" name="email" value={state.email ?? ""} />
         <input type="hidden" name="next" value={next ?? ""} />
-        <div className="mt-[22px] flex flex-col gap-1.5">
-          <label htmlFor="pr-code" className={LABEL}>{t("Verification code")}</label>
-          <input id="pr-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={10} placeholder="000000" aria-describedby="pr-code-err"
-            className="box-border h-[46px] rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 font-mono text-[17px] tracking-[0.3em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
-            style={vState.fieldErrors?.code?.length ? { borderColor: "#B3261E" } : undefined} />
+        <div className="mt-[22px] flex flex-col gap-2">
+          <span id="pr-code-label" className={LABEL}>{t("Code from the email")}</span>
+          <CodeBoxes key={vState.fieldErrors?.code ? `bad-${tries}` : "code"} labelledBy="pr-code-label" length={EMAIL_CODE_LENGTH} invalid={!!vState.fieldErrors?.code?.length} disabled={vPending}
+            onComplete={() => { setTries((n) => n + 1); formRef.current?.requestSubmit(); }} />
           <FieldError id="pr-code-err" errors={vState.fieldErrors?.code} />
         </div>
         <button type="submit" disabled={vPending} className={`mt-4 ${PRIMARY}`}>{vPending ? t("Checking…") : t("Verify and sign in")}</button>

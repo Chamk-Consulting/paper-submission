@@ -57,7 +57,7 @@ export function CreateAccountForm({ next, venue, withPassword = false, noCode = 
   return (
     <>
       <div role="tablist" aria-label={t("Account")} className="flex gap-1 rounded-[6px] bg-[#E9EBE6] p-1">
-        <Link href={`/sign-in${next ? `?next=${encodeURIComponent(next)}` : ""}`} role="tab" aria-selected={false} className="flex h-[38px] flex-1 items-center justify-center rounded-[4px] text-[14px] font-semibold text-[#4A5263] no-underline">{t("Sign in")}</Link>
+        <Link prefetch href={`/sign-in${next ? `?next=${encodeURIComponent(next)}` : ""}`} role="tab" aria-selected={false} className="flex h-[38px] flex-1 items-center justify-center rounded-[4px] text-[14px] font-semibold text-[#4A5263] no-underline">{t("Sign in")}</Link>
         <span role="tab" aria-selected className="flex h-[38px] flex-1 items-center justify-center rounded-[4px] bg-white text-[14px] font-semibold text-[#121826] shadow-[0_1px_2px_rgba(18,24,38,.12)]">{t("Create account")}</span>
       </div>
 

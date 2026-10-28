@@ -130,6 +130,8 @@ export function SiteFlagsForm({ flags, events }: { flags: SiteFlagsValue; events
           <span>{t("Institution single sign-on (needs SAML set up in Supabase)")}</span></label>
         <span className="text-[13px] text-[#4A5263]">{t("Password or email link/code must stay on.")}</span>
       </fieldset>
+      <label className={box}><input type="checkbox" name="languages" defaultChecked={flags.languages} className="mt-1" />
+        <span>{t("Languages: show the language picker (off: English only)")}</span></label>
       <label className={box}><input type="checkbox" name="signupCode" defaultChecked={flags.signupEmailCode} className="mt-1" />
         <span>{t("New accounts confirm their email with a code first (off: name, email and password, then straight in)")}</span></label>
       <div className="flex flex-wrap items-center gap-3"><button type="submit" disabled={pending} className={small}>{pending ? t("Saving…") : t("Save")}</button><Status s={s} /></div>

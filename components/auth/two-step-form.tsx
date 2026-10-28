@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { CodeBoxes } from "@/components/auth/code-boxes";
 import { useT } from "@/lib/i18n/client";
 import { verifyTwoStep, type SecState } from "@/lib/account/security-actions";
 import { signOut } from "@/lib/auth/actions";
@@ -10,19 +11,19 @@ import { ui } from "@/components/auth/split-layout";
 export function TwoStepForm({ next }: { next: string }) {
   const t = useT();
   const [state, action, pending] = useActionState<SecState, FormData>(verifyTwoStep, {});
+  const formRef = useRef<HTMLFormElement>(null);
+  const [tries, setTries] = useState(0);
   useEffect(() => {
     // Full navigation so the upgraded session cookie is sent with the next request.
     if (state.ok) window.location.assign(`/auth/continue?next=${encodeURIComponent(next)}`);
   }, [state.ok, next]);
   return (
     <>
-      <form action={action} noValidate className="mt-[22px]">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="ts-code" className={ui.label}>{t("6-digit code")}</label>
-          <input id="ts-code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={7} placeholder="000 000" autoFocus
-            aria-invalid={state.error ? true : undefined} aria-describedby="ts-err"
-            className="box-border h-[46px] rounded-[4px] border border-[#B7BDC9] bg-white px-3.5 font-mono text-[20px] tracking-[0.3em] text-[#121826] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F5FD0]"
-            style={state.error ? { borderColor: "#B3261E" } : undefined} />
+      <form ref={formRef} action={action} noValidate className="mt-[22px]">
+        <div className="flex flex-col gap-2">
+          <span id="ts-code-label" className={ui.label}>{t("6-digit code")}</span>
+          <CodeBoxes key={state.error ? `bad-${state.error}-${tries}` : "code"} labelledBy="ts-code-label" length={6} invalid={!!state.error} disabled={pending || state.ok}
+            onComplete={() => { setTries((n) => n + 1); formRef.current?.requestSubmit(); }} />
           {state.error ? <span id="ts-err" role="alert" data-form-error className={ui.error}>{t(state.error)}</span> : null}
         </div>
         <button type="submit" disabled={pending || state.ok} className={`mt-4 ${ui.primary}`}>{pending || state.ok ? t("Checking…") : t("Verify and continue")}</button>

@@ -29,7 +29,7 @@ export function LanguageSelect({ id = "lang-select", className = "", tone = "lig
 
   if (tone === "dark") {
     return (
-      <span className={`h-9 items-center gap-1.5 rounded-[4px] border border-[#4A5F99] bg-[#17285A] pl-2.5 text-[#F5F6F3] hover:border-[#8F9CC0] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#F2A93B] ${className || "inline-flex"}`}>
+      <span className={`lang-pick h-9 items-center gap-1.5 rounded-[4px] border border-[#4A5F99] bg-[#17285A] pl-2.5 text-[#F5F6F3] hover:border-[#8F9CC0] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#F2A93B] ${className || "inline-flex"}`}>
         <Globe aria-hidden size={15} className="flex-none text-[#F2A93B]" />
         {label}
         <select id={id} value={locale} onChange={(e) => change(e.target.value as Locale)}
@@ -42,7 +42,7 @@ export function LanguageSelect({ id = "lang-select", className = "", tone = "lig
   return (
     <>
       {label}
-      <select id={id} value={locale} onChange={(e) => change(e.target.value as Locale)} className={`h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-2 text-[14px] text-[#121826] ${className}`}>
+      <select id={id} value={locale} onChange={(e) => change(e.target.value as Locale)} className={`lang-pick h-8 rounded-[4px] border border-[#B7BDC9] bg-white px-2 text-[14px] text-[#121826] ${className}`}>
         {options}
       </select>
     </>

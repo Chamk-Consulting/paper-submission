@@ -232,6 +232,8 @@ html:not([data-auth="in"]) .auth-in { display: none !important; }
 html[data-auth="in"] .auth-out { display: none !important; }
 /* <html data-single="1">: the public site is one event (lib/config/site-flags.ts) — directory, organizer and pricing links are hidden. */
 html[data-single="1"] .single-hide { display: none !important; }
+/* Languages switched off (Admin › Venues): English only, no language picker anywhere. */
+html:not([data-langs="1"]) .lang-pick { display: none !important; }
 /* Pages written as full-screen columns sit under the 60 px header: keep them exactly one screen tall. */
 .chrome-body .min-h-dvh { min-height: calc(100dvh - 60px); }
 /* public pages: the page fills the space above the shared footer instead of pushing it below the fold */
@@ -244,6 +246,9 @@ html { scroll-padding-top: 72px; }
 /* ------------------------------------------------------------------ sign-in frame ((auth)/layout.tsx) */
 /* The right-hand panel only shows from 1024 px: fixed to the right, the form column takes the rest. Phones and tablets get one column. */
 .auth-aside { display: none; }
+/* Logo bar and footer line up with the form column (420 px), or the wide help pages (1200 px). */
+.auth-bar { width: 100%; max-width: 420px; margin-inline: auto; }
+.auth-frame:has(.ah-wide) .auth-bar { max-width: 1200px; }
 @media (min-width: 1024px) {
   .auth-frame:has(.auth-aside) .auth-col { width: 44%; }
   .auth-aside { display: flex; position: fixed; inset: 0 0 0 44%; overflow-y: auto; background: #0E1B3D; }

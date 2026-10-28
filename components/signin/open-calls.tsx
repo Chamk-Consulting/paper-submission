@@ -13,7 +13,7 @@ export async function OpenCallsPanel() {
       <h2 className="mt-3.5 max-w-[20ch] font-serif text-[44px] font-[350] leading-[1.08] tracking-[-0.015em]">{t("Every deadline you care about, in one place.")}</h2>
       <div className="mt-8 overflow-hidden rounded-[8px] bg-[#17285A]">
         <div className="grid grid-cols-12 gap-3 border-b border-[#24335C] px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.06em] text-[#B9C3DA]">
-          <span className="col-span-6">{t("Venue")}</span><span className="col-span-3">{t("Where")}</span><span className="col-span-3 text-right">{t("Closes in")}</span>
+          <span className="col-span-6">{t("Event")}</span><span className="col-span-3">{t("Where")}</span><span className="col-span-3 text-right">{t("Closes in")}</span>
         </div>
         <Suspense fallback={<OpenCallsSkeleton tone="dark" />}>
           <OpenCallsList tone="dark" limit={4} />
@@ -21,7 +21,7 @@ export async function OpenCallsPanel() {
       </div>
       <div className="mt-3.5 flex flex-wrap justify-between gap-3">
         <span className="font-mono text-[12px] text-[#B9C3DA]">{t("Saffron = closes within 7 days.")}</span>
-        <Link href="/events" className="text-[14px] font-medium text-[#F2A93B]">{t("Browse all venues →")}</Link>
+        <Link href="/events" className="text-[14px] font-medium text-[#F2A93B]">{t("Browse all events →")}</Link>
       </div>
       <div className="mt-10 grid grid-cols-3 gap-4 border-t border-[#24335C] pt-6">
         <div><div className="text-[14px] font-semibold">{t("One account")}</div><div className="mt-0.5 text-[13px] text-[#B9C3DA]">{t("Every venue, every role.")}</div></div>

@@ -96,7 +96,7 @@ function MobileMenu({ open, onClose, p, s }: { open: boolean; onClose: () => voi
             <Link href="/manage/new" className="single-hide flex h-11 items-center justify-center rounded-[4px] bg-[#F2A93B] text-[15px] font-semibold text-[#0E1B3D] no-underline">{t("Host a conference")}</Link>
           </div>
         </div>
-        <div className="mt-auto border-t border-[#EEF0EC] px-6 py-4">
+        <div className="lang-pick mt-auto border-t border-[#EEF0EC] px-6 py-4">
           <LanguageSelect id="menu-lang" />
         </div>
       </div>

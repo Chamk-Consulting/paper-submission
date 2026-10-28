@@ -1,12 +1,14 @@
 -- Sign-in method switches (28 Oct 2026). Which ways in the sign-in page offers. Defaults: password, email code/link
 -- and ORCID on; passkey, institution (SSO) and Google off. At least one of password and email code stays on.
+-- Also: languages (the language picker and other languages; off = English only for now).
 
 alter table public.platform_settings
   add column if not exists signin_password boolean not null default true,
   add column if not exists signin_passkey boolean not null default false,
   add column if not exists signin_orcid boolean not null default true,
   add column if not exists signin_institution boolean not null default false,
-  add column if not exists signin_google boolean not null default false;
+  add column if not exists signin_google boolean not null default false,
+  add column if not exists languages boolean not null default false;
 
 create or replace function public.site_flags()
 returns jsonb language sql stable security definer set search_path = '' as $$
@@ -20,7 +22,8 @@ returns jsonb language sql stable security definer set search_path = '' as $$
     'signin_passkey', s.signin_passkey,
     'signin_orcid', s.signin_orcid,
     'signin_institution', s.signin_institution,
-    'signin_google', s.signin_google)
+    'signin_google', s.signin_google,
+    'languages', s.languages)
   from public.platform_settings s limit 1
 $$;
 grant execute on function public.site_flags() to anon, authenticated;
@@ -29,7 +32,7 @@ drop function if exists public.admin_set_site_flags(text, boolean, boolean, bool
 create or replace function public.admin_set_site_flags(
   p_home_event text, p_single_event boolean, p_signin_email_code boolean, p_signup_email_code boolean,
   p_signin_password boolean default true, p_signin_passkey boolean default false, p_signin_orcid boolean default true,
-  p_signin_institution boolean default false, p_signin_google boolean default false)
+  p_signin_institution boolean default false, p_signin_google boolean default false, p_languages boolean default false)
 returns void language plpgsql security definer set search_path = '' as $$
 begin
   perform private.require_admin();
@@ -49,15 +52,16 @@ begin
     signin_orcid = coalesce(p_signin_orcid, false),
     signin_institution = coalesce(p_signin_institution, false),
     signin_google = coalesce(p_signin_google, false),
+    languages = coalesce(p_languages, false),
     updated_at = now()
   where id;
   perform private.admin_log('settings.site_flags', null, null, null, null, jsonb_build_object(
     'home_event', p_home_event, 'single_event', p_single_event, 'signin_email_code', p_signin_email_code,
     'signup_email_code', p_signup_email_code, 'signin_password', p_signin_password, 'signin_passkey', p_signin_passkey,
-    'signin_orcid', p_signin_orcid, 'signin_institution', p_signin_institution, 'signin_google', p_signin_google));
+    'signin_orcid', p_signin_orcid, 'signin_institution', p_signin_institution, 'signin_google', p_signin_google, 'languages', p_languages));
 end $$;
-revoke all on function public.admin_set_site_flags(text, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) from public, anon;
-grant execute on function public.admin_set_site_flags(text, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
+revoke all on function public.admin_set_site_flags(text, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) from public, anon;
+grant execute on function public.admin_set_site_flags(text, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 
 -- ORCID sign-in for someone with no account linked to that ORCID iD: Supabase makes a new user with no email. The web
 -- server signs the user out and removes that empty user here (signed by the server; only brand-new users with no

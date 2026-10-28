@@ -94,6 +94,7 @@ export async function setSiteFlags(_: AdminState, fd: FormData): Promise<AdminSt
     p_signin_orcid: fd.get("signinOrcid") === "on",
     p_signin_institution: fd.get("signinInstitution") === "on",
     p_signin_google: fd.get("signinGoogle") === "on",
+    p_languages: fd.get("languages") === "on",
   });
   if (error) return fail(error.message);
   updateTag("site-flags");

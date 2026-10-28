@@ -59,7 +59,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   if (!isLocale(lang)) notFound();
   const [locale, brand, flags] = await Promise.all([getLocale(), getBrand(), getSiteFlags()]);
   return (
-    <html lang={locale} data-single={flags.singleEvent ? "1" : undefined} suppressHydrationWarning>
+    <html lang={locale} data-single={flags.singleEvent ? "1" : undefined} data-langs={flags.languages ? "1" : undefined} suppressHydrationWarning>
       <head>
         {/* Before the first paint: signed-in or not, from the session cookie, so the shared header shows the right side at once. */}
         <script dangerouslySetInnerHTML={{ __html: AUTH_FLAG }} />

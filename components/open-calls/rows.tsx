@@ -69,7 +69,7 @@ export function OpenCallsError({ tone }: { tone: Tone }) {
   return (
     <div role="status" className={`px-5 py-7 text-[14px] ${s.empty}`}>
       <p className="m-0 font-semibold">{t("Open calls couldn't load.")}</p>
-      <p className="m-0 mt-1">{t("Refresh the page in a moment, or")} <Link href="/events" className={tone === "dark" ? "text-[#F2A93B]" : "text-[#2F5FD0]"}>{t("browse all venues")}</Link>.</p>
+      <p className="m-0 mt-1">{t("Refresh the page in a moment, or")} <Link href="/events" className={tone === "dark" ? "text-[#F2A93B]" : "text-[#2F5FD0]"}>{t("browse all events")}</Link>.</p>
     </div>
   );
 }
