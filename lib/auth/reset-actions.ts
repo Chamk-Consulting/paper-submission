@@ -38,9 +38,9 @@ export async function startPasswordReset(_: ForgotState, formData: FormData): Pr
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
   const raw = parsed.data.identifier;
   const kind = detectIdentifier(raw).kind;
-  if (kind === "none") return { fieldErrors: { identifier: ["Enter the email or PIN you use for Plenary."] } };
-  if (kind === "id" && plenaryIdSignIn()) {
-    // PIN: look up the email server-side; the code page carries the ID, never the email.
+  if (kind === "none") return { fieldErrors: { identifier: ["Enter the email, PIN or alias you use for Plenary."] } };
+  if ((kind === "id" || kind === "alias") && plenaryIdSignIn()) {
+    // PIN or alias: look up the email server-side; the code page carries the PIN or alias, never the email.
     const { email, id } = await accountEmailFor(raw);
     if (id) {
       if (email && (await sendRecovery(email)) === "rate") return { message: "Please wait a minute before asking for another code." };
@@ -48,9 +48,8 @@ export async function startPasswordReset(_: ForgotState, formData: FormData): Pr
     }
   }
   if (kind !== "email") {
-    // TODO(auth): alias and phone lookup.
     const what = { id: "PIN", alias: "alias", phone: "phone number" }[kind as string] ?? "that";
-    return { fieldErrors: { identifier: [`Resetting with a ${what} isn’t available yet — use your email or PIN.`] } };
+    return { fieldErrors: { identifier: [`Resetting with a ${what} isn’t available yet — use your email, PIN or alias.`] } };
   }
   const email = raw.toLowerCase();
   if ((await sendRecovery(email)) === "rate") return { message: "Please wait a minute before asking for another code." };

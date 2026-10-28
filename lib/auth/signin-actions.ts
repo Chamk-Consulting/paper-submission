@@ -39,14 +39,13 @@ async function continueTo(supabase: Awaited<ReturnType<typeof createClient>>, ne
 /**
  * Turns whatever was typed into the account email. A PIN is looked up server-side (signed request,
  * lib/auth/plenary-id.ts); `lookedUp` marks that case so the caller never shows the full email back.
- * TODO(auth): alias and phone lookup.
  */
-async function resolveEmail(identifier: string): Promise<{ email: string | null; kind: string; lookedUp?: boolean }> {
+async function resolveEmail(identifier: string): Promise<{ email: string | null; kind: string; lookedUp?: boolean; ref?: string }> {
   const d = detectIdentifier(identifier);
   if (d.kind === "email") return { email: identifier.trim().toLowerCase(), kind: "email" };
-  if (d.kind === "id" && plenaryIdSignIn()) {
+  if ((d.kind === "id" || d.kind === "alias") && plenaryIdSignIn()) {
     const r = await accountEmailFor(identifier);
-    if (r.id) return { email: r.email, kind: "id", lookedUp: true };
+    if (r.id) return { email: r.email, kind: d.kind, lookedUp: true, ref: r.id };
   }
   return { email: null, kind: d.kind };
 }
@@ -55,13 +54,13 @@ function notYet(kind: string): SignInState {
   const what = { id: "PIN", alias: "alias", phone: "phone number" }[kind] ?? "that";
   return {
     fieldErrors: {
-      identifier: [kind === "none" ? "Enter your email or your PIN." : `Signing in with a ${what} isn’t available yet — use your email or PIN.`],
+      identifier: [kind === "none" ? "Enter your email, PIN or alias." : `Signing in with a ${what} isn’t available yet — use your email, PIN or alias.`],
     },
   };
 }
 
 const passwordSchema = z.object({
-  identifier: z.string().trim().min(1, "Enter your email or your PIN").max(254),
+  identifier: z.string().trim().min(1, "Enter your email, PIN or alias").max(254),
   password: z.string().min(1, "Enter your password").max(128),
   remember: z.string().optional(),
   next: z.string().optional(),
@@ -97,7 +96,7 @@ export async function signInWithPassword(_: SignInState, formData: FormData): Pr
 }
 
 const codeRequestSchema = z.object({
-  identifier: z.string().trim().min(1, "Enter your email or your PIN").max(254),
+  identifier: z.string().trim().min(1, "Enter your email, PIN or alias").max(254),
   next: z.string().optional(),
 });
 
@@ -106,9 +105,9 @@ export async function sendSignInCode(_: SignInState, formData: FormData): Promis
   if (!(await getSiteFlags()).signinEmailCode) return { message: "Sign-in codes are switched off. Sign in with your password, or reset it." };
   const parsed = codeRequestSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
-  const { email, kind, lookedUp } = await resolveEmail(parsed.data.identifier);
+  const { email, kind, lookedUp, ref } = await resolveEmail(parsed.data.identifier);
   // Unknown PIN: the same code step as a real one, so nobody can test which IDs exist.
-  if (!email && lookedUp) return { step: "sent", sentKind: kind, email: parsed.data.identifier.trim().toUpperCase(), mode: "signin" };
+  if (!email && lookedUp) return { step: "sent", sentKind: kind, email: ref, mode: "signin" };
   if (!email) return notYet(kind);
 
   const supabase = await createClient();
@@ -125,7 +124,7 @@ export async function sendSignInCode(_: SignInState, formData: FormData): Promis
   const limited = !!error && (error.status === 429 || /rate limit|seconds|too many/i.test(error.message));
   // Same answer whether or not the account exists.
   // For a PIN the form carries the ID, never the email (verify and resend look it up again).
-  return { step: "sent", sentTo: lookedUp ? maskEmail(email) : email, sentKind: kind, email: lookedUp ? parsed.data.identifier.trim().toUpperCase() : email, mode: "signin", notice: limited ? "A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute." : undefined };
+  return { step: "sent", sentTo: lookedUp ? maskEmail(email) : email, sentKind: kind, email: lookedUp ? ref : email, mode: "signin", notice: limited ? "A code was sent very recently — use the one already in your inbox (check spam too). You can ask for a new one in a minute." : undefined };
 }
 
 const verifySchema = z.object({

@@ -19,6 +19,6 @@ export function detectIdentifier(value: string): Detected {
   if (/^pin/i.test(t)) return { kind: "id", tone: "info", icon: "#", chip: "PIN", hint: "A PIN is a number from 1000 up, like 1024." };
   if (/^\+/.test(t) || (/^0/.test(t) && digits.length >= 9))
     return { kind: "phone", tone: "info", icon: "+", chip: "PHONE", hint: "Phone recognised. Codes go to your account email." };
-  if (/^[a-z][a-z0-9._-]{2,}$/i.test(t)) return { kind: "alias", tone: "info", icon: "Aa", chip: "ALIAS", hint: "Sign-in alias recognised." };
-  return { kind: "none", tone: "neutral", icon: "?", hint: "Enter your email or your PIN." };
+  if (/^[a-z][a-z0-9._-]{2,31}$/i.test(t)) return { kind: "alias", tone: "ok", icon: "Aa", chip: "ALIAS", hint: "Login alias recognised." };
+  return { kind: "none", tone: "neutral", icon: "?", hint: "Enter your email, PIN or alias." };
 }

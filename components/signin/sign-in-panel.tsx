@@ -119,12 +119,12 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
           <form action={methods.password ? pwAction : codeAction} noValidate>
             <input type="hidden" name="next" value={next ?? ""} />
             <div className="mt-6 flex flex-col gap-1.5">
-              <label htmlFor="pr-id" className={LABEL}>{t("Email or PIN")}</label>
+              <label htmlFor="pr-id" className={LABEL}>{t("Email, PIN or alias")}</label>
               <div className="box-border flex h-12 items-center gap-2.5 rounded-[4px] border-2 bg-white px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2F5FD0]" style={{ borderColor: idErrors?.length ? "#B3261E" : tone.border }}>
                 <span aria-hidden className="flex size-7 flex-none items-center justify-center rounded-[4px] font-mono text-[11px] font-semibold" style={{ background: tone.iconBg, color: tone.iconInk }}>{d.icon}</span>
                 <input
                   id="pr-id" name="identifier" type="text" autoComplete="username webauthn" autoCapitalize="none" spellCheck={false}
-                  placeholder="name@uni.edu · 1024"
+                  placeholder="name@uni.edu · 1024 · jdoe"
                   value={identifier} onChange={(e) => setIdentifier(e.target.value)}
                   aria-describedby="pr-id-hint pr-id-err" aria-invalid={idErrors?.length ? true : undefined}
                   className="h-10 min-w-0 flex-auto border-0 bg-transparent text-[16px] text-[#121826] outline-none"

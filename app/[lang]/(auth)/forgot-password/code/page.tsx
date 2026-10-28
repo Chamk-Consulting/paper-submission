@@ -17,12 +17,13 @@ type Search = { email?: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PID_RE = /^[1-9]\d{3,8}$/;
+const ALIAS_RE = /^[a-z][a-z0-9._-]{2,31}$/;
 /** The email, or a PIN when the person reset with their ID (the email is never put in the address). */
 const who = (raw?: string) => { const v = (raw ?? "").trim(); return PID_RE.test(v.toUpperCase()) ? v.toUpperCase() : v.toLowerCase(); };
 
 async function Left({ searchParams }: { searchParams: Promise<Search> }) {
   const email = who((await searchParams).email);
-  if (!EMAIL_RE.test(email) && !PID_RE.test(email)) redirect("/forgot-password");
+  if (!EMAIL_RE.test(email) && !PID_RE.test(email) && !ALIAS_RE.test(email)) redirect("/forgot-password");
   const t = await getT();
   return (
     <>
