@@ -78,16 +78,22 @@ export async function setRequireApproval(_: AdminState, fd: FormData): Promise<A
   return done(on ? "New events now wait for approval before opening." : "Events can open without approval.");
 }
 
-/** Site switches: home event, one-event public site, sign-in code, sign-up code (public.admin_set_site_flags). */
+/** Site switches: home event, events-only public site, ways to sign in, sign-up code (public.admin_set_site_flags). */
 export async function setSiteFlags(_: AdminState, fd: FormData): Promise<AdminState> {
   const home = String(fd.get("home") ?? "").trim();
   if (home && !/^[a-z0-9-]{2,80}$/.test(home)) return { error: "Choose an event from the list." };
+  if (fd.get("signinPassword") !== "on" && fd.get("signinCode") !== "on") return { error: "Keep password or email link/code sign-in on, so everyone can still get in." };
   const supabase = await createClient();
   const { error } = await supabase.rpc("admin_set_site_flags", {
     p_home_event: home || null,
     p_single_event: fd.get("single") === "on" && !!home,
     p_signin_email_code: fd.get("signinCode") === "on",
     p_signup_email_code: fd.get("signupCode") === "on",
+    p_signin_password: fd.get("signinPassword") === "on",
+    p_signin_passkey: fd.get("signinPasskey") === "on",
+    p_signin_orcid: fd.get("signinOrcid") === "on",
+    p_signin_institution: fd.get("signinInstitution") === "on",
+    p_signin_google: fd.get("signinGoogle") === "on",
   });
   if (error) return fail(error.message);
   updateTag("site-flags");

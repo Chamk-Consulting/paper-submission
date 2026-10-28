@@ -1,5 +1,6 @@
 "use client";
-import { Globe, Landmark, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
+import { OtherWays, type SignInMethods } from "@/components/signin/other-ways";
 
 import Link from "@/components/site/link";
 import { useActionState, useState } from "react";
@@ -56,17 +57,19 @@ function Banner({ tone = "bad", children }: { tone?: "bad" | "info"; children: R
 }
 
 const MailIcon = () => <Mail size={16} strokeWidth={1.75} aria-hidden />;
-const OrcidIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden><circle cx="9" cy="9" r="8.5" fill="#A6CE39" /><text x="9" y="12.5" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="9" fontWeight="700" fill="#FFFFFF">iD</text></svg>
-);
-const InstitutionIcon = () => <Landmark size={18} strokeWidth={1.75} aria-hidden />;
-const GoogleIcon = () => <Globe size={18} strokeWidth={1.75} aria-hidden />;
+const ERRORS: Record<string, string> = {
+  orcid_unlinked: "No account is connected to that ORCID iD yet. Sign in another way, then connect ORCID from your profile.",
+  oauth_no_email: "That account didn’t share an email address. Sign in another way.",
+  provider_off: "That sign-in option isn’t available yet. Sign in another way.",
+  oauth: "That sign-in didn’t finish. Try again, or sign in another way.",
+};
+const ALL_METHODS: SignInMethods = { password: true, passkey: false, orcid: true, institution: false, google: false };
 
-export function SignInPanel({ next, senderDomain = "[sender domain]", initialIdentifier = "", codeSignIn = true }: { next?: string; senderDomain?: string; initialIdentifier?: string; codeSignIn?: boolean }) {
+export function SignInPanel({ next, senderDomain = "[sender domain]", initialIdentifier = "", codeSignIn = true, methods = ALL_METHODS, error }: { next?: string; senderDomain?: string; initialIdentifier?: string; codeSignIn?: boolean; methods?: SignInMethods; error?: string }) {
   const tab = "signin" as const;
   const [identifier, setIdentifier] = useState(initialIdentifier);
   const [showPass, setShowPass] = useState(false);
-  const [soon, setSoon] = useState<string | null>(null);
+  const [soon, setSoon] = useState<string | null>(error && ERRORS[error] ? ERRORS[error] : null);
   const t = useT();
   // PR03: accounts used on this device. The chooser shows until one is picked or "Use another account".
   const [accounts, removeAccount] = useDeviceAccounts();
@@ -90,7 +93,6 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
   const tabBtn = (active: boolean) =>
     `h-[38px] flex-1 rounded-[4px] border-0 text-[14px] font-semibold ${active ? "bg-white text-[#121826] shadow-[0_1px_2px_rgba(18,24,38,.12)]" : "bg-transparent text-[#4A5263]"}`;
 
-  const comingSoon = (what: string) => setSoon(t("{what} sign-in is coming soon. Use your email for now.", { what: t(what) }));
 
   return (
     <div className="w-full max-w-[420px]">
@@ -112,9 +114,9 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
           ) : null}
           {pwState.message ? <Banner>{t(pwState.message)}</Banner> : null}
           {codeState.message ? <Banner>{t(codeState.message)}</Banner> : null}
-          {soon ? <Banner tone="info">{soon}</Banner> : null}
+          {soon ? <Banner tone="info">{t(soon)}</Banner> : null}
 
-          <form action={pwAction} noValidate>
+          <form action={methods.password ? pwAction : codeAction} noValidate>
             <input type="hidden" name="next" value={next ?? ""} />
             <div className="mt-6 flex flex-col gap-1.5">
               <label htmlFor="pr-id" className={LABEL}>{t("Email or PIN")}</label>
@@ -133,6 +135,8 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
               <FieldError id="pr-id-err" errors={idErrors} />
             </div>
 
+            {methods.password ? (
+              <>
             <div className="mt-4 flex flex-col gap-1.5">
               <div className="flex items-baseline justify-between">
                 <label htmlFor="pr-pass1" className={LABEL}>{t("Password")}</label>
@@ -151,10 +155,14 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
               <input type="checkbox" name="remember" className="size-[18px] accent-[#0E1B3D]" />{t("Keep me signed in on this device")}
             </label>
             <button type="submit" disabled={pwPending} className={`mt-4 ${PRIMARY}`}>{pwPending ? t("Signing in…") : t("Sign in")}</button>
+              </>
+            ) : (
+              <button type="submit" disabled={codePending} className={`mt-4 ${PRIMARY}`}>{codePending ? t("Sending…") : t("Email me a sign-in link and code")}</button>
+            )}
           </form>
 
           {/* Sign-in code by email: switchable (Admin › Venues › Public site and sign-in). */}
-          {codeSignIn ? (
+          {codeSignIn && methods.password ? (
             <form action={codeAction} className="mt-2.5">
               <input type="hidden" name="identifier" value={identifier} />
               <input type="hidden" name="next" value={next ?? ""} />
@@ -162,15 +170,7 @@ export function SignInPanel({ next, senderDomain = "[sender domain]", initialIde
             </form>
           ) : null}
 
-          <div className={`my-[22px] flex items-center gap-3 text-[13px] ${MUTED}`}>
-            <span className="h-px flex-auto bg-[#DADDE3]" />{t("or continue with")}<span className="h-px flex-auto bg-[#DADDE3]" />
-          </div>
-          {/* TODO(auth): wire ORCID (custom OIDC), Institution (SAML) and Google once providers are configured. */}
-          <div className="grid grid-cols-3 gap-2">
-            <button type="button" onClick={() => comingSoon("ORCID")} className={`h-11 text-[14px] ${SECONDARY}`}><OrcidIcon />ORCID</button>
-            <button type="button" onClick={() => comingSoon("Institution")} className={`h-11 text-[14px] ${SECONDARY}`}><InstitutionIcon />{t("Institution")}</button>
-            <button type="button" onClick={() => comingSoon("Google")} className={`h-11 text-[14px] ${SECONDARY}`}><GoogleIcon />Google</button>
-          </div>
+          <OtherWays methods={methods} next={next} identifier={identifier} onMessage={setSoon} />
           <p className={`mt-5 text-[14px] ${MUTED}`}>{t("Used PaperCept before?")} <Link href="/contact?topic=import" className={LINK}>{t("Bring your history")}</Link></p>
         </>
       ) : null}

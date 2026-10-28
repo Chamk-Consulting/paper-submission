@@ -7,7 +7,7 @@ import { rememberDevice } from "@/lib/auth/remember-device";
  * Adds a row to the person's sign-in activity (ST03). Best effort: a database
  * without the activity table, or any other error, never blocks signing in.
  */
-export async function recordSignIn(supabase: SupabaseClient, method: "password" | "email_code" | "email_link" | "orcid") {
+export async function recordSignIn(supabase: SupabaseClient, method: "password" | "email_code" | "email_link" | "orcid" | "google" | "sso" | "passkey") {
   try {
     const h = await headers();
     const city = h.get("x-vercel-ip-city");

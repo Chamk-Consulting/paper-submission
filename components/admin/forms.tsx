@@ -96,7 +96,7 @@ export function ApprovalToggle({ on }: { on: boolean }) {
   );
 }
 
-export type SiteFlagsValue = { homeEvent: string | null; singleEvent: boolean; signinEmailCode: boolean; signupEmailCode: boolean };
+export type SiteFlagsValue = import("@/lib/config/site-flags-core").SiteFlags;
 
 /** Site switches: which event the home page opens, one-event public site, sign-in and sign-up codes. */
 export function SiteFlagsForm({ flags, events }: { flags: SiteFlagsValue; events: { slug: string; name: string }[] }) {
@@ -114,8 +114,22 @@ export function SiteFlagsForm({ flags, events }: { flags: SiteFlagsValue; events
       </label>
       <label className={box}><input type="checkbox" name="single" defaultChecked={flags.singleEvent} className="mt-1" />
         <span>{t("Events-only site: the home page opens the list of all events (with search), and the top bar hides the organizer and pricing links")}</span></label>
-      <label className={box}><input type="checkbox" name="signinCode" defaultChecked={flags.signinEmailCode} className="mt-1" />
-        <span>{t("Sign in with an emailed code (as well as the password)")}</span></label>
+      <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
+        <legend className="mb-1 p-0 text-[14px] font-semibold">{t("Ways to sign in")}</legend>
+        <label className={box}><input type="checkbox" name="signinPassword" defaultChecked={flags.signinPassword} className="mt-1" />
+          <span>{t("Password")}</span></label>
+        <label className={box}><input type="checkbox" name="signinCode" defaultChecked={flags.signinEmailCode} className="mt-1" />
+          <span>{t("Email link or code")}</span></label>
+        <label className={box}><input type="checkbox" name="signinOrcid" defaultChecked={flags.signinOrcid} className="mt-1" />
+          <span>{t("ORCID (needs the ORCID provider set up in Supabase)")}</span></label>
+        <label className={box}><input type="checkbox" name="signinPasskey" defaultChecked={flags.signinPasskey} className="mt-1" />
+          <span>{t("Passkey (needs passkeys turned on in Supabase)")}</span></label>
+        <label className={box}><input type="checkbox" name="signinGoogle" defaultChecked={flags.signinGoogle} className="mt-1" />
+          <span>{t("Google (needs the Google provider set up in Supabase)")}</span></label>
+        <label className={box}><input type="checkbox" name="signinInstitution" defaultChecked={flags.signinInstitution} className="mt-1" />
+          <span>{t("Institution single sign-on (needs SAML set up in Supabase)")}</span></label>
+        <span className="text-[13px] text-[#4A5263]">{t("Password or email link/code must stay on.")}</span>
+      </fieldset>
       <label className={box}><input type="checkbox" name="signupCode" defaultChecked={flags.signupEmailCode} className="mt-1" />
         <span>{t("New accounts confirm their email with a code first (off: name, email and password, then straight in)")}</span></label>
       <div className="flex flex-wrap items-center gap-3"><button type="submit" disabled={pending} className={small}>{pending ? t("Saving…") : t("Save")}</button><Status s={s} /></div>

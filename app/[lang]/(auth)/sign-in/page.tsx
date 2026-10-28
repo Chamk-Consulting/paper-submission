@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("Sign in") };
 }
 
-type Search = { next?: string; venue?: string; tab?: string; email?: string };
+type Search = { next?: string; venue?: string; tab?: string; email?: string; error?: string };
 
 async function VenueBanner({ searchParams }: { searchParams: Promise<Search> }) {
   const { venue, next } = await searchParams;
@@ -41,12 +41,14 @@ async function VenueBanner({ searchParams }: { searchParams: Promise<Search> }) 
 }
 
 async function Panel({ searchParams }: { searchParams: Promise<Search> }) {
-  const { next, tab, email } = await searchParams;
+  const { next, tab, email, error } = await searchParams;
   // the old in-panel sign-up form is gone: ?tab=create goes to the real sign-up page
   if (tab === "create") redirect(`/create-account${next ? `?next=${encodeURIComponent(next)}` : ""}`);
   const prefill = typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email.trim().toLowerCase().slice(0, 254) : "";
   const flags = await getSiteFlags();
-  return <SignInPanel next={next} senderDomain={senderDomain()} initialIdentifier={prefill} codeSignIn={flags.signinEmailCode} />;
+  return <SignInPanel next={next} senderDomain={senderDomain()} initialIdentifier={prefill} codeSignIn={flags.signinEmailCode}
+    methods={{ password: flags.signinPassword, passkey: flags.signinPasskey, orcid: flags.signinOrcid, institution: flags.signinInstitution, google: flags.signinGoogle }}
+    error={typeof error === "string" ? error.slice(0, 40) : undefined} />;
 }
 
 export default function Page({ searchParams }: { searchParams: Promise<Search> }) {

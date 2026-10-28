@@ -49,7 +49,7 @@ export function SecurityPanel({ email, device, providers, events, plus }: { emai
   const [outState, setOut] = useState<AccountState | null>(null);
   const [outPending, startOut] = useTransition();
   const fmt = new Intl.DateTimeFormat(t.intl, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-  const orcid = providers.includes("orcid");
+  const orcid = providers.includes("orcid") || providers.includes("custom:orcid");
 
   return (
     <>
