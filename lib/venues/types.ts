@@ -40,6 +40,9 @@ export type DirectoryVenue = {
   importedFrom: string | null;
   dates: VenueDate[];
   cover: VenueCover | null;
+  /** The event's own website, and an outside submission site when papers are submitted elsewhere (details.external_submit_url). */
+  website?: string | null;
+  submitUrl?: string | null;
 };
 
 /** Focus point of a cover image (which part stays visible in every crop). */

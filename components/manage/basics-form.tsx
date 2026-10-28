@@ -10,7 +10,7 @@ import type { ManageState } from "@/lib/manage/actions-util";
 
 const ACCENTS: [string, string, string][] = [["navy", "Navy", "#0E1B3D"], ["saffron", "Saffron", "#F2A93B"], ["teal", "Teal", "#0F7C7A"], ["forest", "Forest", "#18744F"], ["crimson", "Crimson", "#9B1C31"], ["royal", "Royal", "#2F5FD0"]];
 
-export type BasicsValues = { slug: string; name: string; short_name: string; tagline: string; website: string; accent: string; public_text: string; venue_address: string; hotels: string; contact_email: string };
+export type BasicsValues = { slug: string; name: string; short_name: string; tagline: string; website: string; accent: string; public_text: string; venue_address: string; hotels: string; contact_email: string; submit_url: string };
 
 export function BasicsForm({ v, status, last, canEdit }: { v: BasicsValues; status: "not_started" | "in_progress" | "ready"; last: { at: string | null; by: string | null }; canEdit: boolean }) {
   const t = useT();
@@ -27,6 +27,8 @@ export function BasicsForm({ v, status, last, canEdit }: { v: BasicsValues; stat
             <label className={ui.label}>{t("Tagline")}<input name="tagline" defaultValue={v.tagline} placeholder={t("Control for a changing world")} className={ui.input} /></label>
             <label className={ui.label}>{t("Website")}<input name="website" defaultValue={v.website} placeholder="https://ca2027.org" className={ui.input} /><FieldError state={state} name="website" /></label>
           </div>
+          <label className={`${ui.label} mt-4`}>{t("Submissions on another site")} <span className={ui.hint}>{t("Optional. If papers are submitted elsewhere (e.g. PaperCept), paste that link: every Submit button for this event opens it instead.")}</span>
+            <input name="submit_url" defaultValue={v.submit_url} placeholder="https://controls.papercept.net/…" className={ui.input} /><FieldError state={state} name="submit_url" /></label>
         </section>
 
         <section className={ui.card}>

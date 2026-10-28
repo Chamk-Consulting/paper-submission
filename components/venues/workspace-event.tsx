@@ -1,4 +1,4 @@
-import { BadgeCheck, CalendarClock, CalendarPlus, CalendarRange, Gauge, Ticket, UserRound } from "lucide-react";
+import { BadgeCheck, CalendarClock, CalendarPlus, CalendarRange, ExternalLink, Gauge, Ticket, UserRound } from "lucide-react";
 import Link from "@/components/site/link";
 import { getT } from "@/lib/i18n/server";
 import { CountdownCard, DeadlineStrip, FollowButton } from "@/components/venues/venue-live";
@@ -20,7 +20,7 @@ export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open
 }) {
   const t = await getT();
   const [fbg, fink] = v.field ? FIELD_COLOR[v.field] : ["#E6EDFC", "#1F47A8"];
-  const act = primaryAction(v.slug, mine, open);
+  const act = primaryAction(v.slug, mine, open, v.submitUrl);
   const organizer = mine?.roles.some((r) => ORGANIZER.test(r));
   return (
     <section className="border-b border-[#DADDE3] bg-white">
@@ -44,12 +44,15 @@ export async function WorkspaceEventHeader({ v, tags, where, tagline, mine, open
               {/* Below 1280 px the deadline is a one-line strip here instead of the tall card beside. */}
               <div className="mt-3 xl:hidden"><DeadlineStrip dates={v.dates} generatedAt={generatedAt} /></div>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Link href={act.href} className={`${btn} ${act.label === "View event" ? "bg-[#0E1B3D] text-white" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>
+                {act.external
+                  ? <a href={act.href} target="_blank" rel="noopener noreferrer" className={`${btn} bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]`}>{t(act.label)}<ExternalLink size={14} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a>
+                  : <Link href={act.href} className={`${btn} ${act.label === "View event" ? "bg-[#0E1B3D] text-white" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>}
                 {act.label === "Continue draft" && open ? <Link href={`/submit/${v.slug}`} className={ghost}>{t("New paper")}</Link> : null}
                 {closedOn !== null ? <span className="inline-flex h-10 items-center rounded-[4px] bg-[#EEF0EC] px-3.5 text-[14px] font-semibold text-[#4A5263]">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span> : null}
                 <FollowButton venueId={v.id} slug={v.slug} compact />
                 {organizer ? <Link href={`/manage/${v.slug}`} className={ghost}><Gauge size={15} aria-hidden />{t("Event dashboard")}</Link> : null}
                 <a href={`/venues/${v.slug}/calendar.ics`} className={ghost}><CalendarPlus size={15} aria-hidden />{t("Add deadlines to calendar")}</a>
+                {v.website ? <a href={v.website} target="_blank" rel="noopener noreferrer" className={ghost}>{t("Official website")}<ExternalLink size={14} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a> : null}
               </div>
             </div>
           </div>

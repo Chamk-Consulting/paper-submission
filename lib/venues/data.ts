@@ -5,7 +5,7 @@ import type { DirectoryVenue, VenueDate, VenueDetails } from "@/lib/venues/types
 import type { ArchiveAward, ArchiveSession, Fee, VenueArchive, VenuePublic, VenuePublicInfo } from "@/lib/venues/polish-types";
 
 const COLS =
-  "id, slug, short_name, name, kind, society, field, format, review_mode, page_limit, indexed_in, accepting, city, country, location, region, latitude, longitude, place_hint, starts_on, ends_on, papers_count, acceptance_rate, best_paper, imported_from, cover:details->cover, venue_dates(id, kind, label, starts_at, ends_at, is_hard, is_extended, extended_from)";
+  "id, slug, short_name, name, kind, society, field, format, review_mode, page_limit, indexed_in, accepting, city, country, location, region, latitude, longitude, place_hint, starts_on, ends_on, papers_count, acceptance_rate, best_paper, imported_from, website, submit_url:details->>external_submit_url, cover:details->cover, venue_dates(id, kind, label, starts_at, ends_at, is_hard, is_extended, extended_from)";
 
 type Row = Record<string, unknown> & { venue_dates?: Record<string, unknown>[] };
 
@@ -30,6 +30,8 @@ function mapVenue(r: Row): DirectoryVenue {
     startsOn: (r.starts_on as string) ?? null, endsOn: (r.ends_on as string) ?? null, papersCount: (r.papers_count as number) ?? null,
     acceptanceRate: r.acceptance_rate == null ? null : Number(r.acceptance_rate), bestPaper: (r.best_paper as string) ?? null,
     importedFrom: (r.imported_from as string) ?? null, dates: mapDates(r.venue_dates),
+    website: (r.website as string) || null,
+    submitUrl: (r.submit_url as string) || ((r.details as { external_submit_url?: string } | undefined)?.external_submit_url ?? null),
     cover: (r.cover as DirectoryVenue["cover"]) ?? ((r.details as { cover?: DirectoryVenue["cover"] } | undefined)?.cover ?? null),
   };
 }
@@ -57,7 +59,7 @@ export async function getVenue(slug: string): Promise<{ venue: DirectoryVenue; d
   cacheLife("minutes");
   cacheTag("venues", `venue:${slug}`);
   if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) return null;
-  const { data } = await createPublicClient().from("venues").select(`${COLS}, details, double_blind, website, tagline, public_text, venue_address, hotels`).eq("slug", slug).eq("is_published", true).maybeSingle();
+  const { data } = await createPublicClient().from("venues").select(`${COLS}, details, double_blind, tagline, public_text, venue_address, hotels`).eq("slug", slug).eq("is_published", true).maybeSingle();
   if (!data) return null;
   const r = data as Row;
   // Paper types set up by the organizers (EM05); the public page prefers them over the seeded details.types.

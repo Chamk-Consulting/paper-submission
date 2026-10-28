@@ -1,5 +1,5 @@
 "use client";
-import { Search } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
 
 import Link from "@/components/site/link";
 import { ViewTransition, startTransition, useCallback, useEffect, useMemo, useState, type SetStateAction } from "react";
@@ -11,7 +11,8 @@ import { useClock, useFollows } from "@/components/venues/use-clock";
 import { FIELD_COLOR, FIELD_LABEL, FORMAT_LABEL, KIND_LABEL, type DirectoryVenue, type Field } from "@/lib/venues/types";
 import { cityOf, fmtRange, statusOf, type Status } from "@/lib/venues/time";
 import { VenueCoverImage, hasRealCover } from "@/components/venues/cover";
-import { STAGE_LABEL, STAGE_TONE, primaryAction, roleChips, type MyEvent, type MyEvents } from "@/lib/workspace/event-action";
+import { STAGE_LABEL, STAGE_TONE, primaryAction, roleChips, submitAction, type MyEvent, type MyEvents } from "@/lib/workspace/event-action";
+import { EventMoreMenu, WebsiteButton } from "@/components/venues/event-actions";
 
 type View = "list" | "calendar" | "map" | "past";
 type Win = "any" | "d7" | "d30" | "open";
@@ -222,7 +223,7 @@ export function Directory({ venues, generatedAt, ready, mine }: { venues: Direct
       <section className="bg-[#0E1B3D] text-[#F5F6F3]">
         <div className="mx-auto max-w-[1280px] px-5 pb-0 pt-10 sm:px-8">
           <p className="m-0 font-mono text-[12px] font-medium uppercase tracking-[0.06em] text-[#F2A93B]">{t("Event directory")}</p>
-          <h1 className="mt-2 font-serif text-[36px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[48px]">{t("Find your next call for papers")}</h1>
+          <h1 className="mt-2 font-serif text-[36px] font-[350] leading-[1.05] tracking-[-0.015em] sm:text-[48px]">{t("Find an event and submit your paper")}</h1>
           <p className="mt-2 text-[16px] text-[#B9C3DA]">
             {current.length} {current.length === 1 ? t("conference, journal or award") : t("conferences, journals and awards")} · {t("deadlines in")} <strong className="text-[#F5F6F3]">{tz === "UTC" ? t("your time zone") : `${cityOf(tz)} (${tz})`}</strong>, {t("AoE alongside")}
           </p>
@@ -381,7 +382,11 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
   const tags = [v.format ? t(FORMAT_LABEL[v.format]) : null, v.indexedIn.length ? v.indexedIn.slice(0, 2).join(" · ") : null].filter(Boolean) as string[];
   const where = v.kind === "journal" ? t("Online") : [v.city, v.country].filter(Boolean).join(", ") || v.location || "";
   const href = ws ? `/workspace/events/${v.slug}` : `/events/${v.slug}`;
-  const act = ws ? (intent && isOpenCall(v) ? { label: "Submit a paper", href: `/submit/${v.slug}` } : primaryAction(v.slug, mine, isOpenCall(v))) : null;
+  // One main action that adapts to the event: submit while the call is open (here or on the organizers' own site),
+  // otherwise view the event; signed in, a draft or paper in progress comes first.
+  const openCall = isOpenCall(v);
+  const act = ws ? (intent && openCall ? submitAction(v.slug, v.submitUrl) : primaryAction(v.slug, mine, openCall, v.submitUrl))
+    : openCall ? submitAction(v.slug, v.submitUrl) : { label: "View event", href, external: false };
   const roles = mine ? roleChips(mine.roles) : [];
   return (
     <article className="flex flex-col gap-[18px] rounded-[8px] border border-[#DADDE3] bg-white p-4 @2xl:flex-row @2xl:items-start">
@@ -423,15 +428,17 @@ function VenueCard({ v, following, onFollow, ws, mine, intent }: { v: Row; follo
         <div className="text-[12px] text-[#4A5263]">{v.st.aoe}</div>
         <div className="text-[12px] font-medium text-[#121826]">{v.st.local}</div>
         <div className="mt-2.5 flex flex-wrap gap-1.5 whitespace-nowrap @2xl:justify-end">
+          {act.external ? (
+            <a href={act.href} target="_blank" rel="noopener noreferrer" className="inline-flex h-[34px] items-center gap-1.5 rounded-[4px] bg-[#F2A93B] px-3 text-[13px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t(act.label)}<ExternalLink size={13} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a>
+          ) : (
+            <Link href={act.href} className={`inline-flex h-[34px] items-center rounded-[4px] px-3 text-[13px] font-semibold no-underline ${act.label === "View event" ? "bg-[#0E1B3D] text-white hover:bg-[#17285A]" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>
+          )}
+          {v.website ? <WebsiteButton url={v.website} /> : null}
+          <EventMoreMenu slug={v.slug} ws={ws} kind={v.kind} />
           <button type="button" onClick={onFollow} aria-pressed={following} aria-label={following ? t("Unfollow {venue}", { venue: v.acr }) : t("Follow {venue}", { venue: v.acr })} className="h-[34px] rounded-[4px] px-2.5 text-[13px] font-semibold"
             style={{ color: following ? "#7A4508" : "#121826", background: following ? "#FFF6E6" : "#FFFFFF", border: `1px solid ${following ? "#F1D29A" : "#B7BDC9"}` }}>
             {following ? t("★ Following") : t("☆ Follow")}
           </button>
-          {act ? (
-            <Link href={act.href} className={`inline-flex h-[34px] items-center rounded-[4px] px-3 text-[13px] font-semibold no-underline ${act.label === "View event" ? "bg-[#0E1B3D] text-white hover:bg-[#17285A]" : "bg-[#F2A93B] text-[#0E1B3D] hover:bg-[#E89B26]"}`}>{t(act.label)}</Link>
-          ) : (
-            <Link href={href} className="inline-flex h-[34px] items-center rounded-[4px] bg-[#0E1B3D] px-3 text-[13px] font-semibold text-white no-underline hover:bg-[#17285A]">{t("View call")}</Link>
-          )}
         </div>
       </div>
     </article>

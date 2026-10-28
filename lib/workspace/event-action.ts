@@ -5,12 +5,12 @@ export type MyEvent = { roles: string[]; papers: MyEventPaper[]; following: bool
 export type MyEvents = Record<string, MyEvent>;
 
 /** Draft → continue it; a paper in progress after the call closed → open it; call open → submit; else view the event. */
-export function primaryAction(slug: string, mine: MyEvent | undefined, open: boolean): { label: string; href: string } {
+export function primaryAction(slug: string, mine: MyEvent | undefined, open: boolean, submitUrl?: string | null): { label: string; href: string; external?: boolean } {
   const draft = mine?.papers.find((p) => p.stage === "draft");
   if (draft) return { label: "Continue draft", href: draft.href };
   const live = mine?.papers.find((p) => !["withdrawn", "rejected", "done"].includes(p.stage));
   if (live && !open) return { label: "Open my paper", href: live.href };
-  if (open) return { label: "Submit a paper", href: `/submit/${slug}` };
+  if (open) return submitAction(slug, submitUrl);
   return { label: "View event", href: `/workspace/events/${slug}` };
 }
 
@@ -31,3 +31,8 @@ export const STAGE_TONE: Record<Stage, [string, string]> = {
   draft: ["#FFF6E6", "#7A4508"], submitted: ["#E6EDFC", "#1F47A8"], review: ["#E6EDFC", "#1F47A8"], decision: ["#E6EDFC", "#1F47A8"],
   revise: ["#FFF6E6", "#7A4508"], final: ["#E5F3EC", "#14603F"], done: ["#E5F3EC", "#14603F"], rejected: ["#EEF0EC", "#4A5263"], withdrawn: ["#EEF0EC", "#4A5263"],
 };
+
+/** Submit: here, or on the outside site the organizers set (Setup › Basics › "Submissions on another site"). */
+export function submitAction(slug: string, submitUrl?: string | null): { label: string; href: string; external?: boolean } {
+  return submitUrl && /^https:\/\//.test(submitUrl) ? { label: "Submit a paper", href: submitUrl, external: true } : { label: "Submit a paper", href: `/submit/${slug}` };
+}

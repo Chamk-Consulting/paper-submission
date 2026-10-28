@@ -13,7 +13,8 @@ function venue(i: number, acr: string, name: string, over: Partial<DirectoryVenu
     format: "in_person", reviewMode: "Single-blind", pageLimit: "6+2 pages", indexedIn: ["IEEE Xplore", "Scopus"], accepting: "Regular papers, invited sessions",
     city: "Lisbon", country: "Portugal", location: null, region: "Europe", lat: 38.7, lng: -9.1, placeHint: null,
     startsOn: date("120"), endsOn: date("123"), papersCount: null, acceptanceRate: null, bestPaper: null, importedFrom: null,
-    dates: [dl(`d${i}a`, "submission", "Full paper", 12), dl(`d${i}b`, "notification", "Notification", 60)], cover: null, ...over,
+    dates: [dl(`d${i}a`, "submission", "Full paper", 12), dl(`d${i}b`, "notification", "Notification", 60)], cover: null,
+    website: "https://example.org/", submitUrl: i === 2 ? "https://controls.papercept.net/" : null, ...over,
   };
 }
 

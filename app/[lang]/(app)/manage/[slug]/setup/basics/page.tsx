@@ -29,7 +29,8 @@ async function Inner({ params }: P) {
       <SetupLayout ctx={ctx} current="basics">
         <BasicsForm
           v={{ slug: v.slug, name: v.name, short_name: s("short_name"), tagline: s("tagline"), website: s("website"), accent: s("accent") || "navy",
-               public_text: s("public_text"), venue_address: s("venue_address"), hotels: s("hotels"), contact_email: s("contact_email") }}
+               public_text: s("public_text"), venue_address: s("venue_address"), hotels: s("hotels"), contact_email: s("contact_email"),
+               submit_url: ((extra?.details as { external_submit_url?: string } | null)?.external_submit_url) ?? "" }}
           status={groupStatus(ctx, ["basics"])} last={lastChange(ctx, ["basics"])} canEdit={ctx.isChair} />
         <CoverForm venueId={v.id as string} slug={v.slug as string} acr={(s("short_name") || (v.name as string))} field={(extra?.field as string | null) ?? null} initial={cover} canEdit={ctx.isChair} />
       </SetupLayout>

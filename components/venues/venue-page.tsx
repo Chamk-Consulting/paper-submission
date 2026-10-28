@@ -1,3 +1,5 @@
+import { WebsiteButton } from "@/components/venues/event-actions";
+import { ExternalLink } from "lucide-react";
 import Link from "@/components/site/link";
 import { notFound } from "next/navigation";
 import { CountdownCard, DatesList, FollowButton, LiveHeader, StatusCard } from "@/components/venues/venue-live";
@@ -73,7 +75,7 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
           <div aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,27,61,0.92)_0%,rgba(14,27,61,0.74)_50%,rgba(14,27,61,0.3)_100%)]" />
         <div className="relative mx-auto max-w-[1280px] px-5 pb-10 pt-7 sm:px-8 lg:min-h-[380px]">
           <nav aria-label={t("Breadcrumb")} className="text-[13px] text-[#D6DCEA]">
-            <Link href="/events" className="text-[#F5F6F3] underline">{t("Venues")}</Link>
+            <Link href="/events" className="text-[#F5F6F3] underline">{t("Events")}</Link>
             {v.field ? <> / <Link href="/events" className="text-[#F5F6F3] underline">{t(FIELD_LABEL[v.field])}</Link></> : null} / {v.acr}
           </nav>
           <div className="mt-4 flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
@@ -88,11 +90,13 @@ export async function VenueView({ data, pub, myEvents, mode = "public", win = nu
                 {basics.tagline ? <p className="mt-1 text-[16px] italic text-[#D6DCEA]">{basics.tagline}</p> : null}
                 <p className="mt-1.5 text-[15px] text-[#D6DCEA]">{[fmtRange(v.startsOn, v.endsOn, t.intl, t, v.kind === "journal"), where, v.society ? t("Sponsored by {society}", { society: v.society }) : null].filter(Boolean).join(" · ")}</p>
                 <div className="mt-5 flex flex-wrap gap-2.5">
-                  {open ? <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
+                  {open && v.submitUrl ? <a href={v.submitUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-1.5 rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}<ExternalLink size={15} aria-hidden /><span className="sr-only">{t("(opens in a new tab)")}</span></a>
+                    : open ? <Link href={`/submit/${v.slug}`} className="inline-flex h-11 items-center rounded-[4px] bg-[#F2A93B] px-5 text-[15px] font-semibold text-[#0E1B3D] no-underline hover:bg-[#E89B26]">{t("Submit a paper")}</Link>
                     : <span aria-disabled="true" className="inline-flex h-11 cursor-not-allowed items-center rounded-[4px] bg-white/15 px-5 text-[15px] font-semibold text-white/80 ring-1 ring-white/30">{closedOn ? t("Submissions closed on {date}", { date: closedOn }) : t("Submissions closed")}</span>}
                   <FollowButton venueId={v.id} slug={v.slug} />
                   <Link href={`/venues/${v.slug}/register`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Register to attend")}</Link>
                   <a href={`/venues/${v.slug}/calendar.ics`} className="inline-flex h-11 items-center rounded-[4px] border border-[#B7BDC9] bg-white px-4 text-[15px] font-medium text-[#121826] no-underline">{t("Add deadlines to calendar")}</a>
+                  {website ? <WebsiteButton url={website} tone="dark" size="lg" /> : null}
                 </div>
               </div>
             </div>
